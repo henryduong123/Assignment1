@@ -130,6 +130,18 @@ else %the old track still exists in some fasion
         RemoveChildren(newTrackID);
     end
 end
+
+%check to see if either of the tracks are dead
+familyIDs = [];
+if(~isempty(CellTracks(oldTrackID).timeOfDeath))
+    familyIDs = StraightenTrack(oldTrackID);
+end
+if(~isempty(CellTracks(newTrackID).timeOfDeath))
+    familyIDs = [familyIDs StraightenTrack(newTrackID)];
+end
+if(~isempty(familyIDs))
+    ProcessNewborns(familyIDs);
+end
 end
 
 function moveChildren(oldTrackID,newTrackID)

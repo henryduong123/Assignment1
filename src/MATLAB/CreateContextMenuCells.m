@@ -27,9 +27,9 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
 
-uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Change Parent',...
-    'CallBack',     @changeParent);
+% uimenu(Figures.cells.contextMenuHandle,...
+%     'Label',        'Change Parent',...
+%     'CallBack',     @changeParent);
 
 addHull = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Add Hull',...
@@ -69,9 +69,9 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @markDeath,...
     'Separator',    'on');
 
-uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Remove From Tree',...
-    'CallBack',     @removeFromTree);
+% uimenu(Figures.cells.contextMenuHandle,...
+%     'Label',        'Remove From Tree',...
+%     'CallBack',     @removeFromTree);
 
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Properties',...
@@ -80,17 +80,6 @@ uimenu(Figures.cells.contextMenuHandle,...
 end
 
 %% Callback functions
-% function cellSelected(src,evnt)
-% %doesn't work, closes context menu
-% global Figures
-% [hullID trackID] = getClosestCell();
-% 
-% if(isempty(trackID))
-%     set(Figures.cells.contextMenuLabelHandle,'Label','No Cell Selected, Click Closer');
-% else
-%     set(Figures.cells.contextMenuLabelHandle,'Label',['Cell: ' num2str(trackID)]);
-% end
-% end
 
 function removeMitosis(src,evnt)
 global CellTracks Figures
@@ -106,15 +95,35 @@ choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
 switch choice
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
-        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
-            CellTracks(object.UserData).siblingTrack,'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
+                CellTracks(object.UserData).siblingTrack,'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
+                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
-        newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' ' num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     otherwise
         return
 end
-History('Push');
 LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
 DrawTree(Figures.tree.familyID);
 DrawCells();
@@ -126,13 +135,16 @@ global CellTracks Figures
 [hullID trackID] = getClosestCell();
 if(isempty(trackID)),return,end
 
-answer = inputdlg({'Enter Time of Mitosis',['Enter new sibling of ' num2str(trackID)]},...
-    'Add Mitosis',1,{num2str(Figures.time),''});
+% answer = inputdlg({['Enter new sibling of ' num2str(trackID)],'Enter Time of Mitosis'},...
+%     'Add Mitosis',1,{'',num2str(Figures.time)});
+
+answer = inputdlg({['Enter new sibling of ' num2str(trackID)]},...
+    'Add Mitosis',1,{''});
 
 if(isempty(answer)),return,end
 
-time = str2double(answer(1));
-siblingTrack = str2double(answer(2));
+siblingTrack = str2double(answer(1));
+time = Figures.time;
 
 if(isempty(CellTracks(siblingTrack).hulls))
     msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
@@ -146,12 +158,31 @@ end
 oldParent = CellTracks(siblingTrack).parentTrack;
 
 if(CellTracks(trackID).startTime==time)
-    ChangeTrackParent(siblingTrack,time,trackID);
+    History('Push');
+    try
+        ChangeTrackParent(siblingTrack,time,trackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
 else
-    ChangeTrackParent(trackID,time,siblingTrack);
+    History('Push');
+    try
+        ChangeTrackParent(trackID,time,siblingTrack);
+    catch errorMessage
+        try
+            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
 end
 
-History('Push');
 LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
 
 DrawTree(CellTracks(trackID).familyID);
@@ -204,8 +235,18 @@ global Figures CellFamilies
 [hullID trackID] = getClosestCell();
 if(isempty(trackID)),return,end
 
-RemoveHull(hullID);
 History('Push');
+try
+    RemoveHull(hullID);
+catch errorMessage
+    try
+        ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message]);
+    catch errorMessage2
+        fprintf(errorMessage2.message);
+        return
+    end
+end
+
 LogAction(['Removed hull from track ' num2str(trackID)],hullID,[]);
 
 %if the whole family disapears with this change, pick a diffrent family to
@@ -237,17 +278,19 @@ CellTracks(trackID).timeOfDeath = Figures.time;
 
 %drop children from tree and run ProcessNewborns
 if(~isempty(CellTracks(trackID).childrenTracks))
-    familyIDs = [];
-    for i=1:length(CellTracks(trackID).childrenTracks)
-        familyIDs = [familyIDs ...
-            RemoveFromTree(CellTracks(CellTracks(trackID).childrenTracks(i)).startTime,...
-            CellTracks(trackID).childrenTracks(i),'yes')];
+    History('Push');
+    try
+        ProcessNewborns(StraightenTrack(trackID));
+    catch errorMessage
+        try
+            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
     end
-    CellTracks(trackID).childrenTracks = [];
-    ProcessNewborns(familyIDs);
-end    
+end
 
-History('Push');
 LogAction(['Marked time of death for ' num2str(trackID)],[],[]);
 
 DrawTree(Figures.tree.familyID);
@@ -282,17 +325,33 @@ if ( ~CHullContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
 end
 
 if(~isempty(trackID))
-    % Try to split the existing hull
-    newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
-
+    % Try to split the existing hull    
     History('Push');
+    try
+        newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
+    catch errorMessage
+        try
+            ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num+1) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('Split cell',trackID,[trackID newTracks]);
 elseif ( num<2 )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
-    newTrack = AddNewSegmentHull(clickPt(1,1:2));
-
     History('Push');
+    try
+        newTrack = AddNewSegmentHull(clickPt(1,1:2));
+    catch errorMessage
+        try
+            ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('Added cell',[],newTrack);
 else
     return;
@@ -302,17 +361,17 @@ DrawTree(Figures.tree.familyID);
 DrawCells();
 end
 
-function [hullID trackID] = getClosestCell(bAllowEmpty)
+function [hullID trackID] = getClosestCell(allowEmpty)
 hullID = FindHull(get(gca,'CurrentPoint'));
 if(0>=hullID)
-    if ( bAllowEmpty )
+    if (allowEmpty )
         hullID = [];
     else
         warndlg('Please click closer to the center of the desired cell','Unknown Cell');
     end
-    
     trackID = [];
     return
 end
 trackID = GetTrackID(hullID);
+
 end

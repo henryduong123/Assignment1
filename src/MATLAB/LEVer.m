@@ -14,7 +14,9 @@ end
 if(OpenData())
     InitializeFigures();
     History('Init');
-elseif(~isempty(Figures))
+else %if(~isempty(Figures))
     History('Pop');
+    DrawTree(Figures.tree.familyID);
+    DrawCells();
 end
 end

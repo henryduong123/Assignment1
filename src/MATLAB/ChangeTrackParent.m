@@ -28,26 +28,27 @@ else
     return
 end
 
+oldFamilyID = CellTracks(childTrackID).familyID;
+newFamilyID = CellTracks(siblingTrackID).familyID;
+
 childIndex = length(CellTracks(parentTrackID).childrenTracks) + 1;
 CellTracks(parentTrackID).childrenTracks(childIndex) = childTrackID;
 
 %clean up old parent
 if(~isempty(CellTracks(childTrackID).siblingTrack))
     CellTracks(CellTracks(childTrackID).siblingTrack).siblingTrack = [];
-    ChangeLabel(CellTracks(CellTracks(childTrackID).siblingTrack).startTime,...
-        CellTracks(childTrackID).siblingTrack,CellTracks(childTrackID).parentTrack);
-    index = CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks == childTrackID;
-    CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks(index) = [];
+    CombineTrackWithParent(CellTracks(childTrackID).siblingTrack);
+%     ChangeLabel(CellTracks(CellTracks(childTrackID).siblingTrack).startTime,...
+%         CellTracks(childTrackID).siblingTrack,CellTracks(childTrackID).parentTrack);
+%     index = CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks == childTrackID;
+%     CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks(index) = [];
 end
 CellTracks(childTrackID).parentTrack = parentTrackID;
 
 %Detatch childTrack and clean up child's family
-oldFamilyID = CellTracks(childTrackID).familyID;
-newFamilyID = CellTracks(siblingTrackID).familyID;
-
-% CellTracks(childTrackID).familyID = newFamilyID;
-
-ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,childTrackID);
+if(oldFamilyID~=newFamilyID)
+    ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,childTrackID);
+end
 
 CellTracks(childTrackID).siblingTrack = siblingTrackID;
 CellTracks(siblingTrackID).siblingTrack = childTrackID;

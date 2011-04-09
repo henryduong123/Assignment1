@@ -9,6 +9,8 @@ global CellTracks HashedCells CellHulls
 
 trackID = GetTrackID(hullID);
 
+if(isempty(trackID)),return,end
+
 %remove hull from its track
 index = find(CellTracks(trackID).hulls==hullID);
 CellTracks(trackID).hulls(index) = 0;

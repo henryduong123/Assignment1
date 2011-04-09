@@ -13,6 +13,9 @@ Figures.time = 1;
 Figures.cells.handle = figure();
 Figures.tree.handle = figure();
 
+whitebg(Figures.cells.handle,'k');
+whitebg(Figures.tree.handle,'w');
+
 Figures.advanceTimerHandle = timer(...
     'TimerFcn',         @play,...
     'Period',           .1,...

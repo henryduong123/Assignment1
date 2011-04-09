@@ -14,7 +14,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
-fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' num2str(Figures.time,'%03d') '.TIF'];
+fileName = [CONSTANTS.rootImageFolder CONSTANTS.imageDatasetName '_t' num2str(Figures.time,'%03d') '.TIF'];
 [img colrMap] = imread(fileName);
 xl=xlim;
 yl=ylim;
@@ -34,6 +34,11 @@ colormap(gray);
 hold all;
 
 siblingsAlreadyDrawn = [];
+
+%draw Image or not
+if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
+    set(im,'Visible','off');
+end
 
 %draw labels if turned on
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
@@ -150,5 +155,5 @@ plot([CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)
     'uicontextmenu',    Figures.cells.contextMenuHandle,...
     'Tag',              'SiblingRelationship');
 
-set(Figures.cells.removeMenu,'Visible','on');
+% set(Figures.cells.removeMenu,'Visible','on');
 end

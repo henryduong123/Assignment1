@@ -31,19 +31,38 @@ elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
     switch choice
         case 'Yes'
             oldFamily = CellTracks(trackID).familyID;
-            RemoveFromTree(time,trackID,'yes');
             History('Push');
+            try
+                RemoveFromTree(time,trackID,'yes');
+            catch errorMessage
+                try
+                    ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
+                catch errorMessage2
+                    fprintf(errorMessage2.message);
+                    return
+                end
+            end
+            
             LogAction(['Removed ' num2str(trackID) ' From Tree'], oldFamily,CellTracks(trackID).familyID);
         case 'Cancel'
             return
     end
 elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
-        choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
-            'Swap Labels?','Forward','This Frame','Cancel','Cancel');
+    choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
+        'Swap Labels?','Forward','This Frame','Cancel','Cancel');
     switch choice
         case 'Forward'
-            SwapTrackLabels(time,trackID,newTrackID);
             History('Push');
+            try
+                SwapTrackLabels(time,trackID,newTrackID);
+            catch errorMessage
+                try
+                    ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+                catch errorMessage2
+                    fprintf(errorMessage2.message);
+                    return
+                end
+            end
             LogAction('Swapped Labels',trackID,newTrackID);
         case 'This Frame'
             SwapHulls(time,trackID,newTrackID);
@@ -52,20 +71,56 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
     end
 elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
     hullID = CellTracks(trackID).hulls(1);
-    AddSingleHullToTrack(trackID,newTrackID);
     History('Push');
+    try
+        AddSingleHullToTrack(trackID,newTrackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['AddSingleHullToTrack(' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('Added hull to track',hullID,newTrackID);
 elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTrack==newTrackID)
-    MoveMitosisUp(time,trackID)
     History('Push');
+    try
+        MoveMitosisUp(time,trackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('Moved Mitosis Up',trackID,newTrackID);
-elseif(~isempty(CellTracks(newTrackID).parentTrack) &&CellTracks(newTrackID).parentTrack==trackID)
-    MoveMitosisUp(time,newTrackID)
+elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).parentTrack==trackID)
     History('Push');
+    try
+        MoveMitosisUp(time,newTrackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('Moved Mitosis Up',newTrackID,trackID);
 else
-    ChangeLabel(time,trackID,newTrackID);
     History('Push');
+    try
+        ChangeLabel(time,trackID,newTrackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
     LogAction('ChangeLabel',trackID,newTrackID);
 end
 

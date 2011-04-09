@@ -22,13 +22,13 @@ uimenu(Figures.tree.contextMenuHandle,...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
 
-uimenu(Figures.tree.contextMenuHandle,...
-    'Label',        'Change Parent',...
-    'CallBack',     @changeParent);
+% uimenu(Figures.tree.contextMenuHandle,...
+%     'Label',        'Change Parent',...
+%     'CallBack',     @changeParent);
 
-uimenu(Figures.tree.contextMenuHandle,...
-    'Label',        'Remove From Tree',...
-    'CallBack',     @removeFromTree);
+% uimenu(Figures.tree.contextMenuHandle,...
+%     'Label',        'Remove From Tree',...
+%     'CallBack',     @removeFromTree);
 
 uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Properties',...
@@ -61,23 +61,66 @@ end
 switch choice
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
-        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
-            CellTracks(object.UserData).siblingTrack,'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
+                CellTracks(object.UserData).siblingTrack,'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime) ' '...
+                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
-        newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' ' num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     case num2str(CellTracks(object.UserData).childrenTracks(1))
         remove = CellTracks(object.UserData).childrenTracks(2);
-        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
-            CellTracks(object.UserData).childrenTracks(2),'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
+                CellTracks(object.UserData).childrenTracks(2),'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime) ' '...
+                    num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     case num2str(CellTracks(object.UserData).childrenTracks(2))
         remove = CellTracks(object.UserData).childrenTracks(1);
-        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
-            CellTracks(object.UserData).childrenTracks(1),'yes');
+        History('Push');
+        try
+            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
+                CellTracks(object.UserData).childrenTracks(1),'yes');
+        catch errorMessage
+            try
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime) ' '...
+                    num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message]);
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
     otherwise
         return
 end
-History('Push');
+
 LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
 DrawTree(Figures.tree.familyID);
 DrawCells();
@@ -108,9 +151,17 @@ end
 
 oldParent = CellTracks(siblingTrack).parentTrack;
 
-ChangeTrackParent(trackID,time,siblingTrack);
-
 History('Push');
+try
+    ChangeTrackParent(trackID,time,siblingTrack);
+catch errorMessage
+    try
+        ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+    catch errorMessage2
+        fprintf(errorMessage2.message);
+        return
+    end
+end
 LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
 
 DrawTree(CellTracks(trackID).familyID);

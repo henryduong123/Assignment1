@@ -15,6 +15,7 @@ for i=1:size
         
         %Get all the possible hulls that could have been connected
         childHullID = CellTracks(childTrackID).hulls(1);
+        if(childHullID>length(Costs)),continue,end
         parentHullCandidates = find(Costs(:,childHullID));
         if(isempty(parentHullCandidates)),continue,end
         
@@ -25,6 +26,7 @@ for i=1:size
         for j=1:length(parentHullCandidates)
             %Get the length of time that the parentCandidate exists
             parentTrackID = GetTrackID(parentHullCandidates(j));
+            if(isempty(parentTrackID)),continue,end
             parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
             
             %Change the cost of the candidates
@@ -49,6 +51,14 @@ for i=1:size
         
         %Make the connections
         parentTrackID = GetTrackID(parentHullID);
+        if(isempty(parentTrackID))
+            try
+                ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns']);
+            catch errorMessage2
+                fprintf(errorMessage2);
+                return
+            end
+        end
         connectTime = CellHulls(parentHullID).time;
         if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
             ChangeTrackParent(parentTrackID,connectTime,childTrackID);

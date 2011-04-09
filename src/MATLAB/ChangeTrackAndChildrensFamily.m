@@ -21,7 +21,7 @@ if(isempty(CellFamilies(oldFamilyID).tracks))
     CellFamilies(oldFamilyID).rootTrackID = [];
     CellFamilies(oldFamilyID).startTime = [];
     CellFamilies(oldFamilyID).endTime = [];
-else    
+else
     %update times
     CellFamilies(oldFamilyID).startTime = min([CellTracks(CellFamilies(oldFamilyID).tracks).startTime]);
     CellFamilies(oldFamilyID).endTime = max([CellTracks(CellFamilies(oldFamilyID).tracks).endTime]);

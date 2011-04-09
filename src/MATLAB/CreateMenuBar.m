@@ -93,6 +93,14 @@ siblingsMenu = uimenu(...
     'Checked',          'off',...
     'Accelerator',      'b');
 
+imageMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Image',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleImage,...
+    'Checked',          'on',...
+    'Accelerator',      'i');
+
 playMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Play',...
@@ -128,6 +136,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.labelsMenu = labelsMenu;
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
+    Figures.cells.menuHandles.imageMenu = imageMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
     Figures.tree.menuHandles.undoMenu = undoMenu;
@@ -135,6 +144,7 @@ else
     Figures.tree.menuHandles.labelsMenu = labelsMenu;
     Figures.tree.menuHandles.playMenu = playMenu;
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
+    Figures.tree.menuHandles.imageMenu = imageMenu;
 end
 end
 
@@ -161,6 +171,7 @@ printdlg;
 end
 
 function undo(src,evnt)
+History('Push');%put the current state on the stack then go to the previous
 History('Pop');
 end
 
@@ -190,6 +201,19 @@ if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'), 'on'))
 else
     set(Figures.cells.menuHandles.siblingsMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.siblingsMenu, 'Checked', 'on');
+    DrawCells();
+end
+end
+
+function toggleImage(src,evnt)
+global Figures
+if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'), 'on'))
+    set(Figures.cells.menuHandles.imageMenu, 'Checked', 'off');
+    set(Figures.tree.menuHandles.imageMenu, 'Checked', 'off');
+    DrawCells();
+else
+    set(Figures.cells.menuHandles.imageMenu, 'Checked', 'on');
+    set(Figures.tree.menuHandles.imageMenu, 'Checked', 'on');
     DrawCells();
 end
 end

@@ -23,9 +23,17 @@ elseif(CellTracks(trackID).endTime < CellTracks(newParentID).startTime)
 end
 
 oldParent = CellTracks(trackID).parentTrack;
-ChangeTrackParent(newParentID,time,trackID);
-
 History('Push');
+try
+    ChangeTrackParent(newParentID,time,trackID);
+catch errorMessage
+    try
+        ErrorHandeling(['ChangeTrackParent(' num2str(newParentID) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+    catch errorMessage2
+        fprintf(errorMessage2.message);
+        return
+    end
+end
 LogAction(['Changed parent of ' num2str(trackID)],oldParent,newParentID);
 
 DrawTree(CellTracks(newParentID).familyID);

@@ -7,8 +7,16 @@ global CellTracks
 
 oldFamilyID = CellTracks(trackID).familyID;
 
-newFamilyID = RemoveFromTree(time, trackID,'yes');
-History('Push');
+try
+    newFamilyID = RemoveFromTree(time, trackID,'yes');
+catch errorMessage
+    try
+        ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
+    catch errorMessage2
+        fprintf(errorMessage2.message);
+        return
+    end
+end
 LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],oldFamilyID,newFamilyID);
 
 DrawTree(oldFamilyID);

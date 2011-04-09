@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 3.4\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 3.6\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -92,28 +92,28 @@ imageFilter = [settings.imagePath '*' CONSTANTS.datasetName '*.TIF'];
 while (filterIndexImage==0)
     fprintf('\nSelect first .TIF image...\n\n');
     [imageFile,imagePath,filterIndexImage] = uigetfile(imageFilter,['Open First Image in dataset: ' CONSTANTS.datasetName]);
-    if (filterIndexImage==0)
-        return
-    end
+    if (filterIndexImage==0),return,end
 end
-
-opened = 1;
 
 index = strfind(imageFile,'t');
 if (~isempty(index) && filterIndexImage~=0)
     CONSTANTS.rootImageFolder = imagePath;
     imageDataset = imageFile(1:(index(length(index))-2));
+    CONSTANTS.imageDatasetName = imageDataset;
     fileName=[CONSTANTS.rootImageFolder imageDataset '_t001.TIF'];
 end
 
 while (isempty(index) || ~exist(fileName,'file'))
     fprintf(['Image file name not in correct format: ' CONSTANTS.datasetName '_t001.TIF\nPlease choose another...\n']);
     [imageFile,imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
+    if(filterIndexImage==0),return,end
     index = strfind(imageFile,'t');
     CONSTANTS.rootImageFolder = [imgPath '\'];
     imageDataset = imageFile(1:(index(length(index))-2));
     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' num2str(t,'%03d') '.TIF'];
 end
+
+opened = 1;
 
 %save out settings
 settings.matFilePath = matPath;

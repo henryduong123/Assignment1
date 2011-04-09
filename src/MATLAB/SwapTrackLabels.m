@@ -66,4 +66,16 @@ if(CellTracks(trackID1).familyID ~= CellTracks(trackID2).familyID)
         ChangeTrackAndChildrensFamily(CellTracks(trackID1).familyID,CellTracks(trackID2).familyID,CellTracks(trackID2).childrenTracks(i));
     end
 end 
+
+%check to see if either of the tracks are dead
+familyIDs = [];
+if(~isempty(CellTracks(trackID1).timeOfDeath))
+    familyIDs = StraightenTrack(trackID1);
+end
+if(~isempty(CellTracks(trackID2).timeOfDeath))
+    familyIDs = [familyIDs StraightenTrack(trackID2)];
+end
+if(~isempty(familyIDs))
+    ProcessNewborns(familyIDs);
+end
 end
