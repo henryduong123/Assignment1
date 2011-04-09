@@ -233,6 +233,8 @@ global CellTracks
 answer = inputdlg('Enter Tree Containing Cell:','Display Tree',1);
 answer = str2double(answer);
 
+if(isempty(answer)),return,end
+
 if(0>=answer || isempty(CellTracks(answer).hulls))
     msgbox([num2str(answer) ' is not a valid cell'],'Not Valid','error');
     return

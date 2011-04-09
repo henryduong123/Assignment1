@@ -272,23 +272,45 @@ end
 
 %% Helper functions
 function addHull(num)
-global Figures
+global Figures CellHulls
 
-[hullID trackID] = getClosestCell();
-if(isempty(trackID)),return,end
+[hullID trackID] = getClosestCell(num<2);
+clickPt = get(gca,'CurrentPoint');
 
-newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
+if ( ~CHullContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
+    trackID = [];
+end
 
-History('Push');
-LogAction('Split cell',trackID,[trackID newTracks]);
+if(~isempty(trackID))
+    % Try to split the existing hull
+    newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
+
+    History('Push');
+    LogAction('Split cell',trackID,[trackID newTracks]);
+elseif ( num<2 )
+    % Try to run local segmentation and find a hull we missed or place a
+    % point-hull at least
+    newTrack = AddNewSegmentHull(clickPt(1,1:2));
+
+    History('Push');
+    LogAction('Added cell',[],newTrack);
+else
+    return;
+end
+
 DrawTree(Figures.tree.familyID);
 DrawCells();
 end
 
-function [hullID trackID] = getClosestCell()
+function [hullID trackID] = getClosestCell(bAllowEmpty)
 hullID = FindHull(get(gca,'CurrentPoint'));
 if(0>=hullID)
-    warndlg('Please click closer to the center of the desired cell','Unknown Cell');
+    if ( bAllowEmpty )
+        hullID = [];
+    else
+        warndlg('Please click closer to the center of the desired cell','Unknown Cell');
+    end
+    
     trackID = [];
     return
 end

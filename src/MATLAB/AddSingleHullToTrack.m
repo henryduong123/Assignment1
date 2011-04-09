@@ -16,17 +16,20 @@ if(~isempty(CellTracks(oldTrackID).parentTrack) && ...
     error([num2str(oldTrackID) ' is not a single hull track or has a parent/child']);
 end
 
-if(CellTracks(oldTrackID).startTime<CellTracks(newTrackID).startTime)
+if(~any([CellTracks(CellTracks(newTrackID).childrenTracks).endTime]<CellTracks(oldTrackID).startTime))
+    RemoveChildren(newTrackID);
+    AddHullToTrack(CellTracks(oldTrackID).hulls(1),newTrackID,[]);
+elseif(CellTracks(oldTrackID).startTime<CellTracks(newTrackID).startTime)
     %old before new
     if(~isempty(CellTracks(newTrackID).parentTrack))
-        moveMitosisUp(CellTracks(oldTrackID).startTime,...
+        MoveMitosisUp(CellTracks(oldTrackID).startTime,...
             CellTracks(newTrackID).siblingTrack);
     end
     AddHullToTrack(CellTracks(oldTrackID).hulls(1),newTrackID,[]);
 elseif(CellTracks(oldTrackID).startTime>CellTracks(newTrackID).endTime)
     %new before old
     if(~isempty(CellTracks(newTrackID).childrenTracks))
-        moveMitosisDown(CellTracks(oldTrackID).startTime,newTrackID);
+        MoveMitosisDown(CellTracks(oldTrackID).startTime,newTrackID);
     end
     AddHullToTrack(CellTracks(oldTrackID).hulls(1),newTrackID,[]);
 else
@@ -53,50 +56,4 @@ CellTracks(oldTrackID).startTime = [];
 CellTracks(oldTrackID).endTime = [];
 CellTracks(oldTrackID).timeOfDeath = [];
 CellTracks(oldTrackID).color = [];
-end
-
-function moveMitosisUp(time,siblingTrackID)
-global CellTracks
-
-%remove hulls from parent
-hash = time - CellTracks(CellTracks(siblingTrackID).parentTrack).startTime + 1;
-hulls = CellTracks(CellTracks(siblingTrackID).parentTrack).hulls(hash:end);
-CellTracks(CellTracks(siblingTrackID).parentTrack).hulls(hash:end) = 0;
-RehashCellTracks(CellTracks(siblingTrackID).parentTrack,CellTracks(CellTracks(siblingTrackID).parentTrack).startTime);
-
-%add hulls to sibling
-for i=1:length(hulls)
-    AddHullToTrack(hulls(i),siblingTrackID,[]);
-end
-end
-
-function moveMitosisDown(time,trackID)
-global CellTracks CellFamilies
-
-remove = 0;
-children = {};
-
-for i=1:length(CellTracks(trackID).childrenTracks)
-    if(CellTracks(CellTracks(trackID).childrenTracks(i)).endTime <= time)
-        remove = 1;
-        break
-    end
-    hash = time - CellTracks(CellTracks(trackID).childrenTracks(i)).startTime + 1;
-    if(0<hash)
-        children(i).startTime = CellTracks(CellTracks(trackID).childrenTracks(i)).startTime;
-        children(i).hulls = CellTracks(CellTracks(trackID).childrenTracks(i)).hulls(1:hash);
-    end
-end
-
-if(remove)
-    RemoveChildren(trackID);
-else
-    for i=1:length(children)
-        familyID = NewCellFamily(children(i).hulls(1),children(i).startTime);
-        newTrackID = CellFamilies(familyID).rootTrackID;
-        for j=2:length(children(i).hulls)
-            AddHullToTrack(children(i).hulls(j),newTrackID,[]);
-        end
-    end
-end
 end

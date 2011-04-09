@@ -55,6 +55,14 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
     AddSingleHullToTrack(trackID,newTrackID);
     History('Push');
     LogAction('Added hull to track',hullID,newTrackID);
+elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTrack==newTrackID)
+    MoveMitosisUp(time,trackID)
+    History('Push');
+    LogAction('Moved Mitosis Up',trackID,newTrackID);
+elseif(~isempty(CellTracks(newTrackID).parentTrack) &&CellTracks(newTrackID).parentTrack==trackID)
+    MoveMitosisUp(time,newTrackID)
+    History('Push');
+    LogAction('Moved Mitosis Up',newTrackID,trackID);
 else
     ChangeLabel(time,trackID,newTrackID);
     History('Push');
