@@ -8,6 +8,7 @@ function AddHullToTrack(hullID,trackID,previousHullID)
 %previousHullID at previousTime exists in that track.  Also, it has been
 %removed from any previous track assosiation.
 
+%--Eric Wait
 
 global HashedCells CellTracks CellFamilies CellHulls
 
@@ -37,7 +38,6 @@ if(0 >= hash)
     end
 end
 CellTracks(curTrackID).hulls(hash) = hullID;
-% CellTracks(curTrackID).hulls(hash).time = time;
 
 if(CellTracks(curTrackID).endTime < time)
     CellTracks(curTrackID).endTime = time;

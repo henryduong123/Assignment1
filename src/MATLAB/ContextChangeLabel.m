@@ -1,5 +1,8 @@
 function ContextChangeLabel(time,trackID)
 %context menu callback function
+
+%--Eric Wait
+
 global CellTracks HashedCells
 
 newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
@@ -11,7 +14,7 @@ if(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
     switch choice
         case 'Yes'
             oldFamily = CellTracks(trackID).familyID;
-            RemoveFromTree(time,trackID);
+            RemoveFromTree(time,trackID,'yes');
             History('Push');
             LogAction(['Removed ' num2str(trackID) ' From Tree'], oldFamily,CellTracks(trackID).familyID);
         case 'Cancel'

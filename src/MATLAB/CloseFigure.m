@@ -1,4 +1,8 @@
 function CloseFigure(varargin)
+%Closes both figures and cleans up the Figures global var
+
+%--Eric Wait
+
 global Figures
 if(strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on'))
     choice = questdlg('Save current edits before closing?','Closing','Yes','No','Cancel','Cancel');

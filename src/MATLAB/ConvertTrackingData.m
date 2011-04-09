@@ -2,10 +2,12 @@ function ConvertTrackingData(objHulls,gConnect)
 %Takes the data structure from the tracking data and creates LEVer's data
 %scheme
 
+%--Eric Wait
+
 global CONSTANTS Costs HashedCells CellHulls CellFamilies
 
 %Initialize CONSTANTS
-CONSTANTS.ImageSize = unique([objHulls(:).imSize]);
+CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 CONSTANTS.maxPixelDistance = 40;
 CONSTANTS.maxCenterOfMassDistance = 80;
 CONSTANTS.minParentCandidateTimeFrame = 5;
@@ -23,7 +25,8 @@ CellHulls = struct(...
     'time',             {objHulls(1).t},...
     'points',           {objHulls(1).pts},...
     'centerOfMass',     {objHulls(1).COM},...
-    'indexPixels',      {objHulls(1).indPixels});
+    'indexPixels',      {objHulls(1).indPixels},...
+    'deleted',          {0});
 
 if objHulls(1).inID == 0
     NewCellFamily(1,objHulls(1).t);
@@ -37,6 +40,7 @@ for i=2:length(objHulls)
     CellHulls(i).points          =  objHulls(i).pts;
     CellHulls(i).centerOfMass    =  objHulls(i).COM;
     CellHulls(i).indexPixels     =  objHulls(i).indPixels;
+    CellHulls(i).deleted         =  0;
     
     if objHulls(i).inID == 0
         NewCellFamily(i,objHulls(i).t);

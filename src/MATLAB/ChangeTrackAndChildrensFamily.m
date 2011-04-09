@@ -4,6 +4,8 @@ function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
 %This DOES NOT make the parent child relationship, it is just updates the
 %CellFamilies data structure.
 
+%--Eric Wait
+
 global CellFamilies CellTracks
 
 %get the full list of tracks to be updateded
@@ -12,8 +14,7 @@ trackList = traverseTree(newFamilyID,trackID);
 %remove tracks from family
 for i=1:length(trackList)
     CellTracks(trackList(i)).familyID = newFamilyID;
-    index = CellFamilies(oldFamilyID).tracks == trackList(i);
-    CellFamilies(oldFamilyID).tracks(index) = [];
+%     RemoveTrackFromFamily(trackList(i));
 end
 
 if(isempty(CellFamilies(oldFamilyID).tracks))
@@ -22,16 +23,8 @@ if(isempty(CellFamilies(oldFamilyID).tracks))
     CellFamilies(oldFamilyID).endTime = [];
 else    
     %update times
-    CellFamilies(oldFamilyID).startTime = CellTracks(CellFamilies(oldFamilyID).tracks(1)).startTime;
-    CellFamilies(oldFamilyID).endTime = CellTracks(CellFamilies(oldFamilyID).tracks(1)).endTime;
-    for i=2:length(CellFamilies(oldFamilyID).tracks)
-        if(CellTracks(CellFamilies(oldFamilyID).tracks(i)).startTime < CellFamilies(oldFamilyID).startTime)
-            CellFamilies(oldFamilyID).startTime = CellTracks(CellFamilies(oldFamilyID).tracks(i)).startTime;
-        end
-        if(CellTracks(CellFamilies(oldFamilyID).tracks(i)).endTime > CellFamilies(oldFamilyID).endTime)
-            CellFamilies(oldFamilyID).endTime = CellTracks(CellFamilies(oldFamilyID).tracks(i)).endTime;
-        end
-    end
+    CellFamilies(oldFamilyID).startTime = min([CellTracks(CellFamilies(oldFamilyID).tracks).startTime]);
+    CellFamilies(oldFamilyID).endTime = max([CellTracks(CellFamilies(oldFamilyID).tracks).endTime]);
 end
 end
 
@@ -57,4 +50,6 @@ if(~isempty(CellTracks(trackID).childrenTracks))
         trackList = [trackList traverseTree(newFamilyID, CellTracks(trackID).childrenTracks(i))];
     end
 end
+
+RemoveTrackFromFamily(trackID);
 end

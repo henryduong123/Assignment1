@@ -1,6 +1,8 @@
 function ContextProperties(hullID,trackID)
 %context menu callback function
 
+%--Eric Wait
+
 global CellTracks Figures
 
 %collect all the data that will be passed to the properties UI

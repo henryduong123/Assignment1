@@ -2,6 +2,8 @@ function hullID = FindHull(curPoint)
 %This function will find the closest hull to the given point and return the
 %hullID if it is within CONSTANTS.clickMargin
 
+%--Eric Wait
+
 global CONSTANTS CellHulls HashedCells Figures
 
 centerOfMasses = reshape([CellHulls([HashedCells{Figures.time}(:).hullID]).centerOfMass]',2,[])';

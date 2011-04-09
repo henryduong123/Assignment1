@@ -1,4 +1,8 @@
 function SaveDataAs()
+%Save the current state to a user defined dir
+
+%--Eric Wait
+
 global CellFamilies CellTracks HashedCells CONSTANTS Costs CellHulls Figures
 
 if (exist('LEVerSettings.mat','file')~=0)

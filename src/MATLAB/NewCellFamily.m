@@ -1,4 +1,9 @@
 function curFamilyID = NewCellFamily(cellHullID,t)
+%Create a empty Family that will contain one track that contains only one
+%hull
+
+%--Eric Wait
+
 global CellFamilies
 
 if(isempty(CellFamilies))

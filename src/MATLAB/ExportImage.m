@@ -2,6 +2,8 @@ function ExportImage(figureHandle)
 %this function is intended to create a high resolution file of the given
 %figure for printing or sharing
 
+%--Eric Wait
+
 global Figures
 
 if(figureHandle == Figures.cells.handle)

@@ -1,5 +1,6 @@
 function History(action)
-%This will keep track of any state changes.
+%This will keep track of any state changes.  Call this function once the
+%new state is established. After the changes take place.
 %Possible actions are:
 %History('Push') = save current state to the stack
 %History('Pop') = retrive the last state
@@ -10,158 +11,194 @@ function History(action)
 %All of the data structures are saved on the stack, so do not set this
 %value too high or you might run out of working memory
 
+%--Eric Wait
+
 global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls
 
-persistent hist;
-persistent top;
-persistent bottom;
-persistent redo;
-persistent empty;
-persistent full;
+persistent hist;            %stack
+persistent current;         %points to the last state saved on the stack
+persistent bottom;          %points to the oldest or bottom most valid history
+persistent top;             %points to the youngest or top most valid history
+persistent empty;           %flag will be "empty" if only the original opened state is on the stack
+persistent full;            %flag
+persistent exceededLimit;   %flag to denote if CONSTANTS.historySize has ever been reached
 
 if (isempty(hist))
-    top = 1;%points to next place to push or is one greater than the current history
-    bottom = 0;%points to the oldest or bottom most valid history
-    redo = 0;%points to the youngest or top most valid history
-    empty = 1;%flag will be "empty" if only the original opened state is on the stack
-    full = 0;%flag
+    current = 1;
+    bottom = 0;
+    top = 0;
+    empty = 1;
+    full = 0;
+    exceededLimit = 0;
 end
 
 switch action
     case 'Push'
-        set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-        set(Figures.cells.menuHandles.saveMenu,'Enable','on');
-        set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-        set(Figures.tree.menuHandles.saveMenu,'Enable','on');
         if (empty)
             empty = 0;
             bottom = 1;
         elseif (full)
             %drop oldest history
+            exceededLimit = 1;
             if (bottom < CONSTANTS.historySize)
                 bottom = bottom + 1;
             else
                 bottom = 1;
             end
         end
-        
-        hist(top).CellFamilies = CellFamilies;
-        hist(top).CellTracks = CellTracks;
-        hist(top).HashedCells = HashedCells;
-        hist(top).CellHulls = CellHulls;
-        hist(top).Figures.tree.familyID = Figures.tree.familyID;
-        
-        redo = top;
 
-        top = top + 1;
-        if (top > CONSTANTS.historySize)
-            top = 1;
+        current = current + 1;
+        if (current > CONSTANTS.historySize)
+            current = 1;
         end
         
-        if (top==bottom)
+        top = current;
+        
+        hist(current).CellFamilies = CellFamilies;
+        hist(current).CellTracks = CellTracks;
+        hist(current).HashedCells = HashedCells;
+        hist(current).CellHulls = CellHulls;
+        hist(current).Figures.tree.familyID = Figures.tree.familyID;
+        
+        if (current==bottom)
             full = 1;
             empty = 0;
         end
-        
-        %"Disable" redo
-        set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-        set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-        
+        setMenus();
     case 'Pop'        
         if (~empty)
-            if(redo < top)
-                top = top - 2;
-            else
-                top = top - 1;
-            end
-            if (top == 0)
-                top = CONSTANTS.historySize;
+            current = current - 1;
+            if (current == 0)
+                current = CONSTANTS.historySize;
             end
             full = 0;
             
-            if (top==bottom)
+            if (current==bottom)
                 empty = 1;
-                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-            else
-                set(Figures.cells.menuHandles.saveMenu,'Enable','on');
-                set(Figures.tree.menuHandles.saveMenu,'Enable','on');
             end
             
-            CellFamilies = hist(top).CellFamilies;
-            CellTracks = hist(top).CellTracks;
-            HashedCells = hist(top).HashedCells;
-            CellHulls = hist(top).CellHulls;
-            Figures.tree.familyID = hist(top).Figures.tree.familyID;
-            
-            %increment again so that top is always the next available place
-            top = top + 1;
-            if (top > CONSTANTS.historySize)
-                top = 1;
-            end
-            
-            set(Figures.cells.menuHandles.redoMenu,'Enable','on');
-            set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+            CellFamilies = hist(current).CellFamilies;
+            CellTracks = hist(current).CellTracks;
+            HashedCells = hist(current).HashedCells;
+            CellHulls = hist(current).CellHulls;
+            Figures.tree.familyID = hist(current).Figures.tree.familyID;
             
             %Update displays
             DrawTree(Figures.tree.familyID);
             DrawCells();
-            
+            setMenus();
             LogAction('Undo',[],[]);
-        else
-            set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-            set(Figures.tree.menuHandles.redoMenu,'Enable','off');
         end
-        
     case 'Redo'
-        if (redo>=top || (top<bottom && redo<top))
+        if (top>current || (bottom>top && top~=current))
             %redo possible
-            
-            CellFamilies = hist(top).CellFamilies;
-            CellTracks = hist(top).CellTracks;
-            HashedCells = hist(top).HashedCells;
-            CellHulls = hist(top).CellHulls;
-            Figures.tree.familyID = hist(top).Figures.tree.familyID;
-            
-            %increment again so that top is always the next available place
-            top = top + 1;
-            if (top > CONSTANTS.historySize)
-                top = 1;
+            current = current + 1;
+            if (current > CONSTANTS.historySize)
+                current = 1;
             end
             
+            CellFamilies = hist(current).CellFamilies;
+            CellTracks = hist(current).CellTracks;
+            HashedCells = hist(current).HashedCells;
+            CellHulls = hist(current).CellHulls;
+            Figures.tree.familyID = hist(current).Figures.tree.familyID;
+            
             empty = 0;
-            if(top==bottom)
+            if(current==bottom)
                 full = 1;
             end
             
             %Update displays
             DrawTree(Figures.tree.familyID);
             DrawCells();
-            
-            if (top>redo)
-                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-            end
-            
-            set(Figures.cells.menuHandles.saveMenu,'Enable','on');
-            set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+            setMenus();
             LogAction('Redo',[],[]);
         end
     case 'Init'
-        top = 1;
+        current = 1;
         bottom = 1;
-        redo = 1;
+        top = 1;
         empty = 0;
         full = 0;
-        hist(top).CellFamilies = CellFamilies;
-        hist(top).CellTracks = CellTracks;
-        hist(top).HashedCells = HashedCells;
-        hist(top).CellHulls = CellHulls;
-        hist(top).Figures.tree.familyID = Figures.tree.familyID;
-        top = 2;
+        exceededLimit = 0;
+        hist(current).CellFamilies = CellFamilies;
+        hist(current).CellTracks = CellTracks;
+        hist(current).HashedCells = HashedCells;
+        hist(current).CellHulls = CellHulls;
+        hist(current).Figures.tree.familyID = Figures.tree.familyID;
+        set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+        set(Figures.tree.menuHandles.redoMenu,'Enable','off');
+        set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+        set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+        set(Figures.tree.menuHandles.saveMenu,'Enable','off');
 end
+
+    function setMenus()
+        if(top>bottom)
+            %not "rolled over"
+            if(current<top)
+                %redo possible
+                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+            else
+                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
+            end
+            if(current>bottom)
+                %undo possible
+                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
+            else
+                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+            end
+        elseif(top==bottom && ~empty)
+            if(current~=top)
+                %redo and undo possible
+                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
+            else
+                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
+                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+            end
+            
+        else
+            %"rolled over"
+            if(current>=bottom || current<top)
+                %redo possible
+                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+            else
+                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
+            end
+            if(current>bottom || current<=top)
+                %undo possible
+                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
+            else
+                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+            end
+        end
+        
+        %check to see if we are at the original state from the .mat file
+        if(exceededLimit)
+            set(Figures.cells.menuHandles.saveMenu,'Enable','on');
+            set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+        else
+            if(empty)
+                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+                set(Figures.tree.menuHandles.saveMenu,'Enable','off');
+            else
+                set(Figures.cells.menuHandles.saveMenu,'Enable','on');
+                set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+            end
+        end
+    end %setMenu
 end

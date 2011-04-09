@@ -6,4 +6,6 @@ function DeleteHullFromTrack(hullID,trackID)
 %It is intended that AddHullToTrack will be run after this function,
 %otherwise this hull will cease to exist in any family or track
 
+%--Eric Wait
+
 end

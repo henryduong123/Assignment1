@@ -2,6 +2,8 @@ function TimeChange(time)
 %Takes the given time and changes the figures to that time or the closest
 %time within [1 length(HashedCells)]
 
+%--Eric Wait
+
 global Figures HashedCells
 
 if(time > length(HashedCells))

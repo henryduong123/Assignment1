@@ -2,6 +2,8 @@ function UpdateTimeIndicatorLine()
 %Changes the postition of the Red Line that indicates the current time
 %displayed
 
+%--Eric Wait
+
 global Figures
 
 if(ishandle(Figures.tree.timeIndicatorLine))

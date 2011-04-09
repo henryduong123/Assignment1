@@ -4,6 +4,8 @@ function newTrackID = SplitTrack(trackID,hullID)
 %given track.  Returns the trackID of the new track, which is the first
 %child of the given track.
 
+%--Eric Wait
+
 global CellFamilies CellTracks
 
 %get all the hulls that come after hullID (in time that is)

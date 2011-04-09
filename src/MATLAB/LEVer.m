@@ -1,4 +1,8 @@
 function LEVer()
+%Main program
+
+%--Eric Wait
+
 global Figures
 
 %if LEVer is already opened, save state just in case the User cancels the

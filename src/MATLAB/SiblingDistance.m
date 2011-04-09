@@ -4,8 +4,9 @@ function distance = SiblingDistance(cell1HullID,cell2HullID)
 %and maxPixelDistance.  Make sure they are set in the global CONSTANTS
 %variable.
 
+%--Eric Wait
+
 global CellHulls CONSTANTS
-distance = Inf;
 
 pixelsCell1 = CellHulls(cell1HullID).indexPixels;
 pixelsCell2 = CellHulls(cell2HullID).indexPixels;
@@ -16,8 +17,8 @@ if (length(pixelsCell2) < length(pixelsCell1))
     pixelsCell2 = temp;
 end
 
-[yCell1 xCell1] = ind2sub(CONSTANTS.ImageSize,pixelsCell1);
-[yCell2 xCell2] = ind2sub(CONSTANTS.ImageSize,pixelsCell2);
+[yCell1 xCell1] = ind2sub(CONSTANTS.imageSize,pixelsCell1);
+[yCell2 xCell2] = ind2sub(CONSTANTS.imageSize,pixelsCell2);
 
 minPixelDistance = Inf;
 

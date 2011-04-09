@@ -1,6 +1,8 @@
 function trackID = GetTrackID(hullID)
 %Given a hull ID a track ID will be returned
 
+%--Eric Wait
+
 global CellHulls HashedCells
 
 hullTime = CellHulls(hullID).time;

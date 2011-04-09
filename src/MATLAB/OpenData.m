@@ -3,9 +3,11 @@ function opened = OpenData()
 %results.  If the latter, the data will be converted to LEVer's data scheme
 %and save out to a new file.
 
+%--Eric Wait
+
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 3.0\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 3.1\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))

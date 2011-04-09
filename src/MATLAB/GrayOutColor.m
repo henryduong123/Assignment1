@@ -1,6 +1,8 @@
 function grayedColor = GrayOutColor(color)
-%this will take the given color and give back a grayed out color of similar
+%This will take the given color and give back a grayed out color of similar
 %hue
+
+%--Eric Wait
 
 grayedColor = [0 0 0];
 parfor i=1:3

@@ -5,7 +5,15 @@ function ChangeTrackParent(parentTrackID,time,childTrackID)
 %there should be a new track and the child track that are siblings with the
 %parent track being the parent.
 
-global CellTracks
+%--Eric Wait
+
+global CellTracks CellFamilies
+
+%see if the child exists before time
+if(time > CellTracks(childTrackID).startTime)
+    newFamilyID = RemoveFromTree(time,childTrackID,'yes');
+    childTrackID = CellFamilies(newFamilyID).rootTrackID;
+end
 
 %find where the child should attach to the parent
 hash = time - CellTracks(parentTrackID).startTime + 1;

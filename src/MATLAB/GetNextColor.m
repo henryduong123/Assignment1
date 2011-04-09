@@ -2,6 +2,8 @@ function color = GetNextColor()
 %Takes the global Colors list and selects the next in the list and returns
 %it
 
+%--Eric Wait
+
 global Colors
 persistent index
 

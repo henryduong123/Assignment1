@@ -4,6 +4,8 @@ function InitializeFigures()
 %Figures will have all the menus, button actions, and context menus set up
 %here
 
+%--Eric Wait
+
 global Figures CONSTANTS
 
 Figures.time = 1;

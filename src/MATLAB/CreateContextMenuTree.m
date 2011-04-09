@@ -2,6 +2,8 @@ function CreateContextMenuTree()
 %creates the context menu for the figure that displays the tree data and
 %the subsequent function calls
 
+%--Eric Wait
+
 global Figures
 
 figure(Figures.tree.handle);
@@ -33,8 +35,9 @@ ContextChangeLabel(CellTracks(trackID).startTime,trackID);
 end
 
 function changeParent(src,evnt)
+global CellTracks
 trackID = get(gco,'UserData');
-ContextChangeParent(trackID);
+ContextChangeParent(trackID,CellTracks(trackID).startTime);
 end
 
 function removeFromTree(src,evnt)
@@ -45,7 +48,6 @@ end
 
 function properties(src,evnt)
 global CellTracks
-
 trackID = get(gco,'UserData');
 ContextProperties(CellTracks(trackID).hulls(1),trackID);
 end

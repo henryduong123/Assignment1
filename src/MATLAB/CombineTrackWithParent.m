@@ -1,4 +1,5 @@
 function CombineTrackWithParent(trackID)
+% CombineTrackWithParent(trackID)
 %Combine childTrack with its parent track - in otherwords the childtrack
 %will be merged into the parent track making it all one edge.
 %Afterward all of the hulls previously associated with the given track will
@@ -6,6 +7,8 @@ function CombineTrackWithParent(trackID)
 %given track.
 %***Make sure that the sibling of the given track has been delt with prior
 %to calling this function. IT WILL BE LOST
+
+%--Eric Wait
 
 global CellFamilies CellTracks CellHulls
 

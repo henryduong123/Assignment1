@@ -2,6 +2,8 @@ function AddHashedCell(t,cellHullID,cellTrackID)
 %This will either add an entry to HashedHulls or update an entry based on
 %cellHullID
 
+%--Eric Wait
+
 global HashedCells
 
 if(isempty(HashedCells))

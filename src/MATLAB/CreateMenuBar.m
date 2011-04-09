@@ -1,6 +1,8 @@
 function CreateMenuBar(handle)
 %This sets up the custom menu bar for the given figure handle
 
+%--Eric Wait
+
 global Figures
 
 fileMenu = uimenu(...
@@ -98,6 +100,13 @@ uimenu(...
     'Callback',         @timeJump,...
     'Accelerator',      't');
 
+uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Display Largest Tree',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @largestTree,...
+    'Separator',      'on');
+
 
 if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.saveMenu = saveMenu;
@@ -172,5 +181,21 @@ else
     Figures.time = answer;
 end
 UpdateTimeIndicatorLine();
+DrawCells();
+end
+
+function largestTree(src,evnt)
+global CellFamilies Figures
+
+maxID = 1;
+for i=2:length(CellFamilies)
+    if(length(CellFamilies(maxID).tracks) < length(CellFamilies(i).tracks))
+        maxID = i;
+    end
+end
+if(Figures.tree.familyID == maxID),return,end
+
+Figures.tree.familyID = maxID;
+DrawTree(maxID);
 DrawCells();
 end

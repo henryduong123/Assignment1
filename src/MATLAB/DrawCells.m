@@ -5,6 +5,8 @@ function DrawCells()
 %will be more boldly colored, others will be with square labels and be
 %slightly grayed out
 
+%--Eric Wait
+
 global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS
 
 if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
@@ -20,7 +22,8 @@ yl=ylim;
 %adjust the image display
 
 hold off;
-imagesc(img);
+im = imagesc(img);
+set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
 set(gca,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 axis off;
 if xl(1)~=0 && xl(2)~=1

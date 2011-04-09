@@ -1,9 +1,15 @@
 function DrawTree(familyID)
-%This will draw the family tree of the given family.  Assumes binary tree
+%This will draw the family tree of the given family.
+
+%--Eric Wait
 
 global CellFamilies HashedCells Figures
 
 if(isempty(CellFamilies(familyID).tracks)),return,end
+
+%let the user know that this might take a while
+set(Figures.tree.handle,'Pointer','watch');
+set(Figures.cells.handle,'Pointer','watch');
 
 Figures.tree.familyID = familyID;
 
@@ -27,6 +33,10 @@ set(gca,...
 Figures.tree.axesHandle = gca;
 hold off
 UpdateTimeIndicatorLine();
+
+%let the user know that the drawing is done
+set(Figures.tree.handle,'Pointer','arrow');
+set(Figures.cells.handle,'Pointer','arrow');
 end
 
 function [xMin xCenter xMax] = traverseTree(trackID,initXmin)

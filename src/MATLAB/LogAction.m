@@ -5,6 +5,8 @@ function LogAction(action,oldValue,newValue)
 %oldValue and newValue are used to show what numbers are changed. Please
 %use the action string to denote what the values represent
 
+%--Eric Wait
+
 global Figures CONSTANTS
 time = clock;%[year month day hour minute seconds]
 

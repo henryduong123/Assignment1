@@ -2,6 +2,8 @@ function SwapTrackLabels(time,trackID1,trackID2)
 %This function will swap the hulls of the two tracks from the given time
 %forward.  Any children will also be swaped
 
+%--Eric Wait
+
 global CellTracks CellHulls
 
 track1Hash = time - CellTracks(trackID1).startTime + 1;
