@@ -1,4 +1,5 @@
 
+*~
 bin/*.c
 bin/*.log
 *.mat

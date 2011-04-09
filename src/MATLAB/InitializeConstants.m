@@ -2,23 +2,22 @@ function InitializeConstants()
 %Set all constants here
 
 %--Eric Wait
-global CONSTANTS
 
-CONSTANTS.imageAlpha = 1;
-CONSTANTS.maxRetrackDistSq = 40^2;
-CONSTANTS.maxPixelDistance = 40;
-CONSTANTS.maxCenterOfMassDistance = 80;
-CONSTANTS.minParentCandidateTimeFrame = 5;
-CONSTANTS.minParentHistoryTimeFrame = 5;
-CONSTANTS.minParentFuture = 5;
-CONSTANTS.minFamilyTimeFrame = 5;
-CONSTANTS.maxFrameDifference = 5;
-CONSTANTS.historySize = 50;
-CONSTANTS.clickMargin = 500;
-CONSTANTS.timeResolution = 10; %in frames per min
-CONSTANTS.dMaxConnectComponet = 40;
-CONSTANTS.dMaxCenterOfMass = 80;
-CONSTANTS.lookAhead = 2;
-CONSTANTS.minPlayer = 9;
-CONSTANTS.minMitosis = 30;
+AddConstant('imageAlpha',1.5);
+AddConstant('maxRetrackDistSq',40^2);
+AddConstant('maxPixelDistance',40);
+AddConstant('maxCenterOfMassDistance',80);
+AddConstant('minParentCandidateTimeFrame',5);
+AddConstant('minParentHistoryTimeFrame',5);
+AddConstant('minParentFuture',5);
+AddConstant('minFamilyTimeFrame',5);
+AddConstant('maxFrameDifference',5);
+AddConstant('historySize',50);
+AddConstant('clickMargin',500);
+AddConstant('timeResolution',10); %in frames per min
+AddConstant('dMaxConnectComponet',40);
+AddConstant('dMaxCenterOfMass',80);
+AddConstant('lookAhead',2);
+AddConstant('minPlayer',9);
+AddConstant('minMitosis',30);
 end

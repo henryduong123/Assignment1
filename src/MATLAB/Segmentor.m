@@ -8,7 +8,7 @@ function objs = Segmentor(tStart,tLength,rootImageFolder,datasetName,imageAlpha,
 %--Andrew Cohen
 
 % global CONSTANTS
-se=strel('square',3);
+
 
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
@@ -30,6 +30,11 @@ for t = tStart:tStart + tLength
     fname=[rootImageFolder '\' datasetName '_t' frameT '.TIF'];
     if(isempty(dir(fname))),continue,end
     
+    fprintf('%d, ', t);
+    if ( mod(t,20) == 0 )
+        fprintf('\n');
+    end
+    
     [im map]=imread(fname);
     im=mat2gray(im);
     
@@ -44,7 +49,7 @@ for t = tStart:tStart + tLength
     
     % bwNorm=GetNormalVectors(bwHalo,bwDark);
     bwNorm=0*bwDark;
-    
+    se=strel('square',3);
     gd=imdilate(im,se);
     ge=imerode(im,se);
     ig=gd-ge;

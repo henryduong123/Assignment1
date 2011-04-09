@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 4.0\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 4.1\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -30,11 +30,6 @@ if (~exist('settings','var') || isempty(settings))
 end
 
 filterIndexImage = 0;
-matFile = [];
-matFilePath = [];
-imageFile = [];
-imagePath = [];
-imageDataset = [];
 goodLoad = 0;
 opened = 0;
 
@@ -56,7 +51,6 @@ if(~isempty(Figures))
 end
 
 oldCONSTANTS = CONSTANTS;
-InitializeConstants();
 
 %find the first image
 imageFilter = [settings.imagePath '*.TIF'];
@@ -70,7 +64,6 @@ while (filterIndexImage==0)
 end
 
 index = strfind(settings.imageFile,'_t');
-frameT = '001';
 if (~isempty(index) && filterIndexImage~=0)
     CONSTANTS.rootImageFolder = settings.imagePath;
     imageDataset = settings.imageFile(1:(index(length(index))-1));
@@ -117,11 +110,11 @@ switch answer
                     end
                 catch
                 end
-                CellFamilies = [];
-                CellTracks = [];
-                CellHulls = [];
-                HashedCells = [];
-                Costs = [];
+%                 CellFamilies = [];
+%                 CellTracks = [];
+%                 CellHulls = [];
+%                 HashedCells = [];
+%                 Costs = [];
 				rootImageFolder = CONSTANTS.rootImageFolder;
                 imageSignificantDigits = CONSTANTS.imageSignificantDigits;
 				
@@ -160,7 +153,7 @@ switch answer
         
         Figures.time = 1;
         
-        LogAction(['Opened file ' matFile],[],[]);
+        LogAction(['Opened file ' settings.matFile],[],[]);
     otherwise
         return
 end

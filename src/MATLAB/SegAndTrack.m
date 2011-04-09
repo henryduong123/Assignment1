@@ -51,7 +51,6 @@ WriteSegData(cellSegments,CONSTANTS.datasetName);
 
 fprintf(1,'\nDone\n');
 
-load ( ['SegObjs_' CONSTANTS.datasetName '.mat']);
 fnameIn=['SegObjs_' CONSTANTS.datasetName '.txt'];
 fnameOut=['Tracked_' CONSTANTS.datasetName '.txt'];
 tSeg=toc;
