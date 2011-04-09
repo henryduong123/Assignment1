@@ -137,6 +137,15 @@ while (isempty(index) || ~exist(fileName,'file'))
     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' num2str(t,'%03d') '.TIF'];
 end
 
+% Add imagePixels field to CellHulls structure (and resave in place)
+if ( ~isfield(CellHulls, 'imagePixels') )
+    fprintf('Adding Image Pixel Information...\n');
+    AddImagePixelsField();
+    fprintf('Image Information Added\n');
+    save([matPath matFile],...
+        'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
+end
+
 opened = 1;
 
 %save out settings

@@ -67,10 +67,11 @@ Figures.tree.timeLabel = uicontrol(Figures.tree.handle,...
     'Position',[1 0 60 20],...
     'String',['Time: ' num2str(Figures.time)]);
 
-DrawTree(1);
-figure(Figures.tree.handle);
-
-DrawCells();
+FindLargestTree([],[]);
+% DrawTree(1);
+% figure(Figures.tree.handle);
+% 
+% DrawCells();
 end
 
 %% Callback Functions

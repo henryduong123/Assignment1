@@ -130,7 +130,7 @@ uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Display Largest Tree',...
     'HandleVisibility', 'callback',...
-    'Callback',         @largestTree,...
+    'Callback',         @FindLargestTree,...
     'Separator',      'on');
 
 uimenu(...
@@ -264,22 +264,6 @@ else
     Figures.time = answer;
 end
 UpdateTimeIndicatorLine();
-DrawCells();
-end
-
-function largestTree(src,evnt)
-global CellFamilies Figures
-
-maxID = 1;
-for i=2:length(CellFamilies)
-    if(length(CellFamilies(maxID).tracks) < length(CellFamilies(i).tracks))
-        maxID = i;
-    end
-end
-if(Figures.tree.familyID == maxID),return,end
-
-Figures.tree.familyID = maxID;
-DrawTree(maxID);
 DrawCells();
 end
 

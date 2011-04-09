@@ -16,7 +16,7 @@ if ( any(isnan(kIdx)) )
     return;
 end
 
-nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'deleted', 0);
+nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0);
 for i=1:k
     bIdxPix = (kIdx == i);
     
@@ -31,6 +31,7 @@ for i=1:k
     end
     
     nh.indexPixels = hull.indexPixels(bIdxPix);
+    nh.imagePixels = hull.imagePixels(bIdxPix);
     nh.centerOfMass = mean([hy hx]);
     nh.time = hull.time;
     

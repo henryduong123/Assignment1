@@ -7,7 +7,9 @@ function AddHashedCell(t,cellHullID,cellTrackID)
 global HashedCells
 
 if(isempty(HashedCells))
-    HashedCells = {struct('hullID',{cellHullID},'trackID',{cellTrackID})};
+    HashedCells{t}(1).hullID = cellHullID;
+    HashedCells{t}(1).trackID = cellTrackID;
+%     HashedCells = {struct('hullID',{cellHullID},'trackID',{cellTrackID})};
 else
     if(t > length(HashedCells))
         HashedCells{t}(1).hullID = cellHullID;

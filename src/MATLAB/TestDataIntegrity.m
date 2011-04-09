@@ -9,9 +9,13 @@ function TestDataIntegrity(correct)
 global CellTracks CellHulls CellFamilies HashedCells
 
 hullsList = [];
-fprintf('Checking CellTracks');
+fprintf('Checking CellTracks...');
+progress = 0;
+iterations = length(CellTracks);
 for i=1:length(CellTracks)
-    fprintf(', %d',i);
+    progress = progress+1;
+    Progressbar(progress/iterations);
+%     fprintf(', %d',i);
     %% Check child/parent/sibling relationships
     if(~isempty(CellTracks(i).parentTrack))
         if(isempty(find(CellTracks(CellTracks(i).parentTrack).childrenTracks==i, 1)))
@@ -108,21 +112,26 @@ for i=1:length(CellTracks)
     end
     
 end
-fprintf('\n');
+% fprintf('\n');
 
 %% check CellHulls
 % if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
 missingHulls = find(ismember(find([CellHulls.deleted]==0),hullsList')==0);
 if(~isempty(missingHulls))
     if(correct)
+        progress = 0;
+        iterations = length(missingHulls); 
         for i=1:length(missingHulls)
+            progress = progress+1;
+            Progressbar(progress/iterations);
             if(isempty(CellHulls(missingHulls(i)).points))
                 CellHulls(missingHulls(i)).deleted = 1;
             end
         end
+    else
+        error('HullsList ~= CellHulls');
     end
-    error('HullsList ~= CellHulls');
 end
 
-fprintf('\n');
+fprintf('\nDone\n');
 end

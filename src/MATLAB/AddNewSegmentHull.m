@@ -7,7 +7,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
     
     newObj = PartialImageSegment(img, clickPt, 200, 1.0);
 
-    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'deleted', 0);
+    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0);
     
     if ( isempty(newObj) )
         % Add a point hull since we couldn't find a segmentation containing the click
@@ -15,11 +15,13 @@ function newTrackID = AddNewSegmentHull(clickPt)
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
+        newHull.imagePixels = img(newHull.indexPixels);
     else
         newHull.time = Figures.time;
         newHull.points = newObj.points;
         newHull.centerOfMass = newObj.centerOfMass;
         newHull.indexPixels = newObj.indexPixels;
+        newHull.imagePixels = newObj.imagePixels;
     end
 
     CellHulls(end+1) = newHull;

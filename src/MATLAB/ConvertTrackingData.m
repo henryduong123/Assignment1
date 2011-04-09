@@ -21,64 +21,82 @@ CONSTANTS.timeResolution = 10; %in frames per min
 Costs = gConnect;
 
 %Initialize Structures
-HashedCells = cell(0,length(objHulls));
-CellHulls = struct(...
-    'time',             {objHulls(1).t},...
-    'points',           {objHulls(1).pts},...
-    'centerOfMass',     {objHulls(1).COM},...
-    'indexPixels',      {objHulls(1).indPixels},...
-    'deleted',          {0});
-
-if objHulls(1).inID == 0
-    NewCellFamily(1,objHulls(1).t);
-else
-    AddHullToTrack(1,[],objHulls(1).inID);
-end
+% HashedCells = cell(0,length(objHulls));
+cellHulls = struct(...
+    'time',             {},...
+    'points',           {},...
+    'centerOfMass',     {},...
+    'indexPixels',      {},...
+    'imagePixels',      {},...
+    'deleted',          {});
 
 %loop through the data 
-for i=2:length(objHulls)
-%     if(i<=length(CellHulls)+1 || ~isempty(CellHulls(i).time))
-%         addHull(i);
-%     end
-    CellHulls(i).time            =  objHulls(i).t;
-    CellHulls(i).points          =  objHulls(i).pts;
-    CellHulls(i).centerOfMass    =  objHulls(i).COM;
-    CellHulls(i).indexPixels     =  objHulls(i).indPixels;
-    CellHulls(i).deleted         =  0;
-    
-    if objHulls(i).inID == 0
-        NewCellFamily(i,objHulls(i).t);
-    else       
-        AddHullToTrack(i,[],objHulls(i).inID);
+% progress = 1;
+% iterations = length(objHulls);
+% cellHulls(length(objHulls)) = ;
+parfor i=1:length(objHulls)
+%     progress = progress+1;
+%     Progressbar(progress/iterations);
+    cellHulls(i).time            =  objHulls(i).t;
+    cellHulls(i).points          =  objHulls(i).pts;
+    cellHulls(i).centerOfMass    =  objHulls(i).COM;
+    cellHulls(i).indexPixels     =  objHulls(i).indPixels;
+    cellHulls(i).imagePixels     =  objHulls(i).imPixels;
+    cellHulls(i).deleted         =  0;
+end
+CellHulls = cellHulls;
+
+%walk through the tracks
+progress = 1;
+iterations = length(objHulls);
+hullList = [];
+for i=length(objHulls):-1:1
+    progress = progress+1;
+    Progressbar(progress/iterations);
+    if(any(ismember(hullList,i))),continue,end
+    if(objHulls(i).inID~=0),continue,end
+    hullList = addToTrack(i,hullList,objHulls);
+end
+
+%add any hulls that were missed
+if(length(hullList)~=length(CellHulls))
+    reprocess = find(ismember(1:length(CellHulls),hullList)==0);
+    progress = 1;
+    iterations = length(objHulls);
+    for i=1:length(reprocess)
+        progress = progress+1;
+        Progressbar(progress/iterations);
+        NewCellFamily(reprocess(i),objHulls(reprocess(i)).t);
     end
 end
+
+TestDataIntegrity(1);
 
 %create the family trees
 ProcessNewborns(1:length(CellFamilies));
+
 end
 
-function addHull(num)
-CellHulls(num).time            =  objHulls(num).t;
-CellHulls(num).points          =  objHulls(num).pts;
-CellHulls(num).centerOfMass    =  objHulls(num).COM;
-CellHulls(num).indexPixels     =  objHulls(num).indPixels;
-CellHulls(num).deleted         =  0;
+function hullList = addToTrack(hull,hullList,objHulls)
+%error checking
+if(any(ismember(hullList,hull)) || objHulls(hull).inID ~= 0)
+    %already part of a track
+    return
+end
 
-if(objHulls(num).inID > length(CellHulls)+1)
-    if(objHulls(objHulls(num).inID).inID == 0)
-        NewCellFamily(num,objHulls(objHulls(num).inID).t);
+NewCellFamily(hull,objHulls(hull).t);
+hullList = [hullList hull];
+
+while(objHulls(hull).outID~=0)
+    hull = objHulls(hull).outID;
+    if(any(ismember(hullList,hull))),break,end
+    if(any(ismember(hullList,objHulls(hull).inID)))
+        AddHullToTrack(hull,[],objHulls(hull).inID);
     else
-        addHull(objHulls(num).inID);
+        %this runs if there was an error in objHulls data structure
+        NewCellFamily(hull,objHulls(hull).t);
     end
+    hullList = [hullList hull];
+end
 end
 
-if(objHulls(num).inID == 0)
-    NewCellFamily(num,objHulls(num).t);
-else
-    AddHullToTrack(num,[],objHulls(num).inID);
-end
-
-if(objHulls(num).outID > length(CellHulls)+1)
-    addHull(objHulls(num).outID);
-end
-end
