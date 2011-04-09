@@ -14,9 +14,13 @@ else
         HashedCells{t}(1).trackID = cellTrackID;
     else
         %if the hullID exists update it, otherwise create the entry
-        index = find([HashedCells{t}(:).hullID] == cellHullID);
-        if(isempty(index))
-            index = length(HashedCells{t}) + 1;
+        if(t>length(HashedCells) || isempty(HashedCells{t}))
+            index = 1;
+        else
+            index = find([HashedCells{t}(:).hullID] == cellHullID);
+            if(isempty(index))
+                index = length(HashedCells{t}) + 1;
+            end
         end
         HashedCells{t}(index).hullID = cellHullID;
         HashedCells{t}(index).trackID = cellTrackID;

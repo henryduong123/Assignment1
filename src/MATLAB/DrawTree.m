@@ -5,7 +5,7 @@ function DrawTree(familyID)
 
 global CellFamilies HashedCells Figures
 
-if(isempty(CellFamilies(familyID).tracks)),return,end
+if(isempty(CellFamilies(familyID).tracks) || (isvarname('Figures.tree.familyID') && familyID==Figures.tree.familyID)),return,end
 
 %let the user know that this might take a while
 set(Figures.tree.handle,'Pointer','watch');

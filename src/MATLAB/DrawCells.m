@@ -33,6 +33,7 @@ end
 colormap(gray);
 hold all;
 
+siblingsAlreadyDrawn = [];
 
 %draw labels if turned on
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
@@ -79,6 +80,14 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             textColor = 'r';
         end
         
+        %draw connection to sibling 
+        if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
+            %if the cell is on the current tree or already drawn
+            if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
+                siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curTrackID,curHullID)];
+            end
+        end
+            
         %draw outline
         plot(CellHulls(curHullID).points(:,1),...
             CellHulls(curHullID).points(:,2),...
@@ -104,5 +113,42 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'UserData',             curTrackID,...
             'uicontextmenu',        Figures.cells.contextMenuHandle);
     end
+elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
+    %just draw sibling lines
+    for i=1:length(HashedCells{Figures.time})
+        curHullID = HashedCells{Figures.time}(i).hullID;
+        curTrackID = HashedCells{Figures.time}(i).trackID;
+        
+        %if the cell is on the current tree or already drawn
+        if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
+            siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curTrackID,curHullID)];
+        end
+    end
 end
+end
+
+function tracksDrawn = drawSiblingsLine(trackID,hullID)
+global Figures CellTracks CellHulls HashedCells
+
+tracksDrawn = [];
+siblingID = CellTracks(trackID).siblingTrack;
+parentID = CellTracks(trackID).parentTrack;
+
+if(isempty(siblingID)),return,end
+
+tracksDrawn = [trackID siblingID];
+
+siblingHullID = [HashedCells{Figures.time}.trackID] == siblingID;
+siblingHullID = [HashedCells{Figures.time}(siblingHullID).hullID];
+
+if(isempty(siblingHullID)),return,end
+
+plot([CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)],...
+    [CellHulls(hullID).centerOfMass(1) CellHulls(siblingHullID).centerOfMass(1)],...
+    'Color',            CellTracks(parentID).color.background,...
+    'UserData',         trackID,...
+    'uicontextmenu',    Figures.cells.contextMenuHandle,...
+    'Tag',              'SiblingRelationship');
+
+set(Figures.cells.removeMenu,'Visible','on');
 end

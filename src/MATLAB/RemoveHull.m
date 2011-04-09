@@ -14,7 +14,29 @@ index = find(CellTracks(trackID).hulls==hullID);
 CellTracks(trackID).hulls(index) = 0;
 if(1==index)
     index = find(CellTracks(trackID).hulls,1,'first');
-    RehashCellTracks(trackID,CellHulls(CellTracks(trackID).hulls(index)).time);
+    if(~isempty(index))
+        RehashCellTracks(trackID,CellHulls(CellTracks(trackID).hulls(index)).time);
+    else
+        if(~isempty(CellTracks(trackID).parentTrack))
+            CombineTrackWithParent(CellTracks(trackID).siblingTrack);
+        end
+        if(~isempty(CellTracks(trackID).childrenTracks))
+            for i=1:length(CellTracks(trackID).childrenTracks)
+                RemoveFromTree(CellTracks(trackID).childrenTracks(i))
+            end
+        end
+        RemoveTrackFromFamily(trackID);
+        CellTracks(trackID).familyID = [];
+        CellTracks(trackID).parentTrack = [];
+        CellTracks(trackID).siblingTrack = [];
+        CellTracks(trackID).childrenTracks = [];
+        CellTracks(trackID).hulls = [];
+        CellTracks(trackID).starTime = [];
+        CellTracks(trackID).endTime = [];
+        CellTracks(trackID).hulls = [];
+        CellTracks(trackID).timeOfDeath = [];
+        CellTracks(trackID).color = [];
+    end
 elseif(index==length(CellTracks(trackID).hulls))
     RehashCellTracks(trackID,CellTracks(trackID).startTime);
 end

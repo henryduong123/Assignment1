@@ -42,4 +42,6 @@ if(indexOfLastHull~=length(CellTracks(trackID).hulls))
 end
 
 CellTracks(trackID).startTime = newStartTime;
+
+%check to see if this effects the family
 end

@@ -22,6 +22,13 @@ CellTracks(trackID1).hulls = [CellTracks(trackID1).hulls track2Hulls];
 CellTracks(trackID2).hulls = [CellTracks(trackID2).hulls track1Hulls];
 
 %update times
+% index = find(CellTracks(trackID1).hulls,1,'first');
+% startTime1 = CellHulls(CellTracks(trackID1).hulls(index)).time;
+% index = find(CellTracks(trackID2).hulls,1,'first');
+% startTime2 = CellHulls(CellTracks(trackID2).hulls(index)).time;
+% RehashCellTracks(trackID1,startTime1);
+% RehashCellTracks(trackID2,startTime2);
+
 CellTracks(trackID1).startTime = CellHulls(CellTracks(trackID1).hulls(1)).time;
 CellTracks(trackID2).startTime = CellHulls(CellTracks(trackID2).hulls(1)).time;
 CellTracks(trackID1).endTime = CellHulls(CellTracks(trackID1).hulls(find([CellTracks(trackID1).hulls]~=0,1,'last'))).time;
@@ -36,10 +43,18 @@ tempChildrenTracks = CellTracks(trackID1).childrenTracks;
 CellTracks(trackID1).childrenTracks = CellTracks(trackID2).childrenTracks;
 CellTracks(trackID2).childrenTracks = tempChildrenTracks;
 
+for i=1:length(CellTracks(trackID1).childrenTracks)
+    CellTracks(CellTracks(trackID1).childrenTracks(i)).parentTrack = trackID1;
+end
+for i=1:length(CellTracks(trackID2).childrenTracks)
+    CellTracks(CellTracks(trackID2).childrenTracks(i)).parentTrack = trackID2;
+end
+
+
 %check to see if the children have moved to a new family
 if(CellTracks(trackID1).familyID ~= CellTracks(trackID2).familyID)
     for i=1:length(CellTracks(trackID1).childrenTracks)
-        ChangeTrackAndChildrensFamily(CellTracks(trackID2).familyID,CellTracks(trackID1).familyID,CellTracks(trackID1).childrenTracks(i));
+        ChangeTrackAndChildrensFamily(CellTracks(trackID2).familyID,CellTracks(trackID1).familyID,CellTracks(trackID1).childrenTracks(1));
     end
     for i=1:length(CellTracks(trackID2).childrenTracks)
         ChangeTrackAndChildrensFamily(CellTracks(trackID1).familyID,CellTracks(trackID2).familyID,CellTracks(trackID2).childrenTracks(i));

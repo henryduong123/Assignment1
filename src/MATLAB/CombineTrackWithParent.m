@@ -30,6 +30,9 @@ end
 
 %inherit grandchildren
 CellTracks(parentID).childrenTracks = CellTracks(trackID).childrenTracks;
+for i=1:length(CellTracks(parentID).childrenTracks)
+    CellTracks(CellTracks(parentID).childrenTracks(i)).parentTrack = parentID;
+end
 
 %update the endTime of the parent
 CellTracks(parentID).endTime = CellTracks(trackID).endTime;

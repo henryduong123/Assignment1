@@ -85,6 +85,14 @@ labelsMenu = uimenu(...
     'Checked',          'on',...
     'Accelerator',      'l');
 
+siblingsMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Sibling Relationships',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleSiblings,...
+    'Checked',          'off',...
+    'Accelerator',      'b');
+
 playMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Play',...
@@ -107,6 +115,11 @@ uimenu(...
     'Callback',         @largestTree,...
     'Separator',      'on');
 
+uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Display Tree...',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @displayTree);
 
 if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.saveMenu = saveMenu;
@@ -114,12 +127,14 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.redoMenu = redoMenu;
     Figures.cells.menuHandles.labelsMenu = labelsMenu;
     Figures.cells.menuHandles.playMenu = playMenu;
+    Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
     Figures.tree.menuHandles.undoMenu = undoMenu;
     Figures.tree.menuHandles.redoMenu = redoMenu;
     Figures.tree.menuHandles.labelsMenu = labelsMenu;
     Figures.tree.menuHandles.playMenu = playMenu;
+    Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
 end
 end
 
@@ -166,6 +181,19 @@ else
 end
 end
 
+function toggleSiblings(src,evnt)
+global Figures
+if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'), 'on'))
+    set(Figures.cells.menuHandles.siblingsMenu, 'Checked', 'off');
+    set(Figures.tree.menuHandles.siblingsMenu, 'Checked', 'off');
+    DrawCells();
+else
+    set(Figures.cells.menuHandles.siblingsMenu, 'Checked', 'on');
+    set(Figures.tree.menuHandles.siblingsMenu, 'Checked', 'on');
+    DrawCells();
+end
+end
+
 function timeJump(src,evnt)
 global Figures HashedCells
 answer = inputdlg('Enter Frame Number:','Jump to Time...',1,{num2str(Figures.time)});
@@ -198,4 +226,16 @@ if(Figures.tree.familyID == maxID),return,end
 Figures.tree.familyID = maxID;
 DrawTree(maxID);
 DrawCells();
+end
+
+function displayTree(src,evnt)
+global CellTracks
+answer = inputdlg('Enter Tree Containing Cell:','Display Tree',1);
+answer = str2double(answer);
+
+if(0>=answer || isempty(CellTracks(answer).hulls))
+    msgbox([num2str(answer) ' is not a valid cell'],'Not Valid','error');
+    return
+end
+DrawTree(CellTracks(answer).familyID);
 end

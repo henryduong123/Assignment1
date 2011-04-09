@@ -9,9 +9,23 @@ global Figures
 figure(Figures.cells.handle);
 Figures.cells.contextMenuHandle = uicontextmenu;
 
+% Figures.cells.contextMenuLabelHandle = uimenu(Figures.cells.contextMenuHandle,...
+%     'Label',        'Click to Show Which Cell Is Selected',...
+%     'CallBack',     @cellSelected);
+
+Figures.cells.removeMenu = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove Mitosis',...
+    'CallBack',     @removeMitosis,...
+    'Visible',      'off');
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Add Mitosis',...
+    'CallBack',     @addMitosis);
+
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Label',...
-    'CallBack',     @changeLabel);
+    'CallBack',     @changeLabel,...
+    'Separator',    'on');
 
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Parent',...
@@ -66,6 +80,80 @@ uimenu(Figures.cells.contextMenuHandle,...
 end
 
 %% Callback functions
+% function cellSelected(src,evnt)
+% %doesn't work, closes context menu
+% global Figures
+% [hullID trackID] = getClosestCell();
+% 
+% if(isempty(trackID))
+%     set(Figures.cells.contextMenuLabelHandle,'Label','No Cell Selected, Click Closer');
+% else
+%     set(Figures.cells.contextMenuLabelHandle,'Label',['Cell: ' num2str(trackID)]);
+% end
+% end
+
+function removeMitosis(src,evnt)
+global CellTracks Figures
+object = get(gco);
+
+if(~strcmp(object.Tag,'SiblingRelationship'))
+    msgbox('Please click on a Relationship line to remove','Not on line','warn');
+    return
+end
+
+choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
+    num2str(CellTracks(object.UserData).siblingTrack),'Cancel','Cancel');
+switch choice
+    case num2str(object.UserData)
+        remove = CellTracks(object.UserData).siblingTrack;
+        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
+            CellTracks(object.UserData).siblingTrack,'yes');
+    case num2str(CellTracks(object.UserData).siblingTrack)
+        remove = object.UserData;
+        newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+    otherwise
+        return
+end
+History('Push');
+LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
+DrawTree(Figures.tree.familyID);
+DrawCells();
+end
+
+function addMitosis(src,evnt)
+global CellTracks Figures
+
+[hullID trackID] = getClosestCell();
+if(isempty(trackID)),return,end
+
+answer = inputdlg({'Enter Time of Mitosis',['Enter new sibling of ' num2str(trackID)]},...
+    'Add Mitosis',1,{num2str(Figures.time),''});
+
+if(isempty(answer)),return,end
+
+time = str2double(answer(1));
+siblingTrack = str2double(answer(2));
+
+if(isempty(CellTracks(siblingTrack).hulls))
+    msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
+    return
+end
+if(CellTracks(trackID).startTime>time)
+    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid child','error');
+    return
+end
+
+oldParent = CellTracks(siblingTrack).parentTrack;
+
+ChangeTrackParent(trackID,time,siblingTrack);
+
+History('Push');
+LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
+
+DrawTree(CellTracks(trackID).familyID);
+DrawCells();
+end
+
 function changeLabel(src,evnt)
 global Figures
 
@@ -107,7 +195,7 @@ addHull(num);
 end
 
 function removeHull(src,evnt)
-global Figures
+global Figures CellFamilies
 
 [hullID trackID] = getClosestCell();
 if(isempty(trackID)),return,end
@@ -115,6 +203,22 @@ if(isempty(trackID)),return,end
 RemoveHull(hullID);
 History('Push');
 LogAction(['Removed hull from track ' num2str(trackID)],hullID,[]);
+
+%if the whole family disapears with this change, pick a diffrent family to
+%display
+if(isempty(CellFamilies(Figures.tree.familyID).tracks))
+    for i=1:length(CellFamilies)
+        if(~isempty(CellFamilies(i).tracks))
+            Figures.tree.familyID = i;
+            break
+        end
+    end
+    DrawTree(Figures.tree.familyID);
+    DrawCells();
+    msgbox(['By removing this hull, the complete tree is no more. Displaying tree rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
+    return
+end
+
 DrawTree(Figures.tree.familyID);
 DrawCells();
 end

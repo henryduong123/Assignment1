@@ -9,8 +9,25 @@ newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
 if(isempty(newTrackID)),return,end;
 newTrackID = str2double(newTrackID(1));
 
-if(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
-    choice = questdlg('New label does not exist. Do you want this cell and its children dropped from its tree?','Drop Cell?','Yes','Cancel','Cancel');
+%error checking
+if(0>=newTrackID)
+    msgbox(['New label of ' num2str(newTrackID) ' is not a valid number'],'Change Label','warn');
+    return
+elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
+    choice = questdlg(['Changing ' num2str(trackID) ' to ' num2str(newTrackID) ' will have the same effect as Remove From Tree'],...
+        'Remove From Tree?','Continue','Cancel','Cancel');
+    switch choice
+        case 'Continue'
+            newLabel = length(CellTracks) + 1;
+            ContextRemoveFromTree(time,trackID);
+            msgbox(['The new cell label is ' num2str(newLabel)],'Remove From Tree','help');
+            return
+        case 'Cancel'
+            return
+    end
+elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
+    choice = questdlg('New label does not exist. Do you want this cell and its children dropped from its tree?',...
+        'Drop Cell?','Yes','Cancel','Cancel');
     switch choice
         case 'Yes'
             oldFamily = CellTracks(trackID).familyID;
@@ -21,13 +38,15 @@ if(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
             return
     end
 elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
-        choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward?'],...
-            'Swap Labels?','Yes','Cancel','Cancel');
+        choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
+            'Swap Labels?','Forward','This Frame','Cancel','Cancel');
     switch choice
-        case 'Yes'
+        case 'Forward'
             SwapTrackLabels(time,trackID,newTrackID);
             History('Push');
             LogAction('Swapped Labels',trackID,newTrackID);
+        case 'This Frame'
+            SwapHulls(time,trackID,newTrackID);
         case 'Cancel'
             return
     end

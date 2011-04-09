@@ -10,8 +10,17 @@ figure(Figures.tree.handle);
 Figures.tree.contextMenuHandle = uicontextmenu;
 
 uimenu(Figures.tree.contextMenuHandle,...
+    'Label',        'Remove Mitosis',...
+    'CallBack',     @removeMitosis);
+
+uimenu(Figures.tree.contextMenuHandle,...
+    'Label',        'Add Mitosis',...
+    'CallBack',     @addMitosis);
+
+uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Change Label',...
-    'CallBack',     @changeLabel);
+    'CallBack',     @changeLabel,...
+    'Separator',    'on');
 
 uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Change Parent',...
@@ -28,6 +37,86 @@ uimenu(Figures.tree.contextMenuHandle,...
 end
 
 %% Callback functions
+function removeMitosis(src,evnt)
+global CellTracks Figures
+object = get(gco);
+if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
+    %clicked on a node
+    if(isempty(CellTracks(object.UserData).parentTrack))
+        msgbox('No Mitosis to Remove','Unable to Remove Mitosis','error');
+        return
+    end
+    choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
+        num2str(CellTracks(object.UserData).siblingTrack),'Cancel','Cancel');
+elseif(object.YData(1)==object.YData(2))
+    %clicked on a horizontal line
+    choice = questdlg('Which Side to Keep?','Merge With Parent',...
+        num2str(CellTracks(object.UserData).childrenTracks(1)),...
+        num2str(CellTracks(object.UserData).childrenTracks(2)),'Cancel','Cancel');
+else
+    %clicked on a vertical line
+    msgbox('Please Click on the Node or the Vertical Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
+    return
+end
+switch choice
+    case num2str(object.UserData)
+        remove = CellTracks(object.UserData).siblingTrack;
+        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
+            CellTracks(object.UserData).siblingTrack,'yes');
+    case num2str(CellTracks(object.UserData).siblingTrack)
+        remove = object.UserData;
+        newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+    case num2str(CellTracks(object.UserData).childrenTracks(1))
+        remove = CellTracks(object.UserData).childrenTracks(2);
+        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
+            CellTracks(object.UserData).childrenTracks(2),'yes');
+    case num2str(CellTracks(object.UserData).childrenTracks(2))
+        remove = CellTracks(object.UserData).childrenTracks(1);
+        newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
+            CellTracks(object.UserData).childrenTracks(1),'yes');
+    otherwise
+        return
+end
+History('Push');
+LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
+DrawTree(Figures.tree.familyID);
+DrawCells();
+end
+
+function addMitosis(src,evnt)
+global CellTracks
+trackID = get(gco,'UserData');
+time = get(gca,'CurrentPoint');
+time = round(time(1,2));
+
+answer = inputdlg({'Enter Time of Mitosis',['Enter new sibling of ' num2str(trackID)]},...
+    'Add Mitosis',1,{num2str(time),''});
+
+if(isempty(answer)),return,end
+
+time = str2double(answer(1));
+siblingTrack = str2double(answer(2));
+
+if(isempty(CellTracks(siblingTrack).hulls))
+    msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
+    return
+end
+if(CellTracks(trackID).startTime>time)
+    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid child','error');
+    return
+end
+
+oldParent = CellTracks(siblingTrack).parentTrack;
+
+ChangeTrackParent(trackID,time,siblingTrack);
+
+History('Push');
+LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
+
+DrawTree(CellTracks(trackID).familyID);
+DrawCells();
+end
+
 function changeLabel(src,evnt)
 global CellTracks
 trackID = get(gco,'UserData');

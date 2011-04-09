@@ -31,7 +31,7 @@ for i=1:k
     end
     
     nh.indexPixels = hull.indexPixels(bIdxPix);
-    nh.centerOfMass = mean([hx hy]);
+    nh.centerOfMass = mean([hy hx]);
     nh.time = hull.time;
     
     try

@@ -25,4 +25,7 @@ CellFamilies(familyID).endTime = max([CellTracks(CellFamilies(familyID).tracks).
 if(CellFamilies(familyID).rootTrackID == trackID)
     CellFamilies(familyID).rootTrackID = CellFamilies(familyID).tracks(index);
 end
+if(isempty(index))
+    CellFamilies(familyID).tracks = [];
+end
 end

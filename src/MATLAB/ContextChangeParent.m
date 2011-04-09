@@ -9,6 +9,11 @@ newParentID = inputdlg('Enter New Parent','New Parent',1,{num2str(CellTracks(tra
 if(isempty(newParentID)),return,end;
 newParentID = str2double(newParentID(1));
 
+%error checking
+if(0>=newParentID || length(CellTracks)<newParentID || isempty(CellTracks(newParentID).hulls))
+    msgbox(['Parent ' num2str(newParentID) ' is not a valid cell'],'Parent Change','warn');
+    return
+end
 if(CellTracks(newParentID).startTime > time)
     msgbox(['Parent ' num2str(newParentID) ' comes after ' num2str(trackID) ' consider a different edit.'],'Parent Change','warn');
     return

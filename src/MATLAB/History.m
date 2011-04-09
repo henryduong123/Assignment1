@@ -163,8 +163,13 @@ end
             else
                 set(Figures.cells.menuHandles.redoMenu,'Enable','off');
                 set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+                if(~full)
+                    set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+                    set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+                else
+                    set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+                    set(Figures.tree.menuHandles.undoMenu,'Enable','on');
+                end
             end
             
         else
