@@ -123,4 +123,6 @@ if(~isempty(missingHulls))
     end
     error('HullsList ~= CellHulls');
 end
+
+fprintf('\n');
 end

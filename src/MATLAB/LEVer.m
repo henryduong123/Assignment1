@@ -8,13 +8,17 @@ global Figures
 %if LEVer is already opened, save state just in case the User cancels the
 %open
 if(~isempty(Figures))
+    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
     History('Push');
+    if(~saveEnabled)
+        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+    end
 end
 
 if(OpenData())
     InitializeFigures();
     History('Init');
-else %if(~isempty(Figures))
+elseif(~isempty(Figures))
     History('Pop');
     DrawTree(Figures.tree.familyID);
     DrawCells();

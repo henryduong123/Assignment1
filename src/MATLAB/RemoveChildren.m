@@ -14,5 +14,5 @@ end
 
 CellTracks(trackID).childrenTracks = [];
 %run processNewborns on them
-ProcessNewborns(familyIDs);
+% ProcessNewborns(familyIDs);
 end

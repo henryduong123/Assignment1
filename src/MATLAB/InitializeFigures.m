@@ -127,6 +127,8 @@ if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
         return
     end
     set(Figures.cells.handle,'WindowButtonUpFcn',@figureCellUp);
+elseif(strcmp(get(Figures.cells.handle,'SelectionType'),'extend'))
+    AddHull(1);
 end
 if(strcmp(Figures.advanceTimerHandle.Running,'on'))
     TogglePlay(src,evnt);
@@ -134,17 +136,36 @@ end
 end
 
 function figureCellUp(src,evnt)
-global Figures HashedCells CellTracks
+global Figures CellTracks
+
+set(Figures.cells.handle,'WindowButtonUpFcn','');
 if(Figures.cells.currentHullID == -1)
     return
 end
-trackID = [HashedCells{Figures.time}(:).hullID]==Figures.cells.currentHullID;
-trackID = HashedCells{Figures.time}(trackID).trackID;
-if(CellTracks(trackID).familyID~=Figures.tree.familyID)
-    DrawTree(CellTracks(trackID).familyID);
-    DrawCells();
+
+currentHullID = FindHull(get(gca,'CurrentPoint'));
+previousTrackID = GetTrackID(Figures.cells.currentHullID);
+
+if(currentHullID~=Figures.cells.currentHullID)
+    History('Push')
+    try
+        SwapTrackLabels(Figures.time,GetTrackID(currentHullID),previousTrackID);
+    catch errorMessage
+        try
+            ErrorHandeling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(GetTrackID(currentHullID))...
+                ' ' num2str(previousTrackID) ') -- ' errorMessage.message]);
+            return
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
+elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
+    %no change and the current tree contains the cell clicked on
+    return
 end
-set(Figures.cells.handle,'WindowButtonUpFcn','');
+DrawTree(CellTracks(previousTrackID).familyID);
+DrawCells();
 end
 
 function figureTreeDown(src,evnt)

@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 3.6\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 3.7\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -38,6 +38,24 @@ imageDataset = [];
 goodLoad = 0;
 opened = 0;
 
+if(~isempty(Figures))
+    if(strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on'))
+        choice = questdlg('Save current edits before opening new data?','Closing','Yes','No','Cancel','Cancel');
+        switch choice
+            case 'Yes'
+                SaveData();
+                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+            case 'Cancel'
+                return
+            case 'No'
+                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+            otherwise
+                return
+        end
+    end
+end
+
+oldCONSTANTS = CONSTANTS;
 % .mat file handling
 while(~goodLoad)
     fprintf('Select .mat data file...\n');
@@ -92,7 +110,10 @@ imageFilter = [settings.imagePath '*' CONSTANTS.datasetName '*.TIF'];
 while (filterIndexImage==0)
     fprintf('\nSelect first .TIF image...\n\n');
     [imageFile,imagePath,filterIndexImage] = uigetfile(imageFilter,['Open First Image in dataset: ' CONSTANTS.datasetName]);
-    if (filterIndexImage==0),return,end
+    if (filterIndexImage==0)
+        CONSTANTS = oldCONSTANTS;
+        return
+    end
 end
 
 index = strfind(imageFile,'t');
@@ -106,7 +127,10 @@ end
 while (isempty(index) || ~exist(fileName,'file'))
     fprintf(['Image file name not in correct format: ' CONSTANTS.datasetName '_t001.TIF\nPlease choose another...\n']);
     [imageFile,imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
-    if(filterIndexImage==0),return,end
+    if(filterIndexImage==0)
+        CONSTANTS = oldCONSTANTS;
+        return
+    end
     index = strfind(imageFile,'t');
     CONSTANTS.rootImageFolder = [imgPath '\'];
     imageDataset = imageFile(1:(index(length(index))-2));

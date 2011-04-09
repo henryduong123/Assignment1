@@ -103,6 +103,7 @@ switch choice
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
                     num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -115,7 +116,9 @@ switch choice
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
         catch errorMessage
             try
-                ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' ' num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' '...
+                    num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -130,9 +133,9 @@ DrawCells();
 end
 
 function addMitosis(src,evnt)
-global CellTracks Figures
+global CellTracks Figures HashedCells
 
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 % answer = inputdlg({['Enter new sibling of ' num2str(trackID)],'Enter Time of Mitosis'},...
@@ -146,29 +149,115 @@ if(isempty(answer)),return,end
 siblingTrack = str2double(answer(1));
 time = Figures.time;
 
-if(isempty(CellTracks(siblingTrack).hulls))
-    msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
+if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
+    msgbox([answer(1) ' is not a valid cell'],'Not a valid cell','error');
+    return
+end
+if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
+    msgbox([answer(1) ' is not a valid sibling'],'Not a valid sibling','error');
     return
 end
 if(CellTracks(trackID).startTime>time)
     msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid child','error');
     return
 end
+if(~isempty(CellTracks(siblingTrack).timeOfDeath) && CellTracks(siblingTrack).timeOfDeath<=time)
+    msgbox(['Cannot attach a cell to cell ' num2str(siblingTrack) ' beacuse it is dead at this time'],'Dead Cell','help');
+    return
+end
+if(~isempty(CellTracks(trackID).timeOfDeath) && CellTracks(trackID).timeOfDeath<=time)
+    msgbox(['Cannot attach a cell to cell ' num2str(trackID) ' beacuse it is dead at this time'],'Dead Cell','help');
+    return
+end
 
-oldParent = CellTracks(siblingTrack).parentTrack;
-
-if(CellTracks(trackID).startTime==time)
+if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<time)
     History('Push');
     try
         ChangeTrackParent(siblingTrack,time,trackID);
     catch errorMessage
         try
             ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+            return
         catch errorMessage2
             fprintf(errorMessage2.message);
             return
         end
     end
+    Figures.tree.familyID = CellTracks(siblingTrack).familyID;
+elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime<time)
+    History('Push');
+    try
+        ChangeTrackParent(trackID,time,siblingTrack);
+    catch errorMessage
+        try
+            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            return
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(trackID).familyID;
+elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==time)
+    valid = 0;
+    while(~valid)
+        answer = inputdlg({'Enter parent of these siblings '},'Parent',1,{''});
+        if(isempty(answer)),return,end
+        parentTrack = str2double(answer(1));
+        
+        if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
+                (~isempty(CellTracks(parentTrack).timeOfDeath) && CellTracks(parentTrack).timeOfDeath<=time))
+            choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
+                'Not a valid parent','Enter a different parent','Cancel','Cancel');
+            switch choice
+                case 'Cancel'
+                    return
+            end
+        else
+            valid = 1;
+        end
+    end
+    
+    History('Push');
+    if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
+        try
+            SwapTrackLabels(time,trackID,parentTrack);
+        catch errorMessage
+            try
+                ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message]);
+                return
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
+        LogAction('Swapped Labels',trackID,parentTrack);
+    else
+        try
+            ChangeLabel(time,trackID,parentTrack);
+        catch errorMessage
+            try
+                ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message]);
+                return
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
+    end
+    
+    try
+        ChangeTrackParent(parentTrack,time,siblingTrack);
+    catch errorMessage
+        try
+            ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            return
+        catch errorMessage2
+            fprintf(errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(parentTrack).familyID;
 else
     History('Push');
     try
@@ -176,23 +265,25 @@ else
     catch errorMessage
         try
             ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            return
         catch errorMessage2
             fprintf(errorMessage2.message);
             return
         end
     end
+    Figures.tree.familyID = CellTracks(trackID).familyID;
 end
 
-LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
+LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)],[],[]);
 
-DrawTree(CellTracks(trackID).familyID);
+DrawTree(Figures.tree.familyID);
 DrawCells();
 end
 
 function changeLabel(src,evnt)
 global Figures
 
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 ContextChangeLabel(Figures.time,trackID);
@@ -200,39 +291,39 @@ end
 
 function changeParent(src,evnt)
 global Figures
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 ContextChangeParent(trackID,Figures.time);
 end
 
 function addHull1(src,evnt)
-addHull(1);
+AddHull(1);
 end
 
 function addHull2(src,evnt)
-addHull(2);
+AddHull(2);
 end
 
 function addHull3(src,evnt)
-addHull(3);
+AddHull(3);
 end
 
 function addHull4(src,evnt)
-addHull(4);
+AddHull(4);
 end
 
 function addHullOther(src,evnt)
-num = inputdlg('Enter Number of Hulls to Add','Add Hulls',1,{1});
+num = inputdlg('Enter Number of Hulls to Add','Add Hulls',1,{'1'});
 if(isempty(num)),return,end;
 num = str2double(num(1));
-addHull(num);
+AddHull(num);
 end
 
 function removeHull(src,evnt)
 global Figures CellFamilies
 
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 History('Push');
@@ -241,6 +332,7 @@ try
 catch errorMessage
     try
         ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message]);
+        return
     catch errorMessage2
         fprintf(errorMessage2.message);
         return
@@ -271,7 +363,7 @@ end
 function markDeath(src,evnt)
 global Figures CellTracks
 
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 CellTracks(trackID).timeOfDeath = Figures.time;
@@ -284,6 +376,7 @@ if(~isempty(CellTracks(trackID).childrenTracks))
     catch errorMessage
         try
             ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message]);
+            return
         catch errorMessage2
             fprintf(errorMessage2.message);
             return
@@ -300,78 +393,17 @@ end
 function removeFromTree(src,evnt)
 global Figures
 
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 ContextRemoveFromTree(Figures.time,trackID);
 end
 
 function properties(src,evnt)
-[hullID trackID] = getClosestCell();
+[hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
 ContextProperties(hullID,trackID);
 end
 
 %% Helper functions
-function addHull(num)
-global Figures CellHulls
-
-[hullID trackID] = getClosestCell(num<2);
-clickPt = get(gca,'CurrentPoint');
-
-if ( ~CHullContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
-    trackID = [];
-end
-
-if(~isempty(trackID))
-    % Try to split the existing hull    
-    History('Push');
-    try
-        newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
-    catch errorMessage
-        try
-            ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num+1) ') -- ' errorMessage.message]);
-        catch errorMessage2
-            fprintf(errorMessage2.message);
-            return
-        end
-    end
-    LogAction('Split cell',trackID,[trackID newTracks]);
-elseif ( num<2 )
-    % Try to run local segmentation and find a hull we missed or place a
-    % point-hull at least
-    History('Push');
-    try
-        newTrack = AddNewSegmentHull(clickPt(1,1:2));
-    catch errorMessage
-        try
-            ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message]);
-        catch errorMessage2
-            fprintf(errorMessage2.message);
-            return
-        end
-    end
-    LogAction('Added cell',[],newTrack);
-else
-    return;
-end
-
-DrawTree(Figures.tree.familyID);
-DrawCells();
-end
-
-function [hullID trackID] = getClosestCell(allowEmpty)
-hullID = FindHull(get(gca,'CurrentPoint'));
-if(0>=hullID)
-    if (allowEmpty )
-        hullID = [];
-    else
-        warndlg('Please click closer to the center of the desired cell','Unknown Cell');
-    end
-    trackID = [];
-    return
-end
-trackID = GetTrackID(hullID);
-
-end

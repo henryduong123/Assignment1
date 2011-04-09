@@ -12,6 +12,7 @@ try
 catch errorMessage
     try
         ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
+        return
     catch errorMessage2
         fprintf(errorMessage2.message);
         return

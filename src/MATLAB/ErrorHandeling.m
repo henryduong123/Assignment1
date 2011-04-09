@@ -12,7 +12,7 @@ History('Pop');
 History('Redo');%this is to get to the state just before the error, it was on the top of the stack
 
 msgboxHandle = msgbox('Attempting to fix database. Will take some time depending on the size of the database. This window will close when done',...
-    'Fixing Database','help','modal');
+    'Fixing Database','warn','modal');
 LogAction(errorMessage,[],[]);
 
 %let the user know that this might take a while

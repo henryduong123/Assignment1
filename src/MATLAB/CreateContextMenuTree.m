@@ -58,7 +58,10 @@ else
     msgbox('Please Click on the Node or the Vertical Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
     return
 end
+
 switch choice
+    case 'Cancel'
+        return
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
         History('Push');
@@ -69,6 +72,7 @@ switch choice
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime) ' '...
                     num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -81,7 +85,9 @@ switch choice
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
         catch errorMessage
             try
-                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' ' num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' '...
+                    num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -97,6 +103,7 @@ switch choice
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime) ' '...
                     num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -112,6 +119,7 @@ switch choice
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime) ' '...
                     num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message]);
+                return
             catch errorMessage2
                 fprintf(errorMessage2.message);
                 return
@@ -140,7 +148,7 @@ if(isempty(answer)),return,end
 time = str2double(answer(1));
 siblingTrack = str2double(answer(2));
 
-if(isempty(CellTracks(siblingTrack).hulls))
+if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
     msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
     return
 end
@@ -156,7 +164,9 @@ try
     ChangeTrackParent(trackID,time,siblingTrack);
 catch errorMessage
     try
-        ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+        ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' '...
+            num2str(siblingTrack) ') -- ' errorMessage.message]);
+        return
     catch errorMessage2
         fprintf(errorMessage2.message);
         return

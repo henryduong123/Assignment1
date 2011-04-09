@@ -1,9 +1,10 @@
 function ChangeTrackParent(parentTrackID,time,childTrackID)
-%This will take the childTrack and connect it to the parent track.  It also
-%takes the hulls that exist in the parent track that are come after the
-%childTrack root and makes a new track with said hulls.  When finished
-%there should be a new track and the child track that are siblings with the
-%parent track being the parent.
+%ChangeTrackParent(parentTrackID,time,childTrackID) will take the
+%childTrack and connect it to the parent track.  It also takes the hulls
+%that exist in the parent track that are come after the childTrack root and
+%makes a new track with said hulls.  When finished there should be a new
+%track and the child track that are siblings with the parent track being
+%the parent.
 
 %--Eric Wait
 

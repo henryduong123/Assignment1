@@ -9,6 +9,7 @@ global CellHulls CellFamilies
 newHulls = ResegmentHull(CellHulls(hullID), k);
 
 if ( isempty(newHulls) )
+    newTrackIDs = [];
     return;
 end
 

@@ -172,6 +172,46 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
         no.Eccentricity=stats(idx(i)).Eccentricity;
         objs = [objs no];
     end
+	
+	% bright interiors
+	igm=bwig|bwHalo;
+	se=strel('square',5);
+	igm=imclose(igm,se);
+	igm=imfill(igm,'holes');
+	igm(logical(bwCellFG))=0;
+	se=strel('square',13);
+	igm=imerode(igm,se);
+
+	CC = bwconncomp(igm,8);
+	Ligm = labelmatrix(CC);
+	stats = regionprops(CC, 'Area','Eccentricity');
+	idx = find( [stats.Area] >25 & [stats.Area] <1000 & [stats.Eccentricity]<.95 ) ;
+	for i=1:length(idx)
+		pix = find(Ligm==idx(i));
+		[r c] = ind2sub(size(subImg),pix);
+		ch = convhull(r,c);
+		
+		bwPoly = poly2mask(c(ch),r(ch),size(subImg,1),size(subImg,2));
+		if length(find(bwCellFG & bwPoly))
+            continue;
+        end
+        
+        glc = c + coordMin(1);
+        glr = r + coordMin(2);
+        
+		no=[];
+        
+		no.points=[glc(ch),glr(ch)];
+		no.centerOfMass = mean([glr glc]);
+        
+		no.indexPixels = sub2ind(imSize,[glr glc]);
+        no.imagePixels=img(no.indexPixels);
+        
+        no.ID=-1;
+		no.BrightInterior=1;
+		no.Eccentricity=stats(idx(i)).Eccentricity;
+		objs=[objs no];
+	end
     
     bInHull = CHullContainsPoint(centerPt, objs);
     

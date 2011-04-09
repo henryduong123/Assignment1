@@ -29,6 +29,7 @@ try
 catch errorMessage
     try
         ErrorHandeling(['ChangeTrackParent(' num2str(newParentID) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+        return
     catch errorMessage2
         fprintf(errorMessage2.message);
         return

@@ -17,6 +17,7 @@ CONSTANTS.minFamilyTimeFrame = 5;
 CONSTANTS.maxFrameDifference = 5;
 CONSTANTS.historySize = 50;
 CONSTANTS.clickMargin = 500;
+CONSTANTS.timeResolution = 10; %in frames per min
 Costs = gConnect;
 
 %Initialize Structures

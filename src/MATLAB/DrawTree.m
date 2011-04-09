@@ -3,7 +3,11 @@ function DrawTree(familyID)
 
 %--Eric Wait
 
-global CellFamilies HashedCells Figures
+global CellFamilies HashedCells Figures CONSTANTS
+
+if(~isfield(CONSTANTS,'timeResolution'))
+    CONSTANTS.timeResolution = 10;
+end
 
 if(isempty(CellFamilies(familyID).tracks)),return,end
 
@@ -17,20 +21,42 @@ trackID = CellFamilies(familyID).tracks(1);
 
 figure(Figures.tree.handle);
 delete(gca);
+% delete(gca);
+% hold off
+% 
+% underAxes = axes;
+% 
+% set(underAxes,...
+%     'YDir',            'reverse',...
+%     'YLim',             [0 length(HashedCells)],...
+%     'Position',         [.07 .06 .80 .90],...
+%     'YAxisLocation',    'right',...  
+%     'YLim',             [0 length(HashedCells)*CONSTANTS.timeResolution/60],...
+%     'XColor',           'w',...
+%     'XTick',            [],...
+%     'Box',              'off');
+% ylabel('Time (Hours)');
+% axis off
+
+overAxes = axes;
     
-set(gca,...
+set(overAxes,...
     'YDir',     'reverse',...
     'YLim',     [0 length(HashedCells)],...
     'Position', [.06 .06 .90 .90],...
     'XColor',   'w',...
-    'XTick',    []);
+    'XTick',    [],...
+    'Box',      'off');
+% ylabel('Time (Frames)');
 hold on
 
 [xMin xCenter xMax] = traverseTree(trackID,0);
 
-set(gca,...
+% set(underAxes,...
+%     'XLim',     [xMin-1 xMax+1]);
+set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
-Figures.tree.axesHandle = gca;
+Figures.tree.axesHandle = overAxes;
 hold off
 UpdateTimeIndicatorLine();
 

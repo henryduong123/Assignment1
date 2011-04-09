@@ -14,7 +14,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
         newHull.time = Figures.time;
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
-        newHull.indexPixels = sub2ind(size(img), clickPt(2), clickPt(1));
+        newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
     else
         newHull.time = Figures.time;
         newHull.points = newObj.points;

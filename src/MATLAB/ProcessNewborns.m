@@ -54,6 +54,7 @@ for i=1:size
         if(isempty(parentTrackID))
             try
                 ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns']);
+                return
             catch errorMessage2
                 fprintf(errorMessage2);
                 return
