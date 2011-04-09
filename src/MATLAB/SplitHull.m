@@ -4,7 +4,10 @@ function newTrackIDs = SplitHull(hullID, k)
 
 %--Mark Winter
 
-global CellHulls CellFamilies
+global CellHulls CellFamilies HashedCells
+
+oldCOM = CellHulls(hullID).centerOfMass;
+oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
 
 newHulls = ResegmentHull(CellHulls(hullID), k);
 
@@ -15,12 +18,16 @@ end
 
 % Just arbitrarily assign clone's hull for now
 CellHulls(hullID) = newHulls(1);
+newHullIDs = hullID;
 
 % Other hulls are just added off the clone
 newFamilyIDs = [];
 for i=2:length(newHulls)
     CellHulls(end+1) = newHulls(i);
     newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
+    newHullIDs = [newHullIDs length(CellHulls)];
 end
-newTrackIDs = [CellFamilies(newFamilyIDs).rootTrackID];
+% newTrackIDs = [CellFamilies(newFamilyIDs).rootTrackID];
+
+newTrackIDs = TrackSplitHulls(newHullIDs, oldTracks, oldCOM);
 end

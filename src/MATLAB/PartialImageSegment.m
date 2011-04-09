@@ -103,7 +103,7 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
     
         HaloRat=length(find(p & bwHalo))/length(find(p));
 
-        [r c]=ind2sub(imSize,pix);
+        [r c]=ind2sub(size(subImg),pix);
         ch=convhull(r,c);
 
         bwDarkInterior=bwDarkCenters&bwPoly;
@@ -159,7 +159,7 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
         no.centerOfMass = mean([glr glc]);
 
         %no.indPixels=pix;
-        no.indexPixels = sub2ind(imSize,[glr glc]);  
+        no.indexPixels = sub2ind(imSize, glr,glc);
         no.imagePixels=img(no.indexPixels);
         % surround completely by Halo?
         if all(bwHaloHoles(pix))
@@ -204,7 +204,7 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
 		no.points=[glc(ch),glr(ch)];
 		no.centerOfMass = mean([glr glc]);
         
-		no.indexPixels = sub2ind(imSize,[glr glc]);
+		no.indexPixels = sub2ind(imSize, glr,glc);
         no.imagePixels=img(no.indexPixels);
         
         no.ID=-1;

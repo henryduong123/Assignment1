@@ -13,8 +13,12 @@ function AddImagePixelsField()
         'imagePixels',	cell(size(oldCellHulls)),...
         'deleted',      {oldCellHulls.deleted});
 
+    progress = 1;
+    iterations = length(HashedCells);
     for t=1:length(HashedCells)
-        imgfname = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' num2str(t,'%03d') '.TIF'];
+        progress = progress+1;
+        Progressbar(progress/iterations);
+        imgfname = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(t) '.TIF'];
         [curimg map]=imread(imgfname);
         curimg=mat2gray(curimg);
 
@@ -31,4 +35,5 @@ function AddImagePixelsField()
             CellHulls(hullIdx(i)).imagePixels = curimg(CellHulls(hullIdx(i)).indexPixels);
         end
     end
+    Progressbar(1);%clear it out
 end

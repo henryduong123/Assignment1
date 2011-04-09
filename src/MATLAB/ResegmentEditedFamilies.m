@@ -69,7 +69,7 @@ function [oldHulls oldIdx] = ResegmentEditedFamilies(families, hullCheckRadiusSq
                 continue;
             end
             
-            tmpgConnect = trackingCosts(hullsToTrack, t-1, avoidHulls, newHulls, newHash);
+            tmpgConnect = TrackingCosts(hullsToTrack, t-1, avoidHulls, newHulls, newHash);
             
             nzCostIdx = find(tmpgConnect(hullsToTrack(1),:)>0);
             

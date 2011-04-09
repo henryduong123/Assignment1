@@ -1,5 +1,5 @@
 function [path allPaths] = constrainedDFS(hullIdx, constraints, hulls, hash, t0, t1, path, allPaths)
-    scriptConstants;
+    global CONSTANTS
 
     curCnsts = [];
     bFoundPath = 0;
@@ -9,11 +9,11 @@ function [path allPaths] = constrainedDFS(hullIdx, constraints, hulls, hash, t0,
         curCnsts = constraints{length(path)};
         for i=1:length(curCnsts)
             if 105==t0
-                dmax_cc=3*DMAX_CC;
-                dmax_com=3*DMAX_COM;
+                dmax_cc=3*CONSTANTS.dMaxConnectComponet;
+                dmax_com=3*CONSTANTS.dMaxCenterOfMass;
             else
-                dmax_cc=DMAX_CC;
-                dmax_com=DMAX_COM;          
+                dmax_cc=CONSTANTS.dMaxConnectComponet;
+                dmax_com=CONSTANTS.dMaxCenterOfMass;          
             end
             [d dSz] = HullDist(hulls, hullIdx, curCnsts(i), dmax_cc, dmax_com);
 

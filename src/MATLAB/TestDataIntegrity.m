@@ -117,21 +117,22 @@ end
 %% check CellHulls
 % if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
 missingHulls = find(ismember(find([CellHulls.deleted]==0),hullsList')==0);
-if(~isempty(missingHulls))
-    if(correct)
-        progress = 0;
-        iterations = length(missingHulls); 
-        for i=1:length(missingHulls)
-            progress = progress+1;
-            Progressbar(progress/iterations);
-            if(isempty(CellHulls(missingHulls(i)).points))
-                CellHulls(missingHulls(i)).deleted = 1;
-            end
-        end
-    else
-        error('HullsList ~= CellHulls');
-    end
-end
+% if(~isempty(missingHulls))
+%     if(correct)
+%         progress = 0;
+%         iterations = length(missingHulls); 
+%         for i=1:length(missingHulls)
+%             progress = progress+1;
+%             Progressbar(progress/iterations);
+%             if(isempty(CellHulls(missingHulls(i)).points))
+%                 CellHulls(missingHulls(i)).deleted = 1;
+%             end
+%         end
+%     else
+%         error('HullsList ~= CellHulls');
+%     end
+% end
+Progressbar(1);%clear it out
 
 fprintf('\nDone\n');
 end

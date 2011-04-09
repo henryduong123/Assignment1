@@ -4,20 +4,10 @@ function ConvertTrackingData(objHulls,gConnect)
 
 %--Eric Wait
 
-global CONSTANTS Costs HashedCells CellHulls CellFamilies
+global CONSTANTS Costs CellHulls CellFamilies
 
-%Initialize CONSTANTS
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
-CONSTANTS.maxPixelDistance = 40;
-CONSTANTS.maxCenterOfMassDistance = 80;
-CONSTANTS.minParentCandidateTimeFrame = 5;
-CONSTANTS.minParentHistoryTimeFrame = 5;
-CONSTANTS.minParentFuture = 5;
-CONSTANTS.minFamilyTimeFrame = 5;
-CONSTANTS.maxFrameDifference = 5;
-CONSTANTS.historySize = 50;
-CONSTANTS.clickMargin = 500;
-CONSTANTS.timeResolution = 10; %in frames per min
+
 Costs = gConnect;
 
 %Initialize Structures
@@ -30,13 +20,8 @@ cellHulls = struct(...
     'imagePixels',      {},...
     'deleted',          {});
 
-%loop through the data 
-% progress = 1;
-% iterations = length(objHulls);
-% cellHulls(length(objHulls)) = ;
+%loop through the Hulls
 parfor i=1:length(objHulls)
-%     progress = progress+1;
-%     Progressbar(progress/iterations);
     cellHulls(i).time            =  objHulls(i).t;
     cellHulls(i).points          =  objHulls(i).pts;
     cellHulls(i).centerOfMass    =  objHulls(i).COM;
@@ -69,8 +54,13 @@ if(length(hullList)~=length(CellHulls))
         NewCellFamily(reprocess(i),objHulls(reprocess(i)).t);
     end
 end
+Progressbar(1);%clear it out
 
-TestDataIntegrity(1);
+try
+    TestDataIntegrity(1);
+catch errormsg
+    fprintf('\n%s\n',errormsg.message);
+end
 
 %create the family trees
 ProcessNewborns(1:length(CellFamilies));

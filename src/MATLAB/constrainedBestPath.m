@@ -1,5 +1,4 @@
 function [gConnect, allPathsCosts] = constrainedBestPath(hullIdx, tStart, tEnd, constraints, hulls, hash, gConnect)
-    scriptConstants
     global CONSTANTS
     
     windowSize = tEnd - tStart;
@@ -32,11 +31,11 @@ function [gConnect, allPathsCosts] = constrainedBestPath(hullIdx, tStart, tEnd, 
         thGlobal = [thHistory thPath];
 
         if 105==tStart
-            dmax_cc=3*DMAX_CC;
-            dmax_com=3*DMAX_COM;
+            dmax_cc=3*CONSTANTS.dMaxConnectComponet;
+            dmax_com=3*CONSTANTS.dMaxCenterOfMass;
         else
-            dmax_cc=DMAX_CC;
-            dmax_com=DMAX_COM;          
+            dmax_cc=CONSTANTS.dMaxConnectComponet;
+            dmax_com=CONSTANTS.dMaxCenterOfMass;          
         end
         LocalCost = HullDist(hulls, thPath(1), thPath(2), dmax_cc, dmax_com);
         

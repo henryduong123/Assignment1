@@ -1,5 +1,5 @@
-function gConnect = trackingCosts(trackHulls, t, avoidHulls, hulls, hash)
-    windowSize = 4;
+function gConnect = TrackingCosts(trackHulls, t, avoidHulls, hulls, hash)
+    windowSize = 2;
     gConnect = sparse([],[],[],length(hulls),length(hulls),round(0.1*length(hulls)));
     
     if ( t+1 > length(hash) )

@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 3.7\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 4.0\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -56,85 +56,119 @@ if(~isempty(Figures))
 end
 
 oldCONSTANTS = CONSTANTS;
-% .mat file handling
-while(~goodLoad)
-    fprintf('Select .mat data file...\n');
-    [matFile,matPath,filterIndexMatFile] = uigetfile([settings.matFilePath '*.mat'],...
-        'Open Data');
-    
-    if (filterIndexMatFile==0)
-        return
-    else
-        fprintf('Opening file...');
-        try
-            %clear out globals so they can rewriten
-            if(ishandle(Figures.cells.handle))
-                close Figures.cells.handle
-            end
-        catch
-        end
-        CellFamilies = [];
-        CellTracks = [];
-        CellHulls = [];
-        HashedCells = [];
-        Costs = [];
-        CONSTANTS = [];
-        try
-            load([matPath matFile]);
-            fprintf('\nFile open.\n\n');
-        catch exception
-            %DEBUG -- Uncomment
-            %disp(exception);
-        end
-    end
-    
-    if(exist('objHulls','var'))
-        fprintf('Converting File...');
-        ConvertTrackingData(objHulls,gConnect);
-        fprintf('\nFile Converted.\n');
-        CONSTANTS.datasetName = strtok(matFile,' ');
-        save([matPath CONSTANTS.datasetName '_LEVer'],...
-            'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
-        fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
-        goodLoad = 1;
-    elseif(exist('CellHulls','var'))
-        goodLoad = 1;
-    else
-        errordlg('Data either did not load properly or is not the right format for LEVer.');
-        goodLoad = 0;
-    end
-end
 
 %find the first image
-imageFilter = [settings.imagePath '*' CONSTANTS.datasetName '*.TIF'];
+imageFilter = [settings.imagePath '*.TIF'];
 while (filterIndexImage==0)
     fprintf('\nSelect first .TIF image...\n\n');
-    [imageFile,imagePath,filterIndexImage] = uigetfile(imageFilter,['Open First Image in dataset: ' CONSTANTS.datasetName]);
+    [imageFile,imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
     if (filterIndexImage==0)
         CONSTANTS = oldCONSTANTS;
         return
     end
 end
 
-index = strfind(imageFile,'t');
+index = strfind(imageFile,'_t');
+frameT = '001';
 if (~isempty(index) && filterIndexImage~=0)
     CONSTANTS.rootImageFolder = imagePath;
-    imageDataset = imageFile(1:(index(length(index))-2));
+    imageDataset = imageFile(1:(index(length(index))-1));
     CONSTANTS.imageDatasetName = imageDataset;
-    fileName=[CONSTANTS.rootImageFolder imageDataset '_t001.TIF'];
+    CONSTANTS.datasetName = imageDataset;
+    index2 = strfind(imageFile,'.');
+    CONSTANTS.imageSignificantDigits = index2 - index - 2;
+    fileName=[CONSTANTS.rootImageFolder imageDataset '_t' SignificantDigits(1) '.TIF'];
 end
 
 while (isempty(index) || ~exist(fileName,'file'))
-    fprintf(['Image file name not in correct format: ' CONSTANTS.datasetName '_t001.TIF\nPlease choose another...\n']);
+    fprintf(['Image file name not in correct format: ' CONSTANTS.datasetName '_t' frameT '.TIF\nPlease choose another...\n']);
     [imageFile,imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
     if(filterIndexImage==0)
         CONSTANTS = oldCONSTANTS;
         return
     end
     index = strfind(imageFile,'t');
-    CONSTANTS.rootImageFolder = [imgPath '\'];
+    CONSTANTS.rootImageFolder = [imagePath '\'];
     imageDataset = imageFile(1:(index(length(index))-2));
-    fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' num2str(t,'%03d') '.TIF'];
+    fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' SignificantDigits(t) '.TIF'];
+end
+
+answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
+switch answer
+    case 'Segment & Track'
+        InitializeConstants();
+        SegAndTrack();
+    case 'Existing'
+        while(~goodLoad)
+            fprintf('Select .mat data file...\n');
+            [matFile,matPath,filterIndexMatFile] = uigetfile([settings.matFilePath '*.mat'],...
+                'Open Data');
+            
+            if (filterIndexMatFile==0)
+                return
+            else
+                fprintf('Opening file...');
+                try
+                    %clear out globals so they can rewriten
+                    if(ishandle(Figures.cells.handle))
+                        close Figures.cells.handle
+                    end
+                catch
+                end
+                CellFamilies = [];
+                CellTracks = [];
+                CellHulls = [];
+                HashedCells = [];
+                Costs = [];
+				rootImageFolder = CONSTANTS.rootImageFolder;
+                imageSignificantDigits = CONSTANTS.imageSignificantDigits;
+				
+                try
+                    load([matPath matFile]);
+                    fprintf('\nFile open.\n\n');
+                catch exception
+                    %DEBUG -- Uncomment
+                    %disp(exception);
+                end
+            end
+            
+            if(~isfield(CONSTANTS,'rootImageFolder'))
+                CONSTANTS.rootImageFolder = rootImageFolder;
+            end
+            
+            if(~isfield(CONSTANTS,'imageSignificantDigits'))
+                CONSTANTS.imageSignificantDigits = imageSignificantDigits;
+            end
+            
+            if(exist('objHulls','var'))
+                fprintf('Converting File...');
+                InitializeConstants();
+                ConvertTrackingData(objHulls,gConnect);
+                fprintf('\nFile Converted.\n');
+                CONSTANTS.datasetName = strtok(matFile,' ');
+                save([matPath CONSTANTS.datasetName '_LEVer'],...
+                    'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
+                fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
+                goodLoad = 1;
+            elseif(exist('CellHulls','var'))
+                goodLoad = 1;
+            else
+                errordlg('Data either did not load properly or is not the right format for LEVer.');
+                goodLoad = 0;
+            end
+        end
+        
+        %save out settings
+        settings.matFilePath = matPath;
+        settings.imageFile = imageFile;
+        settings.imagePath = [imagePath '\'];
+        save('LEVerSettings.mat','settings');
+        
+        Figures.time = 1;
+        
+        LogAction(['Opened file ' matFile],[],[]);
+    otherwise
+        return
 end
 
 % Add imagePixels field to CellHulls structure (and resave in place)
@@ -148,22 +182,16 @@ end
 
 opened = 1;
 
-%save out settings
-settings.matFilePath = matPath;
-settings.imageFile = imageFile;
-settings.imagePath = [imagePath '\'];
-save('LEVerSettings.mat','settings');
-
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');
 end
 
-if(~isempty(Figures) && ishandle(Figures.cells.handle))
-    close(Figures.cells.handle);
-end
+% if(~isempty(Figures) && ishandle(Figures.cells.handle))
+%     close(Figures.cells.handle);
+% end
 
-Figures.time = 1;
+% Figures.time = 1;
 
-LogAction(['Opened file ' matFile],[],[]);
+% LogAction(['Opened file ' matFile],[],[]);
 
 end
