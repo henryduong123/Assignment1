@@ -50,6 +50,11 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
         case 'Cancel'
             return
     end
+elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
+    hullID = CellTracks(trackID).hulls(1);
+    AddSingleHullToTrack(trackID,newTrackID);
+    History('Push');
+    LogAction('Added hull to track',hullID,newTrackID);
 else
     ChangeLabel(time,trackID,newTrackID);
     History('Push');

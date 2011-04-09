@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 3.1\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 3.4\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))

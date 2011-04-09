@@ -40,4 +40,5 @@ file = fopen([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'a');
 fprintf(file,row);
 fclose(file);
 
+% TestDataIntegrity(0)
 end

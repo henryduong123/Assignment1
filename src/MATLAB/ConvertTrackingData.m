@@ -36,48 +36,48 @@ end
 
 %loop through the data 
 for i=2:length(objHulls)
-    if(i<=length(CellHulls)+1 || ~isempty(CellHulls(i).time))
-        addHull(i);
-    end
-%     CellHulls(i).time            =  objHulls(i).t;
-%     CellHulls(i).points          =  objHulls(i).pts;
-%     CellHulls(i).centerOfMass    =  objHulls(i).COM;
-%     CellHulls(i).indexPixels     =  objHulls(i).indPixels;
-%     CellHulls(i).deleted         =  0;
-%     
-%     if objHulls(i).inID == 0
-%         NewCellFamily(i,objHulls(i).t);
-%     else       
-%         AddHullToTrack(i,[],objHulls(i).inID);
+%     if(i<=length(CellHulls)+1 || ~isempty(CellHulls(i).time))
+%         addHull(i);
 %     end
+    CellHulls(i).time            =  objHulls(i).t;
+    CellHulls(i).points          =  objHulls(i).pts;
+    CellHulls(i).centerOfMass    =  objHulls(i).COM;
+    CellHulls(i).indexPixels     =  objHulls(i).indPixels;
+    CellHulls(i).deleted         =  0;
+    
+    if objHulls(i).inID == 0
+        NewCellFamily(i,objHulls(i).t);
+    else       
+        AddHullToTrack(i,[],objHulls(i).inID);
+    end
 end
 
 %create the family trees
 ProcessNewborns(1:length(CellFamilies));
+end
 
-    function addHull(num)
-        CellHulls(num).time            =  objHulls(num).t;
-        CellHulls(num).points          =  objHulls(num).pts;
-        CellHulls(num).centerOfMass    =  objHulls(num).COM;
-        CellHulls(num).indexPixels     =  objHulls(num).indPixels;
-        CellHulls(num).deleted         =  0;
-        
-        if objHulls(num).inID > length(CellHulls)+1
-            if objHulls(objHulls(num).inID).inID == 0
-                NewCellFamily(num,objHulls(objHulls(num).inID).t);
-            else
-                addHull(objHulls(num).inID);
-            end
-        end
-        
-        if objHulls(num).inID == 0
-            NewCellFamily(num,objHulls(num).t);
-        else
-            AddHullToTrack(num,[],objHulls(num).inID);
-        end
-        
-        if objHulls(num).outID > length(CellHulls)+1
-            addHull(objHulls(num).outID);
-        end
+function addHull(num)
+CellHulls(num).time            =  objHulls(num).t;
+CellHulls(num).points          =  objHulls(num).pts;
+CellHulls(num).centerOfMass    =  objHulls(num).COM;
+CellHulls(num).indexPixels     =  objHulls(num).indPixels;
+CellHulls(num).deleted         =  0;
+
+if(objHulls(num).inID > length(CellHulls)+1)
+    if(objHulls(objHulls(num).inID).inID == 0)
+        NewCellFamily(num,objHulls(objHulls(num).inID).t);
+    else
+        addHull(objHulls(num).inID);
     end
+end
+
+if(objHulls(num).inID == 0)
+    NewCellFamily(num,objHulls(num).t);
+else
+    AddHullToTrack(num,[],objHulls(num).inID);
+end
+
+if(objHulls(num).outID > length(CellHulls)+1)
+    addHull(objHulls(num).outID);
+end
 end

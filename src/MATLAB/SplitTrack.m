@@ -38,7 +38,7 @@ CellTracks(newTrackID).color = CellTracks(trackID).color;
 %attach the parents children to the newTrack
 CellTracks(newTrackID).childrenTracks = CellTracks(trackID).childrenTracks;
 for i=1:length(CellTracks(newTrackID).childrenTracks)
-    CellTracks(CellTracks(newTrackID).childrenTracks(i)).parent = newTrackID;
+    CellTracks(CellTracks(newTrackID).childrenTracks(i)).parentTrack = newTrackID;
 end
 CellTracks(trackID).childrenTracks = newTrackID;
 

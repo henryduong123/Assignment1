@@ -137,8 +137,10 @@ if(Figures.cells.currentHullID == -1)
 end
 trackID = [HashedCells{Figures.time}(:).hullID]==Figures.cells.currentHullID;
 trackID = HashedCells{Figures.time}(trackID).trackID;
-DrawTree(CellTracks(trackID).familyID);
-DrawCells();
+if(CellTracks(trackID).familyID~=Figures.tree.familyID)
+    DrawTree(CellTracks(trackID).familyID);
+    DrawCells();
+end
 set(Figures.cells.handle,'WindowButtonUpFcn','');
 end
 

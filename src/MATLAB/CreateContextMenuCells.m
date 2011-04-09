@@ -145,7 +145,11 @@ end
 
 oldParent = CellTracks(siblingTrack).parentTrack;
 
-ChangeTrackParent(trackID,time,siblingTrack);
+if(CellTracks(trackID).startTime==time)
+    ChangeTrackParent(siblingTrack,time,trackID);
+else
+    ChangeTrackParent(trackID,time,siblingTrack);
+end
 
 History('Push');
 LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);

@@ -1,11 +1,11 @@
 function AddHullToTrack(hullID,trackID,previousHullID)
-% function AddHullToTrack(time,hullID,trackID,previousTime,previousHullID)
-%The hullID will be added to the track and hashed at the given time
+% function AddHullToTrack(hullID,trackID,previousHullID)
+%The hullID will be added to the track
 %
-%If trackID is given, previousTime & previousHullID are not used.  Safe to
-%send [] or vice versa.
+%If trackID is given, previousHullID is not used.  Safe to
+%send [] for either trackID or previousHullID.
 %Prereq to leave trackID empty - Track to be added to exists and the
-%previousHullID at previousTime exists in that track.  Also, it has been
+%previousHullID exists in that track.  Also, it has been
 %removed from any previous track assosiation.
 
 %--Eric Wait

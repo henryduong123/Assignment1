@@ -45,7 +45,7 @@ CellTracks(childTrackID).parentTrack = parentTrackID;
 oldFamilyID = CellTracks(childTrackID).familyID;
 newFamilyID = CellTracks(siblingTrackID).familyID;
 
-CellTracks(childTrackID).familyID = newFamilyID;
+% CellTracks(childTrackID).familyID = newFamilyID;
 
 ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,childTrackID);
 

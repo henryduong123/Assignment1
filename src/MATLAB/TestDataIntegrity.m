@@ -1,0 +1,126 @@
+function TestDataIntegrity(correct)
+%TestDataIntegrity(correct) tests to make sure that the database is consistant.
+%Takes the CellTracks as the most accurate.  If correct=='yes', this
+%function will attempt to correct the error using the data from CellTracks
+%***USE SPARINGLY, TAKES A LOT OF TIME***
+
+%--Eric Wait
+
+global CellTracks CellHulls CellFamilies HashedCells
+
+hullsList = [];
+fprintf('Checking CellTracks');
+for i=1:length(CellTracks)
+    fprintf(', %d',i);
+    %% Check child/parent/sibling relationships
+    if(~isempty(CellTracks(i).parentTrack))
+        if(isempty(find(CellTracks(CellTracks(i).parentTrack).childrenTracks==i, 1)))
+            error(['Parent ' num2str(CellTracks(i).parentTrack) ' does not recognize track ' num2str(i) ' as a child']);
+        end
+        if(CellTracks(CellTracks(i).siblingTrack).siblingTrack~=i)
+            error(['Track ' num2str(CellTracks(i).siblingTrack) ' does not recognize track ' num2str(i) ' as a sibling']);
+        end
+    end
+    currentFamily = CellTracks(i).familyID;
+    if(~isempty(CellTracks(i).childrenTracks))
+        for j=1:length(CellTracks(i).childrenTracks)
+            if(CellTracks(CellTracks(i).childrenTracks(j)).parentTrack~=i)
+                error(['Child ' num2str(CellTracks(i).childrenTracks(j)) ' does not recognize track ' num2str(i) ' as a parent']);
+            end
+            if(CellTracks(CellTracks(i).childrenTracks(j)).familyID~=currentFamily)
+                error(['Track ' num2str(i) ' and child ' num2str(CellTracks(i).childrenTracks(j)) ' do not agree on family ' num2str(currentFamily)]);
+            end
+        end
+    end
+    
+    %% check if the current track is in the correct family and not in any
+    %other
+    if(~isempty(currentFamily))
+        index = find(CellFamilies(currentFamily).tracks==i);
+        if(isempty(index))
+            if(correct)
+                CellFamilies(currentFamily).tracks(end+1) = i;
+                fprintf('Track %d added to family %d\n',i,currentFamily);
+            else
+                error(['Track ' num2str(i) ' not in family ' num2str(currentFamily)])
+            end
+        elseif(1<length(index))
+            if(correct)
+                for j=2:length(index)
+                    CellFamilies(currentFamily).tracks(index(j)) = 0;
+                end
+                CellFamilies(currentFamily).tracks = find(CellFamilies(currentFamily).tracks);
+                fprintf('Removed additional(s) track %d from family %d\n',i,currentFamily);
+            else
+                error(['Too many of track ' num2str(i) ' in family ' num2str(currentFamily)]);
+            end
+        end
+        
+        %check for parent familyIDs
+        if(~isempty(CellTracks(i).parentTrack))
+            if(CellTracks(CellTracks(i).parentTrack).familyID~=currentFamily)
+                error(['Track ' num2str(i) ' and its parent ' num2str(CellTracks(i).parentTrack) ' do not agree on a family ' num2str(currentFamily)]);
+            end
+        end
+        
+        for j=1:length(CellFamilies)
+%             fprintf('CellFamilies %d ',j);
+            if(currentFamily==j),continue,end
+            index = find(CellFamilies(j).tracks==i);
+            if(~isempty(index))
+                if(correct)
+                    CellFamilies(j).tracks(index) = [];
+                    fprintf('Removed track %d from family %d\n',i,j);
+                else
+                    error(['Track ' num2str(i) ' is in family ' num2str(j) ' as well']);
+                end
+            end
+        end
+    end
+    
+    %% check hulls for a given track
+    for j=1:length(CellTracks(i).hulls)
+%         fprintf('Hulls %d ',j);
+        if(~CellTracks(i).hulls(j)),continue,end
+        if(any(ismember(hullsList,CellTracks(i).hulls(j))))
+            tracks = [];
+            for q=1:i
+                if(~isempty(CellTracks(q).hulls) && ~isempty(find(CellTracks(q).hulls==CellTracks(i).hulls(j), 1)))
+                    tracks = [tracks q];
+                end
+            end
+            error(['Hull ' num2str(CellTracks(i).hulls(j)) ' is in track ' num2str(i) ' as well as other tracks']);
+        end
+        hullsList = [hullsList CellTracks(i).hulls(j)];
+        time = j + CellTracks(i).startTime - 1;
+        if(time ~= CellHulls(CellTracks(i).hulls(j)).time)
+            error(['Hull ' num2str(CellTracks(i).hulls(j)) ' is not hashed correctly in track ' num2str(i)]);
+        end
+        index = find([HashedCells{time}.hullID]==CellTracks(i).hulls(j));
+        if(isempty(index))
+            error(['Hull ' num2str(CellTracks(i).hulls(j)) ' is not found in HashedCells at ' num2str(time)]);
+        elseif(1<length(index))
+            error(['Hull ' num2str(CellTracks(i).hulls(j)) ' is in HashedCells more than once at ' num2str(time)]);
+        end
+        if(HashedCells{time}(index).trackID~=i)
+            error(['Hull ' num2str(CellTracks(i).hulls(j)) ' does not have the correct track ' num2str(i)]);
+        end
+    end
+    
+end
+fprintf('\n');
+
+%% check CellHulls
+% if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
+missingHulls = find(ismember(find([CellHulls.deleted]==0),hullsList')==0);
+if(~isempty(missingHulls))
+    if(correct)
+        for i=1:length(missingHulls)
+            if(isempty(CellHulls(missingHulls(i)).points))
+                CellHulls(missingHulls(i)).deleted = 1;
+            end
+        end
+    end
+    error('HullsList ~= CellHulls');
+end
+end

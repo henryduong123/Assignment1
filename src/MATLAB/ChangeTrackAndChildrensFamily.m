@@ -33,6 +33,7 @@ function trackList = traverseTree(newFamilyID,trackID)
 %will add the tracks to the new family along the way
 global CellFamilies CellTracks
 
+RemoveTrackFromFamily(trackID);
 %add track
 CellFamilies(newFamilyID).tracks(end+1) = trackID;
 
@@ -50,6 +51,4 @@ if(~isempty(CellTracks(trackID).childrenTracks))
         trackList = [trackList traverseTree(newFamilyID, CellTracks(trackID).childrenTracks(i))];
     end
 end
-
-RemoveTrackFromFamily(trackID);
 end
