@@ -18,7 +18,7 @@ if(CellTracks(newParentID).startTime > time)
     msgbox(['Parent ' num2str(newParentID) ' comes after ' num2str(trackID) ' consider a different edit.'],'Parent Change','warn');
     return
 elseif(CellTracks(trackID).endTime < CellTracks(newParentID).startTime)
-    msgbox(['Sibling ' num2str(trackID) ' exists completely before ' num2str(newParentID) ' consider a rename instead.'],'Parent Change','warn');
+    msgbox(['Sister Cell ' num2str(trackID) ' exists completely before ' num2str(newParentID) ' consider a rename instead.'],'Parent Change','warn');
     return
 end
 

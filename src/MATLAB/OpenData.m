@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 4.1\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 4.2\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -141,6 +141,7 @@ switch answer
                 fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
+                TestDataIntegrity(1);
                 goodLoad = 1;
             else
                 errordlg('Data either did not load properly or is not the right format for LEVer.');

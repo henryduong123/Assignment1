@@ -7,7 +7,7 @@ HashedHulls=cell(th,1);
 for n=1:length(objsSegment)
     HashedHulls{objsSegment(n).t}=[HashedHulls{objsSegment(n).t};n];
 end
-fname=['SegObjs_' DatasetName '.txt'];
+fname=['.\segmentationData\SegObjs_' DatasetName '.txt'];
 fid=fopen(fname,'wt');
 fprintf(fid,'%d %d\n',th,length(objsSegment) );
 for i=1:length(HashedHulls)

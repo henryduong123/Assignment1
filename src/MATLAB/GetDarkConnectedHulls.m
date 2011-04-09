@@ -36,10 +36,10 @@ end
 
 
     function objsSegment=GetDistances(objsSegment,HashedHulls,t1,t2)
-        bwHalo1=GetHalo(t1);
-        bwHalo2=GetHalo(t2);
-        bwCombo=GetCombo(bwHalo1,bwHalo2,objsSegment,HashedHulls,t1,t2);
-        LCombo=bwlabel(bwCombo);
+%         bwHalo1=GetHalo(t1);
+%         bwHalo2=GetHalo(t2);
+%         bwCombo=GetCombo(bwHalo1,bwHalo2,objsSegment,HashedHulls,t1,t2);
+%         LCombo=bwlabel(bwCombo);
         for i=1:length(HashedHulls{t1})
             hi=HashedHulls{t1}(i);
             ipix=objsSegment(hi).indPixels;

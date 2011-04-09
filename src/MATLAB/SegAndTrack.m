@@ -24,6 +24,8 @@ for timeStart=1:step:numberOfImages
     system(['start Segmentor ' num2str(timeStart) ' ' num2str(step-1) ' "' ...
         CONSTANTS.rootImageFolder(1:end-1) '" ' CONSTANTS.datasetName ' ' ...
         num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']);
+    %use line below instead of the 3 lines above for non-parallel or to debug
+%     Segmentor(timeStart,step-1,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
 end
 
 for i=1:step:numberOfImages
@@ -46,13 +48,13 @@ end
 fprintf('Please wait...');
 
 cellSegments = GetDarkConnectedHulls(cellSegments);
-save ( ['SegObjs_' CONSTANTS.datasetName '.mat'],'cellSegments');
+save ( ['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.mat'],'cellSegments');
 WriteSegData(cellSegments,CONSTANTS.datasetName);
 
 fprintf(1,'\nDone\n');
 
-fnameIn=['SegObjs_' CONSTANTS.datasetName '.txt'];
-fnameOut=['Tracked_' CONSTANTS.datasetName '.txt'];
+fnameIn=['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.txt'];
+fnameOut=['.\segmentationData\Tracked_' CONSTANTS.datasetName '.txt'];
 tSeg=toc;
 
 %% Tracking

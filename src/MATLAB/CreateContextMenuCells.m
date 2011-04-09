@@ -32,28 +32,23 @@ uimenu(Figures.cells.contextMenuHandle,...
 %     'CallBack',     @changeParent);
 
 addHull = uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Add Hull',...
+    'Label',        'Add Segmentation',...
     'Separator',    'on');
 
 uimenu(addHull,...
-    'Label',        'Number of Hulls to add');
-
-uimenu(addHull,...
-    'Label',        '1',...
-    'Separator',    'on',...
-    'CallBack',     @addHull1);
+    'Label',        'Number of Cells');
 
 uimenu(addHull,...
     'Label',        '2',...
-    'CallBack',     @addHull2);
+    'CallBack',     @addHull1);
 
 uimenu(addHull,...
     'Label',        '3',...
-    'CallBack',     @addHull3);
+    'CallBack',     @addHull1);
 
 uimenu(addHull,...
     'Label',        '4',...
-    'CallBack',     @addHull4);
+    'CallBack',     @addHull3);
 
 uimenu(addHull,...
     'Label',        'Other',...
@@ -61,7 +56,7 @@ uimenu(addHull,...
     'CallBack',     @addHullOther);
 
 uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Remove Hull',...
+    'Label',        'Remove Cell',...
     'CallBack',     @removeHull);
 
 uimenu(Figures.cells.contextMenuHandle,...
@@ -141,7 +136,7 @@ if(isempty(trackID)),return,end
 % answer = inputdlg({['Enter new sibling of ' num2str(trackID)],'Enter Time of Mitosis'},...
 %     'Add Mitosis',1,{'',num2str(Figures.time)});
 
-answer = inputdlg({['Enter new sibling of ' num2str(trackID)]},...
+answer = inputdlg({['Enter new sister of cell' num2str(trackID)]},...
     'Add Mitosis',1,{''});
 
 if(isempty(answer)),return,end
@@ -154,11 +149,11 @@ if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
     return
 end
 if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
-    msgbox([answer(1) ' is not a valid sibling'],'Not a valid sibling','error');
+    msgbox([answer(1) ' is not a valid sister cell'],'Not a valid sister cell','error');
     return
 end
 if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid child','error');
+    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
     return
 end
 if(~isempty(CellTracks(siblingTrack).timeOfDeath) && CellTracks(siblingTrack).timeOfDeath<=time)
@@ -201,7 +196,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
 elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==time)
     valid = 0;
     while(~valid)
-        answer = inputdlg({'Enter parent of these siblings '},'Parent',1,{''});
+        answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
         parentTrack = str2double(answer(1));
         
@@ -297,10 +292,6 @@ if(isempty(trackID)),return,end
 ContextChangeParent(trackID,Figures.time);
 end
 
-function addHull1(src,evnt)
-AddHull(1);
-end
-
 function addHull2(src,evnt)
 AddHull(2);
 end
@@ -314,7 +305,7 @@ AddHull(4);
 end
 
 function addHullOther(src,evnt)
-num = inputdlg('Enter Number of Hulls to Add','Add Hulls',1,{'1'});
+num = inputdlg('Enter Number of Cells Present','Add Hulls',1,{'1'});
 if(isempty(num)),return,end;
 num = str2double(num(1));
 AddHull(num);
@@ -352,7 +343,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks))
     end
     DrawTree(Figures.tree.familyID);
     DrawCells();
-    msgbox(['By removing this hull, the complete tree is no more. Displaying tree rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
+    msgbox(['By removing this cell, the complete tree is no more. Displaying clone rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
     return
 end
 

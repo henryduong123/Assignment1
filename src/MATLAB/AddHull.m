@@ -17,7 +17,7 @@ if(~isempty(trackID))
     % Try to split the existing hull    
     History('Push');
     try
-        newTracks = SplitHull(hullID,num+1);%adding one to the number so that the original hull is accounted for
+        newTracks = SplitHull(hullID,num);
         if(isempty(newTracks))
             msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
             return

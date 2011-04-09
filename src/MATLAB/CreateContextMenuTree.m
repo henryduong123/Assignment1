@@ -140,7 +140,7 @@ trackID = get(gco,'UserData');
 time = get(gca,'CurrentPoint');
 time = round(time(1,2));
 
-answer = inputdlg({'Enter Time of Mitosis',['Enter new sibling of ' num2str(trackID)]},...
+answer = inputdlg({'Enter Time of Mitosis',['Enter new sister cell of ' num2str(trackID)]},...
     'Add Mitosis',1,{num2str(time),''});
 
 if(isempty(answer)),return,end
@@ -153,7 +153,7 @@ if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
     return
 end
 if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid child','error');
+    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
     return
 end
 

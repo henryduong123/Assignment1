@@ -30,10 +30,7 @@ for t = tStart:tStart + tLength
     fname=[rootImageFolder '\' datasetName '_t' frameT '.TIF'];
     if(isempty(dir(fname))),continue,end
     
-    fprintf('%d, ', t);
-    if ( mod(t,20) == 0 )
-        fprintf('\n');
-    end
+    fprintf('%d%%...',ceil((t-tStart)/tLength*100));
     
     [im map]=imread(fname);
     im=mat2gray(im);
@@ -254,4 +251,6 @@ end
 fileName = ['.\segmentationData\objs_' num2str(tStart) '.mat'];
 if(isempty(dir('.\segmentationData'))),system('mkdir .\segmentationData');end
 save(fileName,'objs');
+
+fprintf('\tDone\n');
 end
