@@ -10,7 +10,6 @@ bin/*.txt
 Thumbs.db
 #Ignore files build by Visual Studio
 *.obj
-*.exe
 *.pdb
 *.user
 *.aps
