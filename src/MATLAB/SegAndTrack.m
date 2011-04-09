@@ -43,6 +43,8 @@ for i=1:step:numberOfImages
     pause(1)
 end
 
+fprintf('Please wait...');
+
 cellSegments = GetDarkConnectedHulls(cellSegments);
 save ( ['SegObjs_' CONSTANTS.datasetName '.mat'],'cellSegments');
 WriteSegData(cellSegments,CONSTANTS.datasetName);

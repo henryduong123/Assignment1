@@ -15,7 +15,7 @@ for i=1:size
         
         %Get all the possible hulls that could have been connected
         childHullID = CellTracks(childTrackID).hulls(1);
-        if(childHullID>length(Costs)),continue,end
+        if(childHullID>length(Costs) || childHullID==0),continue,end
         parentHullCandidates = find(Costs(:,childHullID));
         if(isempty(parentHullCandidates)),continue,end
         

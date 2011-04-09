@@ -10,6 +10,13 @@ global Figures CONSTANTS
 
 Figures.time = 1;
 
+oldCellsHandle = [];
+oldTreeHandle = [];
+if(isfield(Figures,'cells') && isfield(Figures.cells,'handle') && ~isempty(Figures.cells.handle))
+    oldCellsHandle = Figures.cells.handle;
+    oldTreeHandle = Figures.tree.handle;
+end
+
 Figures.cells.handle = figure();
 Figures.tree.handle = figure();
 
@@ -68,6 +75,16 @@ Figures.tree.timeLabel = uicontrol(Figures.tree.handle,...
     'String',['Time: ' num2str(Figures.time)]);
 
 FindLargestTree([],[]);
+
+if(~isempty(oldCellsHandle) && ishandle(oldCellsHandle))
+    set(oldCellsHandle,'CloseRequestFcn','remove');
+    close(oldCellsHandle);
+end
+if(~isempty(oldTreeHandle) && ishandle(oldTreeHandle))
+    set(oldTreeHandle,'CloseRequestFcn','remove');
+    close(oldTreeHandle);
+end
+
 % DrawTree(1);
 % figure(Figures.tree.handle);
 % 

@@ -2,6 +2,7 @@ function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
     global CONSTANTS CellHulls HashedCells
     
     t = CellHulls(newHulls(1)).time;
+    trackIDs = [CellHulls(newHulls).trackID];
     if ( t <= 1 )
         return;
     end

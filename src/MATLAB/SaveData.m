@@ -8,7 +8,7 @@ global CellFamilies CellTracks HashedCells CONSTANTS Costs CellHulls Figures
 if (exist('LEVerSettings.mat','file')~=0)
         load('LEVerSettings.mat');
 else
-    settings.matPath = ['.\' CONSTANTS.datasetName '_LEVer_edits.mat'];
+    settings.matFilePath = '.\';
 end
 
 %let the user know that this might take a while
