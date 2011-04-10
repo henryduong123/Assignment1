@@ -9,6 +9,9 @@ global CellTracks CellHulls
 track1Hash = time - CellTracks(trackID1).startTime + 1;
 track2Hash = time - CellTracks(trackID2).startTime + 1;
 
+%Mark the hulls as edited
+MarkHullAsEdited(CellTracks(trackID1).hulls(track1Hash),time);
+
 %get the hulls to move
 track1Hulls = CellTracks(trackID1).hulls(track1Hash:end);
 track2Hulls = CellTracks(trackID2).hulls(track2Hash:end);
