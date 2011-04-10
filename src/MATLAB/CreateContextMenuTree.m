@@ -64,10 +64,10 @@ switch choice
         return
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
                 CellTracks(object.UserData).siblingTrack,'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime) ' '...
@@ -80,9 +80,9 @@ switch choice
         end
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' '...
@@ -95,10 +95,10 @@ switch choice
         end
     case num2str(CellTracks(object.UserData).childrenTracks(1))
         remove = CellTracks(object.UserData).childrenTracks(2);
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
                 CellTracks(object.UserData).childrenTracks(2),'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime) ' '...
@@ -111,10 +111,10 @@ switch choice
         end
     case num2str(CellTracks(object.UserData).childrenTracks(2))
         remove = CellTracks(object.UserData).childrenTracks(1);
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
                 CellTracks(object.UserData).childrenTracks(1),'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime) ' '...
@@ -159,9 +159,9 @@ end
 
 oldParent = CellTracks(siblingTrack).parentTrack;
 
-History('Push');
 try
     ChangeTrackParent(trackID,time,siblingTrack);
+    History('Push');
 catch errorMessage
     try
         ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' '...

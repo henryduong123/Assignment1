@@ -19,8 +19,9 @@ if(OpenData())
     InitializeFigures();
     History('Init');
 elseif(~isempty(Figures))
-    History('Pop');
+    History('Top');
     DrawTree(Figures.tree.familyID);
     DrawCells();
 end
+
 end

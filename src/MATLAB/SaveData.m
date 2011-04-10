@@ -12,19 +12,25 @@ else
 end
 
 %let the user know that this might take a while
-set(Figures.tree.handle,'Pointer','watch');
-set(Figures.cells.handle,'Pointer','watch');
+if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
+    set(Figures.tree.handle,'Pointer','watch');
+    set(Figures.cells.handle,'Pointer','watch');
+end
 
 save([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat'],...
     'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
 
 %no longer "dirty"
-set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figure.tree.menuHandles,'saveMenu'))
+    set(Figures.tree.menuHandles.saveMenu,'Enable','off');
+    set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+end
 
-LogAction('Saved',[],[]);
+LogAction('Saved');
 
 %let the user know that the drawing is done
-set(Figures.tree.handle,'Pointer','arrow');
-set(Figures.cells.handle,'Pointer','arrow');
+if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
+    set(Figures.tree.handle,'Pointer','arrow');
+    set(Figures.cells.handle,'Pointer','arrow');
+end
 end

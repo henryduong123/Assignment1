@@ -165,9 +165,9 @@ currentHullID = FindHull(get(gca,'CurrentPoint'));
 previousTrackID = GetTrackID(Figures.cells.currentHullID);
 
 if(currentHullID~=Figures.cells.currentHullID)
-    History('Push')
     try
         SwapTrackLabels(Figures.time,GetTrackID(currentHullID),previousTrackID);
+        History('Push')
     catch errorMessage
         try
             ErrorHandeling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(GetTrackID(currentHullID))...

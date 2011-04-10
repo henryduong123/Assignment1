@@ -90,10 +90,10 @@ choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
 switch choice
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
                 CellTracks(object.UserData).siblingTrack,'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
@@ -106,9 +106,9 @@ switch choice
         end
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
-        History('Push');
         try
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' '...
@@ -166,9 +166,9 @@ if(~isempty(CellTracks(trackID).timeOfDeath) && CellTracks(trackID).timeOfDeath<
 end
 
 if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<time)
-    History('Push');
     try
         ChangeTrackParent(siblingTrack,time,trackID);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
@@ -180,9 +180,9 @@ if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<tim
     end
     Figures.tree.familyID = CellTracks(siblingTrack).familyID;
 elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime<time)
-    History('Push');
     try
         ChangeTrackParent(trackID,time,siblingTrack);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
@@ -213,10 +213,10 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
         end
     end
     
-    History('Push');
     if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
         try
             SwapTrackLabels(time,trackID,parentTrack);
+            History('Push');
         catch errorMessage
             try
                 ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message]);
@@ -254,9 +254,9 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
     end
     Figures.tree.familyID = CellTracks(parentTrack).familyID;
 else
-    History('Push');
     try
         ChangeTrackParent(trackID,time,siblingTrack);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
@@ -269,7 +269,7 @@ else
     Figures.tree.familyID = CellTracks(trackID).familyID;
 end
 
-LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)],[],[]);
+LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
 
 DrawTree(Figures.tree.familyID);
 DrawCells();
@@ -317,9 +317,9 @@ global Figures CellFamilies
 [hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
-History('Push');
 try
     RemoveHull(hullID);
+    History('Push');
 catch errorMessage
     try
         ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message]);
@@ -330,7 +330,7 @@ catch errorMessage
     end
 end
 
-LogAction(['Removed hull from track ' num2str(trackID)],hullID,[]);
+LogAction(['Removed hull from track ' num2str(trackID)],hullID);
 
 %if the whole family disapears with this change, pick a diffrent family to
 %display
@@ -361,9 +361,9 @@ CellTracks(trackID).timeOfDeath = Figures.time;
 
 %drop children from tree and run ProcessNewborns
 if(~isempty(CellTracks(trackID).childrenTracks))
-    History('Push');
     try
         ProcessNewborns(StraightenTrack(trackID));
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message]);
@@ -375,7 +375,7 @@ if(~isempty(CellTracks(trackID).childrenTracks))
     end
 end
 
-LogAction(['Marked time of death for ' num2str(trackID)],[],[]);
+LogAction(['Marked time of death for ' num2str(trackID)]);
 
 DrawTree(Figures.tree.familyID);
 DrawCells();

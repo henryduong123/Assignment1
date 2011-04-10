@@ -9,7 +9,7 @@ for n=1:length(objHulls)
     objHulls(n).outID=0;
     HashedHulls{objHulls(n).t}=[HashedHulls{objHulls(n).t};n];
 end
-fname=['.\Tracked_' DatasetName '.txt'];
+fname=['.\segmentationData\Tracked_' DatasetName '.txt'];
 fid=fopen(fname,'r');
 bDone=0;
 TrackList=[];

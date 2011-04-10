@@ -16,6 +16,16 @@ load('LEVerSettings.mat');
 ind = strfind(usr, '\');
 usr = usr(:,ind+1:end-1);
 
+if(~exist('oldValue','var'))
+    oldValue = 0;
+end
+if(~exist('newValue','var'))
+    newValue = 0;
+end
+if(isempty(Figures) || ~isfield(Figures,'time'))
+    Figures.time = -1;
+end
+
 row = [[num2str(time(1)) '/' num2str(time(2)) '/' num2str(time(3))] ','...
     [num2str(time(4)) ':' num2str(time(5)) ':' num2str(round(time(6)))] ',' usr ',,'...
     action ',' num2str(Figures.time) ','];

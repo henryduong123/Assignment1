@@ -15,13 +15,13 @@ end
 
 if(~isempty(trackID))
     % Try to split the existing hull    
-    History('Push');
     try
         newTracks = SplitHull(hullID,num);
         if(isempty(newTracks))
             msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
             return
         end
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num+1) ') -- ' errorMessage.message]);
@@ -35,9 +35,9 @@ if(~isempty(trackID))
 elseif ( num<2 )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
-    History('Push');
     try
         newTrack = AddNewSegmentHull(clickPt(1,1:2));
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message]);
@@ -47,7 +47,7 @@ elseif ( num<2 )
             return
         end
     end
-    LogAction('Added cell',[],newTrack);
+    LogAction('Added cell',newTrack);
 else
     return;
 end

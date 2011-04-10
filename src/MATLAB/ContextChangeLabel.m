@@ -19,9 +19,9 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
     switch choice
         case 'Continue'
             newLabel = length(CellTracks) + 1;
-            History('Push');
             try
                 ContextRemoveFromTree(time,trackID);
+                History('Push');
             catch errorMessage
                 try
                     ErrorHandeling(['ContextRemoveFromTree(' num2str(time) ' ' num2str(trackID) ' ) -- ' errorMessage.message]);
@@ -42,9 +42,9 @@ elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
     switch choice
         case 'Yes'
             oldFamily = CellTracks(trackID).familyID;
-            History('Push');
             try
                 RemoveFromTree(time,trackID,'yes');
+                History('Push');
             catch errorMessage
                 try
                     ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
@@ -64,9 +64,9 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
 %         'Swap Labels?','Forward','This Frame','Cancel','Cancel');
 %     switch choice
 %         case 'Forward'
-            History('Push');
             try
                 SwapTrackLabels(time,trackID,newTrackID);
+                History('Push');
             catch errorMessage
                 try
                     ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
@@ -94,9 +94,9 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
 %     end
 elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
     hullID = CellTracks(trackID).hulls(1);
-    History('Push');
     try
         AddSingleHullToTrack(trackID,newTrackID);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['AddSingleHullToTrack(' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
@@ -108,9 +108,9 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
     end
     LogAction('Added hull to track',hullID,newTrackID);
 elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTrack==newTrackID)
-    History('Push');
     try
         MoveMitosisUp(time,trackID);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
@@ -122,9 +122,9 @@ elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTr
     end
     LogAction('Moved Mitosis Up',trackID,newTrackID);
 elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).parentTrack==trackID)
-    History('Push');
     try
         MoveMitosisUp(time,newTrackID);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
@@ -136,9 +136,9 @@ elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).pa
     end
     LogAction('Moved Mitosis Up',newTrackID,trackID);
 else
-    History('Push');
     try
         ChangeLabel(time,trackID,newTrackID);
+        History('Push');
     catch errorMessage
         try
             ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);

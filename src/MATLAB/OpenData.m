@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
 if(isempty(Figures))
-    fprintf('LEVer ver 4.2\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver 4.3\n***DO NOT DISTRIBUTE***\n\n');
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -21,7 +21,7 @@ else
 end
     
 if (~exist('settings','var') || isempty(settings))
-    if (exist('LEVerSettings.mat','file')~=0)
+    if (exist('LEVerSettings.mat','file'))
         load('LEVerSettings.mat');
     else
         settings.imagePath = '.\';
@@ -92,7 +92,7 @@ switch answer
     case 'Segment & Track'
         save('LEVerSettings.mat','settings');
         InitializeConstants();
-        SegAndTrack();
+        opened = SegAndTrack();
     case 'Existing'
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
@@ -110,13 +110,17 @@ switch answer
                     end
                 catch
                 end
-%                 CellFamilies = [];
-%                 CellTracks = [];
-%                 CellHulls = [];
-%                 HashedCells = [];
-%                 Costs = [];
-				rootImageFolder = CONSTANTS.rootImageFolder;
+                
+                rootImageFolder = CONSTANTS.rootImageFolder;
                 imageSignificantDigits = CONSTANTS.imageSignificantDigits;
+                
+                %ensure that the globals are cleared out
+                CellFamilies = [];
+                CellTracks = [];
+                CellHulls = [];
+                HashedCells = [];
+                Costs = [];
+                CONSTANTS = [];
 				
                 try
                     load([settings.matFilePath settings.matFile]);
@@ -135,13 +139,19 @@ switch answer
                 fprintf('Converting File...');
                 ConvertTrackingData(objHulls,gConnect);
                 fprintf('\nFile Converted.\n');
-                CONSTANTS.datasetName = strtok(matFile,' ');
+                CONSTANTS.datasetName = strtok(settings.matFile,' ');
                 save([settings.matFilePath CONSTANTS.datasetName '_LEVer'],...
                     'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
                 fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
-                TestDataIntegrity(1);
+                try
+                    TestDataIntegrity(1);
+                catch errorMessage
+                    warndlg('There were database inconsistencies.  LEVer might not behave properly!');
+                    fprintf([errorMessage.message '\n']);
+                    LogAction(errorMessage.message);
+                end
                 goodLoad = 1;
             else
                 errordlg('Data either did not load properly or is not the right format for LEVer.');
@@ -154,7 +164,9 @@ switch answer
         
         Figures.time = 1;
         
-        LogAction(['Opened file ' settings.matFile],[],[]);
+        LogAction(['Opened file ' settings.matFile]);
+        
+        opened = 1;
     otherwise
         return
 end
@@ -167,8 +179,6 @@ if ( ~isfield(CellHulls, 'imagePixels') )
     save([settings.matFilePath settings.matFile],...
         'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
 end
-
-opened = 1;
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');

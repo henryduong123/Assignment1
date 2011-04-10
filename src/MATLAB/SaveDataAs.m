@@ -36,5 +36,5 @@ save('LEVerSettings.mat','settings');
 set(Figures.tree.menuHandles.saveMenu,'Enable','off');
 set(Figures.cells.menuHandles.saveMenu,'Enable','off');
 
-LogAction(['Saved As: ' settings.matFile],[],[]);
+LogAction(['Saved As: ' settings.matFile]);
 end

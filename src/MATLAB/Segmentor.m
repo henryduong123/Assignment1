@@ -1,4 +1,4 @@
-function objs = Segmentor(tStart,tLength,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
+function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
 % Segmentor is to be run as a seperate compiled function for parallel
 % processing.  It will process tLength-tStart amount of images.  Call this
 % function for the number of processors on the machine.
@@ -12,11 +12,14 @@ function objs = Segmentor(tStart,tLength,rootImageFolder,datasetName,imageAlpha,
 
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
-if(ischar(tLength)),tLength = str2double(tLength);end
+if(ischar(tStep)),tStep = str2double(tStep);end
+if(ischar(tEnd)),tStep = str2double(tEnd);end
 if(ischar(imageAlpha)),imageAlpha = str2double(imageAlpha);end
 if(ischar(imageSignificantDigits)),imageSignificantDigits = str2double(imageSignificantDigits);end
 
-for t = tStart:tStart + tLength
+numImages = tEnd/tStep;
+
+for t = tStart:tStep:tEnd
     switch imageSignificantDigits
         case 3
             frameT = num2str(t,'%03d');
@@ -30,7 +33,7 @@ for t = tStart:tStart + tLength
     fname=[rootImageFolder '\' datasetName '_t' frameT '.TIF'];
     if(isempty(dir(fname))),continue,end
     
-    fprintf('%d%%...',ceil((t-tStart)/tLength*100));
+    fprintf('%d%%...',floor(floor(t/tStep)/numImages*100));
     
     [im map]=imread(fname);
     im=mat2gray(im);

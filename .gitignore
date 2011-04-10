@@ -1,8 +1,12 @@
 
 *~
+*.mat
+src/MATLAB/*.c
+src/MATLAB/*.log
+src/MATLAB/*.prj
+src/MATLAB/*.txt
 bin/*.c
 bin/*.log
-*.mat
 bin/*.prj
 bin/*.txt
 

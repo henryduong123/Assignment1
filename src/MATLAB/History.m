@@ -6,6 +6,8 @@ function History(action)
 %History('Pop') = retrive the last state
 %History('Redo') = will 'push' the last 'pop' back on the stack
 %History('Init') = will initilize the history stack
+%History('Top') = will reinstate the top state without changing any history
+%stack pointers.
 %
 %Stack size will be set from CONSTANTS.historySize
 %All of the data structures are saved on the stack, so do not set this
@@ -67,7 +69,6 @@ switch action
         setMenus();
     case 'Pop'        
         if (~empty)
-            current = current - 1;
             if (current == 0)
                 current = CONSTANTS.historySize;
             end
@@ -76,6 +77,8 @@ switch action
             if (current==bottom)
                 empty = 1;
             end
+            
+            current = current - 1;
             
             CellFamilies = hist(current).CellFamilies;
             CellTracks = hist(current).CellTracks;
@@ -87,7 +90,7 @@ switch action
             DrawTree(Figures.tree.familyID);
             DrawCells();
             setMenus();
-            LogAction('Undo',[],[]);
+            LogAction('Undo');
         end
     case 'Redo'
         if (top>current || (bottom>top && top~=current))
@@ -112,8 +115,14 @@ switch action
             DrawTree(Figures.tree.familyID);
             DrawCells();
             setMenus();
-            LogAction('Redo',[],[]);
+            LogAction('Redo');
         end
+    case 'Top'
+        CellFamilies = hist(current).CellFamilies;
+        CellTracks = hist(current).CellTracks;
+        HashedCells = hist(current).HashedCells;
+        CellHulls = hist(current).CellHulls;
+        Figures.tree.familyID = hist(current).Figures.tree.familyID;
     case 'Init'
         current = 1;
         bottom = 1;
