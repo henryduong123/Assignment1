@@ -38,14 +38,14 @@ if(~isempty(dir('.\segmentationData')))
 end
 
 for i=1:numProcessors
-%     system(['start Segmentor ' num2str(timeStart) ' ' num2str(step-1) ' "' ...
-%         CONSTANTS.rootImageFolder(1:end-1) '" ' CONSTANTS.datasetName ' ' ...
-%         num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']);
+    system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
+        num2str(numberOfImages) ' "' CONSTANTS.rootImageFolder(1:end-1) '" ' CONSTANTS.datasetName ' ' ...
+        num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']);
     %use line below instead of the 3 lines above for non-parallel or to debug
-    Segmentor(i,numProcessors,numberOfImages,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
+%     Segmentor(i,numProcessors,numberOfImages,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
 end
 
-parfor i=1:numProcessors
+for i=1:numProcessors
     fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
     fileDescriptor = dir(fileName);
     while(isempty(fileDescriptor))
