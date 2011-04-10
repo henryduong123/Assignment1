@@ -13,7 +13,7 @@ function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlp
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
 if(ischar(tStep)),tStep = str2double(tStep);end
-if(ischar(tEnd)),tStep = str2double(tEnd);end
+if(ischar(tEnd)),tEnd = str2double(tEnd);end
 if(ischar(imageAlpha)),imageAlpha = str2double(imageAlpha);end
 if(ischar(imageSignificantDigits)),imageSignificantDigits = str2double(imageSignificantDigits);end
 
