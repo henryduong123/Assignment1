@@ -4,7 +4,14 @@ function ConvertTrackingData(objHulls,gConnect)
 
 %--Eric Wait
 
-global CONSTANTS Costs CellHulls CellFamilies
+global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells
+
+%ensure that the globals are empty
+Costs = [];
+CellHulls = [];
+CellFamilies = [];
+CellTracks = [];
+HashedCells = [];
 
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
@@ -60,6 +67,7 @@ try
     TestDataIntegrity(1);
 catch errormsg
     fprintf('\n%s\n',errormsg.message);
+    ProgressBar(1);
 end
 
 %create the family trees

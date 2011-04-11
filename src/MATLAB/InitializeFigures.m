@@ -146,7 +146,7 @@ if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
     end
     set(Figures.cells.handle,'WindowButtonUpFcn',@figureCellUp);
 elseif(strcmp(get(Figures.cells.handle,'SelectionType'),'extend'))
-    AddHull(1);
+    AddHull(2);
 end
 if(strcmp(Figures.advanceTimerHandle.Running,'on'))
     TogglePlay(src,evnt);

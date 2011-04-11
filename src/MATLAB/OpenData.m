@@ -113,21 +113,12 @@ switch answer
                 
                 rootImageFolder = CONSTANTS.rootImageFolder;
                 imageSignificantDigits = CONSTANTS.imageSignificantDigits;
-                
-                %ensure that the globals are cleared out
-                CellFamilies = [];
-                CellTracks = [];
-                CellHulls = [];
-                HashedCells = [];
-                Costs = [];
-                CONSTANTS = [];
 				
                 try
                     load([settings.matFilePath settings.matFile]);
                     fprintf('\nFile open.\n\n');
                 catch exception
-                    %DEBUG -- Uncomment
-                    %disp(exception);
+                    fprintf([exception.message '\n']);
                 end
             end
             
@@ -149,6 +140,7 @@ switch answer
                     TestDataIntegrity(1);
                 catch errorMessage
                     warndlg('There were database inconsistencies.  LEVer might not behave properly!');
+                    Progressbar(1);
                     fprintf([errorMessage.message '\n']);
                     LogAction(errorMessage.message);
                 end
