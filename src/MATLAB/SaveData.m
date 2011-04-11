@@ -21,7 +21,7 @@ save([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat'],...
     'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
 
 %no longer "dirty"
-if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figure.tree.menuHandles,'saveMenu'))
+if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figures.tree.menuHandles,'saveMenu'))
     set(Figures.tree.menuHandles.saveMenu,'Enable','off');
     set(Figures.cells.menuHandles.saveMenu,'Enable','off');
 end
