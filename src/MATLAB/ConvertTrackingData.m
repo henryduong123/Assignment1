@@ -4,7 +4,7 @@ function ConvertTrackingData(objHulls,gConnect)
 
 %--Eric Wait
 
-global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells
+global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells ConnectedDist
 
 %ensure that the globals are empty
 Costs = [];
@@ -12,10 +12,13 @@ CellHulls = [];
 CellFamilies = [];
 CellTracks = [];
 HashedCells = [];
+ConnectedDist = [];
 
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
 Costs = gConnect;
+
+connDist = cell(1,length(objHulls));
 
 %Initialize Structures
 % HashedCells = cell(0,length(objHulls));
@@ -35,7 +38,10 @@ parfor i=1:length(objHulls)
     cellHulls(i).indexPixels     =  objHulls(i).indPixels;
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;
     cellHulls(i).deleted         =  0;
+    
+    connDist{i} = objHulls(i).DarkConnectedHulls;
 end
+ConnectedDist = connDist;
 CellHulls = cellHulls;
 
 %walk through the tracks

@@ -5,7 +5,7 @@ function opened = OpenData()
 
 %--Eric Wait
 
-global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks
+global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist
 if(isempty(Figures))
     fprintf('LEVer ver 4.3\n***DO NOT DISTRIBUTE***\n\n');
 end
@@ -131,8 +131,7 @@ switch answer
                 ConvertTrackingData(objHulls,gConnect);
                 fprintf('\nFile Converted.\n');
                 CONSTANTS.datasetName = strtok(settings.matFile,' ');
-                save([settings.matFilePath CONSTANTS.datasetName '_LEVer'],...
-                    'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
+                SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
                 fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
@@ -168,8 +167,16 @@ if ( ~isfield(CellHulls, 'imagePixels') )
     fprintf('Adding Image Pixel Information...\n');
     AddImagePixelsField();
     fprintf('Image Information Added\n');
-    save([settings.matFilePath settings.matFile],...
-        'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
+    SaveLEVerState([settings.matFilePath settings.matFile]);
+end
+
+% Calculate connected-component distance for all cell hulls (out 2 frames)
+if ( isempty(ConnectedDist) )
+    fprintf('Building Cell Distance Information...\n');
+    ConnectedDist = [];
+    BuildConnectedDistance(1:length(CellHulls), 0);
+    fprintf('Finished\n');
+    SaveLEVerState([settings.matFilePath settings.matFile]);
 end
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
