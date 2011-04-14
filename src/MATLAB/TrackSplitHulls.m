@@ -1,5 +1,14 @@
 function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
-    global CONSTANTS CellHulls HashedCells
+    global CONSTANTS CellHulls HashedCells Costs
+    
+    % Update incoming and outgoing connected-component distance for new hulls
+    BuildConnectedDistance(newHulls, 1);
+    
+    % Add zero costs to cost matrix if necessary
+    addCosts = max(max(newHulls)-size(Costs,1),0);
+    if (  addCosts > 0 )
+        Costs = [Costs zeros(size(Costs,1),addCosts); zeros(addCosts,size(Costs,1)+addCosts)];
+    end
     
     t = CellHulls(newHulls(1)).time;
     

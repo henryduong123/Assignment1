@@ -15,7 +15,7 @@ function History(action)
 
 %--Eric Wait
 
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls
+global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs ConnectedDist
 
 persistent hist;            %stack
 persistent current;         %points to the last state saved on the stack
@@ -56,11 +56,7 @@ switch action
         
         top = current;
         
-        hist(current).CellFamilies = CellFamilies;
-        hist(current).CellTracks = CellTracks;
-        hist(current).HashedCells = HashedCells;
-        hist(current).CellHulls = CellHulls;
-        hist(current).Figures.tree.familyID = Figures.tree.familyID;
+        SetHistElement(current);
         
         if (current==bottom)
             full = 1;
@@ -79,12 +75,7 @@ switch action
             end
             
             current = current - 1;
-            
-            CellFamilies = hist(current).CellFamilies;
-            CellTracks = hist(current).CellTracks;
-            HashedCells = hist(current).HashedCells;
-            CellHulls = hist(current).CellHulls;
-            Figures.tree.familyID = hist(current).Figures.tree.familyID;
+            GetHistElement(current);
             
             %Update displays
             DrawTree(Figures.tree.familyID);
@@ -100,11 +91,7 @@ switch action
                 current = 1;
             end
             
-            CellFamilies = hist(current).CellFamilies;
-            CellTracks = hist(current).CellTracks;
-            HashedCells = hist(current).HashedCells;
-            CellHulls = hist(current).CellHulls;
-            Figures.tree.familyID = hist(current).Figures.tree.familyID;
+            GetHistElement(current);
             
             empty = 0;
             if(current==bottom)
@@ -118,11 +105,7 @@ switch action
             LogAction('Redo');
         end
     case 'Top'
-        CellFamilies = hist(current).CellFamilies;
-        CellTracks = hist(current).CellTracks;
-        HashedCells = hist(current).HashedCells;
-        CellHulls = hist(current).CellHulls;
-        Figures.tree.familyID = hist(current).Figures.tree.familyID;
+         GetHistElement(current);
     case 'Init'
         current = 1;
         bottom = 1;
@@ -130,11 +113,7 @@ switch action
         empty = 0;
         full = 0;
         exceededLimit = 0;
-        hist(current).CellFamilies = CellFamilies;
-        hist(current).CellTracks = CellTracks;
-        hist(current).HashedCells = HashedCells;
-        hist(current).CellHulls = CellHulls;
-        hist(current).Figures.tree.familyID = Figures.tree.familyID;
+        SetHistElement(current);
         set(Figures.cells.menuHandles.redoMenu,'Enable','off');
         set(Figures.tree.menuHandles.redoMenu,'Enable','off');
         set(Figures.cells.menuHandles.undoMenu,'Enable','off');
@@ -215,4 +194,24 @@ end
             end
         end
     end %setMenu
+
+    function SetHistElement(index)
+        hist(index).CellFamilies = CellFamilies;
+        hist(index).CellTracks = CellTracks;
+        hist(index).HashedCells = HashedCells;
+        hist(index).CellHulls = CellHulls;
+        hist(index).Costs = Costs;
+        hist(index).ConnectedDist = ConnectedDist;
+        hist(index).Figures.tree.familyID = Figures.tree.familyID;
+    end
+
+    function GetHistElement(index)
+        CellFamilies = hist(index).CellFamilies;
+        CellTracks = hist(index).CellTracks;
+        HashedCells = hist(index).HashedCells;
+        CellHulls = hist(index).CellHulls;
+        Costs = hist(index).Costs;
+        ConnectedDist = hist(index).ConnectedDist;
+        Figures.tree.familyID = hist(index).Figures.tree.familyID;
+    end
 end
