@@ -26,7 +26,7 @@ function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
     lastHulls = [HashedCells{t-1}.hullID];
     distSq = sum((vertcat(CellHulls(lastHulls).centerOfMass) - ones(length(lastHulls),1)*COM).^2, 2);
     
-    bTrackHull = distSq < CONSTANTS.maxRetrackDistSq;
+    bTrackHull = distSq < (CONSTANTS.dMaxCenterOfMass^2);
     trackHulls = lastHulls(bTrackHull);
     
     if ( isempty(trackHulls) )
@@ -44,11 +44,17 @@ function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
 %     end
     
     avoidHulls = setdiff(curHulls,newHulls);
-    tmpGConnect = TrackingCosts(trackHulls, t-1, avoidHulls, CellHulls, HashedCells);
+    costMatrix = TrackingCosts(trackHulls, t-1, avoidHulls, CellHulls, HashedCells);
     
+    % Update newly tracked costs
+    [r c] = ndgrid(trackHulls, newHulls);
+    costIdx = sub2ind(size(Costs), r, c);
+    Costs(costIdx) = costMatrix;
+    
+    % Get larger costMatrix representing all trackHulls to current frame
     [r c] = ndgrid(trackHulls, curHulls);
-    costIdx = sub2ind(size(tmpGConnect), r, c);
-    costMatrix = tmpGConnect(costIdx);
+    costIdx = sub2ind(size(Costs), r, c);
+    costMatrix = Costs(costIdx);
     
     bAffected = any(costMatrix,1);
     affectedHulls = curHulls(bAffected);
@@ -65,12 +71,42 @@ function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
 %     affectedTracks = curTracks(bAffected);
 %     forceTracks = intersect(forceTracks, union(oldTracks,affectedTracks));
     
-    assignTracks(t, costMatrix, extendTracks, affectedHulls);
+    changedHulls = assignTracks(t, costMatrix, extendTracks, affectedHulls);
+    propagateChanges(changedHulls, t, t+5);
     
     trackIDs = [HashedCells{t}(ismember([HashedCells{t}.hullID],newHulls)).trackID];
 end
 
-function assignTracks(t, costMatrix, extendTracks, affectedHulls)
+function propagateChanges(trackHulls, t, tEnd)
+    global CellHulls HashedCells
+    
+    if ( isempty(trackHulls) )
+        return;
+    end
+    
+    if ( t >= tEnd || t >= length(HashedCells) )
+        return;
+    end
+    
+    checkHulls = [HashedCells{t}.hullID];
+    nextHulls = [HashedCells{t+1}.hullID];
+    
+    costMatrix = TrackingCosts(trackHulls, t, [], CellHulls, HashedCells);
+    
+%     % Update newly tracked costs
+%     [r c] = ndgrid(trackHulls, nextHulls);
+%     costIdx = sub2ind(size(Costs), r, c);
+%     Costs(costIdx) = costMatrix;
+%     
+%     % Get larger costMatrix representing all trackHulls to current frame
+%     [r c] = ndgrid(checkHulls, nextHulls);
+%     costIdx = sub2ind(size(Costs), r, c);
+%     costMatrix = Costs(costIdx);
+    
+    
+end
+
+function changedHulls = assignTracks(t, costMatrix, extendTracks, affectedHulls)
 %     bMustAssign = ismember(oldTracks, forceTracks);
 %     bDontChange = ismember(affectedTracks, setdiff(forceTracks,oldTracks));
 %     
@@ -78,6 +114,8 @@ function assignTracks(t, costMatrix, extendTracks, affectedHulls)
 %     % force-keep track
 %     affectedHulls = affectedHulls(~bDontChange);
 %     costMatrix = costMatrix(:,~bDontChange);
+
+    changedHulls = [];
     
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
     [minOutCosts,bestOutgoing] = min(costMatrix,[],2);
@@ -93,32 +131,36 @@ function assignTracks(t, costMatrix, extendTracks, affectedHulls)
         assignHull = affectedHulls(bestOutgoing(matchedIdx(i)));
         assignTrack = extendTracks(matchedIdx(i));
         
-        assignHullToTrack(t, assignHull, assignTrack);
+        change = assignHullToTrack(t, assignHull, assignTrack);
+        changedHulls = [changedHulls change];
     end
     
-    costMatrix(bMatched,:) = Inf;
-    costMatrix(:,bMatchedCol) = Inf;
+    changedHulls = unique(changedHulls);
     
-    [minCost minIdx] = min(costMatrix(:));
-    % Patch up whatever other tracks we can
-    while( ~isinf(minCost) )
-        [r c] = ind2sub(size(costMatrix), minIdx);
-        assignHull = affectedHulls(c);
-        assignTrack = extendTracks(r);
-        
-        assignHullToTrack(t, assignHull, assignTrack);
-        
-        costMatrix(r,:) = Inf;
-        costMatrix(:,c) = Inf;
-        
-        [minCost minIdx] = min(costMatrix(:));
-    end
+%     costMatrix(bMatched,:) = Inf;
+%     costMatrix(:,bMatchedCol) = Inf;
+%     
+%     [minCost minIdx] = min(costMatrix(:));
+%     % Patch up whatever other tracks we can
+%     while( ~isinf(minCost) )
+%         [r c] = ind2sub(size(costMatrix), minIdx);
+%         assignHull = affectedHulls(c);
+%         assignTrack = extendTracks(r);
+%         
+%         assignHullToTrack(t, assignHull, assignTrack);
+%         
+%         costMatrix(r,:) = Inf;
+%         costMatrix(:,c) = Inf;
+%         
+%         [minCost minIdx] = min(costMatrix(:));
+%     end
 end
 
-function assignHullToTrack(t, hull, track)
+function changedHulls = assignHullToTrack(t, hull, track)
     global HashedCells
     
     oldHull = [];
+    changedHulls = [];
     
 	% Get old hull - track assignments
     bOldHull = [HashedCells{t}.trackID] == track;
@@ -136,9 +178,11 @@ function assignHullToTrack(t, hull, track)
     if ( ~isempty(oldHull) )
         % Swap track assignments
         swapTracking(t, oldHull, hull, track, oldTrack);
+        changedHulls = [oldHull hull];
     else
         % Add hull to track
-        AddHullToTrack(hull, track, []);
+        ChangeLabel(t, oldTrack, track);
+        changedHulls = hull;
     end
 end
 
