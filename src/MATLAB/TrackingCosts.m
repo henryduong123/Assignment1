@@ -21,8 +21,8 @@ function [costMatrix, trackedHulls, nextHulls] = TrackingCosts(trackHulls, t, av
     
     costMatrix = mexMAT(t, windowSize, constraints, hulls, hash);
     
-    [~,backRowIdx] = sort(rowIdx);
-    [~,backColIdx] = sort(colIdx);
+    [dump,backRowIdx] = sort(rowIdx);
+    [dump,backColIdx] = sort(colIdx);
     
     costMatrix = costMatrix(backRowIdx,backColIdx);
     trackedHulls = trackedHulls(backRowIdx);
