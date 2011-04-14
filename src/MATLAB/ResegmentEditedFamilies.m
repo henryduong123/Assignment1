@@ -15,6 +15,9 @@ function [oldHulls oldIdx] = ResegmentEditedFamilies(families, hullCheckRadiusSq
     trackStarts = [CellTracks(familyTracks).startTime];
     trackEnds = [CellTracks(familyTracks).endTime];
     
+    splitCount = 0;
+    relabelCount = 0;
+    
     for t=1:length(HashedCells)
         bInTrack = ((t >= trackStarts) & (t <= trackEnds));
         
@@ -105,6 +108,8 @@ function [oldHulls oldIdx] = ResegmentEditedFamilies(families, hullCheckRadiusSq
                 
                 AddHullToTrack(length(CellHulls), parentTrack);
                 AddHullToTrack(parentIdx, missSegTracks(i));
+                
+                splitCount = splitCount + 1;
             else
                 % Assign to non-family hull
                 parentIdx = splitInfo.hulls(bestIdx,2);
@@ -117,11 +122,16 @@ function [oldHulls oldIdx] = ResegmentEditedFamilies(families, hullCheckRadiusSq
                 CellTracks(parentTrack).hulls(CellTracks(parentTrack).hulls == parentIdx) = 0;
                 
                 AddHullToTrack(parentIdx, missSegTracks(i));
+                
+                relabelCount = relabelCount + 1;
             end
         end
         
         fprintf('%f seconds\n', toc(timer));
     end
+    
+    fprintf('Cells Split: %d\n', splitCount);
+    fprintf('Cells Relabeled: %d\n', relabelCount);
 end
 
 function distSq = calcHullDistances(lastHulls, frameHulls)
