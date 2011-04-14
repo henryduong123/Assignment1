@@ -31,10 +31,17 @@ Thumbs.db
 *.ilk
 *.log
 src/c/[Bb]in
-src/c/[Dd]ebug*/
+src/c/*/[Dd]ebug*/
 *.lib
 *.sbr
 src/c/obj/
-src/c/[Rr]elease*/
+src/c/*/[Rr]elease*/
 src/c/_ReSharper*/
 src/c/[Tt]est[Rr]esult*
+
+# Ignore intermediate outputs
+src/c/*/Intermediate/
+# Allow commit of debug info in bin directory
+#!bin/*.pdb
+#ignore binaries in MATLAB source
+src/MATLAB/*.mexw32
