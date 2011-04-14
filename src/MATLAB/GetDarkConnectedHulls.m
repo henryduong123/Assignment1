@@ -50,8 +50,10 @@ end
                     continue
                 end
                 jpix=objsSegment(hj).indPixels;
-                if ~isempty(intersect(ipix,jpix))
-                    objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj 0];
+                isect = intersect(ipix,jpix);
+                if ~isempty(isect)
+                    isectDist = 1 - (length(isect) / min(length(ipix), length(jpix)));
+                    objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj isectDist];
                 else
                     if length(ipix)<length(jpix)  % p1 smaller
                         p1=ipix;

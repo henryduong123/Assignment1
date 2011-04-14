@@ -1,8 +1,12 @@
-function BuildConnectedDistance(updateCells, bUpdateIncoming)
+function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
     global CellHulls ConnectedDist
     
     if ( ~exist('bUpdateIncoming', 'var') )
         bUpdateIncoming = 0;
+    end
+    
+    if ( ~exist('bShowProgress', 'var') )
+        bShowProgress = 0;
     end
     
     if ( isempty(ConnectedDist) )
@@ -10,6 +14,10 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming)
     end
     
     for i=1:length(updateCells)
+        if (bShowProgress)
+            Progressbar(i/length(updateCells));
+        end
+        
         ConnectedDist{updateCells(i)} = [];
         t = CellHulls(updateCells(i)).time;
         
@@ -20,6 +28,10 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming)
             UpdateDistances(updateCells(i), t, t-1);
             UpdateDistances(updateCells(i), t, t-2);
         end
+    end
+    
+    if ( bShowProgress )
+        Progressbar(1);
     end
 end
 
@@ -42,8 +54,10 @@ function UpdateDistances(updateCell, t, tNext)
     for i=1:length(nextCells)
         [rNext cNext] = ind2sub(CONSTANTS.imageSize, CellHulls(nextCells(i)).indexPixels);
 
-        if ( ~isempty(intersect(CellHulls(updateCell).indexPixels, CellHulls(nextCells(i)).indexPixels)) )
-            SetDistance(updateCell, nextCells(i), 0, tNext-t);
+        isect = intersect(CellHulls(updateCell).indexPixels, CellHulls(nextCells(i)).indexPixels);
+        if ( ~isempty(isect) )
+            isectDist = 1 - (length(isect) / min(length(CellHulls(updateCell).indexPixels), length(CellHulls(nextCells(i)).indexPixels)));
+            SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
             continue;
         end
         

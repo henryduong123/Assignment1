@@ -1,4 +1,4 @@
-function opened = OpenData()
+function opened = OpenData(versionString)
 %Opens the data file either from a previous state of LEVer or from tracking
 %results.  If the latter, the data will be converted to LEVer's data scheme
 %and save out to a new file.
@@ -7,7 +7,7 @@ function opened = OpenData()
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist
 if(isempty(Figures))
-    fprintf('LEVer ver 4.3\n***DO NOT DISTRIBUTE***\n\n');
+    fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', versionString);
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -93,6 +93,7 @@ switch answer
         save('LEVerSettings.mat','settings');
         InitializeConstants();
         opened = SegAndTrack();
+        UpdateFileVersion(versionString);
     case 'Existing'
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
@@ -162,21 +163,10 @@ switch answer
         return
 end
 
-% Add imagePixels field to CellHulls structure (and resave in place)
-if ( ~isfield(CellHulls, 'imagePixels') )
-    fprintf('Adding Image Pixel Information...\n');
-    AddImagePixelsField();
-    fprintf('Image Information Added\n');
-    SaveLEVerState([settings.matFilePath settings.matFile]);
-end
-
-% Calculate connected-component distance for all cell hulls (out 2 frames)
-if ( isempty(ConnectedDist) )
-    fprintf('Building Cell Distance Information...\n');
-    ConnectedDist = [];
-    BuildConnectedDistance(1:length(CellHulls), 0);
-    fprintf('Finished\n');
-    SaveLEVerState([settings.matFilePath settings.matFile]);
+bUpdated = FixOldFileVersions(versionString);
+if ( bUpdated )
+    UpdateFileVersionString(versionString);
+    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
 end
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))

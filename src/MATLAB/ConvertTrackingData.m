@@ -18,8 +18,6 @@ CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
 Costs = gConnect;
 
-connDist = cell(1,length(objHulls));
-
 %Initialize Structures
 % HashedCells = cell(0,length(objHulls));
 cellHulls = struct(...
@@ -38,10 +36,7 @@ parfor i=1:length(objHulls)
     cellHulls(i).indexPixels     =  objHulls(i).indPixels;
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;
     cellHulls(i).deleted         =  0;
-    
-    connDist{i} = objHulls(i).DarkConnectedHulls;
 end
-ConnectedDist = connDist;
 CellHulls = cellHulls;
 
 %walk through the tracks
