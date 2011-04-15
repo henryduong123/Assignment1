@@ -8,7 +8,7 @@ function bGreatOrEqual = CheckFileVersionString(minVersion)
     end
     
     % Sorts entries, if CONSTANTS.version is >= minVersion, then order will start with entry 1.
-    [dump,order] = sort({minVersion,CONSTANTS.version}, 'first');
+    [dump,order] = sort({minVersion,CONSTANTS.version});
     
     if ( order(1) ~= 1 )
         return;
