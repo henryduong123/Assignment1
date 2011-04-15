@@ -39,6 +39,10 @@ uimenu(addHull,...
     'Label',        'Number of Cells');
 
 uimenu(addHull,...
+    'Label',        '1',...
+    'CallBack',     @addHull1);
+
+uimenu(addHull,...
     'Label',        '2',...
     'CallBack',     @addHull2);
 
@@ -290,6 +294,10 @@ global Figures
 if(isempty(trackID)),return,end
 
 ContextChangeParent(trackID,Figures.time);
+end
+
+function addHull1(src,evnt)
+AddHull(1);
 end
 
 function addHull2(src,evnt)

@@ -135,18 +135,23 @@ end
 function figureCellDown(src,evnt)
 global Figures
 
+currentPoint = get(gca,'CurrentPoint');
+Figures.cells.currentHullID = FindHull(currentPoint);
+
 if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
     if(strcmp(Figures.advanceTimerHandle.Running,'on'))
         TogglePlay(src,evnt);
     end
-    currentPoint = get(gca,'CurrentPoint');
-    Figures.cells.currentHullID = FindHull(currentPoint);
     if(Figures.cells.currentHullID == -1)
         return
     end
     set(Figures.cells.handle,'WindowButtonUpFcn',@figureCellUp);
 elseif(strcmp(get(Figures.cells.handle,'SelectionType'),'extend'))
-    AddHull(2);
+    if(Figures.cells.currentHullID == -1)
+        AddHull(1);
+    else
+        AddHull(2);
+    end
 end
 if(strcmp(Figures.advanceTimerHandle.Running,'on'))
     TogglePlay(src,evnt);
