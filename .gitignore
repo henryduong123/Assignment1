@@ -9,7 +9,7 @@ bin/*.c
 bin/*.log
 bin/*.prj
 bin/*.txt
-*/segmentationData/*
+segmentationData/
 
 #ignore thumbnails created by windows
 Thumbs.db
