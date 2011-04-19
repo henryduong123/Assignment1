@@ -17,8 +17,7 @@ if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.cells.handle,'Pointer','watch');
 end
 
-save([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat'],...
-    'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','CONSTANTS');
+SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
 
 %no longer "dirty"
 if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figures.tree.menuHandles,'saveMenu'))
