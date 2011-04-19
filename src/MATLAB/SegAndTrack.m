@@ -61,6 +61,10 @@ for i=1:numProcessors
     pause(1)
 end
 
+segtimes = [cellSegments.t];
+[srtseg srtidx] = sort(segtimes);
+cellSegments = cellSegments(srtidx);
+
 fprintf('Please wait...');
 
 cellSegments = GetDarkConnectedHulls(cellSegments);
