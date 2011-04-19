@@ -92,8 +92,8 @@ switch answer
     case 'Segment & Track'
         save('LEVerSettings.mat','settings');
         InitializeConstants();
+        UpdateFileVersionString(versionString);
         opened = SegAndTrack();
-        UpdateFileVersion(versionString);
     case 'Existing'
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
@@ -166,7 +166,11 @@ end
 bUpdated = FixOldFileVersions(versionString);
 if ( bUpdated )
     UpdateFileVersionString(versionString);
-    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
+    if( exist('objHulls','var') && strcmpi(answer,'Existing') )
+        SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
+    else
+        SaveLEVerState([settings.matFilePath settings.matFile]);
+    end
 end
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
