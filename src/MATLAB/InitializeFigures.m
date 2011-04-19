@@ -6,7 +6,9 @@ function InitializeFigures()
 
 %--Eric Wait
 
-global Figures CONSTANTS
+global Figures CONSTANTS CellPhenotypes
+
+CellPhenotypes=[];
 
 Figures.time = 1;
 

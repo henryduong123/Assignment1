@@ -4,6 +4,7 @@ function SaveData()
 %--Eric Wait
 
 global CellFamilies CellTracks HashedCells CONSTANTS Costs CellHulls Figures
+global CellPhenotypes
 
 if (exist('LEVerSettings.mat','file')~=0)
         load('LEVerSettings.mat');

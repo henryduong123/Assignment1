@@ -15,7 +15,8 @@ function History(action)
 
 %--Eric Wait
 
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs ConnectedDist
+global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs ConnectedDist 
+global CellPhenotypes
 
 persistent hist;            %stack
 persistent current;         %points to the last state saved on the stack
@@ -203,6 +204,7 @@ end
         hist(index).Costs = Costs;
         hist(index).ConnectedDist = ConnectedDist;
         hist(index).Figures.tree.familyID = Figures.tree.familyID;
+        hist(index).CellPhenotypes = CellPhenotypes;
     end
 
     function GetHistElement(index)

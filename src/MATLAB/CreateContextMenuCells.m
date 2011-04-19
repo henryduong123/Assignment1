@@ -4,7 +4,16 @@ function CreateContextMenuCells()
 
 %--Eric Wait
 
-global Figures
+global Figures CellPhenotypes CellTracks
+
+if isempty(CellPhenotypes)
+    CellPhenotypes.Descriptions={'Dead'};
+    CellPhenotypes.ContextMenuID=[];
+end
+    
+if ~isfield(CellTracks,'Phenotype')
+    CellTracks(1).Phenotype=0;
+end
 
 figure(Figures.cells.handle);
 Figures.cells.contextMenuHandle = uicontextmenu;
@@ -63,10 +72,10 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove Cell',...
     'CallBack',     @removeHull);
 
-uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Mark Death',...
-    'CallBack',     @markDeath,...
-    'Separator',    'on');
+% uimenu(Figures.cells.contextMenuHandle,...
+%     'Label',        'Mark Death',...
+%     'CallBack',     @markDeath,...
+%     'Separator',    'on');
 
 % uimenu(Figures.cells.contextMenuHandle,...
 %     'Label',        'Remove From Tree',...
@@ -76,6 +85,23 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Properties',...
     'CallBack',     @properties,...
     'Separator',    'on');
+
+PhenoMenu = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Phenotype',...
+    'Separator',    'on',...
+    'CallBack',     @PhenoPopulate);
+
+uimenu(PhenoMenu,...
+    'Label',        'Create new phenotype...',...
+    'CallBack',     @phenotypes);
+
+for i=1:length(CellPhenotypes.Descriptions)
+    CellPhenotypes.ContextMenuID(i)=uimenu(PhenoMenu,...
+        'Label',        CellPhenotypes.Descriptions{i},...
+        'CallBack',     @phenotypes);
+end
+
+
 end
 
 %% Callback functions
@@ -404,5 +430,111 @@ if(isempty(trackID)),return,end
 
 ContextProperties(hullID,trackID);
 end
+% added 4 19 2011 ac
+function phenotypes(src,evnt)
 
+global Figures CellPhenotypes CellTracks
+
+[hullID trackID] = GetClosestCell(0);
+if(isempty(trackID)),return,end
+% which did they click
+for i=1:length(CellPhenotypes.ContextMenuID)
+    if src == CellPhenotypes.ContextMenuID(i)
+        break;
+    end
+end
+
+if src~=CellPhenotypes.ContextMenuID(i)
+    % add new one
+    NewPhenotype=inputdlg('Enter description for new phenotype','Cell Phenotypes');
+    if isempty(NewPhenotype)
+        return
+    end
+    
+    PhenoMenu = get(CellPhenotypes.ContextMenuID(1),'parent');
+    i=length(CellPhenotypes.Descriptions)+1;
+    CellPhenotypes.ContextMenuID(i)=uimenu(PhenoMenu,...
+        'Label',        NewPhenotype{1},...
+        'CallBack',     @phenotypes);  
+    CellPhenotypes.Descriptions(i)=NewPhenotype;  
+
+    
+end
+bActive = strcmp(get(CellPhenotypes.ContextMenuID(i),'checked'),'on');
+if 1==i
+    % death!
+    if CellTracks(trackID).Phenotype
+        set(CellPhenotypes.ContextMenuID(CellTracks(trackID).Phenotype),'checked','off');
+    end
+    if bActive
+        CellTracks(trackID).Phenotype=0;
+    else
+        CellTracks(trackID).Phenotype=1;
+    end
+    
+    if bActive | ~isempty(CellTracks(trackID).timeOfDeath )
+        % turn off death...
+        CellTracks(trackID).timeOfDeath = [];
+        History('Push');
+        try
+            ProcessNewborns(CellTracks(trackID).familyID);
+        catch errorMessage
+            try
+                ErrorHandeling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message]);
+                return
+            catch errorMessage2
+                fprintf(errorMessage2.message);
+                return
+            end
+        end
+        LogAction(['Removed death for ' num2str(trackID)],[],[]);
+        DrawTree(Figures.tree.familyID);
+        DrawCells();
+    else
+        markDeath(src,evnt);       
+    end 
+    return
+end
+
+if bActive
+   set(CellPhenotypes.ContextMenuID(CellTracks(trackID).Phenotype),'checked','off');
+   CellTracks(trackID).Phenotype=0;
+   LogAction(['Deactivated phenotype ' CellPhenotypes.Descriptions{i} ' for track ' num2str(trackID)]);
+
+else    
+    if CellTracks(trackID).Phenotype        
+        set(CellPhenotypes.ContextMenuID(CellTracks(trackID).Phenotype),'checked','off');
+        LogAction(['Deactivated phenotype ' CellPhenotypes.Descriptions{CellTracks(trackID).Phenotype} ' for track ' num2str(trackID)]);
+    end
+    if 1==CellTracks(trackID).Phenotype        
+        CellTracks(trackID).timeOfDeath = [];
+        DrawCells();
+    end
+    
+    CellTracks(trackID).Phenotype=i;
+    set(CellPhenotypes.ContextMenuID(CellTracks(trackID).Phenotype),'checked','on');
+    LogAction(['Activated phenotype ' CellPhenotypes.Descriptions{i} ' for track ' num2str(trackID)]);
+
+end
+DrawTree(Figures.tree.familyID);   
+    
+end
+
+function PhenoPopulate(src,evnt)
+global Figures CellPhenotypes CellTracks
+
+[hullID trackID] = GetClosestCell(0);
+if(isempty(trackID)),return,end
+    
+for i=1:length(CellPhenotypes.ContextMenuID)        
+    set(CellPhenotypes.ContextMenuID(i),'checked','off');    
+end
+if ~isfield(CellTracks,'Phenotype') | isempty(CellTracks(trackID).Phenotype) ...
+        | 0==CellTracks(trackID).Phenotype
+
+    return
+end
+    
+set(CellPhenotypes.ContextMenuID(CellTracks(trackID).Phenotype),'checked','on');
+end
 %% Helper functions
