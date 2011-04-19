@@ -105,9 +105,11 @@ try
     if fractiondone == 0
         delete(progfig) % Close progress bar
         progfig = []; % Set to empty so a new progress bar is created
+        firstIteration = [];
     end
 catch
     progfig = []; % Set to empty so a new progress bar is created
+    firstIteration = [];
 end
 
 
@@ -250,10 +252,23 @@ if percentdone == 100 % Task completed
     % Clear persistent vars
     clear progpatch starttime lastupdate firstIteration 
     delete(progfig);
+    clear progfig
     return
 end
 % Record time of this update
 lastupdate = clock;
+
+    %%
+    function closeBar(src,evnt)
+        progpatch = [];
+        starttime = [];
+        lastupdate = [];
+        firstIteration = [];
+        delete(progfig);
+        progfig = [];
+    end
+
+end
 
 %%
 % ------------------------------------------------------------------------------
@@ -266,6 +281,7 @@ while sum(thiscolor) > colorlim
     thiscolor = rand(1,3);
 end
 set(progpatch,'FaceColor',thiscolor);
+end
 
 
 
@@ -305,16 +321,4 @@ elseif m > 0
 else
     timestr = sprintf('%d sec',s);
 end
-
-%%
-function closeBar(src,evnt)
- 
-% selection = questdlg('Do you want to stop this process?',...
-%                      'Stop process',...
-%                      'Yes','No','Yes');
-% switch selection,
-%    case 'Yes',
-    delete(gcf)
-%    case 'No'
-%      return
-% end
+end
