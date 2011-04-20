@@ -99,7 +99,7 @@ switch answer
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
             [settings.matFile,settings.matFilePath,filterIndexMatFile] = uigetfile([settings.matFilePath '*.mat'],...
-                'Open Data');
+                ['Open Data (' CONSTANTS.datasetName ')']);
             
             if (filterIndexMatFile==0)
                 return
