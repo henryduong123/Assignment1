@@ -13,6 +13,7 @@ CellFamilies = [];
 CellTracks = [];
 HashedCells = [];
 ConnectedDist = [];
+CellPhenotypes = [];
 
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 

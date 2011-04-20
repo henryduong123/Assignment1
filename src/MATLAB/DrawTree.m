@@ -3,15 +3,14 @@ function DrawTree(familyID)
 
 %--Eric Wait
 
-global CellFamilies HashedCells Figures CONSTANTS
-global CellTracks CellPhenotypes PhenoScratch   
+global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
 
-if(isfield(CellTracks,'Phenotype'))     
-    PhenoScratch.PhenoColors = hsv(length(CellPhenotypes.ContextMenuID));
-    PhenoScratch.PhenoLegendSet = zeros(length(CellPhenotypes.ContextMenuID),1);
+if(isfield(CellTracks,'phenotype'))     
+    phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
+    phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
 else
-   PhenoScratch.PhenoColors = [];
-   PhenoScratch.PhenoLegendSet = [];    
+   phenoScratch.phenoColors = [];
+   phenoScratch.phenoLegendSet = [];    
 end
 
 if(~isfield(CONSTANTS,'timeResolution'))
@@ -59,7 +58,7 @@ set(overAxes,...
 % ylabel('Time (Frames)');
 hold on
 
-[xMin xCenter xMax] = traverseTree(trackID,0);
+[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
 
 % set(underAxes,...
 %     'XLim',     [xMin-1 xMax+1]);
@@ -67,40 +66,44 @@ set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
 UpdateTimeIndicatorLine();
-gObjects = get(Figures.tree.axesHandle,'children');
-for i=1:length(gObjects)
-    set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
-        'IconDisplayStyle','off'); % Exclude line from legend
-end   
-for i=1:length(PhenoScratch.PhenoLegendSet)
-    if 0==PhenoScratch.PhenoLegendSet(i),continue,end
+% gObjects = get(Figures.tree.axesHandle,'children');
+% parfor i=1:length(gObjects)
+%     set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
+%         'IconDisplayStyle','off'); % Exclude line from legend
+% end
+phenoHandles = [];
+for i=1:length(phenoScratch.phenoLegendSet)
+    if 0==phenoScratch.phenoLegendSet(i),continue,end
     if 1==i
         color = [0 0 0];
         sym='o';
     else
-        color = PhenoScratch.PhenoColors(i,:);
+        color = phenoScratch.phenoColors(i,:);
         sym='s';        
     end
         
     hPheno=plot(-5,-5,sym,'MarkerFaceColor',color,'MarkerEdgeColor','w',...
         'MarkerSize',12);
-    set(hPheno,'DisplayName',CellPhenotypes.Descriptions{i});
+    phenoHandles = [phenoHandles hPheno];
+    set(hPheno,'DisplayName',CellPhenotypes.descriptions{i});
 end
 
 hold off
 
-hLegend=legend('show');
+if(~isempty(phenoHandles))
+    legend(phenoHandles);
+end
 
 %let the user know that the drawing is done
 set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
 end
 
-function [xMin xCenter xMax] = traverseTree(trackID,initXmin)
+function [xMin xCenter xMax phenoScratch] = traverseTree(trackID,initXmin,phenoScratch)
 global CellTracks
 if(~isempty(CellTracks(trackID).childrenTracks))
-    [child1Xmin child1Xcenter child1Xmax] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin);
-    [child2Xmin child2Xcenter child2Xmax] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1);
+    [child1Xmin child1Xcenter child1Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin,phenoScratch);
+    [child2Xmin child2Xcenter child2Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1,phenoScratch);
     xMin = min(child1Xmin,child2Xmin);
     xMax = max(child1Xmax,child2Xmax);
     if(child1Xcenter < child2Xcenter)
@@ -110,10 +113,10 @@ if(~isempty(CellTracks(trackID).childrenTracks))
         drawHorizontalEdge(child2Xcenter,child1Xcenter,CellTracks(trackID).endTime+1,trackID);
         xCenter = (child1Xcenter-child2Xcenter)/2 + child2Xcenter;
     end
-    drawVerticalEdge(trackID,xCenter);
+    phenoScratch = drawVerticalEdge(trackID,xCenter,phenoScratch);
 else
     %This is when the edge is for a leaf node
-    drawVerticalEdge(trackID,initXmin);
+    drawVerticalEdge(trackID,initXmin,phenoScratch);
     xMin = initXmin;
     xCenter = initXmin;
     xMax = initXmin;
@@ -129,8 +132,8 @@ h = h([2:end, 1]);
 set(gca, 'child', h);
 end
 
-function drawVerticalEdge(trackID,xVal)
-global CellTracks Figures PhenoScratch
+function phenoScratch = drawVerticalEdge(trackID,xVal,phenoScratch)
+global CellTracks Figures
 
 %draw circle for node
 FontSize = 8;
@@ -148,15 +151,15 @@ end
 
 yMin = CellTracks(trackID).startTime;
 
-if isfield(CellTracks,'Phenotype') & CellTracks(trackID).Phenotype>1 
-    color = PhenoScratch.PhenoColors(CellTracks(trackID).Phenotype,:);
+if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1 
+    color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
     plot(xVal,yMin,'s',...
         'MarkerFaceColor',  color,...
         'MarkerEdgeColor',  'w',...
         'MarkerSize',       1.45*circleSize,...
         'UserData',         trackID,...
         'uicontextmenu',    Figures.tree.contextMenuHandle);
-    PhenoScratch.PhenoLegendSet(CellTracks(trackID).Phenotype)=1;
+    phenoScratch.phenoLegendSet(CellTracks(trackID).phenotype)=1;
 end
 
 if(isempty(CellTracks(trackID).timeOfDeath))
@@ -196,7 +199,7 @@ else
         'color',                'r',...
         'UserData',             trackID,...
         'uicontextmenu',        Figures.tree.contextMenuHandle);
-    PhenoScratch.PhenoLegendSet(1)=1;
+    phenoScratch.phenoLegendSet(1)=1;
 end
 end
 
