@@ -4,6 +4,15 @@ function DrawTree(familyID)
 %--Eric Wait
 
 global CellFamilies HashedCells Figures CONSTANTS
+global CellTracks CellPhenotypes PhenoScratch   
+
+if(isfield(CellTracks,'Phenotype'))     
+    PhenoScratch.PhenoColors = hsv(length(CellPhenotypes.ContextMenuID));
+    PhenoScratch.PhenoLegendSet = zeros(length(CellPhenotypes.ContextMenuID),1);
+else
+   PhenoScratch.PhenoColors = [];
+   PhenoScratch.PhenoLegendSet = [];    
+end
 
 if(~isfield(CONSTANTS,'timeResolution'))
     CONSTANTS.timeResolution = 10;
@@ -57,8 +66,30 @@ hold on
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
-hold off
 UpdateTimeIndicatorLine();
+gObjects = get(Figures.tree.axesHandle,'children');
+for i=1:length(gObjects)
+    set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
+        'IconDisplayStyle','off'); % Exclude line from legend
+end   
+for i=1:length(PhenoScratch.PhenoLegendSet)
+    if 0==PhenoScratch.PhenoLegendSet(i),continue,end
+    if 1==i
+        color = [0 0 0];
+        sym='o';
+    else
+        color = PhenoScratch.PhenoColors(i,:);
+        sym='s';        
+    end
+        
+    hPheno=plot(-5,-5,sym,'MarkerFaceColor',color,'MarkerEdgeColor','w',...
+        'MarkerSize',12);
+    set(hPheno,'DisplayName',CellPhenotypes.Descriptions{i});
+end
+
+hold off
+
+hLegend=legend('show');
 
 %let the user know that the drawing is done
 set(Figures.tree.handle,'Pointer','arrow');
@@ -99,7 +130,7 @@ set(gca, 'child', h);
 end
 
 function drawVerticalEdge(trackID,xVal)
-global CellTracks Figures
+global CellTracks Figures PhenoScratch
 
 %draw circle for node
 FontSize = 8;
@@ -116,6 +147,18 @@ switch length(num2str(trackID))
 end
 
 yMin = CellTracks(trackID).startTime;
+
+if isfield(CellTracks,'Phenotype') & CellTracks(trackID).Phenotype>1 
+    color = PhenoScratch.PhenoColors(CellTracks(trackID).Phenotype,:);
+    plot(xVal,yMin,'s',...
+        'MarkerFaceColor',  color,...
+        'MarkerEdgeColor',  'w',...
+        'MarkerSize',       1.45*circleSize,...
+        'UserData',         trackID,...
+        'uicontextmenu',    Figures.tree.contextMenuHandle);
+    PhenoScratch.PhenoLegendSet(CellTracks(trackID).Phenotype)=1;
+end
+
 if(isempty(CellTracks(trackID).timeOfDeath))
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
@@ -153,6 +196,7 @@ else
         'color',                'r',...
         'UserData',             trackID,...
         'uicontextmenu',        Figures.tree.contextMenuHandle);
+    PhenoScratch.PhenoLegendSet(1)=1;
 end
 end
 

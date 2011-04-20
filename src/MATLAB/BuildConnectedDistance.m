@@ -15,7 +15,7 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
     
     for i=1:length(updateCells)
         if (bShowProgress)
-            Progressbar(i/length(updateCells));
+            Progressbar((i-1)/length(updateCells));
         end
         
         ConnectedDist{updateCells(i)} = [];
@@ -58,6 +58,7 @@ function UpdateDistances(updateCell, t, tNext)
         if ( ~isempty(isect) )
             isectDist = 1 - (length(isect) / min(length(CellHulls(updateCell).indexPixels), length(CellHulls(nextCells(i)).indexPixels)));
             SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
+%             SetDistance(updateCell, nextCells(i), 0, tNext-t);
             continue;
         end
         

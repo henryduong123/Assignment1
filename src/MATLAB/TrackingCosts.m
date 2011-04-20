@@ -16,7 +16,7 @@ function [costMatrix, trackedHulls, nextHulls] = TrackingCosts(trackHulls, t, av
     constraints{1} = trackedHulls;
     constraints{2} = nextHulls;
     for i=2:min(windowSize-1, (length(hash)-t))
-        [constraints{i+1} tempIdx] = setdiff([hash{t+i}.hullID], avoidHulls);
+        constraints{i+1} = setdiff([hash{t+i}.hullID], avoidHulls);
     end
     
     costMatrix = mexMAT(t, windowSize, constraints, hulls, hash);
