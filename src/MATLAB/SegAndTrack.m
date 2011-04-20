@@ -93,7 +93,7 @@ fprintf('Done\n');
 
 InitializeFigures();
 
-SaveData();
+SaveData(1);
 
 LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end

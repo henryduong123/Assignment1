@@ -13,7 +13,7 @@ if(strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on'))
     choice = questdlg('Save current edits before closing?','Closing','Yes','No','Cancel','Cancel');
     switch choice
         case 'Yes'
-            SaveData();
+            SaveData(0);
         case 'Cancel'
             return
         case 'No'

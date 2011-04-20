@@ -39,7 +39,7 @@ if(~isempty(Figures))
         choice = questdlg('Save current edits before opening new data?','Closing','Yes','No','Cancel','Cancel');
         switch choice
             case 'Yes'
-                SaveData();
+                SaveData(0);
                 set(Figures.cells.menuHandles.saveMenu,'Enable','off');
             case 'Cancel'
                 return

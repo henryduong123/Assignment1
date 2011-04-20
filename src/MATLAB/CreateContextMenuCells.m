@@ -498,11 +498,12 @@ if 1==i
 end
 
 if bActive
-   set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
-   CellTracks(trackID).phenotype=0;
-   LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{i} ' for track ' num2str(trackID)]);
-
+    History('Push');
+    set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
+    CellTracks(trackID).phenotype=0;
+    LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{i} ' for track ' num2str(trackID)]);
 else    
+    History('Push');
     if CellTracks(trackID).phenotype        
         set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
         LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{CellTracks(trackID).phenotype} ' for track ' num2str(trackID)]);

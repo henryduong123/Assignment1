@@ -1,9 +1,9 @@
-function SaveData()
+function SaveData(orginal)
 %This will save the current state back to the opened dataset
 
 %--Eric Wait
 
-global CellFamilies CellTracks HashedCells CONSTANTS Costs CellHulls Figures CellPhenotypes
+global CONSTANTS Figures
 
 if (exist('LEVerSettings.mat','file')~=0)
         load('LEVerSettings.mat');
@@ -17,7 +17,11 @@ if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.cells.handle,'Pointer','watch');
 end
 
-SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+if(orginal)
+    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
+else
+    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+end
 
 %no longer "dirty"
 if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figures.tree.menuHandles,'saveMenu'))

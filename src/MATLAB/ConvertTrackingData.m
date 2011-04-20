@@ -4,7 +4,7 @@ function ConvertTrackingData(objHulls,gConnect)
 
 %--Eric Wait
 
-global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells ConnectedDist
+global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells ConnectedDist Log
 
 %ensure that the globals are empty
 Costs = [];
@@ -14,6 +14,7 @@ CellTracks = [];
 HashedCells = [];
 ConnectedDist = [];
 CellPhenotypes = [];
+Log = [];
 
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
