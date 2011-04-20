@@ -8,7 +8,7 @@ for i=1:length(CellTracks)
     trackMetrics = [trackMetrics getMetrics(i,CellTracks(i))];
 end
 
-data = 'Cell Label,Number of Frames,Parent,Child 1,Child 2,Dies on Frame,Mean Speed,Speed Variance,Min Speed,Max Speed,Mean Area,Variance Area,Min Area,Max Area,Mean Pixel Intensities,Variance Pixel Intensities\n';
+data = 'Cell Label,Number of Frames,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area,Mean Pixel Intensities,Standard Deviation Pixel Intensities\n';
 for i=1:length(trackMetrics)
     data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ','];
     if(~isempty(trackMetrics(i).parent))
@@ -26,26 +26,32 @@ for i=1:length(trackMetrics)
     else
         data = [data ',,'];
     end
+    data = [data trackMetrics(i).phenotype ','];
     if(~isempty(trackMetrics(i).death))
         data = [data num2str(trackMetrics(i).death) ','];
     else
         data = [data ','];
     end
-    data = [data num2str(trackMetrics(i).meanSpeed) ',' num2str(trackMetrics(i).varianceSpeed) ','...
+    data = [data num2str(trackMetrics(i).meanSpeed) ',' num2str(trackMetrics(i).standardDeviationSpeed) ','...
         num2str(trackMetrics(i).minSpeed) ',' num2str(trackMetrics(i).maxSpeed) ','...
-        num2str(trackMetrics(i).meanArea) ',' num2str(trackMetrics(i).varianceArea) ','...
+        num2str(trackMetrics(i).meanArea) ',' num2str(trackMetrics(i).standardDeviationArea) ','...
         num2str(trackMetrics(i).minArea) ',' num2str(trackMetrics(i).maxArea) ','...
-        num2str(trackMetrics(i).meanIntesity) ',' num2str(trackMetrics(i).varianceIntesity) '\n'];
+        num2str(trackMetrics(i).meanIntesity) ',' num2str(trackMetrics(i).standardDeviationIntesity) '\n'];
 end
 
 load('LEVerSettings.mat');
 file = fopen([settings.matFilePath CONSTANTS.datasetName '_metrics.csv'],'w');
+if(file==-1)
+    warndlg(['The file ' settings.matFilePath CONSTANTS.datasetName '_metrics.csv might be opened.  Please close and try again.']);
+    return
+end
 fprintf(file,data);
 fclose(file);
+msgbox(['Metrics have been saved to: ' settings.matFilePath CONSTANTS.datasetName '_metrics.csv'],'Saved','help');
 end
 
 function trackMetric = getMetrics(trackID,track)
-global CellHulls
+global CellHulls CellPhenotypes
 
 trackMetric = [];
 if(length(track.hulls)<3),return,end
@@ -54,6 +60,11 @@ trackMetric.trackID = trackID;
 trackMetric.timeFrame = length(track.hulls);
 trackMetric.parent = track.parentTrack;
 trackMetric.children = track.childrenTracks;
+if(~isempty(track.phenotype) && track.phenotype>0)
+    trackMetric.phenotype = CellPhenotypes.descriptions{track.phenotype};
+else
+    trackMetric.phenotype = '';
+end
 trackMetric.death = track.timeOfDeath;
 
 velosities = [];
@@ -83,11 +94,11 @@ end
 trackMetric.meanSpeed = mean(velosities);
 trackMetric.minSpeed = min(velosities);
 trackMetric.maxSpeed = max(velosities);
-trackMetric.varianceSpeed = var(velosities);
+trackMetric.standardDeviationSpeed = sqrt(var(velosities));
 trackMetric.meanArea = mean(areas);
 trackMetric.minArea = min(areas);
 trackMetric.maxArea = max(areas);
-trackMetric.varianceArea = var(areas);
+trackMetric.standardDeviationArea = sqrt(var(areas));
 trackMetric.meanIntesity = mean(intensities);
-trackMetric.varianceIntesity = var(intensities);
+trackMetric.standardDeviationIntesity = sqrt(var(intensities));
 end
