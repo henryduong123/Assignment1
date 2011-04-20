@@ -3,7 +3,7 @@ function SaveDataAs()
 
 %--Eric Wait
 
-global CellFamilies CellTracks HashedCells CONSTANTS Costs CellHulls Figures
+global CONSTANTS Figures
 
 if (exist('LEVerSettings.mat','file')~=0)
         load('LEVerSettings.mat');

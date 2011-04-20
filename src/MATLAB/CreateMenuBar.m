@@ -171,7 +171,7 @@ LEVer();
 end
 
 function saveFile(src,evnt)
-SaveData();
+SaveData(0);
 end
 
 function saveFileAs(src,evnt)
