@@ -4,6 +4,11 @@ function CloseFigure(varargin)
 %--Eric Wait
 
 global Figures
+if(isempty(Figures))
+    set(gcf,'CloseRequestFcn','remove');
+    delete(gcf);
+    return
+end
 if(strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on'))
     choice = questdlg('Save current edits before closing?','Closing','Yes','No','Cancel','Cancel');
     switch choice
