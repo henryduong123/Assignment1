@@ -17,6 +17,7 @@ set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
 
 try
+    History('Top');
     TestDataIntegrity(1);
     msgbox('Database corrected. Your last action was undone, please try again. If change errors again, save the data file and then send it and the log to the code distributor.',...
         'Database Correct','help','modal');
