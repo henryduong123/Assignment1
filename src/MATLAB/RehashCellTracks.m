@@ -15,33 +15,24 @@ function RehashCellTracks(trackID, newStartTime)
 
 global CellTracks CellHulls
 
-dif = CellTracks(trackID).startTime - newStartTime;
-
-if(0<dif)
-    for i=length(CellTracks(trackID).hulls):-1:1
-        CellTracks(trackID).hulls(i+dif) = CellTracks(trackID).hulls(i);
-    end
-    for i=1:dif
-        CellTracks(trackID).hulls(i) = 0;
-    end
-elseif(0>dif)
-    oldLength = length(CellTracks(trackID).hulls);
-    for i=1-dif:length(CellTracks(trackID).hulls)
-        CellTracks(trackID).hulls(i+dif) = CellTracks(trackID).hulls(i);
-    end
-    for i=length(CellTracks(trackID).hulls):-1:oldLength
-        CellTracks(trackID).hulls(i) = 0;
-    end
-end
-
-%clean out any old history
+%clean out empty history first
 indexOfLastHull = find(CellTracks(trackID).hulls,1,'last');
 if(indexOfLastHull~=length(CellTracks(trackID).hulls))
     CellTracks(trackID).hulls = CellTracks(trackID).hulls(1:indexOfLastHull);
     CellTracks(trackID).endTime = CellHulls(CellTracks(trackID).hulls(end)).time;
 end
 
-CellTracks(trackID).startTime = newStartTime;
+oldhulls = CellTracks(trackID).hulls;
 
-%check to see if this effects the family
+dif = CellTracks(trackID).startTime - newStartTime;
+
+CellTracks(trackID).hulls = zeros(1,length(oldhulls)+dif);
+
+oldStartIdx = max(-dif,0)+1;
+oldEndIdx = length(oldhulls);
+newStartIdx = max(dif,0)+1;
+newEndIdx = newStartIdx + oldEndIdx - oldStartIdx;
+
+CellTracks(trackID).hulls(newStartIdx:newEndIdx) = oldhulls(oldStartIdx:oldEndIdx);
+CellTracks(trackID).startTime = newStartTime;
 end
