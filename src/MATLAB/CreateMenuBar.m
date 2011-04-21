@@ -66,7 +66,7 @@ uimenu(...
 
 uimenu(...
     'Parent',           fileMenu,...
-    'Label',            'Export Movie Tiffs',...
+    'Label',            'Export AVI',...
     'Separator',        'on',...
     'HandleVisibility', 'callback', ...
     'Callback',         @makeMovie);
@@ -187,25 +187,13 @@ printdlg;
 end
 
 function makeMovie(src,evnt)
-global CONSTANTS Figures
-choice = questdlg('Please set the zoom that you would like for the duration of the movie.  Click OK when accomplished.','Set Zoom','OK','Cancel','OK');
-switch choice
-    case 'Cancel'
-        return
-end
-xLim = get(get(Figures.cells.handle, 'CurrentAxes'),'XLim');
-yLim = get(get(Figures.cells.handle, 'CurrentAxes'),'YLim');
-dim = [floor(xLim(2)-xLim(1)) floor(yLim(2)-yLim(1))];
-answer = inputdlg({'Enter the prefix for the exported files:','Enter Frames Per Second:','Enter X Dimension:','Enter Y Dimension'},...
-    'Movie Options',1,{CONSTANTS.datasetName,'1',num2str(1024),num2str(384)});%num2str(CONSTANTS.imageSize(2)),num2str(CONSTANTS.imageSize(1))
-if(isempty(answer)),return,end
 
-filename = answer(1);
 try
-    MakeMovie(filename{1},str2double(answer(2)),[str2double(answer(3)) str2double(answer(4))]);
+    GenerateAVI();
 catch errorMessage
     disp(errorMessage);
 end
+
 end
 
 function undo(src,evnt)
