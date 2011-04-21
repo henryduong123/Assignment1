@@ -17,6 +17,11 @@ for i=1:size
         childHullID = CellTracks(childTrackID).hulls(1);
         if(childHullID>length(Costs) || childHullID==0),continue,end
         parentHullCandidates = find(Costs(:,childHullID));
+        
+        % Don't consider deleted hulls as parents
+        bDeleted = [CellHulls(parentHullCandidates).deleted];
+        parentHullCandidates = parentHullCandidates(~bDeleted);
+        
         if(isempty(parentHullCandidates)),continue,end
         
         %Get the costs of the possible connections
