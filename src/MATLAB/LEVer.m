@@ -15,7 +15,7 @@ if(~isempty(Figures))
     end
 end
 
-versionString = '4.3';
+versionString = '4.4';
 
 if(OpenData(versionString))
     InitializeFigures();
