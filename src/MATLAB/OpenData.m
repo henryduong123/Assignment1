@@ -5,7 +5,7 @@ function opened = OpenData(versionString)
 
 %--Eric Wait
 
-global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist CellPhenotypes
+global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist CellPhenotypes SegmentationEdits
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', versionString);

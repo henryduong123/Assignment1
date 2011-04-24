@@ -5,11 +5,24 @@ function [costMatrix, trackedHulls, nextHulls] = TrackingCosts(trackHulls, t, av
         return;
     end
     
+    if ( isempty(trackHulls) )
+        error('Unable to track from empty source cell list');
+    end
+    
+    nextFrameHulls = [hash{t+1}.hullID];
+    if ( isempty(nextFrameHulls) )
+        error('Unable to track to empty destination cell list');
+    end
+    
     [trackedHulls,rowIdx] = unique(trackHulls,'first');
-    [nextHulls,colIdx] = setdiff([hash{t+1}.hullID], avoidHulls);
+    [nextHulls,colIdx] = setdiff(nextFrameHulls, avoidHulls);
     
     if ( length(trackedHulls) < length(trackHulls) )
-        warning('Non-unique track list, cost matrix will include only unique entries.');
+        warning('mexMAT:nonuniqueTrackingList','Non-unique track list, cost matrix will include only unique entries.');
+    end
+    
+    if ( isempty(nextHulls) )
+        error('Avoidance constraints caused empty cell list');
     end
     
     constraints = cell(1,windowSize);

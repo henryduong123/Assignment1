@@ -21,6 +21,19 @@ viewMenu = uimenu(...
     'HandleVisibility', 'callback');
 
 uimenu(...
+    'Parent',           handle,...
+    'Label',            '          ',...
+    'HandleVisibility', 'callback',...
+    'Enable',           'off');
+
+learnEditsMenu = uimenu(...
+    'Parent',           handle,...
+    'Label',            'Learn From Edits!',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @learnFromEdits,...
+    'Enable',           'off');
+
+uimenu(...
     'Parent',           fileMenu,...
     'Label',            'Open',...
     'HandleVisibility', 'callback', ...
@@ -153,6 +166,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
+    Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
     Figures.tree.menuHandles.undoMenu = undoMenu;
@@ -161,6 +175,8 @@ else
     Figures.tree.menuHandles.playMenu = playMenu;
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
+    Figures.tree.menuHandles.imageMenu = imageMenu;
+    Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
 end
 end
 
@@ -273,4 +289,35 @@ if(0>=answer || isempty(CellTracks(answer).hulls))
     return
 end
 DrawTree(CellTracks(answer).familyID);
+end
+
+function learnFromEdits(src,evnt)
+    global CellFamilies SegmentationEdits Figures
+    
+    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
+        return;
+    end
+    
+    try
+        PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+        ProcessNewborns(1:length(CellFamilies));
+    catch err
+        try
+            ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
+            return;
+        catch err2
+            fprintf(err2.message);
+            return;
+        end
+    end
+    
+    SegmentationEdits.newHulls = [];
+    SegmentationEdits.changedHulls = [];
+    UpdateSegmentationEditsMenu();
+    
+    DrawCells();
+    DrawTree(Figures.tree.familyID);
+    
+    History('Push');
+    LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
 end

@@ -5,7 +5,7 @@ function RemoveHull(hullID)
 
 %--Eric Wait
 
-global CellTracks HashedCells CellHulls
+global HashedCells CellHulls
 
 trackID = GetTrackID(hullID);
 
@@ -19,4 +19,6 @@ index = [HashedCells{time}.hullID]==hullID;
 HashedCells{time}(index) = [];
 
 CellHulls(hullID).deleted = 1;
+
+RemoveSegmentationEdit(hullID);
 end
