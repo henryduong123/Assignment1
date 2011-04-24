@@ -44,7 +44,10 @@ for i=1:size
             elseif(~isempty(CellTracks(parentTrackID).timeOfDeath))
                 parentCosts(j) = Inf;
             else
-                parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,parentHullCandidates(j));
+                siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;
+                % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
+                sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
+                parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
             end
         end
         
@@ -65,7 +68,7 @@ for i=1:size
                 return
             end
         end
-        connectTime = CellHulls(parentHullID).time;
+        connectTime = CellHulls(parentHullID).time+1;
         if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
             ChangeTrackParent(parentTrackID,connectTime,childTrackID);
         end

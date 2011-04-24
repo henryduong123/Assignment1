@@ -8,6 +8,16 @@ function distance = SiblingDistance(cell1HullID,cell2HullID)
 
 global CellHulls CONSTANTS
 
+if 0 == cell1HullID || 0 == cell2HullID
+    distance = Inf;
+    return;
+end
+
+if CellHulls(cell1HullID).time ~= CellHulls(cell2HullID).time
+    distance = Inf;
+    return
+end
+
 pixelsCell1 = CellHulls(cell1HullID).indexPixels;
 pixelsCell2 = CellHulls(cell2HullID).indexPixels;
 
