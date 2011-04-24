@@ -24,7 +24,7 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
                 History('Push');
             catch errorMessage
                 try
-                    ErrorHandeling(['ContextRemoveFromTree(' num2str(time) ' ' num2str(trackID) ' ) -- ' errorMessage.message]);
+                    ErrorHandeling(['ContextRemoveFromTree(' num2str(time) ' ' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
                     fprintf(errorMessage2.message);
@@ -47,7 +47,7 @@ elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
                 History('Push');
             catch errorMessage
                 try
-                    ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
+                    ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
                     fprintf(errorMessage2.message);
@@ -69,7 +69,7 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
                 History('Push');
             catch errorMessage
                 try
-                    ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+                    ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
                     fprintf(errorMessage2.message);
@@ -83,7 +83,7 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
 %                 SwapHulls(time,trackID,newTrackID);
 %             catch errorMessage
 %                 try
-%                     ErrorHandeling(['SwapHulls(' num2str(time) ' ' num2str(trackID) num2str(newTrackID) ') -- ' errorMessage.message]);
+%                     ErrorHandeling(['SwapHulls(' num2str(time) ' ' num2str(trackID) num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
 %                 catch errorMessage2
 %                     fprintf(errorMessage2.message);
 %                     return
@@ -99,7 +99,7 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['AddSingleHullToTrack(' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+            ErrorHandeling(['AddSingleHullToTrack(' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -113,7 +113,7 @@ elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTr
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -127,7 +127,7 @@ elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).pa
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+            ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -141,7 +141,7 @@ else
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message]);
+            ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);

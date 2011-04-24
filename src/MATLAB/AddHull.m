@@ -24,7 +24,7 @@ if(~isempty(trackID))
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num+1) ') -- ' errorMessage.message]);
+            ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -40,7 +40,7 @@ elseif ( num<2 )
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message]);
+            ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);

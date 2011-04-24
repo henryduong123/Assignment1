@@ -71,7 +71,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime) ' '...
-                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -86,7 +86,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' '...
-                    num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                    num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -102,7 +102,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime) ' '...
-                    num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message]);
+                    num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -118,7 +118,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime) ' '...
-                    num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message]);
+                    num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -165,7 +165,7 @@ try
 catch errorMessage
     try
         ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' '...
-            num2str(siblingTrack) ') -- ' errorMessage.message]);
+            num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
         fprintf(errorMessage2.message);

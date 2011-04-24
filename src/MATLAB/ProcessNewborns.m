@@ -53,7 +53,7 @@ for i=1:size
         parentTrackID = GetTrackID(parentHullID);
         if(isempty(parentTrackID))
             try
-                ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns']);
+                ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2);

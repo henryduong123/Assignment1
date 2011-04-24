@@ -179,7 +179,7 @@ if(currentHullID~=Figures.cells.currentHullID)
     catch errorMessage
         try
             ErrorHandeling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(GetTrackID(currentHullID))...
-                ' ' num2str(previousTrackID) ') -- ' errorMessage.message]);
+                ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);

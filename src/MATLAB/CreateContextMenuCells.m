@@ -127,7 +127,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
-                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message]);
+                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -142,7 +142,7 @@ switch choice
         catch errorMessage
             try
                 ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' '...
-                    num2str(object.UserData) ' yes) -- ' errorMessage.message]);
+                    num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -201,7 +201,7 @@ if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<tim
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message]);
+            ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -215,7 +215,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -249,7 +249,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
             History('Push');
         catch errorMessage
             try
-                ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message]);
+                ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -262,7 +262,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
             ChangeLabel(time,trackID,parentTrack);
         catch errorMessage
             try
-                ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message]);
+                ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);
@@ -275,7 +275,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
         ChangeTrackParent(parentTrack,time,siblingTrack);
     catch errorMessage
         try
-            ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -289,7 +289,7 @@ else
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message]);
+            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -356,7 +356,7 @@ try
     History('Push');
 catch errorMessage
     try
-        ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message]);
+        ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
         fprintf(errorMessage2.message);
@@ -400,7 +400,7 @@ if(~isempty(CellTracks(trackID).childrenTracks))
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message]);
+            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf(errorMessage2.message);
@@ -481,7 +481,7 @@ if 1==i
             ProcessNewborns(CellTracks(trackID).familyID);
         catch errorMessage
             try
-                ErrorHandeling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message]);
+                ErrorHandeling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf(errorMessage2.message);

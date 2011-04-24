@@ -1,4 +1,4 @@
-function LogAction(action,oldValue,newValue)
+function LogAction(action,oldValue,newValue,callstack)
 %Log is used to keep track of what changes have been made.  It will
 %append entries into a csv file to be opened in excel
 %action = a string to represent what the action is.
@@ -22,6 +22,11 @@ end
 if(~exist('newValue','var'))
     newValue = 0;
 end
+
+if ( ~exist('callstack','var') )
+    callstack = dbstack;
+end
+
 if(isempty(Figures) || ~isfield(Figures,'time'))
     Figures.time = -1;
 end
@@ -53,7 +58,7 @@ logEntry = length(Log)+1;
 Log(logEntry).time = time;
 Log(logEntry).user = usr;
 Log(logEntry).figures = Figures;
-Log(logEntry).stack = dbstack;
+Log(logEntry).stack = callstack;
 Log(logEntry).action = action;
 Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;

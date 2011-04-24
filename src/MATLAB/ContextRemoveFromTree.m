@@ -11,7 +11,7 @@ try
     newFamilyID = RemoveFromTree(time, trackID,'yes');
 catch errorMessage
     try
-        ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message]);
+        ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
         fprintf(errorMessage2.message);
