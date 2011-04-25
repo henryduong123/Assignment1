@@ -51,6 +51,9 @@ if(~isempty(Figures))
     end
 end
 
+% Clear edits when new data set is opened
+SegmentationEdits = [];
+
 oldCONSTANTS = CONSTANTS;
 
 %find the first image

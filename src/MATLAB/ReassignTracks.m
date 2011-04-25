@@ -1,6 +1,10 @@
-function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, changedHulls)
+function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, changedHulls, bPropForward)
     if ( ~exist('changedHulls','var') )
         changedHulls = [];
+    end
+    
+    if ( ~exist('bPropForward','var') )
+        bPropForward = 0;
     end
     
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
@@ -20,7 +24,7 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         % by hull/track removal
         assignTrack = GetTrackID(extendHulls(matchedIdx(i)));
         
-        change = assignHullToTrack(t, assignHull, assignTrack);
+        change = assignHullToTrack(t, assignHull, assignTrack, bPropForward);
         changedHulls = [changedHulls change];
 	end
     
@@ -35,7 +39,7 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         assignHull = affectedHulls(c);
         assignTrack = GetTrackID(extendHulls(r));
         
-        change = assignHullToTrack(t, assignHull, assignTrack);
+        change = assignHullToTrack(t, assignHull, assignTrack, bPropForward);
         changedHulls = [changedHulls change];
         
         costMatrix(r,:) = Inf;
@@ -47,7 +51,7 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
     changedHulls = unique(changedHulls);
 end
 
-function changedHulls = assignHullToTrack(t, hull, track)
+function changedHulls = assignHullToTrack(t, hull, track, bUseChangeLabel)
     global HashedCells
     
     oldHull = [];
@@ -66,13 +70,17 @@ function changedHulls = assignHullToTrack(t, hull, track)
         return;
     end
 
+    if ( bUseChangeLabel )
+        ChangeLabel(t, oldTrack, track);
+        return;
+    end
+    
     if ( ~isempty(oldHull) )
         % Swap track assignments
         swapTracking(t, oldHull, hull, track, oldTrack);
         changedHulls = [oldHull hull];
     else
         % Add hull to track
-        %ChangeLabel(t, oldTrack, track);
         RemoveHullFromTrack(hull, oldTrack, 1);
         ExtendTrackWithHull(track, hull);
         changedHulls = hull;

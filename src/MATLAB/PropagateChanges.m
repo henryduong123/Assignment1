@@ -41,6 +41,7 @@ function PropagateChanges(trackHulls, editedHulls)
         
         % Stop if none of the original split tracks are still around
         if ( isempty(followTracks) )
+            ReassignTracks(t+1, costMatrix, checkHulls, nextHulls, [], 1);
             Progressbar(1);
             return;
         end
@@ -78,17 +79,6 @@ function PropagateChanges(trackHulls, editedHulls)
     end
     
     Progressbar(1);
-    
-    % If we made it to tEnd and trackHulls isn't empty finish updating
-    % forward split costs
-    
-    t = tEnd + 1;
-    if ( t >= length(HashedCells) )
-        return;
-    end
-    
-    nextHulls = [HashedCells{t+1}.hullID];
-	UpdateTrackingCosts(t, trackHulls, nextHulls);
 end
 
 function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
