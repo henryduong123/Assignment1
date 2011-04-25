@@ -44,4 +44,4 @@ src/c/*/Intermediate/
 # Allow commit of debug info in bin directory
 #!bin/*.pdb
 #ignore binaries in MATLAB source
-src/MATLAB/*.mexw32
+#src/MATLAB/*.mexw32

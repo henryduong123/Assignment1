@@ -92,7 +92,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy pdb and mex files to bin and MATLAB directories"
-				CommandLine="copy $(OutDir)\$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).dll ..\..\bin\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\MATLAB&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\..\bin&#x0D;&#x0A;"
+				CommandLine="copy $(OutDir)\$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\MATLAB&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -173,7 +173,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy pdb and mex files to bin and MATLAB directories"
-				CommandLine="copy $(OutDir)\$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).dll ..\..\bin\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\MATLAB&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\..\bin&#x0D;&#x0A;"
+				CommandLine="copy $(OutDir)\$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32&#x0D;&#x0A;copy $(OutDir)\$(ProjectName).pdb ..\MATLAB&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
