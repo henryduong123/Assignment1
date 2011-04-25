@@ -26,9 +26,6 @@ if mp(3)<960 || mp(4)<1080
     fprintf(1,'monitor resolution too low for 1080p video');
     LogAction('GenerateAVI: monitor resolution too low for 1080p video',0,0);
 end
-
-set(Figures.cells.handle,'position',[1 1  960 1080]);
-outerpos = get(Figures.cells.handle,'outerposition');
     
 set(Figures.cells.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);   
 set(Figures.tree.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);
