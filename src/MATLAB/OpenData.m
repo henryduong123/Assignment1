@@ -79,7 +79,7 @@ if (~isempty(index) && filterIndexImage~=0)
 end
 
 while (isempty(index) || ~exist(fileName,'file'))
-    fprintf(['Image file name not in correct format: ' CONSTANTS.datasetName '_t' frameT '.TIF\nPlease choose another...\n']);
+    fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
     [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
     if(filterIndexImage==0)
         CONSTANTS = oldCONSTANTS;
@@ -123,7 +123,7 @@ switch answer
                     load([settings.matFilePath settings.matFile]);
                     fprintf('\nFile open.\n\n');
                 catch exception
-                    fprintf([exception.message '\n']);
+                    fprintf('%s\n',exception.message);
                 end
             end
             
@@ -137,7 +137,7 @@ switch answer
                 fprintf('\nFile Converted.\n');
                 CONSTANTS.datasetName = strtok(settings.matFile,' ');
                 SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
-                fprintf(['New file saved as:\n' CONSTANTS.datasetName '_LEVer.mat']);
+                fprintf('New file saved as:\n%s_LEVer.mat',CONSTANTS.datasetName);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
                 try
@@ -145,7 +145,7 @@ switch answer
                 catch errorMessage
                     warndlg('There were database inconsistencies.  LEVer might not behave properly!');
                     Progressbar(1);
-                    fprintf([errorMessage.message '\n']);
+                    fprintf('%s\n',errorMessage.message);
                     LogAction(errorMessage.message);
                 end
                 goodLoad = 1;

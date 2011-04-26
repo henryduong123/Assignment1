@@ -20,18 +20,18 @@ viewMenu = uimenu(...
     'Label',            'View',...
     'HandleVisibility', 'callback');
 
-uimenu(...
-    'Parent',           handle,...
-    'Label',            '          ',...
-    'HandleVisibility', 'callback',...
-    'Enable',           'off');
+% uimenu(...
+%     'Parent',           handle,...
+%     'Label',            '          ',...
+%     'HandleVisibility', 'callback',...
+%     'Enable',           'off');
 
-learnEditsMenu = uimenu(...
-    'Parent',           handle,...
-    'Label',            'Learn From Edits!',...
-    'HandleVisibility', 'callback',...
-    'Callback',         @learnFromEdits,...
-    'Enable',           'off');
+% learnEditsMenu = uimenu(...
+%     'Parent',           handle,...
+%     'Label',            'Learn From Edits!',...
+%     'HandleVisibility', 'callback',...
+%     'Callback',         @learnFromEdits,...
+%     'Enable',           'off');
 
 uimenu(...
     'Parent',           fileMenu,...
@@ -68,7 +68,7 @@ uimenu(...
     'Separator',        'on',...
     'HandleVisibility', 'callback', ...
     'Callback',         @exportImage,...
-    'Visible',        'off');
+    'Visible',          'off');
 
 uimenu(...
     'Parent',           fileMenu,...
@@ -89,6 +89,12 @@ uimenu(...
     'Label',            'Export Cell Metrics',...
     'HandleVisibility', 'callback', ...
     'Callback',         @ExportMetrics);
+
+uimenu(...
+    'Parent',           fileMenu,...
+    'Label',            'Export AITPD data',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @ExportAITPD);
 
 undoMenu = uimenu(...
     'Parent',           editMenu,...
@@ -166,7 +172,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
-    Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
+%     Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
     Figures.tree.menuHandles.undoMenu = undoMenu;
@@ -176,7 +182,7 @@ else
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
-    Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
+%     Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
 end
 end
 
@@ -291,33 +297,33 @@ end
 DrawTree(CellTracks(answer).familyID);
 end
 
-function learnFromEdits(src,evnt)
-    global CellFamilies SegmentationEdits Figures
-    
-    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
-        return;
-    end
-    
-    try
-        PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-        ProcessNewborns(1:length(CellFamilies));
-    catch err
-        try
-            ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
-            return;
-        catch err2
-            fprintf(err2.message);
-            return;
-        end
-    end
-    
-    SegmentationEdits.newHulls = [];
-    SegmentationEdits.changedHulls = [];
-    UpdateSegmentationEditsMenu();
-    
-    DrawCells();
-    DrawTree(Figures.tree.familyID);
-    
-    History('Push');
-    LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
-end
+% function learnFromEdits(src,evnt)
+%     global CellFamilies SegmentationEdits Figures
+%     
+%     if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
+%         return;
+%     end
+%     
+%     try
+%         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+%         ProcessNewborns(1:length(CellFamilies));
+%     catch err
+%         try
+%             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
+%             return;
+%         catch err2
+%             fprintf('%s',err2.message);
+%             return;
+%         end
+%     end
+%     
+%     SegmentationEdits.newHulls = [];
+%     SegmentationEdits.changedHulls = [];
+%     UpdateSegmentationEditsMenu();
+%     
+%     DrawCells();
+%     DrawTree(Figures.tree.familyID);
+%     
+%     History('Push');
+%     LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
+% end

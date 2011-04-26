@@ -26,7 +26,7 @@ catch errorMessage2
     set(Figures.tree.handle,'Pointer','arrow');
     set(Figures.cells.handle,'Pointer','arrow');
     History('Top'); %reinstate the state prior to the change
-    fprintf(['Orginal error:' errorMessage '\nSecond error:' errorMessage2.message '\n']);
+    fprintf('Orginal error:%s\nSecond error:%s\n',errorMessage,errorMessage2.message);
     LogAction(['Unable to fix database -- ' errorMessage2.message],0,0,errorMessage2.stack);
     msgbox('Unable to fix database! Please save the data file and then send it and the log to the code distributor. Your last change did not take place!',...
         'Database ERROR','error');

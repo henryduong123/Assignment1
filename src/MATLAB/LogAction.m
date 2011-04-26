@@ -64,6 +64,15 @@ Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;
 
 file = fopen([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'a');
+while(file<2)
+    answer = questdlg('Please close the log.','Log Opened','Use new log name','Try Again','Try Again');
+    switch answer
+        case 'Use new log name'
+            file = fopen([settings.matFilePath CONSTANTS.datasetName '_log2.csv'],'a');
+        case 'Try Again'
+            file = fopen([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'a');
+    end
+end
 
 fprintf(file,row);
 fclose(file);

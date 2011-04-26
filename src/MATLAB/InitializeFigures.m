@@ -88,10 +88,14 @@ if(~isempty(oldTreeHandle) && ishandle(oldTreeHandle))
     close(oldTreeHandle);
 end
 
-% DrawTree(1);
-% figure(Figures.tree.handle);
-% 
-% DrawCells();
+% pos = get(Figures.cells.handle,'Position');
+% position = [pos(3)-120 pos(4)-30 100 20];
+Figures.cells.learnButton = uicontrol(...
+    'Parent',       Figures.cells.handle,...
+    'Style',        'pushbutton',...
+    'String',       'Learn From Edits',...
+    'Visible',      'off',...
+    'CallBack',     @learnFromEdits);
 end
 
 %% Callback Functions
@@ -182,7 +186,7 @@ if(currentHullID~=Figures.cells.currentHullID)
                 ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -230,4 +234,35 @@ if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
     set(Figures.tree.handle,'WindowButtonMotionFcn','');
     TimeChange(Figures.time);
 end
+end
+
+function learnFromEdits(src,evnt)
+    global CellFamilies SegmentationEdits Figures
+    
+    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
+        return;
+    end
+    
+    try
+        PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+        ProcessNewborns(1:length(CellFamilies));
+    catch err
+        try
+            ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
+            return;
+        catch err2
+            fprintf('%s',err2.message);
+            return;
+        end
+    end
+    
+    SegmentationEdits.newHulls = [];
+    SegmentationEdits.changedHulls = [];
+    UpdateSegmentationEditsMenu();
+    
+    DrawCells();
+    DrawTree(Figures.tree.familyID);
+    
+    History('Push');
+    LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
 end

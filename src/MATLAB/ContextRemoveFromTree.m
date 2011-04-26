@@ -14,7 +14,7 @@ catch errorMessage
         ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
-        fprintf(errorMessage2.message);
+        fprintf('%s',errorMessage2.message);
         return
     end
 end

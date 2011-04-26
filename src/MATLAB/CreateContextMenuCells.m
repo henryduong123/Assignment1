@@ -130,7 +130,7 @@ switch choice
                     num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -145,7 +145,7 @@ switch choice
                     num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -204,7 +204,7 @@ if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<tim
             ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -218,7 +218,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
             ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -252,7 +252,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
                 ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -265,7 +265,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
                 ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -278,7 +278,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
             ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -292,7 +292,7 @@ else
             ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -359,7 +359,7 @@ catch errorMessage
         ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
-        fprintf(errorMessage2.message);
+        fprintf('%s',errorMessage2.message);
         return
     end
 end
@@ -403,7 +403,7 @@ if(~isempty(CellTracks(trackID).childrenTracks))
             ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -484,7 +484,7 @@ if 1==i
                 ErrorHandeling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end

@@ -27,7 +27,7 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
                     ErrorHandeling(['ContextRemoveFromTree(' num2str(time) ' ' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
-                    fprintf(errorMessage2.message);
+                    fprintf('%s',errorMessage2.message);
                     return
                 end
             end
@@ -50,7 +50,7 @@ elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
                     ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
-                    fprintf(errorMessage2.message);
+                    fprintf('%s',errorMessage2.message);
                     return
                 end
             end
@@ -72,7 +72,7 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
                     ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
-                    fprintf(errorMessage2.message);
+                    fprintf('%s',errorMessage2.message);
                     return
                 end
             end
@@ -102,7 +102,7 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
             ErrorHandeling(['AddSingleHullToTrack(' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -116,7 +116,7 @@ elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTr
             ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -130,7 +130,7 @@ elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).pa
             ErrorHandeling(['MoveMitosisUp(' num2str(time) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
@@ -144,7 +144,7 @@ else
             ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end
