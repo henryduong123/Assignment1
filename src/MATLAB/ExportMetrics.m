@@ -8,9 +8,9 @@ for i=1:length(CellTracks)
     trackMetrics = [trackMetrics getMetrics(i,CellTracks(i))];
 end
 
-data = 'Cell Label,Number of Frames,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area,Mean Pixel Intensities,Standard Deviation Pixel Intensities\n';
+data = 'Cell Label,Number of Frames,First Frame,Last Frame,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area,Mean Pixel,Standard Deviation Pixel\n';
 for i=1:length(trackMetrics)
-    data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ','];
+    data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ',' num2str(trackMetrics(i).firstFrame) ',' num2str(trackMetrics(i).lastFrame) ','];
     if(~isempty(trackMetrics(i).parent))
         data = [data num2str(trackMetrics(i).parent) ','];
     else
@@ -58,6 +58,8 @@ if(length(track.hulls)<3),return,end
 
 trackMetric.trackID = trackID;
 trackMetric.timeFrame = length(track.hulls);
+trackMetric.firstFrame = track.startTime;
+trackMetric.lastFrame = track.endTime;
 trackMetric.parent = track.parentTrack;
 trackMetric.children = track.childrenTracks;
 if(~isempty(track.phenotype) && track.phenotype>0)

@@ -9,7 +9,7 @@ AddConstant('maxPixelDistance',40);
 AddConstant('maxCenterOfMassDistance',80);
 AddConstant('minParentCandidateTimeFrame',5);
 AddConstant('minParentHistoryTimeFrame',5);
-AddConstant('minParentFuture',5);
+AddConstant('minParentFuture',1);
 AddConstant('minFamilyTimeFrame',5);
 AddConstant('maxFrameDifference',1);
 AddConstant('historySize',50);

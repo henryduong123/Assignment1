@@ -64,7 +64,7 @@ for i=1:size
                 ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2);
+                fprintf('%s',errorMessage2);
                 return
             end
         end

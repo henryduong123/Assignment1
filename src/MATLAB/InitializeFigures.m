@@ -182,7 +182,7 @@ if(currentHullID~=Figures.cells.currentHullID)
                 ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf(errorMessage2.message);
+            fprintf('%s',errorMessage2.message);
             return
         end
     end

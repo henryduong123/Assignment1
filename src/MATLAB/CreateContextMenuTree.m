@@ -74,7 +74,7 @@ switch choice
                     num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -89,7 +89,7 @@ switch choice
                     num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -105,7 +105,7 @@ switch choice
                     num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -121,7 +121,7 @@ switch choice
                     num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
-                fprintf(errorMessage2.message);
+                fprintf('%s',errorMessage2.message);
                 return
             end
         end
@@ -168,7 +168,7 @@ catch errorMessage
             num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
-        fprintf(errorMessage2.message);
+        fprintf('%s',errorMessage2.message);
         return
     end
 end

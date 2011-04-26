@@ -306,7 +306,7 @@ function learnFromEdits(src,evnt)
             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
             return;
         catch err2
-            fprintf(err2.message);
+            fprintf('%s',err2.message);
             return;
         end
     end
