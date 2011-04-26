@@ -130,6 +130,8 @@ elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
         end
     end
 end
+
+Figures.cells.axesHandle = gca;
 end
 
 function tracksDrawn = drawSiblingsLine(trackID,hullID)
