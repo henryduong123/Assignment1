@@ -116,7 +116,7 @@ if(~isempty(CellTracks(trackID).childrenTracks))
     phenoScratch = drawVerticalEdge(trackID,xCenter,phenoScratch);
 else
     %This is when the edge is for a leaf node
-    drawVerticalEdge(trackID,initXmin,phenoScratch);
+    phenoScratch = drawVerticalEdge(trackID,initXmin,phenoScratch);
     xMin = initXmin;
     xCenter = initXmin;
     xMax = initXmin;
