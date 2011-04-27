@@ -1,13 +1,15 @@
-function PropagateChanges(trackHulls, editedHulls)
+function tStart = PropagateChanges(changedHulls, editedHulls)
     global CellHulls HashedCells
     
     tStart = min([CellHulls(editedHulls).time]);
     tEnd = length(HashedCells)-1;
     
     % Get initial changehulls to update
-    trackHulls = intersect([HashedCells{tStart}.hullID],trackHulls);
+    trackHulls = [];
     
     for t=tStart:tEnd
+        tChangedHulls = intersect([HashedCells{t}.hullID],changedHulls);
+        trackHulls = union(trackHulls,tChangedHulls);
         if ( isempty(trackHulls) )
             Progressbar(1);
             return;
@@ -77,7 +79,8 @@ end
 function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
     global HashedCells
     
-    while ( length(desireSplitHulls) > 1 )
+% TODO: This was the constraint to only split into actually tracked hulls
+%     while ( length(desireSplitHulls) > 1 )
         % Try to split
         [newHulls oldCOM] = splitNextFrame(hull, length(desireSplitHulls));
         if ( isempty(newHulls) )
@@ -92,16 +95,16 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
         [chkCM bChkHulls bNextHulls] = GetCostSubmatrix(checkHulls, nextHulls);
         checkHulls = checkHulls(bChkHulls);
         nextHulls = nextHulls(bNextHulls);
-
-        trackedSplitHulls = verifySplit(chkCM, checkHulls, nextHulls, newHulls, desireSplitHulls);
-        if ( length(trackedSplitHulls) == length(desireSplitHulls) )
-            break;
-        end
         
-        revertSplit(t+1, hull, newHulls);
-        desireSplitHulls = trackedSplitHulls;
-        newHulls = [];
-    end
+%         trackedSplitHulls = verifySplit(chkCM, checkHulls, nextHulls, newHulls, desireSplitHulls);
+%         if ( length(trackedSplitHulls) == length(desireSplitHulls) )
+%             break;
+%         end
+%         
+%         revertSplit(t+1, hull, newHulls);
+%         desireSplitHulls = trackedSplitHulls;
+%         newHulls = [];
+%     end
 end
 
 function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
@@ -178,7 +181,7 @@ function revertSplit(t, hull, newHulls)
     
     rmHulls = setdiff(newHulls,hull);
     
-    bRmHashIdx = ([HashedCells{t}.hullID] == rmHulls);
+    bRmHashIdx = ismember([HashedCells{t}.hullID], rmHulls);
     rmTrackIDs = getTrackID(rmHulls,t);
     rmFamilyIDs = [CellTracks(rmTrackIDs).familyID];
     

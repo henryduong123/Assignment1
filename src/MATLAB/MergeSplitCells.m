@@ -36,7 +36,7 @@ function [deleteCells replaceCell] = MergeSplitCells(clickPt)
         checkHulls = [HashedCells{t}.hullID];
         nextHulls = [HashedCells{t+1}.hullID];
         
-        [costMatrix bExtendHulls bAffectedHulls] = GetCostSubMatrix(checkHulls, nextHulls);
+        [costMatrix bExtendHulls bAffectedHulls] = GetCostSubmatrix(checkHulls, nextHulls);
         extendHulls = checkHulls(bExtendHulls);
         affectedHulls = nextHulls(bAffectedHulls);
         

@@ -1,77 +1,91 @@
-function ProcessNewborns(families)
+function ProcessNewborns(families, tStart)
 %This takes all the families with start times > 1 and attempts to attach
 %that families' tracks to other families that start before said family
 
 %--Eric Wait
 
 global CellFamilies CellTracks CellHulls Costs CONSTANTS  
+
+% If unspecified start looking for children in frame 2
+if ( ~exist('tStart','var') )
+    tStart = 2;
+else
+    tStart = max(tStart, 2);
+end
+
 size = length(families);
 for i=1:size
-    if(1 < CellFamilies(families(i)).startTime)
-        %The root of the track to try to connect with another track
-        childTrackID = CellFamilies(families(i)).rootTrackID;
-        familyTimeFrame = CellFamilies(families(i)).endTime - CellFamilies(families(i)).startTime;
-        if(CONSTANTS.minFamilyTimeFrame >= familyTimeFrame),continue,end
-        
-        %Get all the possible hulls that could have been connected
-        childHullID = CellTracks(childTrackID).hulls(1);
-        if(childHullID>length(Costs) || childHullID==0),continue,end
-        parentHullCandidates = find(Costs(:,childHullID));
-        
-        % Don't consider deleted hulls as parents
-        bDeleted = [CellHulls(parentHullCandidates).deleted];
-        parentHullCandidates = parentHullCandidates(~bDeleted);
-        
-        if(isempty(parentHullCandidates)),continue,end
-        
-        %Get the costs of the possible connections
-        parentCosts = Costs(parentHullCandidates,childHullID);
-        
-        %Massage the costs a bit
-        for j=1:length(parentHullCandidates)
-            %Get the length of time that the parentCandidate exists
-            parentTrackID = GetTrackID(parentHullCandidates(j));
-            if(isempty(parentTrackID)),continue,end
-            parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
-            
-            %Change the cost of the candidates
-            if(CONSTANTS.minParentCandidateTimeFrame >= parentTrackTimeFrame)
-                parentCosts(j) = Inf;
-            elseif(CONSTANTS.maxFrameDifference < abs(CellTracks(childTrackID).startTime - CellHulls(parentHullCandidates(j)).time))
-                parentCosts(j) = Inf;
-            elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
-                parentCosts(j) = Inf;
-            elseif(~isempty(CellTracks(parentTrackID).timeOfDeath))
-                parentCosts(j) = Inf;
-            else
-                siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;
-                % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
-                sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
-                parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
-            end
+    if ( isempty(CellFamilies(families(i)).startTime) )
+        continue;
+    end
+    
+    if ( CellFamilies(families(i)).startTime < tStart )
+        continue;
+    end
+
+    %The root of the track to try to connect with another track
+    childTrackID = CellFamilies(families(i)).rootTrackID;
+    familyTimeFrame = CellFamilies(families(i)).endTime - CellFamilies(families(i)).startTime;
+    if(CONSTANTS.minFamilyTimeFrame >= familyTimeFrame),continue,end
+
+    %Get all the possible hulls that could have been connected
+    childHullID = CellTracks(childTrackID).hulls(1);
+    if(childHullID>length(Costs) || childHullID==0),continue,end
+    parentHullCandidates = find(Costs(:,childHullID));
+
+    % Don't consider deleted hulls as parents
+    bDeleted = [CellHulls(parentHullCandidates).deleted];
+    parentHullCandidates = parentHullCandidates(~bDeleted);
+
+    if(isempty(parentHullCandidates)),continue,end
+
+    %Get the costs of the possible connections
+    parentCosts = Costs(parentHullCandidates,childHullID);
+
+    %Massage the costs a bit
+    for j=1:length(parentHullCandidates)
+        %Get the length of time that the parentCandidate exists
+        parentTrackID = GetTrackID(parentHullCandidates(j));
+        if(isempty(parentTrackID)),continue,end
+        parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
+
+        %Change the cost of the candidates
+        if(CONSTANTS.minParentCandidateTimeFrame >= parentTrackTimeFrame)
+            parentCosts(j) = Inf;
+        elseif(CONSTANTS.maxFrameDifference < abs(CellTracks(childTrackID).startTime - CellHulls(parentHullCandidates(j)).time))
+            parentCosts(j) = Inf;
+        elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
+            parentCosts(j) = Inf;
+        elseif(~isempty(CellTracks(parentTrackID).timeOfDeath))
+            parentCosts(j) = Inf;
+        else
+            siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;
+            % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
+            sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
+            parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
         end
-        
-        %Pick the best candidate
-        parentCosts = full(parentCosts);
-        [minCost index] = min(parentCosts(find(parentCosts)));
-        if(isinf(minCost)),continue,end
-        parentHullID = parentHullCandidates(index);
-        
-        %Make the connections
-        parentTrackID = GetTrackID(parentHullID);
-        if(isempty(parentTrackID))
-            try
-                ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2);
-                return
-            end
+    end
+
+    %Pick the best candidate
+    parentCosts = full(parentCosts);
+    [minCost index] = min(parentCosts(find(parentCosts)));
+    if(isinf(minCost)),continue,end
+    parentHullID = parentHullCandidates(index);
+
+    %Make the connections
+    parentTrackID = GetTrackID(parentHullID);
+    if(isempty(parentTrackID))
+        try
+            ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2);
+            return
         end
-        connectTime = CellHulls(parentHullID).time+1;
-        if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
-            ChangeTrackParent(parentTrackID,connectTime,childTrackID);
-        end
+    end
+    connectTime = CellHulls(parentHullID).time+1;
+    if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
+        ChangeTrackParent(parentTrackID,connectTime,childTrackID);
     end
 end
 end
