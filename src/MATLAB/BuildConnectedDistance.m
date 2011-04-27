@@ -99,7 +99,11 @@ function SetDistance(updateCell, nextCell, dist, updateDir)
     if ( updateDir > 0 )
         ConnectedDist{updateCell} = [ConnectedDist{updateCell}; nextCell dist];
     else
-        chgIdx = find(ConnectedDist{nextCell}(:,1) == updateCell, 1, 'first');
+        chgIdx = [];
+        if ( ~isempty(ConnectedDist{nextCell}) )
+            chgIdx = find(ConnectedDist{nextCell}(:,1) == updateCell, 1, 'first');
+        end
+        
         if ( isempty(chgIdx) )
             ConnectedDist{nextCell} = [ConnectedDist{nextCell}; updateCell dist];
         else

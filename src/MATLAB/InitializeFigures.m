@@ -244,8 +244,8 @@ function learnFromEdits(src,evnt)
     end
     
     try
-        PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-        ProcessNewborns(1:length(CellFamilies));
+        tStart = PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+        ProcessNewborns(1:length(CellFamilies), tStart);
     catch err
         try
             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
