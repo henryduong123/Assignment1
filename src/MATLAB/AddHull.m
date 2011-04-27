@@ -15,23 +15,43 @@ end
 
 if(~isempty(trackID))
     % Try to split the existing hull    
-    try
-        newTracks = SplitHull(hullID,num);
-        if(isempty(newTracks))
-            msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
-            return
-        end
-        History('Push');
-    catch errorMessage
+    if ( num < 2 )
         try
-            ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
+            [deleteCells replaceCell] = MergeSplitCells(clickPt(1,1:2));
+            if ( isempty(replaceCell) )
+                msgbox(['Unable to merge ' num2str(trackID) ' any further in this frame'],'Unable to Merge','help','modal');
+                return;
+            end
+            History('Push');
+        catch errorMessage
+            try
+                ErrorHandeling(['MergeHull(' num2str(clickPt(1,1:2)) ') -- ' errorMessage.message], errorMessage.stack);
+                return
+            catch errorMessage2
+                 fprintf('%s',errorMessage2.message);
+                return
+            end
         end
+        LogAction('Merged cells',[deleteCells replaceCell],replaceCell);
+	else
+        try
+            newTracks = SplitHull(hullID,num);
+            if(isempty(newTracks))
+                msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
+                return
+            end
+            History('Push');
+        catch errorMessage
+            try
+                ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
+                return
+            catch errorMessage2
+                 fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+        LogAction('Split cell',trackID,[trackID newTracks]);
     end
-    LogAction('Split cell',trackID,[trackID newTracks]);
 elseif ( num<2 )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
