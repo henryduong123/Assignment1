@@ -19,12 +19,9 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
     % Assign matched edges
 	for i=1:length(matchedIdx)
         assignHull = affectedHulls(bestOutgoing(matchedIdx(i)));
-        % Note: It is very important to get track IDs inside the loop as they
-        % are not invariant due to possible tree relationship changes cause
-        % by hull/track removal
-        assignTrack = GetTrackID(extendHulls(matchedIdx(i)));
+        extHull = extendHulls(matchedIdx(i));
         
-        change = assignHullToTrack(t, assignHull, assignTrack, bPropForward);
+        change = assignHullToTrack(t, assignHull, extHull, bPropForward);
         changedHulls = [changedHulls change];
 	end
     
@@ -37,9 +34,9 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
     while ( minCost ~= Inf )
         [r c] = ind2sub(size(costMatrix), minIdx);
         assignHull = affectedHulls(c);
-        assignTrack = GetTrackID(extendHulls(r));
+        extHull = extendHulls(r);
         
-        change = assignHullToTrack(t, assignHull, assignTrack, bPropForward);
+        change = assignHullToTrack(t, assignHull, extHull, bPropForward);
         changedHulls = [changedHulls change];
         
         costMatrix(r,:) = Inf;
@@ -51,8 +48,11 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
     changedHulls = unique(changedHulls);
 end
 
-function changedHulls = assignHullToTrack(t, hull, track, bUseChangeLabel)
+function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
     global HashedCells
+    
+    % Get track to which we will assign hull from extHulls
+    track = GetTrackID(extHull);
     
     oldHull = [];
     changedHulls = [];
@@ -82,6 +82,9 @@ function changedHulls = assignHullToTrack(t, hull, track, bUseChangeLabel)
     else
         % Add hull to track
         RemoveHullFromTrack(hull, oldTrack, 1);
+        
+        % Some RemoveHullFromTracke cases cause track to be changed
+        track = GetTrackID(extHull);
         ExtendTrackWithHull(track, hull);
         changedHulls = hull;
     end

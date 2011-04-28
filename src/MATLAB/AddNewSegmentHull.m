@@ -1,8 +1,8 @@
 function newTrackID = AddNewSegmentHull(clickPt)
     global CONSTANTS CellHulls HashedCells Figures
 
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' num2str(Figures.time,'%03d') '.TIF'];
-    [img colorMap] = imread(fileName);
+    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(Figures.time) '.TIF'];
+    [img colrMap] = imread(fileName);
     img = mat2gray(img);
     
     newObj = PartialImageSegment(img, clickPt, 200, 1.0);

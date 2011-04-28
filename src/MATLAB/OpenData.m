@@ -167,6 +167,8 @@ switch answer
         return
 end
 
+if(~opened),return,end
+
 bUpdated = FixOldFileVersions(versionString);
 if ( bUpdated )
     UpdateFileVersionString(versionString);
