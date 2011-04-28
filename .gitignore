@@ -1,5 +1,7 @@
 
+#Ignore matlab autosaves, mat files and mcc intermediate files
 *~
+*.asv
 *.mat
 src/MATLAB/*.c
 src/MATLAB/*.log
