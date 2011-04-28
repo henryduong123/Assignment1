@@ -7,7 +7,7 @@ function CreateContextMenuCells()
 global Figures CellPhenotypes CellTracks
 
 if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
-    CellPhenotypes.descriptions={'Dead'};
+    CellPhenotypes.descriptions={'died'};
     CellPhenotypes.contextMenuID=[];
 end
     
