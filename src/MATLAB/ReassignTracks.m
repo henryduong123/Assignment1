@@ -71,7 +71,7 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
     end
 
     if ( bUseChangeLabel )
-        ChangeLabel(t, oldTrack, track);
+        exchangeTrackLabels(t, oldTrack, track);
         return;
     end
     
@@ -108,4 +108,41 @@ function swapTracking(t, hullA, hullB, trackA, trackB)
     
     hashTime = t - CellTracks(trackB).startTime + 1;
     CellTracks(trackB).hulls(hashTime) = hullA;
+end
+
+function exchangeTrackLabels(t, oldTrack, track)
+    global CellTracks CellFamilies
+    
+    RehashCellTracks(track, CellTracks(track).startTime);
+    RehashCellTracks(oldTrack, CellTracks(oldTrack).startTime);
+    
+    if ( CellTracks(track).endTime >= t )
+        RemoveFromTree(t, track, 'no');
+    end
+    
+    if ( CellTracks(oldTrack).startTime < t )
+        newFamID = RemoveFromTree(t, oldTrack, 'no');
+%         removeIfEmptyTrack(oldTrack);
+        
+        oldTrack = CellFamilies(newFamID).rootTrackID;
+    end
+    
+    ChangeLabel(t, oldTrack, track);
+end
+
+function removeIfEmptyTrack(track)
+    global CellTracks
+    
+    RehashCellTracks(track);
+    if ( ~isempty(CellTracks(track).hulls) )
+        return;
+    end
+    
+    childTracks = CellTracks(track).childrenTracks;
+    for i=1:length(childTracks)
+        RemoveFromTree(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
+    end
+
+    RemoveTrackFromFamily(track);
+    ClearTrack(track);
 end

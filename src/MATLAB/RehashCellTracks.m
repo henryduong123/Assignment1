@@ -15,6 +15,11 @@ function RehashCellTracks(trackID, newStartTime)
 
 global CellTracks CellHulls
 
+if ( ~exist('newStartTime','var') )
+    nzidx = find(CellTracks(trackID).hulls,1,'first');
+    newStartTime = CellTracks(trackID).startTime + nzidx - 1;
+end
+
 %clean out empty history first
 indexOfLastHull = find(CellTracks(trackID).hulls,1,'last');
 if(indexOfLastHull~=length(CellTracks(trackID).hulls))

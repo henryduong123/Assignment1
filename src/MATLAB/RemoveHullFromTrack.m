@@ -28,7 +28,13 @@ function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
     if(1==index)
         index = find(CellTracks(trackID).hulls,1,'first');
         if(~isempty(index))
-            RehashCellTracks(trackID,CellHulls(CellTracks(trackID).hulls(index)).time);
+            newStartTime = CellHulls(CellTracks(trackID).hulls(index)).time;
+            RehashCellTracks(trackID,newStartTime);
+            if ( CellFamilies(CellTracks(trackID).familyID).rootTrackID == trackID )
+                CellFamilies(CellTracks(trackID).familyID).startTime = newStartTime;
+            elseif ( bUpdateTree )
+               RemoveFromTree(newStartTime, trackID, 'yes');
+            end
         else
             if(~isempty(CellTracks(trackID).parentTrack))
                 CombineTrackWithParent(CellTracks(trackID).siblingTrack);
