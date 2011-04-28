@@ -1,4 +1,4 @@
-function ProcessNewborns(families, tStart)
+function ProcessNewborns(families)
 %This takes all the families with start times > 1 and attempts to attach
 %that families' tracks to other families that start before said family
 
@@ -7,11 +7,13 @@ function ProcessNewborns(families, tStart)
 global CellFamilies CellTracks CellHulls Costs CONSTANTS  
 
 % If unspecified start looking for children in frame 2
-if ( ~exist('tStart','var') )
-    tStart = 2;
-else
-    tStart = max(tStart, 2);
-end
+% if ( ~exist('tStart','var') )
+%     tStart = 2;
+% else
+%     tStart = max(tStart, 2);
+% end
+
+tStart = 2;
 
 size = length(families);
 for i=1:size
@@ -41,7 +43,8 @@ for i=1:size
 
     %Get the costs of the possible connections
     parentCosts = Costs(parentHullCandidates,childHullID);
-
+    bMitosisCost = true(1,nnz(parentCosts));
+    
     %Massage the costs a bit
     for j=1:length(parentHullCandidates)
         %Get the length of time that the parentCandidate exists
@@ -55,7 +58,7 @@ for i=1:size
         elseif(CONSTANTS.maxFrameDifference < abs(CellTracks(childTrackID).startTime - CellHulls(parentHullCandidates(j)).time))
             parentCosts(j) = Inf;
         elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
-            parentCosts(j) = Inf;
+            bMitosisCost(j) = false;
         elseif(~isempty(CellTracks(parentTrackID).timeOfDeath))
             parentCosts(j) = Inf;
         else
@@ -70,10 +73,11 @@ for i=1:size
     parentCosts = full(parentCosts);
     [minCost index] = min(parentCosts(find(parentCosts)));
     if(isinf(minCost)),continue,end
+    
     parentHullID = parentHullCandidates(index);
-
     %Make the connections
     parentTrackID = GetTrackID(parentHullID);
+    
     if(isempty(parentTrackID))
         try
             ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
@@ -83,9 +87,15 @@ for i=1:size
             return
         end
     end
-    connectTime = CellHulls(parentHullID).time+1;
-    if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
-        ChangeTrackParent(parentTrackID,connectTime,childTrackID);
+    
+    % If the parent future is long enough create a mitosis, otherwise patch up track with parent
+    if ( bMitosisCost(index) )
+        connectTime = CellHulls(parentHullID).time+1;
+        if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
+            ChangeTrackParent(parentTrackID,connectTime,childTrackID);
+        end
+    elseif ( familyTimeFrame > (CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime) )
+        ChangeLabel(CellTracks(childTrackID).startTime, childTrackID, parentTrackID);
     end
 end
 end
