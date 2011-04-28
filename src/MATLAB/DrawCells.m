@@ -15,7 +15,12 @@ figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
 fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(Figures.time) '.TIF'];
-[img colrMap] = imread(fileName);
+if exist(fileName,'file')
+    [img colrMap] = imread(fileName);
+else
+    img=zeros(CONSTANTS.imageSize);
+end
+    
 xl=xlim;
 yl=ylim;
 
