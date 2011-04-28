@@ -1,4 +1,4 @@
-function GenerateAVI()
+function GenerateAVI(src, evt)
 
 global Figures CONSTANTS HashedCells
 
