@@ -37,6 +37,11 @@ for i=1:length(CellTracks)
             end
         end
     end
+    if(isempty(CellTracks(i).familyID) || isempty(CellTracks(i).hulls) || isempty(CellTracks(i).startTime) || isempty(CellTracks(i).endTime) || isempty(CellTracks(i).color))
+        if(~isempty(CellTracks(i).familyID) || ~isempty(CellTracks(i).hulls) || ~isempty(CellTracks(i).startTime) || ~isempty(CellTracks(i).endTime) || ~isempty(CellTracks(i).color))
+            error(['Track ' num2str(i) ' is suppose to cleared out but still has data']);
+        end
+    end
     
     %% check if the current track is in the correct family and not in any
     %other
