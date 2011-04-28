@@ -8,6 +8,7 @@ global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes
 figure
 set(gcf,'name',CONSTANTS.datasetName)
 set(gcf,'numbertitle','off')
+set(gcf,'color','w')
 familyID=Figures.tree.familyID;
 if(isfield(CellTracks,'phenotype'))     
     phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
