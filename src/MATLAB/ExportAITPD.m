@@ -29,13 +29,20 @@ else
     trackData.phenotype = '';
 end
 
+trackData.FeatureLabels(1) = 'area';
+trackData.FeatureLabels(2) = 'mu_intensity';
+trackData.FeatureLabels(3) = 'sd_intensity';
+trackData.FeatureLabels(4) = 'speed';
+trackData.FeatureLabels(5) = 'direction';
+trackData.FeatureLabels(6) = 'eccentricity';
+
 for i=1:length(track.hulls)
     if(~track.hulls(i)),continue,end
 
-    trackData.hulls(i).time = track.startTime +i -1;
-    trackData.hulls(i).area = length(CellHulls(track.hulls(i)).indexPixels);
-    trackData.hulls(i).meanIntensity = mean(CellHulls(track.hulls(i)).imagePixels);
-    trackData.hulls(i).sdIntensity = sqrt(var(CellHulls(track.hulls(i)).imagePixels));
+    trackData.times(length(trackData.times)+1,1) = track.startTime +i -1;
+    trackData.Features(1) = length(CellHulls(track.hulls(i)).indexPixels);
+    trackData.Features(2) = mean(CellHulls(track.hulls(i)).imagePixels);
+    trackData.Features(3) = sqrt(var(CellHulls(track.hulls(i)).imagePixels));
     
     j = i-1;
     if(~j),continue,end
@@ -46,8 +53,14 @@ for i=1:length(track.hulls)
         if(~track.hulls(k)),break,end %reached the beginning
         j = k;
     end
-    dist = sqrt((CellHulls(track.hulls(i)).centerOfMass(1)-CellHulls(track.hulls(j)).centerOfMass(1))^2 + ...
-        (CellHulls(track.hulls(i)).centerOfMass(2)-CellHulls(track.hulls(j)).centerOfMass(2))^2);
-    trackData.hulls(i).speed = dist/(i-j);
+    dx = CellHulls(track.hulls(i)).centerOfMass(1)-CellHulls(track.hulls(j)).centerOfMass(1);
+    dy = CellHulls(track.hulls(i)).centerOfMass(2)-CellHulls(track.hulls(j)).centerOfMass(2);
+    dist = sqrt(dx^2 + dy^2);
+    trackData.Features(4) = dist/(i-j);
+    trackData.Features(5) = atan2(dy,dy);
+    im = zeros(CONSTANTS.imageSize);
+    im(ind2sub(2,trackData.indexPixels)) = 1;
+    trackData.
+    
 end
 end

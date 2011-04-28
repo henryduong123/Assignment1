@@ -1,4 +1,4 @@
-function UpdateSegmentationEditsMenu()
+function UpdateSegmentationEditsMenu(src,evnt)
     global SegmentationEdits Figures
     
     if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls) )
