@@ -41,7 +41,7 @@ parfor i=1:length(objHulls)
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;
     cellHulls(i).deleted         =  0;
     
-    connDist{i} = objHulls(i).DarkConnectedHulls;
+    connDist{i} = updateConnectedDistance(objHulls(i), objHulls, objHulls(i).DarkConnectedHulls);
 end
 ConnectedDist = connDist;
 CellHulls = cellHulls;
@@ -106,3 +106,12 @@ while(objHulls(hull).outID~=0)
 end
 end
 
+function connDist = updateConnectedDistance(fromObj, objHulls, connectedHulls)
+    connDist = connectedHulls;
+    zeroDist = find(connectedHulls(:,2) == 0);
+    for i=1:length(zeroDist)
+        toObj = objHulls(connectedHulls(zeroDist(i),1));
+        isectDist = 1 - (length(intersect(fromObj.indPixels, toObj.indPixels)) / min(length(fromObj.indPixels), length( toObj.indPixels)));
+        connDist(zeroDist(i),2) = isectDist;
+    end
+end
