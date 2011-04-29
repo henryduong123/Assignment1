@@ -57,6 +57,8 @@ function tLast = propagateMerge(mergedHull, trackHulls)
     
     tLast = tStart;
     for t=tStart:tEnd
+        tLast = t;
+        
         if ( isempty(mergedHull) )
             return;
         end
@@ -84,12 +86,18 @@ function tLast = propagateMerge(mergedHull, trackHulls)
             return;
         end
         
-        [trackHulls mergedHull] = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, deleteCells);
-        tLast = t;
+        mergedHull = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, deleteCells);
+        
+        nextHulls = [HashedCells{t+1}.hullID];
+        [costMatrix bExtendHulls bAffectedHulls] = GetCostSubmatrix(checkHulls, nextHulls);
+        extendHulls = checkHulls(bExtendHulls);
+        affectedHulls = nextHulls(bAffectedHulls);
+
+        trackHulls = ReassignTracks(t+1, costMatrix, extendHulls, affectedHulls, mergedHull);
     end
 end
 
-function [changedHulls replaceIdx] = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
+function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
     global CONSTANTS CellHulls HashedCells
     
     mergedIdx = find(checkHulls == mergedHull);
@@ -123,17 +131,6 @@ function [changedHulls replaceIdx] = checkMergeHulls(t, costMatrix, checkHulls, 
         RemoveHull(deleteCells(i));
     end
     
-    [costMatrix extendHulls affectedHulls] = TrackThroughMerge(t, replaceIdx);
-    if ( isempty(costMatrix) )
-        return;
-    end
-    
-    nextHulls = [HashedCells{t}.hullID];
-    
-    [costMatrix bExtendHulls bAffectedHulls] = GetCostSubmatrix(checkHulls, nextHulls);
-    extendHulls = checkHulls(bExtendHulls);
-    affectedHulls = nextHulls(bAffectedHulls);
-    
-    changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, replaceIdx);
+    TrackThroughMerge(t, replaceIdx);
 end
 
