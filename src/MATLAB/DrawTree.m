@@ -152,6 +152,9 @@ switch length(num2str(trackID))
         FontSize = 7;
 end
 
+if ~bDrawLabels
+        FontSize=6;
+end
 yMin = CellTracks(trackID).startTime;
 
 if(isempty(CellTracks(trackID).timeOfDeath))
@@ -159,7 +162,7 @@ if(isempty(CellTracks(trackID).timeOfDeath))
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
     bHasPheno = 0;
-    if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) 
+    if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1
         color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
         plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
