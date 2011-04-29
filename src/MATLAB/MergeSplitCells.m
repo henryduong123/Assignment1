@@ -1,5 +1,5 @@
 function [deleteCells replaceCell] = MergeSplitCells(clickPt)
-    global Figures CellHulls HashedCells SegmentationEdits
+    global Figures CellHulls HashedCells SegmentationEdits CellFamilies
     
     replaceCell = [];
     
@@ -46,6 +46,7 @@ function [deleteCells replaceCell] = MergeSplitCells(clickPt)
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
     UpdateSegmentationEditsMenu();
+    ProcessNewborns(1:length(CellFamilies))
 end
 
 function tLast = propagateMerge(mergedHull, trackHulls)
