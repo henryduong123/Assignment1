@@ -169,7 +169,18 @@ if(isempty(CellTracks(trackID).timeOfDeath))
     else
         FaceColor = 'w';
         EdgeColor = 'k';
-        TextColor = 'k';
+                
+        cPheno = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        if isempty(cPheno)
+            TextColor='k';
+        else
+            m=rgb2hsv(cPheno);
+            if m(1)>0.5
+                TextColor='w';
+            else
+                TextColor='k';
+            end
+        end
     end
     if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1
         if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.;end;
