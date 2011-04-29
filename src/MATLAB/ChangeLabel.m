@@ -103,13 +103,7 @@ if(oldEmptied)
     
     %clean up other fields
     RemoveTrackFromFamily(oldTrackID);
-    CellTracks(oldTrackID).familyID = [];
-    CellTracks(oldTrackID).parentTrack = [];
-    CellTracks(oldTrackID).siblingTrack = [];
-    CellTracks(oldTrackID).hulls = [];
-    CellTracks(oldTrackID).startTime = [];
-    CellTracks(oldTrackID).endTime = [];
-    CellTracks(oldTrackID).color = [];
+    ClearTrack(oldTrackID);
 else %the old track still exists in some fasion
     if(isempty(find(CellTracks(oldTrackID).hulls==lastOldHull, 1)) &&...
             ~isempty(CellTracks(oldTrackID).childrenTracks))

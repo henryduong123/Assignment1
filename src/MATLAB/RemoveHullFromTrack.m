@@ -40,17 +40,7 @@ function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             end
             
             RemoveTrackFromFamily(trackID);
-            
-            CellTracks(trackID).familyID = [];
-            CellTracks(trackID).parentTrack = [];
-            CellTracks(trackID).siblingTrack = [];
-            CellTracks(trackID).childrenTracks = [];
-            CellTracks(trackID).hulls = [];
-            CellTracks(trackID).startTime = [];
-            CellTracks(trackID).endTime = [];
-            CellTracks(trackID).hulls = [];
-            CellTracks(trackID).timeOfDeath = [];
-            CellTracks(trackID).color = [];
+            ClearTrack(trackID);
         end
     elseif(index==length(CellTracks(trackID).hulls))
         RehashCellTracks(trackID,CellTracks(trackID).startTime);

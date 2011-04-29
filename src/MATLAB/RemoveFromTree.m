@@ -52,13 +52,7 @@ if(isempty(find([CellTracks(trackID).hulls]~=0, 1)))
         index = CellTracks(CellTracks(trackID).parentTrack).childrenTracks==trackID;
         CellTracks(CellTracks(trackID).parentTrack).childrenTracks(index) = [];
     end
-    CellTracks(trackID).familyID = [];
-    CellTracks(trackID).parentTrack = [];
-    CellTracks(trackID).siblingTrack = [];
-    CellTracks(trackID).hulls = [];
-    CellTracks(trackID).startTime = [];
-    CellTracks(trackID).endTime = [];
-    CellTracks(trackID).color = [];
+    ClearTrack(trackID);
 else
     index = find([CellTracks(trackID).hulls]~=0, 1,'last');
     CellTracks(trackID).endTime = CellHulls(CellTracks(trackID).hulls(index)).time;
