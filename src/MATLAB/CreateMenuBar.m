@@ -238,10 +238,12 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'), 'on'))
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'off');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'off');
     DrawCells();
+    DrawTree(Figures.tree.familyID);
 else
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'on');
     DrawCells();
+    DrawTree(Figures.tree.familyID);
 end
 end
 
