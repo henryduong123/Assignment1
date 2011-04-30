@@ -17,10 +17,14 @@ if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.cells.handle,'Pointer','watch');
 end
 
-if(orginal)
-    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
+if isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile)
+    SaveLEVerState([CONSTANTS.matFullFile]);
 else
-    SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+    if(orginal)
+        SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
+    else
+        SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+    end
 end
 
 %no longer "dirty"
