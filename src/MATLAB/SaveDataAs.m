@@ -18,7 +18,7 @@ if(strcmp(settings.matFilePath,'.\'))
         [CONSTANTS.datasetName '_LEVer.mat']);
 else
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat']);
+        fullfile(settings.matFilePath, [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat']));
 end
 if (FilterIndex~=0)
     CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
