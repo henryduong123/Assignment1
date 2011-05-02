@@ -78,6 +78,8 @@ end
 end
 
 function success = writeOutAITPDtxt(Trellis)
+global CONSTANTS
+
 success = 0;
 
 load('LEVerSettings.mat');
