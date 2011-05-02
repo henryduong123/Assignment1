@@ -11,23 +11,22 @@ else
     settings.matFilePath = '.\';
 end
 
-goodSave = 1;
-
-while(goodSave)
-    time = clock;
-    fprintf('Choose a folder to save current data...\n');
-    if(strcmp(settings.matFilePath,'.\'))
-        [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName '_LEVer.mat']);
-    else
+time = clock;
+fprintf('Choose a folder to save current data...\n');
+if(strcmp(settings.matFilePath,'.\'))
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat']);
-    end
-    if (FilterIndex~=0)
-        SaveLEVerState([settings.matFilePath settings.matFile]);
-        goodSave = 0;
-    end
+        [CONSTANTS.datasetName '_LEVer.mat']);
+else
+    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
+        fullfile(settings.matFilePath, [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat']));
 end
+if (FilterIndex~=0)
+    CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
+    SaveLEVerState(CONSTANTS.matFullFile);
+else
+    return
+end
+
 
 save('LEVerSettings.mat','settings');
 

@@ -47,13 +47,6 @@ CellFamilies(familyID).rootTrackID = [];
 CellFamilies(familyID).tracks = [];
 CellFamilies(familyID).startTime = [];
 CellFamilies(familyID).endTime = [];
-CellTracks(oldTrackID).familyID = [];
-CellTracks(oldTrackID).parentTrack = [];
-CellTracks(oldTrackID).siblingTrack = [];
-CellTracks(oldTrackID).childrenTracks = [];
-CellTracks(oldTrackID).hulls = [];
-CellTracks(oldTrackID).startTime = [];
-CellTracks(oldTrackID).endTime = [];
-CellTracks(oldTrackID).timeOfDeath = [];
-CellTracks(oldTrackID).color = [];
+
+ClearTrack(oldTrackID);
 end

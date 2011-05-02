@@ -101,6 +101,7 @@ end
 
 function [xMin xCenter xMax phenoScratch] = traverseTree(trackID,initXmin,phenoScratch)
 global CellTracks
+
 if(~isempty(CellTracks(trackID).childrenTracks))
     [child1Xmin child1Xcenter child1Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin,phenoScratch);
     [child2Xmin child2Xcenter child2Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1,phenoScratch);
@@ -135,6 +136,8 @@ end
 function phenoScratch = drawVerticalEdge(trackID,xVal,phenoScratch)
 global CellTracks Figures
 
+bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
+
 %draw circle for node
 FontSize = 8;
 switch length(num2str(trackID))
@@ -149,37 +152,64 @@ switch length(num2str(trackID))
         FontSize = 7;
 end
 
-yMin = CellTracks(trackID).startTime;
-
-if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1 
-    color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
-    plot(xVal,yMin,'s',...
-        'MarkerFaceColor',  color,...
-        'MarkerEdgeColor',  'w',...
-        'MarkerSize',       1.5*circleSize,...
-        'UserData',         trackID,...
-        'uicontextmenu',    Figures.tree.contextMenuHandle);
-    phenoScratch.phenoLegendSet(CellTracks(trackID).phenotype)=1;
+if ~bDrawLabels
+        FontSize=6;
 end
+yMin = CellTracks(trackID).startTime;
 
 if(isempty(CellTracks(trackID).timeOfDeath))
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-    
-    color = CellTracks(trackID).color;
-    plot(xVal,yMin,'o',...
-        'MarkerFaceColor',  color.background,...
-        'MarkerEdgeColor',  color.background,...
-        'MarkerSize',       circleSize,...
-        'UserData',         trackID,...
-        'uicontextmenu',    Figures.tree.contextMenuHandle);
+    bHasPheno = 0;
+    if bDrawLabels
+        FaceColor = CellTracks(trackID).color.background;
+        EdgeColor = CellTracks(trackID).color.background;
+        TextColor = CellTracks(trackID).color.text;
+    else
+        FaceColor = 'w';
+        EdgeColor = 'k';
+                
+        cPheno = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        if isempty(cPheno)
+            TextColor='k';
+        else
+            m=rgb2hsv(cPheno);
+            if m(1)>0.5
+                TextColor='w';
+            else
+                TextColor='k';
+            end
+        end
+    end
+    if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1
+        if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.;end;
+        color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        plot(xVal,yMin,'s',...
+            'MarkerFaceColor',  color,...
+            'MarkerEdgeColor',  'w',...
+            'MarkerSize',       scaleMarker*circleSize,...
+            'UserData',         trackID,...
+            'uicontextmenu',    Figures.tree.contextMenuHandle);
+        phenoScratch.phenoLegendSet(CellTracks(trackID).phenotype)=1;
+        bHasPheno = 1;
+    end
+
+    if ~(bHasPheno&~bDrawLabels)
+        plot(xVal,yMin,'o',...
+            'MarkerFaceColor',  FaceColor,...
+            'MarkerEdgeColor',  EdgeColor,...
+            'MarkerSize',       circleSize,...
+            'UserData',         trackID,...
+            'uicontextmenu',    Figures.tree.contextMenuHandle);
+    end
     text(xVal,yMin,num2str(trackID),...
         'HorizontalAlignment',  'center',...
         'FontSize',             FontSize,...
-        'color',                color.text,...
+        'color',                TextColor,...
         'UserData',             trackID,...
         'uicontextmenu',        Figures.tree.contextMenuHandle);
+    
 else
     yMin2 = CellTracks(trackID).timeOfDeath;
     plot([xVal xVal],[yMin yMin2],...

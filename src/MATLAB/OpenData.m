@@ -129,6 +129,7 @@ switch answer
             
             CONSTANTS.rootImageFolder = rootImageFolder;
             CONSTANTS.imageSignificantDigits = imageSignificantDigits;
+            CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
             InitializeConstants();
             
             if(exist('objHulls','var'))

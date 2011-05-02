@@ -45,12 +45,5 @@ CellFamilies(CellTracks(trackID).familyID).tracks(trackIndex) = [];
 UpdateHashedCellsTrackID(parentID,hullList,CellTracks(trackID).startTime);
 
 %clear out track
-CellTracks(trackID).familyID = [];
-CellTracks(trackID).parentTrack = [];
-CellTracks(trackID).siblingTrack = [];
-CellTracks(trackID).childrenTracks = [];
-CellTracks(trackID).hulls = {};
-CellTracks(trackID).startTime = [];
-CellTracks(trackID).endTime = [];
-
+ClearTrack(trackID);
 end

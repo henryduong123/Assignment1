@@ -94,7 +94,10 @@ for i=1:size
         if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
             ChangeTrackParent(parentTrackID,connectTime,childTrackID);
         end
-    elseif ( familyTimeFrame > (CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime) )
+    elseif ( isempty(CellTracks(parentTrackID).childrenTracks) )
+        if ( CellTracks(childTrackID).startTime <= CellTracks(parentTrackID).endTime )
+            RemoveFromTree(CellTracks(childTrackID).startTime, parentTrackID, 'no');
+        end
         ChangeLabel(CellTracks(childTrackID).startTime, childTrackID, parentTrackID);
     end
 end

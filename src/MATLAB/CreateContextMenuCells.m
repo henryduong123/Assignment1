@@ -531,7 +531,7 @@ if(isempty(trackID)),return,end
 for i=1:length(CellPhenotypes.contextMenuID)        
     set(CellPhenotypes.contextMenuID(i),'checked','off');    
 end
-if ~isfield(CellTracks,'Phenotype') || isempty(CellTracks(trackID).phenotype) ...
+if ~isfield(CellTracks,'phenotype') || isempty(CellTracks(trackID).phenotype) ...
         || 0==CellTracks(trackID).phenotype
 
     return
