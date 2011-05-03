@@ -284,19 +284,29 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
     end
     Figures.tree.familyID = CellTracks(parentTrack).familyID;
 else
+    mitosisTracks = [trackID siblingTrack];
+    bCheckParents = (~arrayfun(@(x)(isempty(CellTracks(x).parentTrack)), mitosisTracks));
+    [dump,idxLongest] = sort([CellTracks(mitosisTracks).startTime]);
+    
+    if ( nnz(bCheckParents) == 1 )
+        mitosisTracks = [mitosisTracks(bCheckParents) mitosisTracks(~bCheckParents)];
+    else
+        mitosisTracks = mitosisTracks(idxLongest);
+    end
+    
     try
-        ChangeTrackParent(trackID,time,siblingTrack);
+        ChangeTrackParent(mitosisTracks(1),time,mitosisTracks(2));
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
+            ErrorHandeling(['ChangeTrackParent(' num2str(mitosisTracks(1)) ' ' num2str(time) ' ' num2str(mitosisTracks(2)) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2.message);
             return
         end
     end
-    Figures.tree.familyID = CellTracks(trackID).familyID;
+    Figures.tree.familyID = CellTracks(mitosisTracks(1)).familyID;
 end
 
 LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
