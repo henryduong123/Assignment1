@@ -38,7 +38,7 @@ if(~isempty(CellTracks(oldTrackID).childrenTracks) && ~isempty(CellTracks(newTra
 end
 
 for i=1:length(hulls)
-    if(newTrackHashedTime+i-1<0 || (newTrackHashedTime+i-1<length(CellTracks(newTrackID).hulls) &&...
+    if(newTrackHashedTime+i-1<0 || (newTrackHashedTime+i-1<=length(CellTracks(newTrackID).hulls) &&...
             CellTracks(newTrackID).hulls(newTrackHashedTime+i-1)~=0)),break,end;
     if(hulls(i)~=0)
         AddHullToTrack(hulls(i),newTrackID,[]);
