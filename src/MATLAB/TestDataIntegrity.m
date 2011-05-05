@@ -173,10 +173,16 @@ for i=1:length(HashedCells)
     Progressbar(progress/iterations);
     for j=1:length(HashedCells{i})
         if(HashedCells{i}(j).hullID==0 || HashedCells{i}(j).hullID>length(CellHulls))
-            error(['There is an invalid cellID in HashedCells, time: ' num2str(i) ' index: ' num2str(j)]);
+            error(['There is an invalid hullID in HashedCells, time: ' num2str(i) ' index: ' num2str(j)]);
         end
         if(HashedCells{i}(j).trackID==0 || HashedCells{i}(j).trackID>length(CellTracks))
             error(['There is an invalid trackID in HashedCells, time: ' num2str(i) ' index: ' num2str(j)]);
+        end
+        if(isempty(CellTracks(HashedCells{i}(j).trackID).hulls))
+            error(['HashedCells references a track that is empty, time: '  num2str(i) ' index: ' num2str(j) ' track: ' num2str(HashedCells{i}(j).trackID)]);
+        end
+        if(CellHulls(HashedCells{i}(j).hullID).deleted)
+            error(['HashedCells references a hull that is flaged as deleted, time: '  num2str(i) ' index: ' num2str(j) ' hull: ' num2str(HashedCells{i}(j).hullID)]);
         end
     end
 end
