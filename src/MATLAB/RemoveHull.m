@@ -5,13 +5,17 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function RemoveHull(hullID)
+function RemoveHull(hullID, bDontUpdateTree)
 % RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
 % hull will have a flag set that means that it does not exist anywhere and
 % should not be drawn on the cells figure
 
 
 global HashedCells CellHulls CellTracks
+
+if ( ~exist('bDontUpdateTree','var') )
+    bDontUpdateTree = 0;
+end
 
 trackID = GetTrackID(hullID);
 
@@ -28,7 +32,7 @@ CellHulls(hullID).deleted = 1;
 
 RemoveSegmentationEdit(hullID);
 
-if ( bNeedsUpdate )
+if ( ~bDontUpdateTree && bNeedsUpdate )
     RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
     ProcessNewborns();
 end

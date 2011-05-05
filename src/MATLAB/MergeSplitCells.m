@@ -21,7 +21,7 @@ function [deleteCells replaceCell] = MergeSplitCells(clickPt)
     deleteCells = setdiff(deleteCells,replaceCell);
     
     for i=1:length(deleteCells)
-        RemoveHull(deleteCells(i));
+        RemoveHull(deleteCells(i), 1);
     end
     
     CellHulls(replaceCell).points = mergeObj.points;
@@ -135,7 +135,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     CellHulls(replaceIdx).deleted = 0;
     
     for i=1:length(deleteCells)
-        RemoveHull(deleteCells(i));
+        RemoveHull(deleteCells(i), 1);
     end
     
     TrackThroughMerge(t, replaceIdx);

@@ -222,6 +222,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
     
     bInHull = CHullContainsPoint(centerPt, objs);
     
-    hull = objs(bInHull);
+    hull = objs(find(bInHull,1));
 end
 
