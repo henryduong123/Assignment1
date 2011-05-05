@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function RemoveChildren(trackID)
 % RemoveChildren(trackID) removes the children of the given track and moves
 % them to thier own trees.  Those new trees are attempted to be added to
 % other trees. eg ProcessNewborns
 
-%--Eric Wait
 
 global CellTracks
 

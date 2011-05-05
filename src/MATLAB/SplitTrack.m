@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function newTrackID = SplitTrack(trackID,hullID)
 %SplitTrack will break the given track off at the given hull and assign it
 %a new trackID.  The new track will also be assigned as a child of the
 %given track.  Returns the trackID of the new track, which is the first
 %child of the given track.
 
-%--Eric Wait
 
 global CellFamilies CellTracks
 

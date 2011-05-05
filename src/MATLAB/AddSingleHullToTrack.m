@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function AddSingleHullToTrack(oldTrackID,newTrackID)
 % AddSingleHullToTrack(oldTrackID,newTrackID)
 % This function is indended for the oldTrack to be just a single hull,
@@ -6,7 +13,6 @@ function AddSingleHullToTrack(oldTrackID,newTrackID)
 % newTrack.  The parent and child relationships of the newTrack will be
 % maintained.
 
-%--Eric Wait
 
 global CellTracks HashedCells CellFamilies Figures
 

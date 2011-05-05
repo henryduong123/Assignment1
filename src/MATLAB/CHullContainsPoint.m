@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function bInHull = CHullContainsPoint(pt, hulls)
     bInHull = false(length(hulls),1);
     

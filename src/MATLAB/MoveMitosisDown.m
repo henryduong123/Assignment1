@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function MoveMitosisDown(time,trackID)
 % MoveMitosisDown(time,trackID) will move the Mitosis even down the track
 % to the given time.  The hulls from the children between parent mitosis
 % and the given time are broken off into thier own tracks.
 
-%--Eric Wait
 
 global CellTracks CellFamilies
 

@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function familyIDs = StraightenTrack(trackID)
 % StraightenTrack(trackID) will drop all right children while traversing
 % left.  Usefull for cells that should not have mitosis events such as dead
 % cells.
 
-%--Eric Wait
 
 global CellTracks
 familyIDs = [];

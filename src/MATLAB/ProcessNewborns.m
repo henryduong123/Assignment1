@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ProcessNewborns(families)
 %This takes all the families with start times > 1 and attempts to attach
 %that families' tracks to other families that start before said family
 
-%--Eric Wait
 
 global CellFamilies CellTracks CellHulls Costs CONSTANTS  
 

@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function curCellTrackID = NewCellTrack(familyID,cellHullID,t)
 %Creates a new track in the Family that contains just the given hull.
 %***Use this with empty Families only***
 
-%--Eric Wait
 
 global CellTracks
 

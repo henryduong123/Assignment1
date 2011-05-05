@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function InitializeFigures()
 %Creates two figures one for the cell image and the other for the family
 %tree.
 %Figures will have all the menus, button actions, and context menus set up
 %here
 
-%--Eric Wait
 
 global Figures CONSTANTS
 

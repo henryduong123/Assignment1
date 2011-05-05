@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ExportTree(src, evt)
 %This will draw the family tree of the given family. This is designed
 % for exporting tree with no numeric labels for publication purpose
 
-%--Eric Wait
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
 figure

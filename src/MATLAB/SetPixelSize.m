@@ -1,6 +1,12 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function SetPixelSize(axisHandle, pixSz)
 
-%--Mark Winter
     
     parentHandle = get(axisHandle, 'Parent');
     if ( ~ishandle(parentHandle) )

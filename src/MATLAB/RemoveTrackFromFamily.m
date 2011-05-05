@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function RemoveTrackFromFamily(trackID)
 % RemoveTrackFromFamily(trackID) only removes the track from the tracks
 % list currently assosiated in the CellFamily entery and updated the other
@@ -5,7 +12,6 @@ function RemoveTrackFromFamily(trackID)
 % This is not intended to change the structure, just to keep the data
 % correct
 
-%--Eric Wait
 
 global CellFamilies CellTracks
 familyID = CellTracks(trackID).familyID;

@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function SwapTrackLabels(time,trackID1,trackID2)
 %This function will swap the hulls of the two tracks from the given time
 %forward.  Any children will also be swaped
 
-%--Eric Wait
 
 global CellTracks CellHulls
 

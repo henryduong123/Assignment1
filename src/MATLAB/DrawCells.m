@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function DrawCells()
 %This will display the image with the cells outlined and labeled unless the
 %labels are turned off, in which case only the image is displayed
@@ -5,7 +12,6 @@ function DrawCells()
 %will be more boldly colored, others will be with square labels and be
 %slightly grayed out
 
-%--Eric Wait
 
 global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS
 

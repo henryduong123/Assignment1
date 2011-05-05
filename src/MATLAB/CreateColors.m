@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function colors = CreateColors()
 %Creates a table of default colors in the format:
 %background (r,g,b), text (r,g,b)
 %the text is typicaly white or black depending on the darkness of the
 %background
 
-%--Eric Wait
 
 colors = [1,0,0,0,0,0,0.4,0.15,0.15;...
     1,0.5,0,0,0,0,0.4,0.2,0.15;...

@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function CombineTrackWithParent(trackID)
 % CombineTrackWithParent(trackID)
 %Combine childTrack with its parent track - in otherwords the childtrack
@@ -8,7 +15,6 @@ function CombineTrackWithParent(trackID)
 %***Make sure that the sibling of the given track has been delt with prior
 %to calling this function. IT WILL BE LOST
 
-%--Eric Wait
 
 global CellFamilies CellTracks CellHulls
 

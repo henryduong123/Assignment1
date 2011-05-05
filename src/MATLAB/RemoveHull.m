@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function RemoveHull(hullID)
 % RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
 % hull will have a flag set that means that it does not exist anywhere and
 % should not be drawn on the cells figure
 
-%--Eric Wait
 
 global HashedCells CellHulls CellTracks
 

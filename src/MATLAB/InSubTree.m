@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function bool = InSubTree(rootTrack,questionTrack)
 % InSubTree(rootTrack,questionTrack) will return a flag which represents
 % whether or not the questionTrack falls within the subtree rooted at
 % rootTrack
 
-%--Eric Wait
 
 global CellTracks
 bool = 0;

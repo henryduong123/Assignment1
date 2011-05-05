@@ -1,6 +1,7 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%     
-%      Copyright 2011 Andrew R. Cohen, Eric Wait and Mark Winter 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
 %     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
@@ -24,7 +25,6 @@
 function LEVer()
 %Main program
 
-%--Eric Wait
 
 global Figures
 

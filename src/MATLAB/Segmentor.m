@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
 % Segmentor is to be run as a seperate compiled function for parallel
 % processing.  It will process tLength-tStart amount of images.  Call this
@@ -5,7 +12,6 @@ function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlp
 
 % mcc -o Segmentor -m Segmentor.m
 
-%--Andrew Cohen
 
 % global CONSTANTS
 

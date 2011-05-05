@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function MarkHullAsEdited(hullIDs,time,unmark)
 % MarkHullAsEdited(hullID,time) will flag the given hull(s) in HashedCells as
 % edited.  Pass time in if known (function runs faster) and if all the

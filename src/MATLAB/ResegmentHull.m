@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function newHulls = ResegmentHull(hull, k)
 % Splits hull int k pieces using kmeans, returns the k split hulls or [] if
 % there are errors.
 
-%--Mark Winter
 
 global CONSTANTS
 

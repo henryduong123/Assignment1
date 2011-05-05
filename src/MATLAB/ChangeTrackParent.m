@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ChangeTrackParent(parentTrackID,time,childTrackID)
 %ChangeTrackParent(parentTrackID,time,childTrackID) will take the
 %childTrack and connect it to the parent track.  It also takes the hulls
@@ -6,7 +13,6 @@ function ChangeTrackParent(parentTrackID,time,childTrackID)
 %track and the child track that are siblings with the parent track being
 %the parent.
 
-%--Eric Wait
 
 global CellTracks CellFamilies
 
