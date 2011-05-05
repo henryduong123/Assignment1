@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function AddHullToTrack(hullID,trackID,previousHullID)
 % function AddHullToTrack(hullID,trackID,previousHullID)
 %The hullID will be added to the track
@@ -8,7 +15,6 @@ function AddHullToTrack(hullID,trackID,previousHullID)
 %previousHullID exists in that track.  Also, it has been
 %removed from any previous track assosiation.
 
-%--Eric Wait
 
 global HashedCells CellTracks CellFamilies CellHulls
 

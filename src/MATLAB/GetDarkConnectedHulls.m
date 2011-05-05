@@ -1,6 +1,12 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function objsSegment = GetDarkConnectedHulls(objsSegment)
 
-%--Andrew Cohen
 
 global CONSTANTS
 
@@ -52,9 +58,9 @@ end
                 jpix=objsSegment(hj).indPixels;
                 isect = intersect(ipix,jpix);
                 if ~isempty(isect)
-%                     isectDist = 1 - (length(isect) / min(length(ipix), length(jpix)));
-%                     objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj isectDist];
-                    objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj 0];
+                    isectDist = 1 - (length(isect) / min(length(ipix), length(jpix)));
+                    objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj isectDist];
+%                     objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj 0];
                 else
                     if length(ipix)<length(jpix)  % p1 smaller
                         p1=ipix;

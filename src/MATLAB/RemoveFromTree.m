@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
 %newFamily = RemoveFromTree(time,trackID,dealWithSibling)
 %This will remove the track and any of its children from its current family
@@ -8,7 +15,6 @@ function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
 %***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
 %THERE WILL BE ISSUES WITH THE DATA****
 
-%--Eric Wait
 
 global CellFamilies CellTracks CellHulls
 

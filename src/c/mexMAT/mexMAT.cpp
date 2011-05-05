@@ -1,3 +1,10 @@
+//******************************************************
+//
+//    This file is part of LEVer.exe
+//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//
+//******************************************************
+
 #include "mexMAT.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))

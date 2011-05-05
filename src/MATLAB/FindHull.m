@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function hullID = FindHull(curPoint)
 %This function will find the closest hull to the given point and return the
 %hullID if it is within CONSTANTS.clickMargin
 
-%--Eric Wait
 
 global CONSTANTS CellHulls HashedCells Figures
 

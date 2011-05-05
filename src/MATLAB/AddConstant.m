@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function AddConstant(field,val,overWrite)
 % AddConstant(field,val,overWrite) will add the given field to the
 % CONSTANTS global variable and assign it the given value.
@@ -5,7 +12,6 @@ function AddConstant(field,val,overWrite)
 % the field exists. Zero will keep the old value, One will overwrite the
 % current value
 
-%--Eric Wait
 
 global CONSTANTS
 

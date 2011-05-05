@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function RehashCellTracks(trackID, newStartTime)
 %RehashedCellTracks(trackID,newStartTime) will rearange the hulls in the
 %given track so that the newTime will hash correctly.
@@ -11,7 +18,6 @@ function RehashCellTracks(trackID, newStartTime)
 %***WARNING*** if oldStartTime < newStartTime and there are hulls within
 %[oldStartTime newStartTime) THEY WILL BE REMOVED FROM THE TRACK!!!
 
-%--Eric Wait
 
 global CellTracks CellHulls
 

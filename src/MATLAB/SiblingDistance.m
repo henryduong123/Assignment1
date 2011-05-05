@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function distance = SiblingDistance(cell1HullID,cell2HullID)
 %This will give you a weighted cost dependent on the distance between two
 %cell hulls.  It uses the CONSTANTS: imageSize, maxCenterOfMassDistance,
 %and maxPixelDistance.  Make sure they are set in the global CONSTANTS
 %variable.
 
-%--Eric Wait
 
 global CellHulls CONSTANTS
 

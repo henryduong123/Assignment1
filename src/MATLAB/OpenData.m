@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function opened = OpenData(versionString)
 %Opens the data file either from a previous state of LEVer or from tracking
 %results.  If the latter, the data will be converted to LEVer's data scheme
 %and save out to a new file.
 
-%--Eric Wait
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist CellPhenotypes SegmentationEdits
 

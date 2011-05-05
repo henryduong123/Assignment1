@@ -1,3 +1,10 @@
+//******************************************************
+//
+//    This file is part of LEVer.exe
+//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//
+//******************************************************
+
 
 
 // Get cost based on a frame and index list.  The srcFrameIdx is used if there, it is the index into

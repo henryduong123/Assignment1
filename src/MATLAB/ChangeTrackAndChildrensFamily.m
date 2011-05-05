@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
 %This will remove the tree rooted at the given trackID from the given
 %oldFamily and put them in the newFamily
 %This DOES NOT make the parent child relationship, it is just updates the
 %CellFamilies data structure.
 
-%--Eric Wait
 
 global CellFamilies CellTracks
 

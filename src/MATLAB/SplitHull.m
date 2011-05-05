@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function newTrackIDs = SplitHull(hullID, k)
 % Attempt to split hull corresponding to hullId into k pieces, and update
 % associated data structures if successful.
 
-%--Mark Winter
 
 global CellHulls CellFamilies HashedCells
 

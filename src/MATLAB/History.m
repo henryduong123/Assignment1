@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function History(action)
 %This will keep track of any state changes.  Call this function once the
 %new state is established. After the changes take place.
@@ -13,7 +20,6 @@ function History(action)
 %All of the data structures are saved on the stack, so do not set this
 %value too high or you might run out of working memory
 
-%--Eric Wait
 
 global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs ConnectedDist CellPhenotypes SegmentationEdits
 

@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ChangeLabel(time,oldTrackID,newTrackID)
 %ChangLabel(time,oldTrackID,newTrackID)
 %This will attempt to change the trackID from a given time until the end of
@@ -15,7 +22,6 @@ function ChangeLabel(time,oldTrackID,newTrackID)
 %The only time that the subtree would not move with the change would be as
 %stated above.
 
-%--Eric Wait
 
 global CellTracks CellHulls
 

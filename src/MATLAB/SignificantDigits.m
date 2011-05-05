@@ -1,8 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function digits = SignificantDigits(num)
 % SignificantDigits will see how many digits the image file name needs for
 % each frame and then will convert num to the appropriate string
 
-%--Eric Wait
 
 global CONSTANTS
 digits = '';

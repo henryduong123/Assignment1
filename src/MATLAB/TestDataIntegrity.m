@@ -1,10 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function TestDataIntegrity(correct)
 %TestDataIntegrity(correct) tests to make sure that the database is consistant.
 %Takes the CellTracks as the most accurate.  If correct==1, this
 %function will attempt to correct the error using the data from CellTracks
 %***USE SPARINGLY, TAKES A LOT OF TIME***
 
-%--Eric Wait
 
 global CellTracks CellHulls CellFamilies HashedCells
 

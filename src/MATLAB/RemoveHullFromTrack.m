@@ -1,7 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Removes a hull from a track deleting the track if necessary.  If
 % bUpdateTree is specified, a track with a significant number of zeros in
 % the middle will be split as well.
-function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
+function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
     global CellTracks CellHulls CellFamilies
     
     if ( ~exist('bUpdateTree', 'var') )
@@ -11,6 +18,8 @@ function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
     if ( isempty(trackID) )
         return;
     end
+    
+    bChangedStart = 0;
     
     % Parameters for splitting tracks that have too many continuous zeros
     minLengthSplit = 3;
@@ -26,6 +35,7 @@ function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
     CellTracks(trackID).hulls(index) = 0;
     
     if(1==index)
+        bChangedStart = 1;
         index = find(CellTracks(trackID).hulls,1,'first');
         if(~isempty(index))
             newStartTime = CellHulls(CellTracks(trackID).hulls(index)).time;

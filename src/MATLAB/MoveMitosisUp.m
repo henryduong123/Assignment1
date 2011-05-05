@@ -1,9 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function MoveMitosisUp(time,siblingTrackID)
 % MoveMitosisUp(time,siblingTrackID) will move the Mitosis event up the
 % tree.  This function takes the hulls from the parent between the old
 % mitosis time and the given time and attaches them to the given track.
 
-%--Eric Wait
 
 global CellTracks
 

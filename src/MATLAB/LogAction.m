@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     This file is part of LEVer.exe
+%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function LogAction(action,oldValue,newValue,callstack)
 %Log is used to keep track of what changes have been made.  It will
 %append entries into a csv file to be opened in excel
@@ -5,7 +12,6 @@ function LogAction(action,oldValue,newValue,callstack)
 %oldValue and newValue are used to show what numbers are changed. Please
 %use the action string to denote what the values represent
 
-%--Eric Wait
 
 global Figures CONSTANTS Log
 time = clock;%[year month day hour minute seconds]

@@ -1,3 +1,10 @@
+//******************************************************
+//
+//    This file is part of LEVer.exe
+//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//
+//******************************************************
+
 #ifndef _CEDGESUBGRAPH_H_
 #define _CEDGESUBGRAPH_H_ 1
 
