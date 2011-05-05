@@ -32,8 +32,6 @@ function RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             RehashCellTracks(trackID,newStartTime);
             if ( CellFamilies(CellTracks(trackID).familyID).rootTrackID == trackID )
                 CellFamilies(CellTracks(trackID).familyID).startTime = newStartTime;
-            elseif ( bUpdateTree )
-               RemoveFromTree(newStartTime, trackID, 'yes');
             end
         else
             if(~isempty(CellTracks(trackID).parentTrack))
