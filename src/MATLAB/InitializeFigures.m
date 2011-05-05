@@ -95,7 +95,8 @@ Figures.cells.learnButton = uicontrol(...
     'Parent',       Figures.cells.handle,...
     'Style',        'pushbutton',...
     'String',       'Learn From Edits',...
-    'Visible',      'off');
+    'Visible',      'off',...
+   'CallBack',     @learnFromEdits);
 end
 
 %% Callback Functions
@@ -236,33 +237,33 @@ if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
 end
 end
 
-% function learnFromEdits(src,evnt)
-%     global CellFamilies SegmentationEdits Figures
-%     
-%     if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
-%         return;
-%     end
-%     
-%     try
-%         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-%         ProcessNewborns(1:length(CellFamilies));
-%     catch err
-%         try
-%             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
-%             return;
-%         catch err2
-%             fprintf('%s',err2.message);
-%             return;
-%         end
-%     end
-%     
-%     SegmentationEdits.newHulls = [];
-%     SegmentationEdits.changedHulls = [];
-%     UpdateSegmentationEditsMenu();
-%     
-%     DrawCells();
-%     DrawTree(Figures.tree.familyID);
-%     
-%     History('Push');
-%     LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
-% end
+function learnFromEdits(src,evnt)
+    global CellFamilies SegmentationEdits Figures
+    
+    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
+        return;
+    end
+    
+    try
+        PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+        ProcessNewborns(1:length(CellFamilies));
+    catch err
+        try
+            ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
+            return;
+        catch err2
+            fprintf('%s',err2.message);
+            return;
+        end
+    end
+    
+    SegmentationEdits.newHulls = [];
+    SegmentationEdits.changedHulls = [];
+    UpdateSegmentationEditsMenu();
+    
+    DrawCells();
+    DrawTree(Figures.tree.familyID);
+    
+    History('Push');
+    LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
+end

@@ -164,6 +164,23 @@ for i=1:length(CellHulls)
         end
     end
 end
+
+%% check HashedCells
+progress = 0;
+iterations = length(HashedCells);
+for i=1:length(HashedCells)
+    progress = progress+1;
+    Progressbar(progress/iterations);
+    for j=1:length(HashedCells{i})
+        if(HashedCells{i}(j).hullID==0 || HashedCells{i}(j).hullID>length(CellHulls))
+            error(['There is an invalid cellID in HashedCells, time: ' num2str(i) ' index: ' num2str(j)]);
+        end
+        if(HashedCells{i}(j).trackID==0 || HashedCells{i}(j).trackID>length(CellTracks))
+            error(['There is an invalid trackID in HashedCells, time: ' num2str(i) ' index: ' num2str(j)]);
+        end
+    end
+end
+
 Progressbar(1);%clear it out
 
 fprintf('\nDone\n');
