@@ -13,6 +13,10 @@ global CellFamilies CellTracks CellHulls Costs CONSTANTS
 %     tStart = max(tStart, 2);
 % end
 
+if ( ~exist('families','var') )
+    families = 1:length(CellFamilies);
+end
+
 tStart = 2;
 
 size = length(families);

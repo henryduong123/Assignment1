@@ -5,13 +5,13 @@ function RemoveHull(hullID)
 
 %--Eric Wait
 
-global HashedCells CellHulls
+global HashedCells CellHulls CellTracks
 
 trackID = GetTrackID(hullID);
 
 if(isempty(trackID)),return,end
 
-RemoveHullFromTrack(hullID, trackID);
+bNeedsUpdate = RemoveHullFromTrack(hullID, trackID);
 
 %remove hull from HashedCells
 time = CellHulls(hullID).time;
@@ -21,4 +21,9 @@ HashedCells{time}(index) = [];
 CellHulls(hullID).deleted = 1;
 
 RemoveSegmentationEdit(hullID);
+
+if ( bNeedsUpdate )
+    RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+    ProcessNewborns();
+end
 end
