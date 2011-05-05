@@ -13,6 +13,16 @@ function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
 global CellFamilies CellTracks CellHulls
 
 hash = time - CellTracks(trackID).startTime + 1;
+
+% Make sure we're splitting the track on a non-zero hull
+nzidx = find(CellTracks(trackID).hulls(hash:end) > 0, 1);
+if ( isempty(nzidx) )
+    % Track has no hulls from hash onward
+    return;
+end
+hash = hash + nzidx - 1;
+time = time + nzidx - 1;
+
 oldFamilyID = CellTracks(trackID).familyID;
 newFamilyID = NewCellFamily(CellTracks(trackID).hulls(hash),time);
 newTrackID = CellFamilies(newFamilyID).rootTrackID;
