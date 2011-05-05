@@ -122,7 +122,7 @@ function exchangeTrackLabels(t, oldTrack, track)
     
     if ( CellTracks(oldTrack).startTime < t )
         newFamID = RemoveFromTree(t, oldTrack, 'no');
-%         removeIfEmptyTrack(oldTrack);
+        removeIfEmptyTrack(oldTrack);
         
         oldTrack = CellFamilies(newFamID).rootTrackID;
     end
