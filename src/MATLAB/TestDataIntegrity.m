@@ -123,7 +123,8 @@ end
 
 %% check CellHulls
 % if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
-missingHulls = find(ismember(find([CellHulls.deleted]==0),hullsList')==0);
+missingHulls = find(~[CellHulls.deleted]);
+missingHulls = missingHulls(find(~ismember(missingHulls,hullsList)));
 if(~isempty(missingHulls))
     if(correct)
         progress = 0;
@@ -131,12 +132,36 @@ if(~isempty(missingHulls))
         for i=1:length(missingHulls)
             progress = progress+1;
             Progressbar(progress/iterations);
-            if(isempty(CellHulls(missingHulls(i)).points))
+%             if(isempty(CellHulls(missingHulls(i)).points))
+                if(any([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i)))
+                    RemoveHullFromTrack(missingHulls(i),...
+                        HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))).trackID);
+                    HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))) = [];
+                end
                 CellHulls(missingHulls(i)).deleted = 1;
-            end
+%             end
         end
     else
         error('HullsList ~= CellHulls');
+    end
+ end
+
+progress = 0;
+iterations = length(CellHulls);
+for i=1:length(CellHulls)
+    progress = progress+1;
+    Progressbar(progress/iterations);
+    if(~CellHulls(i).deleted && isempty(find([HashedCells{CellHulls(i).time}.hullID]==i, 1)))
+        error(['Hull ' num2str(i) ' is not hashed to the correct time']);
+    end
+    if(CellHulls(i).deleted && ~isempty(find([HashedCells{CellHulls(i).time}.hullID]==i, 1)))
+        if(correct)
+            RemoveHullFromTrack(i,...
+                HashedCells{CellHulls(i).time}([HashedCells{CellHulls(i).time}.hullID]==i).trackID);
+            HashedCells{CellHulls(i).time}([HashedCells{CellHulls(i).time}.hullID]==i) = [];
+        else
+            error(['Hull ' num2str(i) ' should have been removed from HashedCells']);
+        end
     end
 end
 Progressbar(1);%clear it out
