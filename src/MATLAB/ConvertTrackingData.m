@@ -114,6 +114,11 @@ end
 
 function connDist = updateConnectedDistance(fromObj, objHulls, connectedHulls)
     connDist = connectedHulls;
+    
+    if ( isempty(connectedHulls) )
+        return;
+    end
+    
     zeroDist = find(connectedHulls(:,2) == 0);
     for i=1:length(zeroDist)
         toObj = objHulls(connectedHulls(zeroDist(i),1));
