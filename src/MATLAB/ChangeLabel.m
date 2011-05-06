@@ -82,6 +82,8 @@ if(oldEmptied)
             if(~isempty(find(index, 1)))
                 RemoveFromTree(CellTracks(CellTracks(newTrackID).childrenTracks(~index)).startTime,...
                     CellTracks(newTrackID).childrenTracks(~index),'no');
+                CellTracks(newTrackID).childrenTracks = [];
+                CellTracks(oldTrackID).siblingTrack = [];
             else
                 RemoveChildren(newTrackID);
             end
@@ -91,6 +93,8 @@ if(oldEmptied)
             if(~isempty(find(index, 1)))
                 RemoveFromTree(CellTracks(CellTracks(newTrackID).childrenTracks(~index)).startTime,...
                     CellTracks(newTrackID).childrenTracks(~index),'no');
+                CellTracks(newTrackID).childrenTracks = [];
+                CellTracks(oldTrackID).siblingTrack = [];
             else
                 RemoveChildren(newTrackID);
             end
