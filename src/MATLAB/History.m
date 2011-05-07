@@ -74,13 +74,19 @@ switch action
             if (current == 0)
                 current = CONSTANTS.historySize;
             end
-            full = 0;
             
-            if (current==bottom)
+            if (current==bottom && ~full)
                 empty = 1;
             end
             
+            full = 0;
+            
             current = current - 1;
+            
+            if(current==0)
+                current = CONSTANTS.historySize;
+            end
+            
             GetHistElement(current);
             
             %Update displays
@@ -90,7 +96,7 @@ switch action
             LogAction('Undo');
         end
     case 'Redo'
-        if (top>current || (bottom>top && top~=current))
+        if (top>current || (bottom>=top && top~=current))
             %redo possible
             current = current + 1;
             if (current > CONSTANTS.historySize)
