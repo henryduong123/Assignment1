@@ -87,7 +87,7 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
     global HashedCells
     
 % TODO: This was the constraint to only split into actually tracked hulls
-%     while ( length(desireSplitHulls) > 1 )
+    while ( length(desireSplitHulls) > 1 )
         % Try to split
         [newHulls oldCOM] = splitNextFrame(hull, length(desireSplitHulls));
         if ( isempty(newHulls) )
@@ -103,15 +103,21 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
         checkHulls = checkHulls(bChkHulls);
         nextHulls = nextHulls(bNextHulls);
         
-%         trackedSplitHulls = verifySplit(chkCM, checkHulls, nextHulls, newHulls, desireSplitHulls);
-%         if ( length(trackedSplitHulls) == length(desireSplitHulls) )
-%             break;
-%         end
-%         
-%         revertSplit(t+1, hull, newHulls);
-%         desireSplitHulls = trackedSplitHulls;
-%         newHulls = [];
-%     end
+        % Triple incoming split edge cost during verification
+        bNewHullsIdx = ismember(nextHulls, newHulls);
+        if ( any(bNewHullsIdx) )
+            chkCM(:,bNewHullsIdx) = 3*chkCM(:,bNewHullsIdx);
+        end
+        
+        trackedSplitHulls = verifySplit(chkCM, checkHulls, nextHulls, newHulls, desireSplitHulls);
+        if ( length(trackedSplitHulls) == length(desireSplitHulls) )
+            break;
+        end
+        
+        revertSplit(t+1, hull, newHulls);
+        desireSplitHulls = trackedSplitHulls;
+        newHulls = [];
+    end
 end
 
 function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
@@ -189,12 +195,12 @@ function revertSplit(t, hull, newHulls)
     rmHulls = setdiff(newHulls,hull);
     
     bRmHashIdx = ismember([HashedCells{t}.hullID], rmHulls);
-    rmTrackIDs = getTrackID(rmHulls,t);
+    rmTrackIDs = GetTrackID(rmHulls,t);
     rmFamilyIDs = [CellTracks(rmTrackIDs).familyID];
     
     leaveHulls = setdiff(1:length(CellHulls),rmHulls);
     
-    % Note: can only do these simple removals because notheing has yet been
+    % Note: can only do these simple removals because nothing has yet been
     % updated to reference the new cell structure.
     HashedCells{t} = HashedCells{t}(~bRmHashIdx);
     CellTracks = CellTracks(setdiff(1:length(CellTracks),rmTrackIDs));
