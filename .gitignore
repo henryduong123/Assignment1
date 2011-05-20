@@ -47,3 +47,6 @@ src/c/*/Intermediate/
 #!bin/*.pdb
 #ignore binaries in MATLAB source
 #src/MATLAB/*.mexw32
+bin/*.csv
+src/MATLAB/AITPDData
+src/MATLAB/*.csv

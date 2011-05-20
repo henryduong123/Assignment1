@@ -7,7 +7,10 @@
 
 function ExportAITPD(src,evnt)
 
-global CellTracks CONSTANTS
+global CellTracks Figures CellPhenotypes
+
+History('Push');
+LogAction('Classifing according to AITPD');
 
 Trellis = [];
 progress = 1;
@@ -15,12 +18,73 @@ iterations = length(CellTracks);
 for i = 1:length(CellTracks)
     progress = progress+1;
     Progressbar(progress/iterations);
+    if(isempty(CellTracks(i).familyID)),continue,end
     Trellis = [Trellis compileTrackData(CellTracks(i),i)];
 end
 Progressbar(1);%clear it out
 
 good = writeOutAITPDtxt(Trellis);
+if(~good)
+    History('Pop');
+    return
+end
 
+Progressbar(1);%clear it out
+
+msgbox('Next part will take some time depending on the size of the dataset.  A second window will popup when this is finished');
+
+[status, result] = system('GenerateDistanceMatrices.exe .\AITPDData\Trellis.txt .\AITPDData\distances > distGenLog.txt');
+if(~status)
+    msgbox('AITPD Failed');
+    History('Pop');
+    return
+end
+[status, result] = system('GapSpectral.exe .\AITPDData\distances > stats.txt');
+if(~status)
+    msgbox('AITPD Failed');
+    History('Pop');
+    return
+end
+
+f = fopen('stats.txt','r');
+m = fscanf(f,'%s');
+fs = findstr(m,'f=');
+Ns = findstr(m,'N=');
+ks = findstr(m,'kgap=');
+gs = findstr(m,'gamma=');
+cs = findstr(m,'classes=');
+t = findstr(m,'time');
+
+fcom = findstr(m(fs(end):end),',');
+Ncom = findstr(m(Ns(end):end),',');
+kcom = findstr(m(ks(end):end),',');
+gcom = findstr(m(gs(end):end),',');
+
+F = str2double(m(fs(end)+2:fs(end)+fcom(1)-2));
+N = str2double(m(Ns(end)+2:Ns(end)+Ncom(1)-2));
+k = str2double(m(ks(end)+5:ks(end)+kcom(1)-2));
+gamma = str2double(m(gs(end)+6:gs(end)+gcom(1)-2));
+
+c = m(cs(end)+8:t-1);
+com = findstr(c,',');
+class = str2double(c(1:com(1)-1));
+for i=1:length(com)-1
+    class = [class str2double(c(com(i)+1:com(i+1)-1))];
+end
+
+phenoNum = length(CellPhenotypes.descriptions);
+
+for i=1:k
+    AddPhenotype({['class' num2str(i)]});
+end
+
+msgbox(['F=' num2str(F) ', N=' num2str(N) ', k=' num2str(k) ', gamma=' num2str(gamma)]);
+
+for i=1:length(Trellis)
+    CellTracks(Trellis(i).cellLabel).phenotype = class(i)+phenoNum+1;
+end
+
+DrawTree(Figures.tree.familyID); 
 end
 
 function trackData = compileTrackData(track,label)
@@ -89,15 +153,30 @@ global CONSTANTS
 
 success = 0;
 
-load('LEVerSettings.mat');
-[file,filePath,filterIndex] = uiputfile([settings.matFilePath '*.txt'],'Save data',...
-        [CONSTANTS.datasetName '_AITPD.txt']);
-if(filterIndex<1),return,end
+progress = 1;
+iterations = length(Trellis);
+
+Progressbar(progress/iterations);
+
+if(~isempty(dir('.\AITPDData')))
+    system('rmdir /S /Q .\AITPDData');
+end
+if(isempty(dir('.\AITPDData'))),system('mkdir .\AITPDData');end
+filePath = '.\AITPDData\';
+file = 'Trellis.txt';
+
+% load('LEVerSettings.mat');
+% [file,filePath,filterIndex] = uiputfile([settings.matFilePath '*.txt'],'Save data',...
+%         [CONSTANTS.datasetName '_AITPD.txt']);
+% if(filterIndex<1),return,end
 
 fout=fopen([filePath file],'w');
 [m n]=cellfun(@size,{Trellis.Features});
 fprintf(fout,'%d,%d\n',length(Trellis),sum(m)*n(1));
+
 for i=1:length(Trellis)
+    progress = progress+1;
+    Progressbar(progress/iterations);
     fprintf(fout,'%d,%d\n',size(Trellis(i).Features,1),size(Trellis(i).Features,2));
     for j=1:size(Trellis(i).Features,1)
         for k=1:size(Trellis(i).Features,2)
