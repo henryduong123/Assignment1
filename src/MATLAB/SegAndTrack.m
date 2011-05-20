@@ -46,7 +46,7 @@ end
 
 for i=1:numProcessors
     system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-        num2str(numberOfImages) ' "' CONSTANTS.rootImageFolder(1:end-1) '" ' CONSTANTS.datasetName ' ' ...
+        num2str(numberOfImages) ' "' CONSTANTS.rootImageFolder(1:end-1) '" "' CONSTANTS.datasetName '" ' ...
         num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']); 
     %use line below instead of the 3 lines above for non-parallel or to debug
 %     Segmentor(i,numProcessors,numberOfImages,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
@@ -87,7 +87,7 @@ tSeg=toc;
 %% Tracking
 tic
 fprintf(1,'Tracking...');
-system(['.\MTC.exe ' fnameIn ' ' fnameOut ' > out.txt']);
+system(['.\MTC.exe "' fnameIn '" "' fnameOut '" > out.txt']);
 fprintf('Done\n');
 tTrack=toc;
 
