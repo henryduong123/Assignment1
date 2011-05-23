@@ -20,6 +20,8 @@ else
     Figures.time = time;
 end
 
+ClearCellSelection();
+
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 UpdateTimeIndicatorLine();
