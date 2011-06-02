@@ -26,6 +26,9 @@ end
 Figures.cells.handle = figure();
 Figures.tree.handle = figure();
 
+Figures.cells.selectedHulls = [];
+Figures.cells.selecting = false;
+
 whitebg(Figures.cells.handle,'k');
 whitebg(Figures.tree.handle,'w');
 
@@ -139,11 +142,21 @@ elseif  strcmp(evnt.Key,'pageup')
     TimeChange(time);
 elseif strcmp(evnt.Key,'space')
     TogglePlay(src,evnt);
+elseif ( strcmp(evnt.Key,'control') )
+    Figures.cells.selecting = true;
+elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
+    DeleteSelectedCells();
+elseif ( strcmp(evnt.Key,'return') )
+    tryMergeSelectedCells();
 end
 end
 
 function figureKeyRelease(src,evnt)
-%for future use
+    global Figures
+
+    if ( (src == Figures.cells.handle) && strcmp(evnt.Key,'control') )
+        Figures.cells.selecting = false;
+    end
 end
 
 function figureCellDown(src,evnt)
@@ -152,10 +165,20 @@ global Figures
 currentPoint = get(gca,'CurrentPoint');
 Figures.cells.currentHullID = FindHull(currentPoint);
 
+if ( (Figures.cells.currentHullID ~= -1) && Figures.cells.selecting )
+    ToggleCellSelection(Figures.cells.currentHullID);
+    return;
+end
+
 if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
     if(strcmp(Figures.advanceTimerHandle.Running,'on'))
         TogglePlay(src,evnt);
     end
+    
+    if ( ~Figures.cells.selecting )
+        ClearCellSelection();
+    end
+    
     if(Figures.cells.currentHullID == -1)
         return
     end
@@ -241,6 +264,39 @@ if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
     set(Figures.tree.handle,'WindowButtonMotionFcn','');
     TimeChange(Figures.time);
 end
+end
+
+function tryMergeSelectedCells()
+    global Figures
+    
+    try
+        set(Figures.tree.handle,'Pointer','watch');
+        set(Figures.cells.handle,'Pointer','watch');
+        [deleteCells replaceCell] = MergeSplitCells(Figures.cells.selectedHulls);
+        if ( isempty(replaceCell) )
+            set(Figures.tree.handle,'Pointer','arrow');
+            set(Figures.cells.handle,'Pointer','arrow');
+            msgbox(['Unable to merge [' num2str(Figures.cells.selectedHulls) '] in this frame'],'Unable to Merge','help','modal');
+            return;
+        end
+        History('Push');
+    catch err
+        try
+            ErrorHandeling(['Merging Selected Cells -- ' err.message], err.stack);
+            return;
+        catch err2
+            fprintf('%s',err2.message);
+            return;
+        end
+    end
+    set(Figures.tree.handle,'Pointer','arrow');
+    set(Figures.cells.handle,'Pointer','arrow');
+
+    DrawCells();
+    DrawTree(Figures.tree.familyID);
+    
+    LogAction('Merged cells',[deleteCells replaceCell],replaceCell);
+    
 end
 
 function learnFromEdits(src,evnt)

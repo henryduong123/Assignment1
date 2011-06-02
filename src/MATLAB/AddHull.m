@@ -22,31 +22,7 @@ end
 
 if(~isempty(trackID))
     % Try to split the existing hull    
-    if ( num < 2 )
-        try
-            set(Figures.tree.handle,'Pointer','watch');
-            set(Figures.cells.handle,'Pointer','watch');
-            [deleteCells replaceCell] = MergeSplitCells(clickPt(1,1:2));
-            if ( isempty(replaceCell) )
-                set(Figures.tree.handle,'Pointer','arrow');
-                set(Figures.cells.handle,'Pointer','arrow');
-                msgbox(['Unable to merge ' num2str(trackID) ' any further in this frame'],'Unable to Merge','help','modal');
-                return;
-            end
-            History('Push');
-        catch errorMessage
-            try
-                ErrorHandeling(['MergeHull(' num2str(clickPt(1,1:2)) ') -- ' errorMessage.message], errorMessage.stack);
-                return
-            catch errorMessage2
-                 fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-        set(Figures.tree.handle,'Pointer','arrow');
-        set(Figures.cells.handle,'Pointer','arrow');
-        LogAction('Merged cells',[deleteCells replaceCell],replaceCell);
-	else
+    if ( num > 1 )
         try
             newTracks = SplitHull(hullID,num);
             if(isempty(newTracks))

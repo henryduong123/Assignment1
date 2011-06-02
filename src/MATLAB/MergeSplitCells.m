@@ -5,17 +5,20 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [deleteCells replaceCell] = MergeSplitCells(clickPt)
-    global Figures CellHulls HashedCells SegmentationEdits CellFamilies
+function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
+    global Figures CellHulls HashedCells CellTracks SegmentationEdits CellFamilies
     
     replaceCell = [];
     
     t = Figures.time;
-    [mergeObj, deleteCells] = FindMergedCell(t, clickPt);
+%     [mergeObj, deleteCells] = FindMergedCell(t, clickPt);
+    [mergeObj, deleteCells] = CreateMergedCell(mergeCells);
     
-    if ( isempty(mergeObj) || isempty(deleteCells) )
+	if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
     end
+    
+    nextMergeCells = getNextMergeCells(t, deleteCells);
     
     replaceCell = min(deleteCells);
     deleteCells = setdiff(deleteCells,replaceCell);
@@ -37,7 +40,7 @@ function [deleteCells replaceCell] = MergeSplitCells(clickPt)
     
     changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, replaceCell);
     
-    t = propagateMerge(replaceCell, changedHulls);
+    t = propagateMerge(replaceCell, changedHulls, nextMergeCells);
 
     if ( t < length(HashedCells) )
         checkHulls = [HashedCells{t}.hullID];
@@ -56,12 +59,15 @@ function [deleteCells replaceCell] = MergeSplitCells(clickPt)
     ProcessNewborns(1:length(CellFamilies))
 end
 
-function tLast = propagateMerge(mergedHull, trackHulls)
+function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
     global CellHulls HashedCells
 
     tStart = CellHulls(mergedHull).time;
     tEnd = length(HashedCells)-1;
     
+    propHulls = getPropagationCells(tStart+1, nextMergeCells);
+    
+    idx = 1;
     tLast = tStart;
     for t=tStart:tEnd
         tLast = t;
@@ -86,14 +92,23 @@ function tLast = propagateMerge(mergedHull, trackHulls)
             return;
         end
         
-        checkPt = CellHulls(affectedHulls(mergeIdx)).centerOfMass;
-        [mergeObj, deleteCells] = FindMergedCell(t+1, [checkPt(2) checkPt(1)]);
+%         checkPt = CellHulls(affectedHulls(mergeIdx)).centerOfMass;
+%         [mergeObj, deleteCells] = FindMergedCell(t+1, [checkPt(2) checkPt(1)]);
+
+%         [mergeObj, deleteCells] = CreateMergedCell(nextMergeCells);
+%         if ( isempty(mergeObj) || isempty(deleteCells) )
+%             return;
+%         end
+        mergedHull = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, nextMergeCells);
         
-        if ( isempty(mergeObj) || isempty(deleteCells) )
-            return;
+        for i=1:length(propHulls)
+            if ( isempty(propHulls{i}) || (length(propHulls{i}) < idx) )
+                continue;
+            end
+            
+            nextMergeCells = [nextMergeCells propHulls{i}(idx)];
         end
-        
-        mergedHull = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, deleteCells);
+        idx = idx + 1;
         
         nextHulls = [HashedCells{t+1}.hullID];
         [costMatrix bExtendHulls bAffectedHulls] = GetCostSubmatrix(checkHulls, nextHulls);
@@ -104,8 +119,42 @@ function tLast = propagateMerge(mergedHull, trackHulls)
     end
 end
 
+function nextMergeCells = getNextMergeCells(t, mergeCells)
+    global CellTracks
+    
+    nextMergeCells = [];
+    trackIDs = GetTrackID(mergeCells, t);
+    for i=1:length(trackIDs)
+        hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
+        if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
+            continue;
+        end
+        
+        nextMergeCells = [nextMergeCells CellTracks(trackIDs(i)).hulls(hash)];
+    end
+end
+
+function propHulls = getPropagationCells(t, mergeCells)
+    global CellTracks
+    
+    propHulls = cell(length(mergeCells),1);
+    trackIDs = GetTrackID(mergeCells, t);
+    for i=1:length(trackIDs)
+        hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
+        if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
+            continue;
+        end
+        
+        propHulls{i} = CellTracks(trackIDs(i)).hulls(hash:end);
+        zIdx = find((propHulls{i} == 0), 1, 'first');
+        if ( zIdx > 0 )
+            propHulls{i} = propHulls{i}(1:(zIdx-1));
+        end
+    end
+end
+
 function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
-    global CONSTANTS CellHulls HashedCells
+    global CellHulls
     
     mergedIdx = find(checkHulls == mergedHull);
     bDeleteHulls = ismember(nextHulls, deleteHulls);
@@ -113,25 +162,25 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     
     deleteHulls = nextHulls(bDeleteHulls);
     nextMergeHulls = deleteHulls(bestIn(bDeleteHulls) == mergedIdx);
-    
-    changedHulls = [];
+
     replaceIdx = [];
     
     if ( length(nextMergeHulls) <= 1 )
         return;
     end
     
+    [mergeObj, deleteCells] = CreateMergedCell(nextMergeHulls);
+    if ( isempty(mergeObj) || isempty(deleteCells) )
+        return;
+    end
+    
     replaceIdx = min(nextMergeHulls);
     deleteCells = setdiff(nextMergeHulls, replaceIdx);
     
-    CellHulls(replaceIdx).indexPixels = vertcat(CellHulls(nextMergeHulls).indexPixels);
-    CellHulls(replaceIdx).imagePixels = vertcat(CellHulls(nextMergeHulls).imagePixels);
-    
-    [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(replaceIdx).indexPixels);
-    chIdx = convhull(c,r);
-    
-    CellHulls(replaceIdx).points = [c(chIdx) r(chIdx)];
-    CellHulls(replaceIdx).centerOfMass = mean([r c]);
+    CellHulls(replaceIdx).indexPixels = mergeObj.indexPixels;
+    CellHulls(replaceIdx).imagePixels = mergeObj.imagePixels;
+    CellHulls(replaceIdx).points = mergeObj.points;
+    CellHulls(replaceIdx).centerOfMass = mergeObj.centerOfMass;
     CellHulls(replaceIdx).deleted = 0;
     
     for i=1:length(deleteCells)

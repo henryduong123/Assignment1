@@ -309,6 +309,7 @@ if(0>=answer || isempty(CellTracks(answer).hulls))
     return
 end
 DrawTree(CellTracks(answer).familyID);
+DrawCells();
 end
 
 % function learnFromEdits(src,evnt)
