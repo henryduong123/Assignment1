@@ -189,7 +189,7 @@ if(isempty(CellTracks(trackID).timeOfDeath))
         end
     end
     if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1
-        if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.;end;
+        if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.2;end;
         color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
         plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
