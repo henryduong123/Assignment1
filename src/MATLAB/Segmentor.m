@@ -14,7 +14,7 @@ function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlp
 
 
 % global CONSTANTS
-
+    
 
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
@@ -44,31 +44,36 @@ for t = tStart:tStep:tEnd
     [im map]=imread(fname);
     im=mat2gray(im);
     
-    bwDark=0*im;
     level=imageAlpha*graythresh(im);
     bwHalo=im2bw(im,level);
     
-    l2=graythresh(im);
-    pix=im(im<l2);
-    lDark=graythresh(pix);
-    bwDark(im<lDark)=1;
+    bwDark=0*im;
+    seBig=strel('square',19);
+    bwHaloMask=imdilate(bwHalo,seBig);
     
-    % bwNorm=GetNormalVectors(bwHalo,bwDark);
-    bwNorm=0*bwDark;
     se=strel('square',3);
     gd=imdilate(im,se);
     ge=imerode(im,se);
     ig=gd-ge;
     lig=graythresh(ig);
     bwig=im2bw(ig,lig);
-    seBig=strel('square',19);
+    
     bwmask=imclose(bwig,seBig);
+    % find dark chewy centers
+    CC = bwconncomp(bwmask,8);
+    LHaloMask = labelmatrix(CC);
+    num=max(LHaloMask(:));
+    for n=1:num
+        pix=find(LHaloMask==n & ~bwHalo);
+        level=graythresh(im(pix));
+        bwpix=im2bw(im(pix),level);
+        bwDark(pix(find(~bwpix)))=1;
+    end
     
     bwDarkCenters=(bwDark & bwmask );
     d=bwdist(~bwDarkCenters);
     bwDarkCenters(d<2)=0;
-    %
-    
+
     bwHaloMask=imdilate(bwHalo,seBig);
     
     bwHaloHoles=imfill(bwHalo ,8,'holes') & ~bwHalo;
@@ -87,7 +92,7 @@ for t = tStart:tStep:tEnd
     % [r c]=find(bwHoles);
     % plot(c,r,'.c');
     
-    bwCells=bwDarkCenters| bwHoles|bwNorm;
+    bwCells=bwDarkCenters| bwHoles;
     bwCells(~bwHaloMask)=0;
     
     
@@ -173,9 +178,10 @@ for t = tStart:tStep:tEnd
         end
         
         ch=convhull(r,c);
+        
         % one  last check for parasites
-        if length(find(im(pix)>lDark))/length(pix)> 0.5
-            %         plot(c(ch),r(ch),'-c')
+        if length(find(bwDark(pix)))/length(pix)< 0.4
+%             plot(c(ch),r(ch),'-c')
             continue
         end
         % it's a keeper!
