@@ -15,6 +15,7 @@ oldFamilyID = CellTracks(trackID).familyID;
 
 try
     newFamilyID = RemoveFromTree(time, trackID,'yes');
+    History('Push');
 catch errorMessage
     try
         ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
