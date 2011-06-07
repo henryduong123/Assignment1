@@ -78,6 +78,10 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove Cell',...
     'CallBack',     @removeHull);
 
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove Track Cells To Here',...
+    'CallBack',     @removeTrackPrevious);
+
 % uimenu(Figures.cells.contextMenuHandle,...
 %     'Label',        'Mark Death',...
 %     'CallBack',     @markDeath,...
@@ -399,6 +403,45 @@ end
 
 DrawTree(Figures.tree.familyID);
 DrawCells();
+end
+
+function removeTrackPrevious(src,evnt)
+    global Figures CellFamilies
+
+    [hullID trackID] = GetClosestCell(0);
+    if(isempty(trackID)),return,end
+    
+    try
+        hullIDs = RemoveTrackPrevious(trackID, hullID);
+        History('Push');
+    catch errorMessage
+        try
+            ErrorHandeling(['RemoveTrackPrevious(' num2str(trackID) ', ' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    LogAction(['Removed hulls from start of track ' num2str(trackID) ' to frame ' num2str(Figures.time)],hullIDs);
+    
+    %if the whole family disapears with this change, pick a diffrent family to
+    %display
+    if(isempty(CellFamilies(Figures.tree.familyID).tracks))
+        for i=1:length(CellFamilies)
+            if(~isempty(CellFamilies(i).tracks))
+                Figures.tree.familyID = i;
+                break
+            end
+        end
+        DrawTree(Figures.tree.familyID);
+        DrawCells();
+        msgbox(['By removing this cell, the complete tree is no more. Displaying clone rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
+        return
+    end
+
+    DrawTree(Figures.tree.familyID);
+    DrawCells();
 end
 
 function markDeath(src,evnt)
