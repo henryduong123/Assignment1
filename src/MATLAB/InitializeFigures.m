@@ -222,10 +222,12 @@ if(currentHullID~=Figures.cells.currentHullID)
     end
 elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
     %no change and the current tree contains the cell clicked on
+    ToggleCellSelection(Figures.cells.currentHullID);
     return
 end
 DrawTree(CellTracks(previousTrackID).familyID);
 DrawCells();
+ToggleCellSelection(Figures.cells.currentHullID);
 end
 
 function figureTreeDown(src,evnt)
