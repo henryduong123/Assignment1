@@ -9,11 +9,20 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
     global HashedCells CellHulls CellTracks
     
     startTime = CellTracks(trackID).startTime;
-    endTime = CellHulls(endHullID).time;
+    endTime = CellTracks(trackID).endTime;
+    
+    hullIDs = [];
+    
+    extTime = endTime - CellHulls(endHullID).time;
+    if ( extTime > 3 )
+        button = questdlg(['This track extends ' num2str(extTime) ' frames past the current frame, are you sure you wish to delete?'], 'Delete Track', 'Yes', 'No', 'Yes');
+        if ( strcmpi(button,'No') )
+            return;
+        end
+    end
     
     rmNum = endTime - startTime + 1;
     
-    hullIDs = [];
     bNeedsUpdate = 0;
     hulls = CellTracks(trackID).hulls;
     for i=1:rmNum
