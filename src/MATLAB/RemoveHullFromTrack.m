@@ -43,6 +43,9 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             if ( CellFamilies(CellTracks(trackID).familyID).rootTrackID == trackID )
                 CellFamilies(CellTracks(trackID).familyID).startTime = newStartTime;
             end
+            if ( bUpdateTree )
+                RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+            end
         else
             if(~isempty(CellTracks(trackID).parentTrack))
                 CombineTrackWithParent(CellTracks(trackID).siblingTrack);
@@ -65,6 +68,25 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             nzidx = find(CellTracks(trackID).hulls(startchk:end),1);
             nztime = CellTracks(trackID).startTime + nzidx + startchk - 2;
             newFamilyID = RemoveFromTree(nztime, trackID, 'yes');
+            if ( isempty(newFamilyID) )
+                return;
+            end
+            
+            StraightenTrack(CellFamilies(newFamilyID).rootTrackID);
+            if ( ~isempty(CellTracks(trackID).parentTrack) )
+                StraightenTrack(CellTracks(trackID).parentTrack);
+            end
+        end
+        
+        endchk = min((index+minZeroSplit), length(CellTracks(trackID).hulls));
+        if ( all(CellTracks(trackID).hulls(index:endchk) == 0) )
+            nzidx = find(CellTracks(trackID).hulls(index:end),1);
+            nztime = CellTracks(trackID).startTime + nzidx + index - 2;
+            newFamilyID = RemoveFromTree(nztime, trackID, 'yes');
+            
+            if ( isempty(newFamilyID) )
+                return;
+            end
             
             StraightenTrack(CellFamilies(newFamilyID).rootTrackID);
             if ( ~isempty(CellTracks(trackID).parentTrack) )

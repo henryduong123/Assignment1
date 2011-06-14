@@ -14,7 +14,17 @@ function ExtendTrackWithHull(trackID, hullID)
     time = CellHulls(hullID).time;
     hash = time - CellTracks(trackID).startTime + 1;
     if ( hash <= 0 )
-        error('ExtendTrackWithHull cannot extend tracks backwards before their start time.');
+        if ( ~isempty(CellTracks(trackID).parentTrack) )
+            newFamilyID = RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+            if ( ~isempty(newFamilyID) )
+                trackID = CellFamilies(newFamilyID).rootTrackID;
+            end
+        end
+        
+        RehashCellTracks(trackID, time);
+        CellTracks(trackID).startTime = time;
+        hash = time - CellTracks(trackID).startTime + 1;
+%         error('ExtendTrackWithHull cannot extend tracks backwards before their start time.');
     end
     
     CellTracks(trackID).hulls(hash) = hullID;

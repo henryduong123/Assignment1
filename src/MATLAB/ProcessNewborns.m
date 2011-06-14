@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ProcessNewborns(families)
+function ProcessNewborns(families, tFinal)
 %This takes all the families with start times > 1 and attempts to attach
 %that families' tracks to other families that start before said family
 
@@ -21,6 +21,10 @@ global CellFamilies CellTracks CellHulls Costs CONSTANTS
 
 if ( ~exist('families','var') )
     families = 1:length(CellFamilies);
+end
+
+if ( ~exist('tFinal','var') )
+    tFinal = 1;
 end
 
 tStart = 2;
@@ -111,4 +115,43 @@ for i=1:size
         ChangeLabel(CellTracks(childTrackID).startTime, childTrackID, parentTrackID);
     end
 end
+
+for i=1:length(families)
+    if ( isempty(CellFamilies(families(i)).startTime) )
+        continue;
+    end
+    
+    if ( CellFamilies(families(i)).endTime < tFinal )
+        continue;
+    end
+    
+    removeTracks = [];
+    for j=1:length(CellFamilies(families(i)).tracks)
+        trackID = CellFamilies(families(i)).tracks(j);
+        if ( isempty(CellTracks(trackID).childrenTracks) && (CellTracks(trackID).endTime < tFinal) && ~isempty(CellTracks(trackID).parentTrack) )
+            removeTracks = [removeTracks trackID];
+        end
+    end
+    
+    j = 1;
+    while( j <= length(removeTracks) )
+        siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
+        parentTrack = CellTracks(removeTracks(j)).parentTrack;
+        if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) )
+            removeTracks = [removeTracks parentTrack];
+        end
+        j = j + 1;
+    end
+    
+    for j=1:length(removeTracks)
+        siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
+        if ( any(ismember(removeTracks, siblingTrack)) )
+            RemoveFromTree(CellTracks(removeTracks(j)).startTime, removeTracks(j), 'no');
+        else
+            RemoveFromTree(CellTracks(removeTracks(j)).startTime, removeTracks(j), 'yes');
+        end
+    end
 end
+
+end
+
