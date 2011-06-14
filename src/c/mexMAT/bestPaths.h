@@ -56,4 +56,4 @@ public:
 	std::vector<int> path;
 };
 
-void buildBestPaths(int t, int numTracks);
+void buildBestPaths(int dir, int numTracks);

@@ -33,6 +33,13 @@ double calcHullDist(int startCellIdx, int nextCellIdx)
 
 double calcCCDist(int startCellIdx, int nextCellIdx)
 {
+	if ( getCellTime(startCellIdx) > getCellTime(nextCellIdx) )
+	{
+		int tmp = startCellIdx;
+		startCellIdx = nextCellIdx;
+		nextCellIdx = tmp;
+	}
+
 	mxArray* ccArray = mxGetCell(gCellConnDist, MATLAB_IDX(startCellIdx));
 
 	int M = mxGetM(ccArray);
@@ -88,15 +95,25 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	int sourceHull = path[srcIdx];
 	int nextHull = path[srcIdx+1];
 
+	int dir = 1;
+
 	int startIdx;
 	if ( bCheck )
 		startIdx = path.size() - 2;
 	else
 	{
+		dir = (getCellTime(nextHull) - getCellTime(sourceHull) >= 0) ? 1 : -1;
+
 		int tStart = std::max<int>(getCellTime(path[srcIdx]) - gWindowSize + 1, 1);
 		int tPathStart = getCellTime(path[0]);
-
-		startIdx = std::max<int>(tStart - tPathStart, 0);
+		if ( dir < 0 )
+		{
+			tStart = std::max<int>(getCellTime(path[srcIdx]) + gWindowSize - 1, 1);
+			tPathStart = getCellTime(path[0]);
+			startIdx = std::max<int>(tPathStart - tStart, 0);
+		}
+		else
+			startIdx = std::max<int>(tStart - tPathStart, 0);
 	}
 
 	for ( int k=startIdx; k < path.size()-1; ++k )

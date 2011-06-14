@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmx.lib libmex.lib libmat.lib"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
+				OutputFile="$(OutDir)\..\..\..\MATLAB\$(ProjectName).mexw32"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="C:\Program Files (x86)\MATLAB\R2009bSP1\extern\lib\win32\microsoft"
 				ModuleDefinitionFile="mexMAT/mexMAT.def"

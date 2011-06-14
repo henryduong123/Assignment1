@@ -37,6 +37,7 @@ extern CEdgeSubgraph* gConnectPtr;
 
 extern int gWindowSize;
 extern int gNumFrames;
+extern int gConstraintFrames;
 
 extern const double gVMax;
 extern const double gCCMax;

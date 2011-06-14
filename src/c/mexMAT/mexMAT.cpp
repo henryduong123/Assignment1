@@ -32,6 +32,7 @@ int hashHullsFIdx[ARRAY_SIZE(hashHullsFields)];
 
 int gWindowSize;
 int gNumFrames;
+int gConstraintFrames;
 
 const double gVMax = 80.0;
 const double gCCMax = 40.0;
@@ -78,7 +79,7 @@ void buildStructFieldIdx(int fieldIdx[], int numFields, char* fieldNames[], cons
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-	char* expectTypes[] = {"double", "double", "cell", "struct", "cell"};
+	char* expectTypes[] = {"double", "double", "cell", "struct", "cell", "struct"};
 	int expectNumArgs = ARRAY_SIZE(expectTypes);
 
 	checkInputs(nrhs, prhs, expectNumArgs, expectTypes);
@@ -93,14 +94,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	//if ( gConstants == NULL )
 	//	mexErrMsgTxt("Global CONSTANTS variable unavailable.");
 
-	int t = ((int)mxGetScalar(prhs[0]));
+	int dir = ((int) mxGetScalar(prhs[0]));
 	gWindowSize = ((int) mxGetScalar(prhs[1]));
 
 	gTrackHulls = prhs[2];
 	gCellHulls = prhs[3];
 	gHashHulls = prhs[4];
+	gCellTracks = prhs[5];
 
-	gCellTracks = mexGetVariablePtr("global", "CellTracks");
 	gCellConnDist = mexGetVariablePtr("global", "ConnectedDist");
 
 	if ( gCellHulls == NULL || gCellTracks == NULL || gHashHulls == NULL || gCellConnDist == NULL )
@@ -110,9 +111,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	int otherDim = mxGetM(gHashHulls);
 	if ( gNumFrames < 2 || otherDim > 1 )
 		mexErrMsgTxt("HashedCells must be a 1xN hashed cell structure.");
-
-	if ( t < 0 || t > gNumFrames-1 )
-		mexErrMsgTxt("Parameter 1 must be a valid frame number.");
 
 	//gWindowSize = mxGetN(gTrackHulls);
 	otherDim = mxGetM(gTrackHulls);
@@ -124,6 +122,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	buildStructFieldIdx(cellTracksFIdx, ARRAY_SIZE(cellTracksFields), cellTracksFields, gCellTracks);
 	buildStructFieldIdx(hashHullsFIdx, ARRAY_SIZE(hashHullsFields), hashHullsFields, mxGetCell(gHashHulls,0));
 
+	gConstraintFrames = mxGetNumberOfElements(gTrackHulls);
 	int numTracks = mxGetNumberOfElements(mxGetCell(gTrackHulls,C_IDX(0)));
 	int numNextHulls = mxGetNumberOfElements(mxGetCell(gTrackHulls,C_IDX(1)));
 
@@ -135,7 +134,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	CEdgeSubgraph connGraph(mxGetCell(gTrackHulls,C_IDX(0)), mxGetCell(gTrackHulls,C_IDX(1)));
 	gConnectPtr = &(connGraph);
 
-	buildBestPaths(t, numTracks);
+	buildBestPaths(dir, numTracks);
 
 	// Set output pointer to the internal matlab pointer in EdgeSubgraph
 	plhs[0] = gConnectPtr->graphPointer();

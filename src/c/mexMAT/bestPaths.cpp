@@ -37,8 +37,10 @@ void buildStartTrackList(std::vector<int>& trackIdx, int t, int numTracks)
 	}
 }
 
-void buildTrackHistory(int t, int numTracks)
+void buildTrackHistory(int dir, int numTracks)
 {
+	int firstHull = (int)(((double*) mxGetData(mxGetCell(gTrackHulls, C_IDX(0))))[0]);
+	int t = (int) mxGetScalar(mxGetField(gCellHulls, MATLAB_IDX(firstHull), "time"));
 	std::vector<int> startTrackList(numTracks);
 	buildStartTrackList(startTrackList, t, numTracks);
 
@@ -47,13 +49,17 @@ void buildTrackHistory(int t, int numTracks)
 	{
 		double* hullsData = (double*) mxGetData(mxGetField(gCellTracks, MATLAB_IDX(startTrackList[i]), "hulls"));
 		int trackStart = (int) mxGetScalar(mxGetField(gCellTracks, MATLAB_IDX(startTrackList[i]), "startTime"));
+		int trackLen = (int) mxGetNumberOfElements(mxGetField(gCellTracks, MATLAB_IDX(startTrackList[i]), "hulls"));
 		int trkt = t - trackStart;
+
 		int histt = std::max<int>(0, trkt-gWindowSize-1);
+		if ( dir < 0 )
+			histt = std::min<int>(trackLen-1, trkt+gWindowSize+1);
 
 		gTrackHistory[i].clear();
 		gTrackHistory[i].reserve(2*gWindowSize+1);
 
-		for ( int j=histt; j < trkt; ++j )
+		for ( int j=histt; j != trkt; j += dir )
 		{
 			if ( hullsData[j] == 0.0 )
 			{
@@ -101,13 +107,13 @@ int addBestPath(CSourcePath& path, int bestNextHull)
 }
 
 // Depth-first path search
-int bestPathDFS(int tStart, int t, int tEnd, CSourcePath path, int bestNextHull)
+int bestPathDFS(int t, int tEnd, CSourcePath path, int bestNextHull)
 {
 	bool bFinishedSearch = true;
 
 	if ( t < tEnd )
 	{
-		int thIdx = t - tStart;
+		int thIdx = t;
 		mxArray* hulls = mxGetCell(gTrackHulls, C_IDX(thIdx));
 
 		int numHulls = mxGetNumberOfElements(hulls);
@@ -133,7 +139,7 @@ int bestPathDFS(int tStart, int t, int tEnd, CSourcePath path, int bestNextHull)
 
 			path.pushPoint(nextHull);
 
-			bestNextHull = bestPathDFS(tStart, t+1, tEnd, path, bestNextHull);
+			bestNextHull = bestPathDFS(t+1, tEnd, path, bestNextHull);
 			path.popPoint();
 		}
 	}
@@ -146,11 +152,11 @@ int bestPathDFS(int tStart, int t, int tEnd, CSourcePath path, int bestNextHull)
 	return bestNextHull;
 }
 
-void buildBestPaths(int t, int numTracks)
+void buildBestPaths(int dir, int numTracks)
 {
-	buildTrackHistory(t, numTracks);
+	buildTrackHistory(dir, numTracks);
 
-	int tEnd = std::min<int>(t+gWindowSize, gNumFrames);
+	int tEnd = std::min<int>(gConstraintFrames, gWindowSize);
 
 	double* frmData = (double*) mxGetData(mxGetCell(gTrackHulls, C_IDX(0)));
 	for ( int srcIdx=0; srcIdx < numTracks; ++srcIdx )
@@ -158,6 +164,6 @@ void buildBestPaths(int t, int numTracks)
 		CSourcePath path = gTrackHistory[srcIdx];
 		path.pushPoint((int) frmData[srcIdx]);
 
-		int bestNextHull = bestPathDFS(t, t+1, tEnd, path, -1);
+		int bestNextHull = bestPathDFS(1, tEnd, path, -1);
 	}
 }
