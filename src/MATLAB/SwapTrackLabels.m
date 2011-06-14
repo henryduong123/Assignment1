@@ -10,7 +10,7 @@ function SwapTrackLabels(time,trackID1,trackID2)
 %forward.  Any children will also be swaped
 
 
-global CellTracks CellHulls
+global CellTracks CellHulls SegmentationEdits
 
 track1Hash = time - CellTracks(trackID1).startTime + 1;
 track2Hash = time - CellTracks(trackID2).startTime + 1;
@@ -85,6 +85,6 @@ if(~isempty(CellTracks(trackID2).timeOfDeath))
     familyIDs = [familyIDs StraightenTrack(trackID2)];
 end
 if(~isempty(familyIDs))
-    ProcessNewborns(familyIDs);
+    ProcessNewborns(familyIDs,SegmentationEdits.maxEditedFrame);
 end
 end

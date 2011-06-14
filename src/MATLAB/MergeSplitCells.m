@@ -56,7 +56,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
     UpdateSegmentationEditsMenu();
-    ProcessNewborns(1:length(CellFamilies))
+    ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
 end
 
 function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)

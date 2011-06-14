@@ -23,7 +23,7 @@ function ChangeLabel(time,oldTrackID,newTrackID)
 %stated above.
 
 
-global CellTracks CellHulls
+global CellTracks CellHulls SegmentationEdits
 
 bothHaveChildren = 0;%flag to deal with conflicting children
 %flags to deal with position of tracks relitive to one another
@@ -147,7 +147,7 @@ if(~isempty(CellTracks(newTrackID).timeOfDeath))
     familyIDs = [familyIDs StraightenTrack(newTrackID)];
 end
 if(~isempty(familyIDs))
-    ProcessNewborns(familyIDs);
+    ProcessNewborns(familyIDs, SegmentationEdits.maxEditedFrame);
 end
 end
 

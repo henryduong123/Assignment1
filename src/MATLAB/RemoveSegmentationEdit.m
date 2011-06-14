@@ -12,7 +12,14 @@ function RemoveSegmentationEdit(rmHull)
         % Remove the deleted hull from the edited segmentations lists
         SegmentationEdits.newHulls(SegmentationEdits.newHulls == rmHull) = [];
         SegmentationEdits.changedHulls(SegmentationEdits.changedHulls == rmHull) = [];
+        SegmentationEdits.maxEditedFrame = max(SegmentationEdits.maxEditedFrame, getFrameTimes(rmHull));
     end
     
     UpdateSegmentationEditsMenu();
+end
+
+function times = getFrameTimes(hulls)
+    global CellHulls
+    
+    times =[CellHulls(hulls).time];
 end

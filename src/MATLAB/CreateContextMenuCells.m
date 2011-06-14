@@ -448,7 +448,7 @@ function removeTrackPrevious(src,evnt)
 end
 
 function markDeath(src,evnt)
-global Figures CellTracks
+global Figures CellTracks SegmentationEdits
 
 [hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
@@ -458,11 +458,11 @@ CellTracks(trackID).timeOfDeath = Figures.time;
 %drop children from tree and run ProcessNewborns
 if(~isempty(CellTracks(trackID).childrenTracks))
     try
-        ProcessNewborns(StraightenTrack(trackID));
+        ProcessNewborns(StraightenTrack(trackID), SegmentationEdits.maxEditedFrame);
         History('Push');
     catch errorMessage
         try
-            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
+            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2.message);
@@ -496,7 +496,7 @@ end
 % added 4 19 2011 ac
 function phenotypes(src,evnt)
 
-global Figures CellPhenotypes CellTracks
+global Figures CellPhenotypes CellTracks SegmentationEdits
 
 [hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
@@ -540,10 +540,10 @@ if 1==i
         CellTracks(trackID).timeOfDeath = [];
         History('Push');
         try
-            ProcessNewborns(CellTracks(trackID).familyID);
+            ProcessNewborns(CellTracks(trackID).familyID, SegmentationEdits.maxEditedFrame);
         catch errorMessage
             try
-                ErrorHandeling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
+                ErrorHandeling(['ProcessNewborns(' num2str(trackID) ', ' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf('%s',errorMessage2.message);
@@ -580,6 +580,7 @@ else
     LogAction(['Activated phenotype ' CellPhenotypes.descriptions{i} ' for track ' num2str(trackID)]);
 
 end
+
 DrawTree(Figures.tree.familyID);   
     
 end

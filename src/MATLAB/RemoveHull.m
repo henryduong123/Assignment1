@@ -11,7 +11,7 @@ function RemoveHull(hullID, bDontUpdateTree)
 % should not be drawn on the cells figure
 
 
-global HashedCells CellHulls CellTracks
+global HashedCells CellHulls CellTracks CellFamilies SegmentationEdits
 
 if ( ~exist('bDontUpdateTree','var') )
     bDontUpdateTree = 0;
@@ -34,6 +34,6 @@ RemoveSegmentationEdit(hullID);
 
 if ( ~bDontUpdateTree && bNeedsUpdate )
     RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
-    ProcessNewborns();
+    ProcessNewborns(1:length(CellFamilies),SegmentationEdits.maxEditedFrame);
 end
 end

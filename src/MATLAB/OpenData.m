@@ -58,7 +58,9 @@ if(~isempty(Figures))
 end
 
 % Clear edits when new data set is opened
-SegmentationEdits = [];
+SegmentationEdits.newHulls = [];
+SegmentationEdits.changedHulls = [];
+SegmentationEdits.maxEditedFrame = 1;
 
 oldCONSTANTS = CONSTANTS;
 

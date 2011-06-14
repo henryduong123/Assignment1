@@ -106,6 +106,8 @@ Figures.cells.learnButton = uicontrol(...
     'String',       'Learn From Edits',...
     'Visible',      'off',...
    'CallBack',     @learnFromEdits);
+
+Figures.cells.maxEditedFrame = 1;
 end
 
 %% Callback Functions
@@ -310,7 +312,7 @@ function learnFromEdits(src,evnt)
     
     try
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-        ProcessNewborns(1:length(CellFamilies));
+        ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
     catch err
         try
             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);

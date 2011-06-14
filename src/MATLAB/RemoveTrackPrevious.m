@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function hullIDs = RemoveTrackPrevious(trackID, endHullID)
-    global HashedCells CellHulls CellTracks
+    global HashedCells CellHulls CellTracks CellFamilies SegmentationEdits
     
     startTime = CellTracks(trackID).startTime;
     endTime = CellTracks(trackID).endTime;
@@ -21,13 +21,12 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
         end
     end
     
-    rmNum = endTime - startTime + 1;
+%     rmNum = endTime - startTime + 1;
     
     bNeedsUpdate = 0;
     hulls = CellTracks(trackID).hulls;
-    for i=1:rmNum
+    for i=1:length(hulls)
         hullID = hulls(i);
-        time = startTime + i - 1;
         
         if ( hullID == 0 )
             continue;
@@ -35,6 +34,7 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
         
         hullIDs = [hullIDs hullID];
         
+        time = CellHulls(hullID).time;
         bRmUpdate = RemoveHullFromTrack(hullID, trackID);
         hullIdx = [HashedCells{time}.hullID]==hullID;
         
@@ -47,6 +47,6 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
     
     if ( bNeedsUpdate )
         RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
-        ProcessNewborns();
+        ProcessNewborns(1:length(CellFamilies),SegmentationEdits.maxEditedFrame);
     end
 end

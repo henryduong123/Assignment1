@@ -11,10 +11,18 @@ function AddSegmentationEdit(addNewHulls, addChangedHulls)
     if ( isempty(SegmentationEdits) )
         SegmentationEdits.newHulls = [];
         SegmentationEdits.changedHulls = [];
+        SegmentationEdits.maxEditedFrame = 1;
     end
     
     SegmentationEdits.newHulls = unique([SegmentationEdits.newHulls addNewHulls]);
     SegmentationEdits.changedHulls = unique([SegmentationEdits.changedHulls addChangedHulls]);
+    SegmentationEdits.maxEditedFrame = max([SegmentationEdits.maxEditedFrame getFrameTimes(addNewHulls)]);
     
     UpdateSegmentationEditsMenu();
+end
+
+function times = getFrameTimes(hulls)
+    global CellHulls
+    
+    times =[CellHulls(hulls).time];
 end

@@ -20,6 +20,7 @@ global CellFamilies CellTracks CellHulls
 
 hash = time - CellTracks(trackID).startTime + 1;
 
+newFamilyID = [];
 % Make sure we're splitting the track on a non-zero hull
 nzidx = find(CellTracks(trackID).hulls(hash:end) > 0, 1);
 if ( isempty(nzidx) )
