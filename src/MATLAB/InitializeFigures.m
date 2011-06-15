@@ -12,7 +12,7 @@ function InitializeFigures()
 %here
 
 
-global Figures CONSTANTS
+global Figures CONSTANTS HashedCells
 
 Figures.time = 1;
 
@@ -107,7 +107,7 @@ Figures.cells.learnButton = uicontrol(...
     'Visible',      'off',...
    'CallBack',     @learnFromEdits);
 
-Figures.cells.maxEditedFrame = 1;
+Figures.cells.maxEditedFrame = length(HashedCells);
 end
 
 %% Callback Functions
@@ -304,13 +304,14 @@ function tryMergeSelectedCells()
 end
 
 function learnFromEdits(src,evnt)
-    global CellFamilies SegmentationEdits Figures
+    global CellFamilies HashedCells SegmentationEdits Figures
     
-    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
+    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls)) && isempty(SegmentationEdits.editTime)) )
         return;
     end
     
     try
+        PropagateBackward(SegmentationEdits.editTime);
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
         ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
     catch err
@@ -325,6 +326,9 @@ function learnFromEdits(src,evnt)
     
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
+    SegmentationEdits.maxEditedFrame = length(HashedCells);
+    SegmentationEdits.editTime = [];
+    
     UpdateSegmentationEditsMenu();
     
     DrawCells();

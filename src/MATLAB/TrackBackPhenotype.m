@@ -40,15 +40,19 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
         end
     end
     
+    Progressbar(0);
     for t=tStart:-1:2
-        % Don't track through leaf-marked hulls start new tracks for them
-        avoidHulls = leafHulls([CellHulls(leafHulls).time] == t-1);
+%         % Don't track through leaf-marked hulls start new tracks for them
+%         avoidHulls = leafHulls([CellHulls(leafHulls).time] == t-1);
+        avoidHulls = [];
         
         if ( isempty(trackHulls) )
             break;
         end
         
-        disp(t);
+        Progressbar((tStart - t + 1)/(tStart - 1));
+        
+%         disp(t);
         
         for i=1:length(backHash{t-1})
             idx = find(ismember(backHash{t-1}(i).hullID, startHulls));
@@ -77,7 +81,9 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
         trackHulls = union(trackHulls, startHulls([CellHulls(startHulls).time] == t-1));
     end
     
-    ProcessNewborns(1:length(CellFamilies), tStart);
+    Progressbar(1);
+    
+%     ProcessNewborns(1:length(CellFamilies), tStart);
 end
 
 function [tracks, hash, bAssign] = assignBackTracks(t, costMatrix, trackedHulls, nextHulls, tracks, hash, bPropForward)
@@ -160,7 +166,7 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
         changedHulls = [oldHull hull];
     else
         % Add hull to track
-        RemoveHullFromTrack(hull, oldTrack, 1);
+        RemoveHullFromTrack(hull, oldTrack, 1, -1);
         
         % Some RemoveHullFromTrack cases cause track to be changed
         track = GetTrackID(extHull);

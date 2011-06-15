@@ -8,7 +8,7 @@
 function UpdateSegmentationEditsMenu(src,evnt)
     global SegmentationEdits Figures
     
-    if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls) )
+    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls)) && isempty(SegmentationEdits.editTime)) )
 %         set(Figures.tree.menuHandles.learnEditsMenu, 'enable', 'off');
 %         set(Figures.cells.menuHandles.learnEditsMenu, 'enable', 'off');
         set(Figures.cells.learnButton, 'Visible', 'off');
