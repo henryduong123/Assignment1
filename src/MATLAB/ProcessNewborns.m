@@ -128,7 +128,7 @@ for i=1:length(families)
     removeTracks = [];
     for j=1:length(CellFamilies(families(i)).tracks)
         trackID = CellFamilies(families(i)).tracks(j);
-        if ( isempty(CellTracks(trackID).childrenTracks) && (CellTracks(trackID).endTime < tFinal) && ~isempty(CellTracks(trackID).parentTrack) )
+        if ( ~validBranch(trackID, tFinal) )
             removeTracks = [removeTracks trackID];
         end
     end
@@ -155,3 +155,15 @@ end
 
 end
 
+function bValid = validBranch(trackID, tFinal)
+    global CellTracks
+    
+    bValid = (~isLeafBranch(trackID) || (CellTracks(trackID).endTime >= tFinal) ...
+        || (~isempty(CellTracks(trackID).phenotype) && (CellTracks(trackID).phenotype ~= 0)));
+end
+
+function bLeaf = isLeafBranch(trackID)
+    global CellTracks
+    
+    bLeaf = (isempty(CellTracks(trackID).childrenTracks) && ~isempty(CellTracks(trackID).parentTrack));
+end
