@@ -5,14 +5,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function RemoveSegmentationEdit(rmHull)
+function RemoveSegmentationEdit(rmHull, editTime)
     global SegmentationEdits
     
     if ( ~isempty(SegmentationEdits) )    
         % Remove the deleted hull from the edited segmentations lists
         SegmentationEdits.newHulls(SegmentationEdits.newHulls == rmHull) = [];
         SegmentationEdits.changedHulls(SegmentationEdits.changedHulls == rmHull) = [];
-        SegmentationEdits.maxEditedFrame = max(SegmentationEdits.maxEditedFrame, getFrameTimes(rmHull));
+    else
+        SegmentationEdits.newHulls = [];
+        SegmentationEdits.changedHulls = [];
+    end
+    
+    SegmentationEdits.maxEditedFrame = max(SegmentationEdits.maxEditedFrame, getFrameTimes(rmHull));
+    
+    if ( exist('editTime','var') )
+        SegmentationEdits.editTime = editTime;
     end
     
     UpdateSegmentationEditsMenu();

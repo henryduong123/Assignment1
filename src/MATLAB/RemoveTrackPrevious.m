@@ -40,7 +40,7 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
         
         HashedCells{time}(hullIdx) = [];
         CellHulls(hullID).deleted = 1;
-        RemoveSegmentationEdit(hullID);
+        RemoveSegmentationEdit(hullID,CellHulls(endHullID).time);
         
         bNeedsUpdate = bNeedsUpdate | bRmUpdate;
     end

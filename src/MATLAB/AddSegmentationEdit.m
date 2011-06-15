@@ -6,17 +6,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function AddSegmentationEdit(addNewHulls, addChangedHulls)
-    global SegmentationEdits
+    global SegmentationEdits HashedCells
     
     if ( isempty(SegmentationEdits) )
         SegmentationEdits.newHulls = [];
         SegmentationEdits.changedHulls = [];
-        SegmentationEdits.maxEditedFrame = 1;
+        SegmentationEdits.maxEditedFrame = length(HashedCells);
     end
     
     SegmentationEdits.newHulls = unique([SegmentationEdits.newHulls addNewHulls]);
     SegmentationEdits.changedHulls = unique([SegmentationEdits.changedHulls addChangedHulls]);
     SegmentationEdits.maxEditedFrame = max([SegmentationEdits.maxEditedFrame getFrameTimes(addNewHulls)]);
+    SegmentationEdits.editTime = max([SegmentationEdits.editTime getFrameTimes(addNewHulls)]);
     
     UpdateSegmentationEditsMenu();
 end

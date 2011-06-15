@@ -30,7 +30,7 @@ HashedCells{time}(index) = [];
 
 CellHulls(hullID).deleted = 1;
 
-RemoveSegmentationEdit(hullID);
+RemoveSegmentationEdit(hullID, time);
 
 if ( ~bDontUpdateTree && bNeedsUpdate )
     RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');

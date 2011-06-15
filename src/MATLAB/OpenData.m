@@ -60,7 +60,8 @@ end
 % Clear edits when new data set is opened
 SegmentationEdits.newHulls = [];
 SegmentationEdits.changedHulls = [];
-SegmentationEdits.maxEditedFrame = 1;
+SegmentationEdits.maxEditedFrame = length(HashedCells);
+SegmentationEdits.editTime = [];
 
 oldCONSTANTS = CONSTANTS;
 

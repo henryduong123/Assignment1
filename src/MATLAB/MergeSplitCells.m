@@ -55,6 +55,9 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
+    SegmentationEdits.maxEditedFrame = length(HashedCells);
+    SegmentationEdits.editTime = [];
+    
     UpdateSegmentationEditsMenu();
     ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
 end
