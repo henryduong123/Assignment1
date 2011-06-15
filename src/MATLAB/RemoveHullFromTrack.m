@@ -8,11 +8,15 @@
 % Removes a hull from a track deleting the track if necessary.  If
 % bUpdateTree is specified, a track with a significant number of zeros in
 % the middle will be split as well.
-function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
+function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
     global CellTracks CellHulls CellFamilies
     
     if ( ~exist('bUpdateTree', 'var') )
         bUpdateTree = 0;
+    end
+    
+    if ( ~exist('dir', 'var') )
+        dir = 1;
     end
     
     if ( isempty(trackID) )
@@ -43,7 +47,7 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             if ( CellFamilies(CellTracks(trackID).familyID).rootTrackID == trackID )
                 CellFamilies(CellTracks(trackID).familyID).startTime = newStartTime;
             end
-            if ( bUpdateTree )
+            if ( bUpdateTree && (dir < 0) )
                 RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
             end
         else
@@ -64,6 +68,7 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
     elseif ( bUpdateTree && (index > minLengthSplit) )
         % Split track after the removed hull if it hasn't had a hull for too long.
         startchk = max((index-minZeroSplit), 1);
+        endchk = min((index+minZeroSplit), length(CellTracks(trackID).hulls));
         if ( all(CellTracks(trackID).hulls(startchk:index) == 0) )
             nzidx = find(CellTracks(trackID).hulls(startchk:end),1);
             nztime = CellTracks(trackID).startTime + nzidx + startchk - 2;
@@ -76,10 +81,7 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree)
             if ( ~isempty(CellTracks(trackID).parentTrack) )
                 StraightenTrack(CellTracks(trackID).parentTrack);
             end
-        end
-        
-        endchk = min((index+minZeroSplit), length(CellTracks(trackID).hulls));
-        if ( all(CellTracks(trackID).hulls(index:endchk) == 0) )
+        elseif ( all(CellTracks(trackID).hulls(index:endchk) == 0) )
             nzidx = find(CellTracks(trackID).hulls(index:end),1);
             nztime = CellTracks(trackID).startTime + nzidx + index - 2;
             newFamilyID = RemoveFromTree(nztime, trackID, 'yes');
