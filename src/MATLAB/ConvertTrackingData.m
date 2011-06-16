@@ -85,7 +85,7 @@ catch errormsg
 end
 
 %create the family trees
-ProcessNewborns(1:length(CellFamilies), 1:length(HashedCells));
+ProcessNewborns(1:length(CellFamilies), length(HashedCells));
 
 end
 

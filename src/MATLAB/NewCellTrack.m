@@ -24,7 +24,8 @@ if(isempty(CellTracks))
         'startTime',        {t},...
         'endTime',          {t},...
         'timeOfDeath',      {[]},...
-        'color',            {GetNextColor()});
+        'color',            {GetNextColor()},...
+        'phenotype',        {0});
 else
     %get next celltrack ID
     curCellTrackID = length(CellTracks) + 1;
@@ -39,6 +40,7 @@ else
     CellTracks(curCellTrackID).endTime = t;
     CellTracks(curCellTrackID).timeOfDeath = [];
     CellTracks(curCellTrackID).color = GetNextColor();
+    CellTracks(curCellTrackID).phenotype = 0;
 end
     
 AddHashedCell(t,cellHullID,curCellTrackID);
