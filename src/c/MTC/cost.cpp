@@ -17,14 +17,10 @@
 #define LENGTH(x,y) (sqrt((SQR(x))+(SQR(y))))
 #define SIGN(x) (((x) >= 0.0) ? (1.0) : (-1.0) )
 
-const double velocityMaxDelta = 90.0;
-const double accelMaxDelta = 90.0;
-const double intensityMaxDelta = 99.0;
 const double costEpsilon = 1e-3;
 
-#define VMAX 90.0
-#define CCMAX 40.0
-#define AMAX 90.0
+#define VMAX 40.0
+#define CCMAX 20.0
 
 double CCDist(int t0,int i0,int t1,int i1)
 {
@@ -101,7 +97,7 @@ int GetDestinyNode(int nSourceGIdx,int nOffset,int tOffset)
 double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx, int bCheck)
 {
 	const double intensityCostWeight = 1.0;
-	double velo_max= VMAX,cc_max=CCMAX,accelMaxDelta=AMAX;
+	double velo_max= VMAX,cc_max=CCMAX;
 	double LocalCost = 0.0;
 	double OcclusionCost=1.;
 	double DestinyCost=1.;
