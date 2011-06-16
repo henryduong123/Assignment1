@@ -144,15 +144,45 @@ for i=1:length(families)
     end
     
     for j=1:length(removeTracks)
+        removeID = removeTracks(j);
+        
+        if ( isempty(CellTracks(removeID).startTime) )
+            continue;
+        end
+        
         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
         if ( any(ismember(removeTracks, siblingTrack)) )
-            RemoveFromTree(CellTracks(removeTracks(j)).startTime, removeTracks(j), 'no');
-        else
-            RemoveFromTree(CellTracks(removeTracks(j)).startTime, removeTracks(j), 'yes');
+            [removeID mergeID] = findRemoveSibling(removeTracks(j), siblingTrack);
         end
+        RemoveFromTree(CellTracks(removeID).startTime, removeID, 'yes');
     end
 end
 
+end
+
+function [removeID mergeID] = findRemoveSibling(trackID, siblingID)
+    global CellTracks Costs
+    
+    removeID = trackID;
+    mergeID = siblingID;
+    
+    parentID = CellTracks(trackID).parentTrack;
+    
+    parentHull = CellTracks(parentID).hulls(end);
+    hull = CellTracks(trackID).hulls(1);
+    siblingHull = CellTracks(siblingID).hulls(1);
+    
+    if ( parentHull == 0 || hull == 0 || siblingHull == 0 )
+        return;
+    end
+    
+    hullCost = Costs(parentHull,hull);
+    siblingCost = Costs(parentHull,siblingHull);
+    
+    if ( hullCost < siblingCost )
+        removeID = siblingID;
+        mergeID = trackID;
+    end
 end
 
 function bValid = validBranch(trackID, tFinal)
