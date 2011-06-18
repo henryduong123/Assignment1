@@ -26,7 +26,7 @@ for i=1:length(hullList)
     if(hullList(i)~=0)
         time = CellHulls(hullList(i)).time;
         hash = time - CellTracks(parentID).startTime +1;
-        if(length(CellTracks(parentID).hulls)>hash && ~(CellTracks(parentID).hulls(hash)))
+        if(length(CellTracks(parentID).hulls)>hash && (CellTracks(parentID).hulls(hash)))
             error('Trying to place a hull where one already exists. Track: %d, Time: %d.',parentID,time);
         else
             CellTracks(parentID).hulls(hash) = hullList(i);

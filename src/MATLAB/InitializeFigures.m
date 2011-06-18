@@ -311,8 +311,8 @@ function learnFromEdits(src,evnt)
     end
     
     try
-        PropagateBackward(SegmentationEdits.editTime);
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
+        PropagateBackward(length(HashedCells));
         ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
     catch err
         try

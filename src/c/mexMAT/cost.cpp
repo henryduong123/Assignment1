@@ -45,7 +45,7 @@ double calcCCDist(int startCellIdx, int nextCellIdx)
 	int M = mxGetM(ccArray);
 	double* ccData = (double*) mxGetData(ccArray);
 
-	double ccDist = DoubleLims::infinity();
+	double ccDist = gCCMax + 1.0;
 
 	for ( int i=0; i < M; ++i )
 	{
@@ -73,7 +73,7 @@ double calcFullCellDist(int startCellIdx, int nextCellIdx, double vmax, double c
 	int nmin = std::min<int>(startCellSize, nextCellSize);
 
 	double cdist = calcCCDist(startCellIdx, nextCellIdx);
-	if ( cdist > ccmax )
+	if ( (cdist > ccmax) && (hdist > (vmax/2.0)) )
 		return DoubleLims::infinity();
 
 	//if ( (cdist > ccmax/2) && (hdist > vmax/2) )

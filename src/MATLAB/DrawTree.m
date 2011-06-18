@@ -175,8 +175,12 @@ if(isempty(CellTracks(trackID).timeOfDeath))
     else
         FaceColor = 'w';
         EdgeColor = 'k';
-                
-        cPheno = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+
+        cPheno = [];
+        if (CellTracks(trackID).phenotype > 0)
+            cPheno = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        end
+        
         if isempty(cPheno)
             TextColor='k';
         else
