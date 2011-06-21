@@ -198,7 +198,7 @@ end
 end
 
 function figureCellUp(src,evnt)
-global Figures CellTracks
+global Figures CellTracks CellFamilies HashedCells
 
 set(Figures.cells.handle,'WindowButtonUpFcn','');
 if(Figures.cells.currentHullID == -1)
@@ -224,11 +224,16 @@ if(currentHullID~=Figures.cells.currentHullID)
             return
         end
     end
+    
+    ProcessNewborns(1:length(CellFamilies),length(HashedCells));
+    previousTrackID = GetTrackID(currentHullID);
+    
 elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
     %no change and the current tree contains the cell clicked on
     ToggleCellSelection(Figures.cells.currentHullID);
     return
 end
+
 DrawTree(CellTracks(previousTrackID).familyID);
 DrawCells();
 ToggleCellSelection(Figures.cells.currentHullID);

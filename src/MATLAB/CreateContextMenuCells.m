@@ -259,8 +259,6 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
     
     if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
         try
-%             GraphEditSetEdge(time,trackID,parentTrack);
-%             GraphEditSetEdge(time,parentTrack,trackID);
             SwapTrackLabels(time,trackID,parentTrack);
             History('Push');
         catch errorMessage

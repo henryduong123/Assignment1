@@ -44,7 +44,7 @@ end
 
 %% Callback functions
 function removeMitosis(src,evnt)
-global CellTracks Figures
+global CellTracks HashedCells CellFamilies Figures
 object = get(gco);
 if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
     %clicked on a node
@@ -140,12 +140,15 @@ switch choice
 end
 
 LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
+
+ProcessNewborns(1:length(CellFamilies),length(HashedCells));
+
 DrawTree(Figures.tree.familyID);
 DrawCells();
 end
 
 function addMitosis(src,evnt)
-global CellTracks
+global CellTracks HashedCells CellFamilies
 trackID = get(gco,'UserData');
 time = get(gca,'CurrentPoint');
 time = round(time(1,2));
@@ -184,6 +187,8 @@ catch errorMessage
     end
 end
 LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
+
+ProcessNewborns(1:length(CellFamilies),length(HashedCells));
 
 DrawTree(CellTracks(trackID).familyID);
 DrawCells();

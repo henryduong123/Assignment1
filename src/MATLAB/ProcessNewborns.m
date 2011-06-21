@@ -82,9 +82,9 @@ for i=1:size
             % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
             sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
             parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
-            if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
-                parentCosts(j) = eps;
-            end
+        end
+        if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
+            parentCosts(j) = costMatrix(parentHullCandidates,childHullID);
         end
     end
 
@@ -115,7 +115,8 @@ for i=1:size
     % If the parent future is long enough create a mitosis, otherwise patch up track with parent
     if ( bMitosisCost(index) )
         connectTime = CellHulls(parentHullID).time+1;
-        if(CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime))
+        if( CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime)...
+            || (GraphEdits(parentHullID,childHullID) > 0 && nnz(GraphEdits(parentHullID,:)) > 1) )
             ChangeTrackParent(parentTrackID,connectTime,childTrackID);
         end
     elseif ( isempty(CellTracks(parentTrackID).childrenTracks) )

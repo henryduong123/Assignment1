@@ -9,7 +9,7 @@ function ContextChangeLabel(time,trackID)
 %context menu callback function
 
 
-global CellTracks HashedCells
+global CellTracks HashedCells CellFamilies
 
 newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
 if(isempty(newTrackID)),return,end;
@@ -81,7 +81,7 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
     hullID = CellTracks(trackID).hulls(1);
     try
         GraphEditSetEdge(CellTracks(trackID).startTime,newTrackID,trackID);
-        GraphEditSetEdge(CellTracks(trackID).startTime,trackID,newTrackID);
+        GraphEditSetEdge(CellTracks(trackID).startTime+1,trackID,newTrackID);
         AddSingleHullToTrack(trackID,newTrackID);
         History('Push');
     catch errorMessage
@@ -143,6 +143,11 @@ else
     LogAction('ChangeLabel',trackID,newTrackID);
 end
 
+curHull = CellTracks(newTrackID).hulls(1);
+
+ProcessNewborns(1:length(CellFamilies),length(HashedCells));
+
+newTrackID = GetTrackID(curHull);
 DrawTree(CellTracks(newTrackID).familyID);
 DrawCells();
 end
