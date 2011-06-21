@@ -5,8 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(t, tNext, trackHulls, avoidHulls, hulls, hash, tracks)
-    windowSize = 4;
+function [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, hulls, hash, tracks)
 
     costMatrix = [];
     trackedHulls = [];

@@ -10,10 +10,11 @@ function ConvertTrackingData(objHulls,gConnect)
 %scheme
 
 
-global CONSTANTS Costs CellHulls CellFamilies CellTracks HashedCells ConnectedDist Log
+global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells ConnectedDist Log
 
 %ensure that the globals are empty
 Costs = [];
+GraphEdits = [];
 CellHulls = [];
 CellFamilies = [];
 CellTracks = [];
@@ -25,6 +26,7 @@ Log = [];
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
 Costs = gConnect;
+GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
 
 connDist = cell(1,length(objHulls));
 
@@ -36,7 +38,8 @@ cellHulls = struct(...
     'centerOfMass',     {},...
     'indexPixels',      {},...
     'imagePixels',      {},...
-    'deleted',          {});
+    'deleted',          {},...
+    'userEdited',       {});
 
 %loop through the Hulls
 parfor i=1:length(objHulls)
@@ -46,6 +49,7 @@ parfor i=1:length(objHulls)
     cellHulls(i).indexPixels     =  objHulls(i).indPixels;
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;
     cellHulls(i).deleted         =  0;
+    cellHulls(i).userEdited      =  0;
     
     connDist{i} = updateConnectedDistance(objHulls(i), objHulls, objHulls(i).DarkConnectedHulls);
 end

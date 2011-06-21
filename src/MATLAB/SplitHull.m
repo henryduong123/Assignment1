@@ -10,12 +10,12 @@ function newTrackIDs = SplitHull(hullID, k)
 % associated data structures if successful.
 
 
-global CellHulls CellFamilies HashedCells
+global CellHulls CellFamilies HashedCells GraphEdits
 
 oldCOM = CellHulls(hullID).centerOfMass;
 oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
 
-newHulls = ResegmentHull(CellHulls(hullID), k);
+newHulls = ResegmentHull(CellHulls(hullID), k, 1);
 
 if ( isempty(newHulls) )
     newTrackIDs = [];
@@ -25,6 +25,10 @@ end
 % Just arbitrarily assign clone's hull for now
 CellHulls(hullID) = newHulls(1);
 newHullIDs = hullID;
+
+% Drop old graphedits on a manual split
+GraphEdits(hullID,:) = 0;
+GraphEdits(:,hullID) = 0;
 
 % Other hulls are just added off the clone
 newFamilyIDs = [];

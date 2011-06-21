@@ -71,6 +71,7 @@ switch choice
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
         try
+            GraphEditRemoveMitosis(CellTracks(object.UserData).siblingTrack);
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
                 CellTracks(object.UserData).siblingTrack,'yes');
             History('Push');
@@ -87,6 +88,7 @@ switch choice
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
         try
+            GraphEditRemoveMitosis(object.UserData);
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
             History('Push');
         catch errorMessage
@@ -102,6 +104,7 @@ switch choice
     case num2str(CellTracks(object.UserData).childrenTracks(1))
         remove = CellTracks(object.UserData).childrenTracks(2);
         try
+            GraphEditRemoveMitosis(CellTracks(object.UserData).childrenTracks(2));
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
                 CellTracks(object.UserData).childrenTracks(2),'yes');
             History('Push');
@@ -118,6 +121,7 @@ switch choice
     case num2str(CellTracks(object.UserData).childrenTracks(2))
         remove = CellTracks(object.UserData).childrenTracks(1);
         try
+            GraphEditRemoveMitosis(CellTracks(object.UserData).childrenTracks(1));
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
                 CellTracks(object.UserData).childrenTracks(1),'yes');
             History('Push');
@@ -166,6 +170,7 @@ end
 oldParent = CellTracks(siblingTrack).parentTrack;
 
 try
+    GraphEditAddMitosis(time, trackID, siblingTrack);
     ChangeTrackParent(trackID,time,siblingTrack);
     History('Push');
 catch errorMessage

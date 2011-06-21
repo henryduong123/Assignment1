@@ -32,6 +32,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     CellHulls(replaceCell).imagePixels = mergeObj.imagePixels;
     CellHulls(replaceCell).centerOfMass = mergeObj.centerOfMass;
     CellHulls(replaceCell).deleted = 0;
+    CellHulls(replaceCell).userEdited = 1;
     
     [costMatrix, extendHulls, affectedHulls] = TrackThroughMerge(t, replaceCell);
     if ( isempty(costMatrix) )
@@ -83,6 +84,8 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
         nextHulls = [HashedCells{t+1}.hullID];
 
         UpdateTrackingCosts(t, trackHulls, nextHulls);
+        
+        [checkHulls,nextHulls] = CheckGraphEdits(1, checkHulls, nextHulls);
         
         [costMatrix, bExtendHulls, bAffectedHulls] = GetCostSubmatrix(checkHulls, nextHulls);
         extendHulls = checkHulls(bExtendHulls);
@@ -165,6 +168,9 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     
     deleteHulls = nextHulls(bDeleteHulls);
     nextMergeHulls = deleteHulls(bestIn(bDeleteHulls) == mergedIdx);
+    
+    bAllowMerge = (~[CellHulls(nextMergeHulls).userEdited]);
+    nextMergeHulls = nextMergeHulls(bAllowMerge);
 
     replaceIdx = [];
     

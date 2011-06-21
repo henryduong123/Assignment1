@@ -21,7 +21,7 @@ function History(action)
 %value too high or you might run out of working memory
 
 
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs ConnectedDist CellPhenotypes SegmentationEdits
+global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs GraphEdits ConnectedDist CellPhenotypes SegmentationEdits
 
 persistent hist;            %stack
 persistent current;         %points to the last state saved on the stack
@@ -213,6 +213,7 @@ end
         hist(index).HashedCells = HashedCells;
         hist(index).CellHulls = CellHulls;
         hist(index).Costs = Costs;
+        hist(index).GraphEdits = GraphEdits;
         hist(index).ConnectedDist = ConnectedDist;
         hist(index).Figures.tree.familyID = Figures.tree.familyID;
         hist(index).CellPhenotypes = CellPhenotypes;
@@ -225,6 +226,7 @@ end
         HashedCells = hist(index).HashedCells;
         CellHulls = hist(index).CellHulls;
         Costs = hist(index).Costs;
+        GraphEdits = hist(index).GraphEdits;
         ConnectedDist = hist(index).ConnectedDist;
         Figures.tree.familyID = hist(index).Figures.tree.familyID;
         CellPhenotypes = hist(index).CellPhenotypes;

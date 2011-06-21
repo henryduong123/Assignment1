@@ -6,12 +6,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [costMatrix bOutAffected bInAffected] = GetCostSubmatrix(fromHulls, toHulls)
-    global Costs
+%     global Costs
+%     inCostMatrix = Costs;
+    inCostMatrix = GetCostMatrix();
     
     % Get costMatrix representing costs from fromHulls to toHulls
     [r c] = ndgrid(fromHulls, toHulls);
-    costIdx = sub2ind(size(Costs), r, c);
-    costMatrix = full(Costs(costIdx));
+    costIdx = sub2ind(size(inCostMatrix), r, c);
+    costMatrix = full(inCostMatrix(costIdx));
     
     bInAffected = any(costMatrix,1);
     costMatrix = costMatrix(:,bInAffected);

@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls, COM)
-    global CONSTANTS CellHulls HashedCells Costs
+    global CONSTANTS CellHulls HashedCells Costs GraphEdits
     
     costMatrix = [];
     extendHulls = [];
@@ -19,6 +19,7 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls,
     addCosts = max(max(newHulls)-size(Costs,1),0);
     if (  addCosts > 0 )
         Costs = [Costs zeros(size(Costs,1),addCosts); zeros(addCosts,size(Costs,1)+addCosts)];
+        GraphEdits = [GraphEdits zeros(size(GraphEdits,1),addCosts); zeros(addCosts,size(GraphEdits,1)+addCosts)];
     end
     
     if ( t <= 1 )
@@ -30,7 +31,7 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls,
     
     distSq = sum((vertcat(CellHulls(lastHulls).centerOfMass) - ones(length(lastHulls),1)*COM).^2, 2);
     
-    bTrackHull = distSq < (CONSTANTS.dMaxCenterOfMass^2);
+    bTrackHull = distSq < ((2*CONSTANTS.dMaxCenterOfMass)^2);
     trackHulls = lastHulls(bTrackHull);
     
     if ( isempty(trackHulls) )

@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newHulls = ResegmentHull(hull, k)
+function newHulls = ResegmentHull(hull, k, bUserEdit)
 % Splits hull int k pieces using kmeans, returns the k split hulls or [] if
 % there are errors.
 
@@ -13,6 +13,10 @@ function newHulls = ResegmentHull(hull, k)
 global CONSTANTS
 
 newHulls = [];
+
+if ( ~exist('bUserEdit','var') )
+    bUserEdit = 0;
+end
 
 % k-means clustering of (x,y) coordinates of cell interior
 [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
@@ -22,7 +26,7 @@ if ( any(isnan(kIdx)) )
     return;
 end
 
-nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0);
+nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', bUserEdit);
 for i=1:k
     bIdxPix = (kIdx == i);
     

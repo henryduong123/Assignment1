@@ -210,6 +210,8 @@ previousTrackID = GetTrackID(Figures.cells.currentHullID);
 
 if(currentHullID~=Figures.cells.currentHullID)
     try
+        GraphEditSetEdge(Figures.time,GetTrackID(currentHullID),previousTrackID);
+        GraphEditSetEdge(Figures.time,previousTrackID,GetTrackID(currentHullID));
         SwapTrackLabels(Figures.time,GetTrackID(currentHullID),previousTrackID);
         History('Push')
     catch errorMessage

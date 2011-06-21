@@ -131,6 +131,7 @@ switch choice
     case num2str(object.UserData)
         remove = CellTracks(object.UserData).siblingTrack;
         try
+            GraphEditRemoveMitosis(CellTracks(object.UserData).siblingTrack);
             newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
                 CellTracks(object.UserData).siblingTrack,'yes');
             History('Push');
@@ -147,6 +148,7 @@ switch choice
     case num2str(CellTracks(object.UserData).siblingTrack)
         remove = object.UserData;
         try
+            GraphEditRemoveMitosis(object.UserData);
             newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
             History('Push');
         catch errorMessage
@@ -207,6 +209,7 @@ end
 
 if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<time)
     try
+        GraphEditAddMitosis(time, siblingTrack, trackID);
         ChangeTrackParent(siblingTrack,time,trackID);
         History('Push');
     catch errorMessage
@@ -221,6 +224,7 @@ if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<tim
     Figures.tree.familyID = CellTracks(siblingTrack).familyID;
 elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime<time)
     try
+        GraphEditAddMitosis(time, trackID, siblingTrack);
         ChangeTrackParent(trackID,time,siblingTrack);
         History('Push');
     catch errorMessage
@@ -255,6 +259,8 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
     
     if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
         try
+%             GraphEditSetEdge(time,trackID,parentTrack);
+%             GraphEditSetEdge(time,parentTrack,trackID);
             SwapTrackLabels(time,trackID,parentTrack);
             History('Push');
         catch errorMessage
@@ -282,6 +288,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
     end
     
     try
+        GraphEditAddMitosis(time, parentTrack, siblingTrack);
         ChangeTrackParent(parentTrack,time,siblingTrack);
     catch errorMessage
         try
@@ -305,6 +312,7 @@ else
     end
     
     try
+        GraphEditAddMitosis(time, mitosisTracks(1), mitosisTracks(2));
         ChangeTrackParent(mitosisTracks(1),time,mitosisTracks(2));
         History('Push');
     catch errorMessage

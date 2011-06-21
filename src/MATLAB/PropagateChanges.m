@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function tStart = PropagateChanges(changedHulls, editedHulls)
-    global CellHulls HashedCells
+    global CellHulls HashedCells GraphEdits
     
     tStart = min([CellHulls(editedHulls).time]);
     tEnd = length(HashedCells)-1;
@@ -25,14 +25,15 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
         Progressbar((t-tStart)/(tEnd-tStart));
         
         checkHulls = [HashedCells{t}.hullID];
-        checkTracks = [HashedCells{t}.trackID];
         nextHulls = [HashedCells{t+1}.hullID];
 
         UpdateTrackingCosts(t, trackHulls, nextHulls);
+        
+        [checkHulls,nextHulls] = CheckGraphEdits(1, checkHulls, nextHulls);
 
         [costMatrix bOutTracked bInTracked] = GetCostSubmatrix(checkHulls, nextHulls);
         checkHulls = checkHulls(bOutTracked);
-        checkTracks = checkTracks(bOutTracked);
+        checkTracks = GetTrackID(checkHulls,t);
         nextHulls = nextHulls(bInTracked);
         
         % Figure out which hulls are assigned to tracks we allow to split
@@ -56,6 +57,15 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
             splitHulls = checkHulls(splits{i});
             bFollowSplit = ismember(splitHulls, followHulls);
             if ( ~any(bFollowSplit) )
+                continue;
+            end
+            
+            if ( CellHulls(nextHulls(i)).userEdited )
+                continue;
+            end
+            
+            % Don't automatically split a hull with edited edges
+            if ( any(GraphEdits(nextHulls(i),:)) || any(GraphEdits(:,nextHulls(i))) )
                 continue;
             end
 
@@ -190,7 +200,7 @@ function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHull
 end
 
 function revertSplit(t, hull, newHulls)
-    global CONSTANTS CellHulls HashedCells CellTracks CellFamilies Costs ConnectedDist
+    global CONSTANTS CellHulls HashedCells CellTracks CellFamilies Costs GraphEdits ConnectedDist
     
     rmHulls = setdiff(newHulls,hull);
     
@@ -206,6 +216,7 @@ function revertSplit(t, hull, newHulls)
     CellTracks = CellTracks(setdiff(1:length(CellTracks),rmTrackIDs));
     CellFamilies = CellFamilies(setdiff(1:length(CellFamilies),rmFamilyIDs));
     Costs = Costs(leaveHulls,leaveHulls);
+    GraphEdits = GraphEdits(leaveHulls,leaveHulls);
     ConnectedDist = ConnectedDist(leaveHulls);
     
     BuildConnectedDistance(hull,1);

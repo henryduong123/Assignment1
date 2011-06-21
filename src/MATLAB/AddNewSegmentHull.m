@@ -14,7 +14,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
     
     newObj = PartialImageSegment(img, clickPt, 200, 1.0);
 
-    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0);
+    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
     
     oldTracks = [HashedCells{Figures.time}.trackID];
     

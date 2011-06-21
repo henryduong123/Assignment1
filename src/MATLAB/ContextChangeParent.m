@@ -31,6 +31,7 @@ end
 oldParent = CellTracks(trackID).parentTrack;
 History('Push');
 try
+    %TODO: update GraphEdits based on change parent
     ChangeTrackParent(newParentID,time,trackID);
 catch errorMessage
     try

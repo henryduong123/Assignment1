@@ -42,35 +42,14 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
         case 'Cancel'
             return
     end
-elseif(newTrackID>length(CellTracks) || isempty(CellTracks(newTrackID).hulls))
-    choice = questdlg('New label does not exist. Do you want this cell and its children dropped from its tree?',...
-        'Drop Cell?','Yes','Cancel','Cancel');
-    switch choice
-        case 'Yes'
-            oldFamily = CellTracks(trackID).familyID;
-            try
-                RemoveFromTree(time,trackID,'yes');
-                History('Push');
-            catch errorMessage
-                try
-                    ErrorHandeling(['RemoveFromTree(' num2str(time) ' ' num2str(trackID) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                    return
-                catch errorMessage2
-                    fprintf('%s',errorMessage2.message);
-                    return
-                end
-            end
-            
-            LogAction(['Removed ' num2str(trackID) ' From Tree'], oldFamily,CellTracks(trackID).familyID);
-        case 'Cancel'
-            return
-    end
 elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
 %     choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
 %         'Swap Labels?','Forward','This Frame','Cancel','Cancel');
 %     switch choice
 %         case 'Forward'
             try
+                GraphEditSetEdge(time,trackID,newTrackID);
+                GraphEditSetEdge(time,newTrackID,trackID);
                 SwapTrackLabels(time,trackID,newTrackID);
                 History('Push');
             catch errorMessage
@@ -101,6 +80,8 @@ elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
 elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
     hullID = CellTracks(trackID).hulls(1);
     try
+        GraphEditSetEdge(CellTracks(trackID).startTime,newTrackID,trackID);
+        GraphEditSetEdge(CellTracks(trackID).startTime,trackID,newTrackID);
         AddSingleHullToTrack(trackID,newTrackID);
         History('Push');
     catch errorMessage
@@ -115,6 +96,7 @@ elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).c
     LogAction('Added hull to track',hullID,newTrackID);
 elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTrack==newTrackID)
     try
+        GraphEditMoveMitosis(time,trackID);
         MoveMitosisUp(time,trackID);
         History('Push');
     catch errorMessage
@@ -129,6 +111,7 @@ elseif(~isempty(CellTracks(trackID).parentTrack) && CellTracks(trackID).parentTr
     LogAction('Moved Mitosis Up',trackID,newTrackID);
 elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).parentTrack==trackID)
     try
+        GraphEditMoveMitosis(time,newTrackID);
         MoveMitosisUp(time,newTrackID);
         History('Push');
     catch errorMessage
@@ -143,6 +126,9 @@ elseif(~isempty(CellTracks(newTrackID).parentTrack) && CellTracks(newTrackID).pa
     LogAction('Moved Mitosis Up',newTrackID,trackID);
 else
     try
+        %TODO: This edit graph update may need to more complicated to truly
+        %capture user edit intentions.
+        GraphEditSetEdge(time,newTrackID,trackID);
         ChangeLabel(time,trackID,newTrackID);
         History('Push');
     catch errorMessage

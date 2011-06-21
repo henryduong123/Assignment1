@@ -10,7 +10,7 @@ function ProcessNewborns(families, tFinal)
 %that families' tracks to other families that start before said family
 
 
-global CellFamilies CellTracks CellHulls Costs CONSTANTS  
+global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits
 
 % If unspecified start looking for children in frame 2
 % if ( ~exist('tStart','var') )
@@ -29,6 +29,8 @@ end
 
 tStart = 2;
 
+costMatrix = GetCostMatrix();
+
 size = length(families);
 for i=1:size
     if ( isempty(CellFamilies(families(i)).startTime) )
@@ -38,7 +40,7 @@ for i=1:size
     if ( CellFamilies(families(i)).startTime < tStart )
         continue;
     end
-
+    
     %The root of the track to try to connect with another track
     childTrackID = CellFamilies(families(i)).rootTrackID;
     familyTimeFrame = CellFamilies(families(i)).endTime - CellFamilies(families(i)).startTime;
@@ -46,8 +48,8 @@ for i=1:size
 
     %Get all the possible hulls that could have been connected
     childHullID = CellTracks(childTrackID).hulls(1);
-    if(childHullID>length(Costs) || childHullID==0),continue,end
-    parentHullCandidates = find(Costs(:,childHullID));
+    if(childHullID>length(costMatrix) || childHullID==0),continue,end
+    parentHullCandidates = find(costMatrix(:,childHullID));
 
     % Don't consider deleted hulls as parents
     bDeleted = [CellHulls(parentHullCandidates).deleted];
@@ -56,7 +58,7 @@ for i=1:size
     if(isempty(parentHullCandidates)),continue,end
 
     %Get the costs of the possible connections
-    parentCosts = Costs(parentHullCandidates,childHullID);
+    parentCosts = costMatrix(parentHullCandidates,childHullID);
     bMitosisCost = true(1,nnz(parentCosts));
     
     %Massage the costs a bit
@@ -80,6 +82,9 @@ for i=1:size
             % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
             sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
             parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
+            if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
+                parentCosts(j) = eps;
+            end
         end
     end
 
@@ -87,6 +92,11 @@ for i=1:size
     parentCosts = full(parentCosts);
     [minCost index] = min(parentCosts(find(parentCosts)));
     if(isinf(minCost)),continue,end
+    
+    % Do not allow reconnect of removed edges
+    if ( GraphEdits(parentHullCandidates(index),childHullID) < 0 )
+        continue;
+    end
     
     parentHullID = parentHullCandidates(index);
     %Make the connections
@@ -113,6 +123,7 @@ for i=1:size
             RemoveFromTree(CellTracks(childTrackID).startTime, parentTrackID, 'no');
         end
         ChangeLabel(CellTracks(childTrackID).startTime, childTrackID, parentTrackID);
+        RehashCellTracks(parentTrackID,CellTracks(parentTrackID).startTime);
     end
 end
 
@@ -137,7 +148,7 @@ for i=1:length(families)
     while( j <= length(removeTracks) )
         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
         parentTrack = CellTracks(removeTracks(j)).parentTrack;
-        if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) )
+        if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) && ~checkEditedTrack(parentTrack) )
             removeTracks = [removeTracks parentTrack];
         end
         j = j + 1;
@@ -161,7 +172,7 @@ end
 end
 
 function [removeID mergeID] = findRemoveSibling(trackID, siblingID)
-    global CellTracks Costs
+    global CellTracks
     
     removeID = trackID;
     mergeID = siblingID;
@@ -176,8 +187,10 @@ function [removeID mergeID] = findRemoveSibling(trackID, siblingID)
         return;
     end
     
-    hullCost = Costs(parentHull,hull);
-    siblingCost = Costs(parentHull,siblingHull);
+    costMatrix = GetCostMatrix();
+    
+    hullCost = costMatrix(parentHull,hull);
+    siblingCost = costMatrix(parentHull,siblingHull);
     
     if ( hullCost < siblingCost )
         removeID = siblingID;
@@ -188,8 +201,31 @@ end
 function bValid = validBranch(trackID, tFinal)
     global CellTracks
     
-    bValid = (~isLeafBranch(trackID) || (CellTracks(trackID).endTime >= tFinal) ...
+    bLeaf = isLeafBranch(trackID);
+    bValid = (~bLeaf || (CellTracks(trackID).endTime >= tFinal) ...
         || (~isempty(CellTracks(trackID).phenotype) && (CellTracks(trackID).phenotype ~= 0)));
+    
+    if ( bLeaf && ~bValid )
+        bValid = checkEditedTrack(trackID);
+    end
+end
+
+function bEdited = checkEditedTrack(trackID)
+    global CellTracks GraphEdits
+    
+    bEdited = 0;
+    
+    parentID = CellTracks(trackID).parentTrack;
+    if ( isempty(parentID) )
+        return;
+    end
+    
+    parentHull = CellTracks(parentID).hulls(end);
+	hull = CellTracks(trackID).hulls(1);
+    
+    if ( GraphEdits(parentHull,hull) > 0 )
+        bEdited = 1;
+    end
 end
 
 function bLeaf = isLeafBranch(trackID)

@@ -6,17 +6,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function TrackBackPhenotype(leafHulls, keyframeHulls)
-    global CellHulls HashedCells CellTracks
+    global CellHulls HashedCells
     
     
     goodTracks = struct('familyID',[], 'parentTrack',[], 'siblingTrack',[], 'childrenTracks',[], 'hulls',[], ...
                         'startTime',[], 'endTime',[], 'timeOfDeath',[], 'color',[]);
     
-	backHash = HashedCells;
-    
     leafHulls = unique(leafHulls);
-%     keyframeHulls = unique(keyframeHulls);
-%     keyframeHulls = setdiff(keyframeHulls, markedHulls);
     
     startHulls = union(leafHulls, keyframeHulls);
     
@@ -31,45 +27,19 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
     bCurGood = ([CellHulls(startHulls).time] == tStart);
     trackHulls = startHulls(bCurGood);
     
-    for i=1:length(backHash{tStart})
-        idx = find(ismember(backHash{tStart}(i).hullID, startHulls));
-        if ( idx > 0 )
-            backHash{tStart}(i).trackID = idx;
-        else
-            backHash{tStart}(i).trackID = 0;
-        end
-    end
-    
     missedHulls = [];
     Progressbar(0);
     for t=tStart:-1:2
-%         % Don't track through leaf-marked hulls start new tracks for them
-%         avoidHulls = leafHulls([CellHulls(leafHulls).time] == t-1);
-        avoidHulls = [];
-        
         if ( isempty(trackHulls) )
             break;
         end
         
         Progressbar((tStart - t + 1)/(tStart - 1));
+
+        nextHulls = [HashedCells{t-1}.hullID];
+        UpdateTrackingCosts(t, trackHulls, nextHulls);
         
-%         disp(t);
-        
-        for i=1:length(backHash{t-1})
-            idx = find(ismember(backHash{t-1}(i).hullID, startHulls));
-            if ( idx > 0 )
-                backHash{t-1}(i).trackID = idx;
-            else
-                backHash{t-1}(i).trackID = 0;
-            end
-        end
-        
-        [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(t, t-1, trackHulls, avoidHulls, CellHulls, HashedCells, CellTracks);
-        if ( isempty(costMatrix) )
-            break;
-        end
-        
-        costMatrix(costMatrix == 0) = Inf;
+        [trackHulls,nextHulls] = CheckGraphEdits(-1, trackHulls,nextHulls);
         
         maxOcclSkip = 1;
         if ( ~isempty(missedHulls) )
@@ -83,37 +53,26 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
                 if ( isempty(curMissHulls) )
                     continue;
                 end
-                
-                [occlCostMatrix, occlTrackedHulls, occlNextHulls] = GetTrackingCosts(t+occlSkip, t-1, curMissHulls, avoidHulls, CellHulls, HashedCells, CellTracks);
-                occlCostMatrix(occlCostMatrix == 0) = Inf;
 
-                if ( ~isempty(occlTrackedHulls) )
-                    [newNextHulls newCols] = setdiff(occlNextHulls, nextHulls);
-                    nextHulls = [nextHulls newNextHulls];
-                    trackedHulls = [trackedHulls occlTrackedHulls];
-
-                    [dump,nhidx] = ismember(occlNextHulls, nextHulls);
-                    [dump,thidx] = ismember(occlTrackedHulls, trackedHulls);
-
-                    [r c] = ndgrid(thidx, nhidx);
-
-                    costMatrix = [costMatrix Inf*ones(size(costMatrix,1),length(newNextHulls)); Inf*ones(length(occlTrackedHulls),size(costMatrix,2)+length(newNextHulls))];
-                    cidx = sub2ind(size(costMatrix),r,c);
-                    costMatrix(cidx) = occlCostMatrix(:);
-                end
+                UpdateTrackingCosts(t+occlSkip, curMissHulls, nextHulls);
+                trackHulls = [trackHulls curMissHulls];
             end
         end
+        
+        [costMatrix,bNextHulls,bTrackedHulls] = GetCostSubmatrix(nextHulls, trackHulls);
+        costMatrix = (costMatrix');
+        
+        trackedHulls = trackHulls(bTrackedHulls);
+        nextHulls = nextHulls(bNextHulls);
         
         bAssign = assignBackTracks(t-1, costMatrix, trackedHulls, nextHulls, 0);
         
         missedHulls = trackHulls(~ismember(trackHulls, trackedHulls(any(bAssign,2))));
-        trackHulls = [nextHulls(any(bAssign,1)) avoidHulls];
+        trackHulls = nextHulls(any(bAssign,1));
         trackHulls = union(trackHulls, startHulls([CellHulls(startHulls).time] == t-1));
     end
     
     Progressbar(1);
-    
-%     ProcessNewborns(1:length(CellFamilies), tStart);
 end
 
 function bAssign = assignBackTracks(t, costMatrix, trackedHulls, nextHulls, bPropForward)
@@ -140,27 +99,7 @@ function bAssign = assignBackTracks(t, costMatrix, trackedHulls, nextHulls, bPro
 %         [tracks, hash] = extendBackTrack(extHull, assignHull, tracks, hash);
         assignHullToTrack(t, assignHull, extHull, bPropForward);
         bAssign(matchedIdx(i), bestOutgoing(matchedIdx(i))) = 1;
-	end
-    
-%     costMatrix(bMatched,:) = Inf;
-%     costMatrix(:,bMatchedCol) = Inf;
-%     
-%     [minCost minIdx] = min(costMatrix(:));
-%     % Patch up whatever other nurtureTracks we can
-%     while ( minCost ~= Inf )
-%         [r c] = ind2sub(size(costMatrix), minIdx);
-%         assignHull = nextHulls(c);
-%         extHull = trackedHulls(r);
-%         
-% %         [tracks, hash] = extendBackTrack(extHull, assignHull, tracks, hash);
-%         assignHullToTrack(t, assignHull, extHull, bPropForward);
-%         bAssign(r,c) = 1;
-%         
-%         costMatrix(r,:) = Inf;
-%         costMatrix(:,c) = Inf;
-%         
-%         [minCost minIdx] = min(costMatrix(:));
-%     end
+    end
 end
 
 function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)

@@ -9,6 +9,8 @@
 function UpdateTrackingCosts(t, trackHulls, nextHulls)
     global CellHulls HashedCells CellTracks Costs
     
+    windowSize = 4;
+    
     if ( isempty(nextHulls) )
         return;
     end
@@ -19,14 +21,20 @@ function UpdateTrackingCosts(t, trackHulls, nextHulls)
         return;
     end
     
+    dir = 1;
+    if ( tNext < t )
+        dir = -1;
+    end
+%     trackHulls = checkEditedHistory(windowSize, dir, trackHulls);
+    
     trackToHulls = [HashedCells{tNext}.hullID];
     
     avoidHulls = setdiff(trackToHulls,nextHulls);
     %[costMatrix fromHulls toHulls] = TrackingCosts(trackHulls, t, avoidHulls, CellHulls, HashedCells);
-    [costMatrix fromHulls toHulls] = GetTrackingCosts(t, tNext, trackHulls, avoidHulls, CellHulls, HashedCells, CellTracks);
+    [costMatrix fromHulls toHulls] = GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, CellHulls, HashedCells, CellTracks);
     
     % Update newly tracked costs
-    if ( tNext > t )        
+    if ( dir > 0 )        
         [r c] = ndgrid(fromHulls, toHulls);
         costIdx = sub2ind(size(Costs), r, c);
         Costs(costIdx) = costMatrix;
@@ -36,3 +44,12 @@ function UpdateTrackingCosts(t, trackHulls, nextHulls)
         Costs(costIdx) = (costMatrix');
     end
 end
+
+% function trackHulls = checkEditedHistory(windowSize, dir, fromHulls)
+%     global CellTracks GraphEdits
+%     
+%     for i=1:length(fromHulls)
+%         
+%     end
+% end
+

@@ -11,7 +11,7 @@ function opened = OpenData(versionString)
 %and save out to a new file.
 
 
-global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs CellTracks ConnectedDist CellPhenotypes SegmentationEdits
+global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', versionString);

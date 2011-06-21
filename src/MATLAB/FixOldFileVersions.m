@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls ConnectedDist
+    global CellHulls ConnectedDist GraphEdits Costs
 
     bNeedsUpdate = 0;
     
@@ -15,6 +15,17 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
         fprintf('\nAdding Image Pixel Information...\n');
         AddImagePixelsField();
         fprintf('Image Information Added\n');
+        bNeedsUpdate = 1;
+    end
+    
+    % Need userEdited field as of ver 5.0
+    if ( ~isfield(CellHulls, 'userEdited') )
+        AddUserEditedField();
+        bNeedsUpdate = 1;
+    end
+    
+    if ( isempty(GraphEdits) )
+        GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
         bNeedsUpdate = 1;
     end
 

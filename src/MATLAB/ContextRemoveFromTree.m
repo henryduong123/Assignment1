@@ -14,6 +14,7 @@ global CellTracks
 oldFamilyID = CellTracks(trackID).familyID;
 
 try
+    GraphEditRemoveEdge(time, trackID, trackID);
     newFamilyID = RemoveFromTree(time, trackID,'yes');
     History('Push');
 catch errorMessage
