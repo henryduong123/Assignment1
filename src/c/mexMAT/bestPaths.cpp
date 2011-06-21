@@ -124,7 +124,7 @@ int bestPathDFS(int t, int tEnd, CSourcePath path, int bestNextHull)
 			int nextHull = (int) pHulls[i];
 
 			path.pushPoint(nextHull);
-			double chkCost = getCost(path.path, path.sourceIdx, 1);
+			double chkCost = getCost(path.path, path.sourceIdx, 0);
 			path.popPoint();
 
 			if ( chkCost == DoubleLims::infinity() )
