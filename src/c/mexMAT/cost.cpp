@@ -144,7 +144,7 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 
 	// Calculate local surrounding connected-component distance if possible
 	if ( srcIdx > 0 )
-		localCost += calcFullCellDist(path[srcIdx-1], path[srcIdx+1], vmax, ccmax);
+		localCost += calcFullCellDist(path[srcIdx-1], path[srcIdx+1], 2*vmax, 2*ccmax);
 	else
 		localCost *= 2.0;
 
@@ -153,7 +153,7 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 
 	// Calculate forward cc cost if path is long enough
 	if ( srcIdx < path.size()-2 )
-		localCost += calcFullCellDist(path[srcIdx], path[srcIdx+2], vmax, ccmax);
+		localCost += calcFullCellDist(path[srcIdx], path[srcIdx+2], 2*vmax, 2*ccmax);
 	else
 		localCost *= 2.0;
 
