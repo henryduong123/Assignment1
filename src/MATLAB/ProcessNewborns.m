@@ -128,47 +128,49 @@ for i=1:size
     end
 end
 
-for i=1:length(families)
-    if ( isempty(CellFamilies(families(i)).startTime) )
-        continue;
-    end
-    
-    if ( CellFamilies(families(i)).endTime < tFinal )
-        continue;
-    end
-    
-    removeTracks = [];
-    for j=1:length(CellFamilies(families(i)).tracks)
-        trackID = CellFamilies(families(i)).tracks(j);
-        if ( ~validBranch(trackID, tFinal) )
-            removeTracks = [removeTracks trackID];
-        end
-    end
-    
-    j = 1;
-    while( j <= length(removeTracks) )
-        siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
-        parentTrack = CellTracks(removeTracks(j)).parentTrack;
-        if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) && ~checkEditedTrack(parentTrack) )
-            removeTracks = [removeTracks parentTrack];
-        end
-        j = j + 1;
-    end
-    
-    for j=1:length(removeTracks)
-        removeID = removeTracks(j);
-        
-        if ( isempty(CellTracks(removeID).startTime) )
-            continue;
-        end
-        
-        siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
-        if ( any(ismember(removeTracks, siblingTrack)) )
-            [removeID mergeID] = findRemoveSibling(removeTracks(j), siblingTrack);
-        end
-        RemoveFromTree(CellTracks(removeID).startTime, removeID, 'yes');
-    end
-end
+%trim the tree
+% 
+% for i=1:length(families)
+%     if ( isempty(CellFamilies(families(i)).startTime) )
+%         continue;
+%     end
+%     
+%     if ( CellFamilies(families(i)).endTime < tFinal )
+%         continue;
+%     end
+%     
+%     removeTracks = [];
+%     for j=1:length(CellFamilies(families(i)).tracks)
+%         trackID = CellFamilies(families(i)).tracks(j);
+%         if ( ~validBranch(trackID, tFinal) )
+%             removeTracks = [removeTracks trackID];
+%         end
+%     end
+%     
+%     j = 1;
+%     while( j <= length(removeTracks) )
+%         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
+%         parentTrack = CellTracks(removeTracks(j)).parentTrack;
+%         if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) && ~checkEditedTrack(parentTrack) )
+%             removeTracks = [removeTracks parentTrack];
+%         end
+%         j = j + 1;
+%     end
+%     
+%     for j=1:length(removeTracks)
+%         removeID = removeTracks(j);
+%         
+%         if ( isempty(CellTracks(removeID).startTime) )
+%             continue;
+%         end
+%         
+%         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
+%         if ( any(ismember(removeTracks, siblingTrack)) )
+%             [removeID mergeID] = findRemoveSibling(removeTracks(j), siblingTrack);
+%         end
+%         RemoveFromTree(CellTracks(removeID).startTime, removeID, 'yes');
+%     end
+% end
 
 end
 

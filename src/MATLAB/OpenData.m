@@ -179,6 +179,8 @@ end
 
 if(~opened),return,end
 
+ProcessNewborns(1:length(CellFamilies),length(HashedCells));
+
 bUpdated = FixOldFileVersions(versionString);
 if ( bUpdated )
     UpdateFileVersionString(versionString);
