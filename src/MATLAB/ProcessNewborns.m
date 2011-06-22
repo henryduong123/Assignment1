@@ -10,7 +10,7 @@ function ProcessNewborns(families, tFinal)
 %that families' tracks to other families that start before said family
 
 
-global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits
+global CellFamilies CellTracks CellHulls HashedCells CONSTANTS GraphEdits Figures
 
 % If unspecified start looking for children in frame 2
 % if ( ~exist('tStart','var') )
@@ -24,10 +24,18 @@ if ( ~exist('families','var') )
 end
 
 if ( ~exist('tFinal','var') )
-    tFinal = 1;
+    tFinal = length(HashedCells);
 end
 
 tStart = 2;
+
+rootHull = 0;
+if ( isfield(Figures, 'tree') )
+    rootTrackID = CellFamilies(Figures.tree.familyID).rootTrackID;
+    if ( ~isempty(rootTrackID) )
+        rootHull = CellTracks(rootTrackID).hulls(1);
+    end
+end
 
 costMatrix = GetCostMatrix();
 
@@ -44,7 +52,6 @@ for i=1:size
     %The root of the track to try to connect with another track
     childTrackID = CellFamilies(families(i)).rootTrackID;
     familyTimeFrame = CellFamilies(families(i)).endTime - CellFamilies(families(i)).startTime;
-    if(CONSTANTS.minFamilyTimeFrame >= familyTimeFrame),continue,end
 
     %Get all the possible hulls that could have been connected
     childHullID = CellTracks(childTrackID).hulls(1);
@@ -54,8 +61,9 @@ for i=1:size
     % Don't consider deleted hulls as parents
     bDeleted = [CellHulls(parentHullCandidates).deleted];
     parentHullCandidates = parentHullCandidates(~bDeleted);
-
+    
     if(isempty(parentHullCandidates)),continue,end
+    if(~any(GraphEdits(parentHullCandidates,childHullID)) && CONSTANTS.minFamilyTimeFrame >= familyTimeFrame),continue,end
 
     %Get the costs of the possible connections
     parentCosts = costMatrix(parentHullCandidates,childHullID);
@@ -172,6 +180,13 @@ end
 %     end
 % end
 
+if ( rootHull > 0 )
+    trackID = GetTrackID(rootHull);
+    if ( ~isempty(trackID) )
+        Figures.tree.familyID = CellTracks(trackID).familyID;
+    end
+end
+
 end
 
 function [removeID mergeID] = findRemoveSibling(trackID, siblingID)
@@ -236,3 +251,4 @@ function bLeaf = isLeafBranch(trackID)
     
     bLeaf = (isempty(CellTracks(trackID).childrenTracks) && ~isempty(CellTracks(trackID).parentTrack));
 end
+

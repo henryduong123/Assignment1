@@ -179,6 +179,7 @@ end
 
 if(~opened),return,end
 
+StraightenFamilies();
 ProcessNewborns(1:length(CellFamilies),length(HashedCells));
 
 bUpdated = FixOldFileVersions(versionString);
