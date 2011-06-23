@@ -158,6 +158,7 @@ switch answer
                     fprintf('%s\n',errorMessage.message);
                     LogAction(errorMessage.message);
                 end
+                GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
                 goodLoad = 1;
             else
                 errordlg('Data either did not load properly or is not the right format for LEVer.');
