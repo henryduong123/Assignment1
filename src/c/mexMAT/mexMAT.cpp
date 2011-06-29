@@ -34,8 +34,8 @@ int gWindowSize;
 int gNumFrames;
 int gConstraintFrames;
 
-const double gVMax = 40.0;
-const double gCCMax = 20.0;
+const double gVMax = 80.0;
+const double gCCMax = 40.0;
 //const double gAMax;
 
 //
