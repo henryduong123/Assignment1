@@ -30,7 +30,8 @@ end
 tStart = 2;
 
 rootHull = 0;
-if ( isfield(Figures, 'tree') )
+if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
+        && Figures.tree.familyID<=length(CellFamilies))
     rootTrackID = CellFamilies(Figures.tree.familyID).rootTrackID;
     if ( ~isempty(rootTrackID) )
         rootHull = CellTracks(rootTrackID).hulls(1);
