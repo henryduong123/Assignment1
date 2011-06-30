@@ -536,6 +536,8 @@ if 1==i
                     return
                 end
             end
+        else
+            SetPhenotype(hullID, i, bActive);
         end
         LogAction(['Marked time of death for ' num2str(trackID)]);
     end
@@ -548,7 +550,7 @@ end
 
 SetPhenotype(hullID, i, bActive);
 History('Push');
-
+DrawCells();
 DrawTree(Figures.tree.familyID);
     
 end

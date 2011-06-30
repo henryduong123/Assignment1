@@ -20,10 +20,17 @@ function SetPhenotype(hullID, phenotype, bActive)
 end
 
 function unsetTrackPhenotype(hullID)
+    global CellPhenotypes
+
     trackID = GetTrackID(hullID);
     [oldPhen resetHulls] = GetAllTrackPhenotypes(trackID);
     
     unsetPhenotype(resetHulls);
+    
+    if ( isempty(CellPhenotypes.hullPhenoSet) )
+        CellPhenotypes.hullPhenoSet = zeros(2,0);
+    end
+    
 end
 
 function unsetPhenotype(hullIDs)
