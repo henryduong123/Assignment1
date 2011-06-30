@@ -69,12 +69,13 @@ trackMetric.firstFrame = track.startTime;
 trackMetric.lastFrame = track.endTime;
 trackMetric.parent = track.parentTrack;
 trackMetric.children = track.childrenTracks;
-if(~isempty(track.phenotype) && track.phenotype>0)
-    trackMetric.phenotype = CellPhenotypes.descriptions{track.phenotype};
+pheno = GetTrackPhenotype(trackID);
+if( pheno > 0 )
+    trackMetric.phenotype = CellPhenotypes.descriptions{pheno};
 else
     trackMetric.phenotype = '';
 end
-trackMetric.death = track.timeOfDeath;
+trackMetric.death = GetTimeOfDeath(trackID);
 trackMetric.familyID = track.familyID;
 
 velosities = [];

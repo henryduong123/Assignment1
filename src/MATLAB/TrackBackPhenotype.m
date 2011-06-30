@@ -10,7 +10,7 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
     
     
     goodTracks = struct('familyID',[], 'parentTrack',[], 'siblingTrack',[], 'childrenTracks',[], 'hulls',[], ...
-                        'startTime',[], 'endTime',[], 'timeOfDeath',[], 'color',[]);
+                        'startTime',[], 'endTime',[], 'color',[]);
     
     leafHulls = unique(leafHulls);
     

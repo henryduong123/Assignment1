@@ -90,7 +90,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         end
         
         %see if the cell is dead
-        if(~isempty(CellTracks(curTrackID).timeOfDeath))
+        if(~isempty(GetTimeOfDeath(curTrackID)))
             backgroundColor = 'k';
             edgeColor = 'r';
             textColor = 'r';

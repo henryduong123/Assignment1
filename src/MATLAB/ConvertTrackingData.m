@@ -10,7 +10,7 @@ function ConvertTrackingData(objHulls,gConnect)
 %scheme
 
 
-global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells ConnectedDist Log
+global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
 
 %ensure that the globals are empty
 Costs = [];
@@ -40,6 +40,8 @@ cellHulls = struct(...
     'imagePixels',      {},...
     'deleted',          {},...
     'userEdited',       {});
+
+CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
 
 %loop through the Hulls
 parfor i=1:length(objHulls)

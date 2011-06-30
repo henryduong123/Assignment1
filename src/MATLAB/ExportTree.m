@@ -125,21 +125,29 @@ global CellTracks Figures
 FontSize = 8;
 circleSize=8;
 
+phenotype = GetTrackPhenotype(trackID);
+
 yMin = CellTracks(trackID).startTime;
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID);
 
-if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1 
-    color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+if ( phenotype > 1 ) 
+    color = phenoScratch.phenoColors(phenotype,:);
     plot(xVal,yMin,'s',...
         'MarkerFaceColor',  color,...
         'MarkerEdgeColor',  'k',...
         'MarkerSize',       1.5*circleSize,...
         'UserData',         trackID);
-    phenoScratch.phenoLegendSet(CellTracks(trackID).phenotype)=1;
+    
+    yPhenos = GetTrackPhenoypeTimes(trackID);
+    if ( ~isempty(yPhenos) )
+        plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+    end
+    
+    phenoScratch.phenoLegendSet(phenotype)=1;
 
-elseif(isempty(CellTracks(trackID).timeOfDeath))
+elseif(isempty(GetTimeOfDeath(trackID)))
     
      color = CellTracks(trackID).color;
     plot(xVal,yMin,'o',...
@@ -154,12 +162,15 @@ elseif(isempty(CellTracks(trackID).timeOfDeath))
 %         'UserData',             trackID,...
 %         'uicontextmenu',        Figures.tree.contextMenuHandle);
 else
-    yMin2 = CellTracks(trackID).timeOfDeath;
-    plot([xVal xVal],[yMin yMin2],...
+    yPhenos = GetTrackPhenoypeTimes(trackID);
+    
+    plot([xVal xVal],[yMin yPhenos(end)],...
         '-k','UserData',trackID);
-    plot([xVal xVal],[yMin2 CellTracks(trackID).endTime+1],...
+    plot([xVal xVal],[yPhenos(end) CellTracks(trackID).endTime+1],...
         '--k','UserData',trackID);
-    plot(xVal,yMin2,'rx','UserData',trackID);
+    
+    plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+    
     plot(xVal,yMin,'o',...
         'MarkerFaceColor',  'k',...
         'MarkerEdgeColor',  'r',...

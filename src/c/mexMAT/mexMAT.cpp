@@ -23,7 +23,7 @@ const mxArray* gTrackHulls;
 CEdgeSubgraph* gConnectPtr;
 
 char* cellHullsFields[] = {"time", "points", "centerOfMass", "indexPixels", "imagePixels"};
-char* cellTracksFields[] = {"familyID", "parentTrack", "siblingTrack", "childrenTracks", "hulls", "startTime", "endTime", "timeOfDeath", "color"};
+char* cellTracksFields[] = {"familyID", "parentTrack", "siblingTrack", "childrenTracks", "hulls", "startTime", "endTime", "color"};
 char* hashHullsFields[] = {"hullID", "trackID"};
 
 int cellHullsFIdx[ARRAY_SIZE(cellHullsFields)];

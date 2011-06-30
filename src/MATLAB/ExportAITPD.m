@@ -35,9 +35,10 @@ trackData.cellLabel = label;
 trackData.parent = track.parentTrack;
 trackData.sibling = track.siblingTrack;
 trackData.children = track.childrenTracks;
-trackData.timeOfDeath = track.timeOfDeath;
-if(track.phenotype)
-    trackData.phenotype = CellPhenotypes.descriptions{track.phenotype};
+trackData.timeOfDeath = GetTimeOfDeath(label);
+pheno = GetTrackPhenotype(label);
+if(pheno)
+    trackData.phenotype = CellPhenotypes.descriptions{pheno};
 else
     trackData.phenotype = '';
 end

@@ -15,11 +15,12 @@ global Figures CellPhenotypes CellTracks
 if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
     CellPhenotypes.descriptions={'died'};
     CellPhenotypes.contextMenuID=[];
+    CellPhenotypes.hullPhenoSet = zeros(2,0);
 end
     
-if ~isfield(CellTracks,'phenotype')
-    CellTracks(1).phenotype=0;
-end
+% if ~isfield(CellTracks,'phenotype')
+%     CellTracks(1).phenotype=0;
+% end
 
 figure(Figures.cells.handle);
 Figures.cells.contextMenuHandle = uicontextmenu;
@@ -198,11 +199,11 @@ if(CellTracks(trackID).startTime>time)
     msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
     return
 end
-if(~isempty(CellTracks(siblingTrack).timeOfDeath) && CellTracks(siblingTrack).timeOfDeath<=time)
+if(~isempty(GetTimeOfDeath(siblingTrack)) && GetTimeOfDeath(siblingTrack)<=time)
     msgbox(['Cannot attach a cell to cell ' num2str(siblingTrack) ' beacuse it is dead at this time'],'Dead Cell','help');
     return
 end
-if(~isempty(CellTracks(trackID).timeOfDeath) && CellTracks(trackID).timeOfDeath<=time)
+if(~isempty(GetTimeOfDeath(trackID)) && GetTimeOfDeath(trackID)<=time)
     msgbox(['Cannot attach a cell to cell ' num2str(trackID) ' beacuse it is dead at this time'],'Dead Cell','help');
     return
 end
@@ -245,7 +246,7 @@ elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime
         parentTrack = str2double(answer(1));
         
         if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
-                (~isempty(CellTracks(parentTrack).timeOfDeath) && CellTracks(parentTrack).timeOfDeath<=time))
+                (~isempty(GetTimeOfDeath(parentTrack)) && GetTimeOfDeath(parentTrack)<=time))
             choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
                 'Not a valid parent','Enter a different parent','Cancel','Cancel');
             switch choice
@@ -453,36 +454,6 @@ function removeTrackPrevious(src,evnt)
     DrawCells();
 end
 
-function markDeath(src,evnt)
-global Figures CellTracks SegmentationEdits
-
-[hullID trackID] = GetClosestCell(0);
-if(isempty(trackID)),return,end
-
-CellTracks(trackID).timeOfDeath = Figures.time;
-
-%drop children from tree and run ProcessNewborns
-if(~isempty(CellTracks(trackID).childrenTracks))
-    try
-        ProcessNewborns(StraightenTrack(trackID), SegmentationEdits.maxEditedFrame);
-        History('Push');
-    catch errorMessage
-        try
-            ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
-    end
-end
-
-LogAction(['Marked time of death for ' num2str(trackID)]);
-
-DrawTree(Figures.tree.familyID);
-DrawCells();
-end
-
 function removeFromTree(src,evnt)
 global Figures
 
@@ -530,23 +501,14 @@ if src~=CellPhenotypes.contextMenuID(i)
     
 end
 bActive = strcmp(get(CellPhenotypes.contextMenuID(i),'checked'),'on');
+
 if 1==i
-    % death!
-    if CellTracks(trackID).phenotype
-        set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
-    end
-    if bActive
-        CellTracks(trackID).phenotype=0;
-    else
-        CellTracks(trackID).phenotype=1;
-    end
     
-    if bActive || ~isempty(CellTracks(trackID).timeOfDeath )
+	SetPhenotype(hullID, i, bActive);
+    if ( bActive )
         % turn off death...
-        CellTracks(trackID).timeOfDeath = [];
-        History('Push');
         try
-            ProcessNewborns(CellTracks(trackID).familyID, SegmentationEdits.maxEditedFrame);
+            ProcessNewborns(FindFamiliesAfter(trackID), SegmentationEdits.maxEditedFrame);
         catch errorMessage
             try
                 ErrorHandeling(['ProcessNewborns(' num2str(trackID) ', ' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
@@ -557,40 +519,38 @@ if 1==i
             end
         end
         LogAction(['Removed death for ' num2str(trackID)],[],[]);
-        DrawTree(Figures.tree.familyID);
-        DrawCells();
     else
-        markDeath(src,evnt);       
-    end 
+        if(~isempty(CellTracks(trackID).childrenTracks))
+            try
+                ProcessNewborns(StraightenTrack(trackID), SegmentationEdits.maxEditedFrame);
+            catch errorMessage
+                try
+                    ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
+                    return
+                catch errorMessage2
+                    fprintf('%s',errorMessage2.message);
+                    return
+                end
+            end
+        end
+        LogAction(['Marked time of death for ' num2str(trackID)]);
+    end
+    History('Push');
+    
+    DrawCells();
+    DrawTree(Figures.tree.familyID);
     return
 end
 
-if bActive
-    History('Push');
-    set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
-    CellTracks(trackID).phenotype=0;
-    LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{i} ' for track ' num2str(trackID)]);
-else    
-    History('Push');
-    if CellTracks(trackID).phenotype        
-        set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','off');
-        LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{CellTracks(trackID).phenotype} ' for track ' num2str(trackID)]);
-    end
-    if 1==CellTracks(trackID).phenotype        
-        CellTracks(trackID).timeOfDeath = [];
-        DrawCells();
-    end
-    
-    CellTracks(trackID).phenotype=i;
-    set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','on');
-    LogAction(['Activated phenotype ' CellPhenotypes.descriptions{i} ' for track ' num2str(trackID)]);
+SetPhenotype(hullID, i, bActive);
+History('Push');
 
-end
-
-DrawTree(Figures.tree.familyID);   
+DrawTree(Figures.tree.familyID);
     
 end
 
+% Whenever we right-click on a cell this puts a check mark next to active
+% phenotype, if any.
 function phenoPopulate(src,evnt)
 global CellPhenotypes CellTracks
 
@@ -600,12 +560,13 @@ if(isempty(trackID)),return,end
 for i=1:length(CellPhenotypes.contextMenuID)        
     set(CellPhenotypes.contextMenuID(i),'checked','off');    
 end
-if ~isfield(CellTracks,'phenotype') || isempty(CellTracks(trackID).phenotype) ...
-        || 0==CellTracks(trackID).phenotype
 
+trackPheno = GetTrackPhenotype(trackID);
+
+if ( trackPheno == 0 )
     return
 end
     
-set(CellPhenotypes.contextMenuID(CellTracks(trackID).phenotype),'checked','on');
+set(CellPhenotypes.contextMenuID(trackPheno),'checked','on');
 end
 %% Helper functions

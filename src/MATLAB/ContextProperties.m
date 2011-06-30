@@ -20,7 +20,7 @@ vars.endTime = CellTracks(vars.trackID).endTime;
 vars.parentTrack = CellTracks(vars.trackID).parentTrack;
 vars.siblingTrack = CellTracks(vars.trackID).siblingTrack;
 vars.childrenTracks = CellTracks(vars.trackID).childrenTracks;
-vars.timeOfDeath = CellTracks(vars.trackID).timeOfDeath;
+vars.timeOfDeath = GetTimeOfDeath(vars.trackID);
 vars.time = Figures.time;
 
 Properties(vars);

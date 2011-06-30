@@ -10,14 +10,9 @@ function DrawTree(familyID)
 
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
-
-if(isfield(CellTracks,'phenotype'))     
-    phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
-    phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
-else
-   phenoScratch.phenoColors = [];
-   phenoScratch.phenoLegendSet = [];    
-end
+   
+phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
+phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
 
 if(~isfield(CONSTANTS,'timeResolution'))
     CONSTANTS.timeResolution = 10;
@@ -163,7 +158,9 @@ if ~bDrawLabels
 end
 yMin = CellTracks(trackID).startTime;
 
-if(isempty(CellTracks(trackID).timeOfDeath))
+phenotype = GetTrackPhenotype(trackID);
+
+if ( phenotype ~= 1 )
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
@@ -177,8 +174,8 @@ if(isempty(CellTracks(trackID).timeOfDeath))
         EdgeColor = 'k';
 
         cPheno = [];
-        if (CellTracks(trackID).phenotype > 0)
-            cPheno = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        if (phenotype > 0)
+            cPheno = phenoScratch.phenoColors(phenotype,:);
         end
         
         if isempty(cPheno)
@@ -192,20 +189,25 @@ if(isempty(CellTracks(trackID).timeOfDeath))
             end
         end
     end
-    if isfield(CellTracks,'phenotype') && ~isempty(CellTracks(trackID).phenotype) && CellTracks(trackID).phenotype>1
+    if ( phenotype > 1 )
         if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.2;end;
-        color = phenoScratch.phenoColors(CellTracks(trackID).phenotype,:);
+        color = phenoScratch.phenoColors(phenotype,:);
         plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
             'MarkerEdgeColor',  'w',...
             'MarkerSize',       scaleMarker*circleSize,...
             'UserData',         trackID,...
             'uicontextmenu',    Figures.tree.contextMenuHandle);
-        phenoScratch.phenoLegendSet(CellTracks(trackID).phenotype)=1;
+        phenoScratch.phenoLegendSet(phenotype)=1;
         bHasPheno = 1;
     end
-
-    if ~(bHasPheno&~bDrawLabels)
+    
+    yPhenos = GetTrackPhenoypeTimes(trackID);
+    if ( ~isempty(yPhenos) )
+        plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+    end
+    
+    if ~(bHasPheno && ~bDrawLabels)
         plot(xVal,yMin,'o',...
             'MarkerFaceColor',  FaceColor,...
             'MarkerEdgeColor',  EdgeColor,...
@@ -221,12 +223,15 @@ if(isempty(CellTracks(trackID).timeOfDeath))
         'uicontextmenu',        Figures.tree.contextMenuHandle);
     
 else
-    yMin2 = CellTracks(trackID).timeOfDeath;
-    plot([xVal xVal],[yMin yMin2],...
+    yPhenos = GetTrackPhenoypeTimes(trackID);
+    
+    plot([xVal xVal],[yMin yPhenos(end)],...
         '-k','UserData',trackID);
-    plot([xVal xVal],[yMin2 CellTracks(trackID).endTime+1],...
+    plot([xVal xVal],[yPhenos(end) CellTracks(trackID).endTime+1],...
         '--k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-    plot(xVal,yMin2,'rx','UserData',trackID);
+    
+	plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+    
     plot(xVal,yMin,'o',...
         'MarkerFaceColor',  'k',...
         'MarkerEdgeColor',  'r',...

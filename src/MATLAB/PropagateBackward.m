@@ -1,15 +1,12 @@
 function PropagateBackward(time)
-    global HashedCells CellTracks
-    
-    netracks = find(arrayfun(@(x)(~isempty(x.phenotype)), CellTracks));
-    bPhenoCells = ([CellTracks(netracks).phenotype] > 0);
+    global HashedCells CellTracks CellPhenotypes
 
-    phenoCells = netracks(bPhenoCells);
+    phenoTracks = unique(GetTrackID(CellPhenotypes.hulls(1,:)));
 
     hullList = [];
     for i=1:length(phenoCells)
-        if ( CellTracks(phenoCells(i)).phenotype == 1 )
-            markedIdx = CellTracks(phenoCells(i)).timeOfDeath - CellTracks(phenoCells(i)).startTime + 1;
+        if ( GetTrackPhenotype(phenoTracks(i)) == 1 )
+            markedIdx = GetTimeOfDeath(phenoTracks(i)) - CellTracks(phenoCells(i)).startTime + 1;
             markedHull = CellTracks(phenoCells(i)).hulls(markedIdx);
             if ( markedHull == 0 )
                 continue;

@@ -78,10 +78,10 @@ end
 
 %check to see if either of the tracks are dead
 familyIDs = [];
-if(~isempty(CellTracks(trackID1).timeOfDeath))
+if(~isempty(GetTimeOfDeath(trackID1)))
     familyIDs = StraightenTrack(trackID1);
 end
-if(~isempty(CellTracks(trackID2).timeOfDeath))
+if(~isempty(GetTimeOfDeath(trackID2)))
     familyIDs = [familyIDs StraightenTrack(trackID2)];
 end
 if(~isempty(familyIDs))

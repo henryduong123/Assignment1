@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls ConnectedDist GraphEdits Costs
+    global CellHulls ConnectedDist GraphEdits Costs CellPhenotypes CellTracks
 
     bNeedsUpdate = 0;
     
@@ -34,6 +34,15 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
         fprintf('\nBuilding Cell Distance Information...\n');
         ConnectedDist = [];
         BuildConnectedDistance(1:length(CellHulls), 0, 1);
+        fprintf('Finished\n');
+        bNeedsUpdate = 1;
+    end
+    
+    % Remove CellTracks.phenotype field and use it to create hullPhenoSet
+    % instead
+    if ( ~CheckFileVersionString('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
+        fprintf('\nConverting Phenotype information...\n');
+        UpdatePhenotypeInfo();
         fprintf('Finished\n');
         bNeedsUpdate = 1;
     end

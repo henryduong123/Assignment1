@@ -84,7 +84,7 @@ for i=1:size
             parentCosts(j) = Inf;
         elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
             bMitosisCost(j) = false;
-        elseif(~isempty(CellTracks(parentTrackID).timeOfDeath))
+        elseif(~isempty(GetTimeOfDeath(parentTrackID)))
             parentCosts(j) = Inf;
         else
             siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;
@@ -222,7 +222,7 @@ function bValid = validBranch(trackID, tFinal)
     
     bLeaf = isLeafBranch(trackID);
     bValid = (~bLeaf || (CellTracks(trackID).endTime >= tFinal) ...
-        || (~isempty(CellTracks(trackID).phenotype) && (CellTracks(trackID).phenotype ~= 0)));
+        || (GetTrackPhenotype(trackID) ~= 0));
     
     if ( bLeaf && ~bValid )
         bValid = checkEditedTrack(trackID);

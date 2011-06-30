@@ -180,9 +180,6 @@ end
 
 if(~opened),return,end
 
-% StraightenFamilies();
-% ProcessNewborns(1:length(CellFamilies),length(HashedCells));
-
 bUpdated = FixOldFileVersions(versionString);
 if ( bUpdated )
     UpdateFileVersionString(versionString);
@@ -192,6 +189,9 @@ if ( bUpdated )
         SaveLEVerState([settings.matFilePath settings.matFile]);
     end
 end
+
+% StraightenFamilies();
+% ProcessNewborns(1:length(CellFamilies),length(HashedCells));
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');
