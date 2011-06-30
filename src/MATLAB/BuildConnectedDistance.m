@@ -87,9 +87,9 @@ function UpdateDistances(updateCell, t, tNext)
         end
         
         if ( abs(tNext-t) == 1 )
-            ccMaxDist = CONSTANTS.dMaxConnectComponet;
+            ccMaxDist = CONSTANTS.dMaxConnectComponent;
         else
-            ccMaxDist = 1.5*CONSTANTS.dMaxConnectComponet;
+            ccMaxDist = 1.5*CONSTANTS.dMaxConnectComponent;
         end
         
         if ( ccMinDistSq > (ccMaxDist^2) )

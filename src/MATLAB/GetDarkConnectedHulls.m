@@ -83,9 +83,9 @@ end
                         end
                     end
                     if 1==t2-t1
-                        dmax=CONSTANTS.dMaxConnectComponet;
+                        dmax=CONSTANTS.dMaxConnectComponent;
                     else
-                        dmax=1.5*CONSTANTS.dMaxConnectComponet;
+                        dmax=1.5*CONSTANTS.dMaxConnectComponent;
                     end
                     if dCCmin<dmax
                         objsSegment(hi).DarkConnectedHulls=[objsSegment(hi).DarkConnectedHulls; hj dCCmin];
