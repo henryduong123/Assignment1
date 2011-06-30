@@ -504,10 +504,11 @@ bActive = strcmp(get(CellPhenotypes.contextMenuID(i),'checked'),'on');
 
 if 1==i
     
-	SetPhenotype(hullID, i, bActive);
+	
     if ( bActive )
         % turn off death...
         try
+            SetPhenotype(hullID, i, bActive);
             ProcessNewborns(FindFamiliesAfter(trackID), SegmentationEdits.maxEditedFrame);
         catch errorMessage
             try
@@ -520,9 +521,12 @@ if 1==i
         end
         LogAction(['Removed death for ' num2str(trackID)],[],[]);
     else
+        % turn on death
         if(~isempty(CellTracks(trackID).childrenTracks))
             try
-                ProcessNewborns(StraightenTrack(trackID), SegmentationEdits.maxEditedFrame);
+                NewTrackID=StraightenTrack(trackID);
+                SetPhenotype(hullID, i, bActive);
+                ProcessNewborns(NewTrackID, SegmentationEdits.maxEditedFrame);
             catch errorMessage
                 try
                     ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);

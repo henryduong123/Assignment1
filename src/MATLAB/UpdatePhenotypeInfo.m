@@ -1,6 +1,9 @@
 function UpdatePhenotypeInfo()
     global CellPhenotypes CellTracks
-    
+    % non-empty tracks?
+    if ~isfield(CellTracks,'phenotype')
+        CellTracks(1).phenotype=[];
+    end
     netracks = find(arrayfun(@(x)(~isempty(x.phenotype)), CellTracks));
     bPhenoCells = ([CellTracks(netracks).phenotype] > 0);
 
