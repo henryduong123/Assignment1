@@ -19,8 +19,8 @@
 
 const double costEpsilon = 1e-3;
 
-#define VMAX 80.0
-#define CCMAX 40.0
+#define VMAX 40.0
+#define CCMAX 20.0
 
 double CCDist(int t0,int i0,int t1,int i1)
 {
