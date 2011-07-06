@@ -18,6 +18,10 @@ function AddHullToTrack(hullID,trackID,previousHullID)
 
 global HashedCells CellTracks CellFamilies CellHulls
 
+if ( ~isscalar(hullID) || (hullID <= 0) || (hullID > length(CellHulls)) )
+    error('AddHullToTrack - hullID argument must be a valid scalar cell ID');
+end
+
 if(isempty(trackID))
     %find the track to add this hull to
     previousTime = CellHulls(previousHullID).time;
