@@ -93,6 +93,9 @@ for i=1:size
             parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
         end
         if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
+            if ( nnz(GraphEdits(parentHullCandidates(j),:)) == 1 )
+                bMitosisCost(j) = false;
+            end
             parentCosts(j) = costMatrix(parentHullCandidates,childHullID);
         end
     end

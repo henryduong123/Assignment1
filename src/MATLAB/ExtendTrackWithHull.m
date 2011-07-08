@@ -11,6 +11,10 @@
 function ExtendTrackWithHull(trackID, hullID)
     global CellTracks CellFamilies CellHulls
 
+    if ( ~isscalar(hullID) || (hullID <= 0) || (hullID > length(CellHulls)) )
+        error('ExtendTrackWithHull - hullID argument must be a valid scalar cell ID');
+    end
+    
     time = CellHulls(hullID).time;
     hash = time - CellTracks(trackID).startTime + 1;
     if ( hash <= 0 )
