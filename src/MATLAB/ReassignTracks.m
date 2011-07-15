@@ -65,11 +65,7 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
     changedHulls = [];
     
 	% Get old hull - track assignments
-    bOldHull = [HashedCells{t}.trackID] == track;
-    if ( any(bOldHull) )
-        oldHull = HashedCells{t}(bOldHull).hullID;
-    end
-    
+    oldHull = getOldHull(t, track);
     oldTrack = HashedCells{t}([HashedCells{t}.hullID] == hull).trackID;
 
     % Hull - track assignment is unchanged
@@ -88,13 +84,44 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
         changedHulls = [oldHull hull];
     else
         % Add hull to track
-        RemoveHullFromTrack(hull, oldTrack, 1);
+        [bDump,splitTrack] = RemoveHullFromTrack(hull, oldTrack, 1);
         
         % Some RemoveHullFromTracke cases cause track to be changed
         track = GetTrackID(extHull);
-        ExtendTrackWithHull(track, hull);
-        changedHulls = hull;
+        oldHull = getOldHull(t, track);
+        if ( ~isempty(oldHull) )
+            if ( isempty(splitTrack) )
+                error('Non-empty old cell ID without track split, cannot repair change');
+            end
+            
+            reassignAndSwap(t, hull, splitTrack, oldHull, track);
+            changedHulls = [oldHull hull];
+        else
+            ExtendTrackWithHull(track, hull);
+            changedHulls = hull;
+        end
     end
+end
+
+% Special case: a split-track due to hull removal has caused us to want to
+% assign hull to a track which now exists in this frame (oldHull), we first
+% assign hull to splitTrack, then swap tracking in this frame.
+function reassignAndSwap(t, hull, splitTrack, oldHull, track)
+    ExtendTrackWithHull(splitTrack, hull);
+    swapTracking(t, oldHull, hull, track, splitTrack);
+end
+
+function oldHull = getOldHull(t, track)
+    global HashedCells
+    
+    oldHull = [];
+    
+    oldHullIdx = find([HashedCells{t}.trackID] == track,1,'first');
+    if ( isempty(oldHullIdx) )
+        return;
+    end
+    
+    oldHull = HashedCells{t}(oldHullIdx).hullID;
 end
 
 % Currently hullA has trackA, hullB has trackB

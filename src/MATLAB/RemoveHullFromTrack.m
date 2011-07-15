@@ -8,7 +8,7 @@
 % Removes a hull from a track deleting the track if necessary.  If
 % bUpdateTree is specified, a track with a significant number of zeros in
 % the middle will be split as well.
-function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
+function [bChangedStart,splitTrack] = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
     global CellTracks CellHulls CellFamilies
     
     if ( ~exist('bUpdateTree', 'var') )
@@ -23,6 +23,7 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
         return;
     end
     
+    splitTrack = [];
     bChangedStart = 0;
     
     % Parameters for splitting tracks that have too many continuous zeros
@@ -77,6 +78,8 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
                 return;
             end
             
+            splitTrack = CellFamilies(newFamilyID).rootTrackID;
+            
             StraightenTrack(CellFamilies(newFamilyID).rootTrackID);
             if ( ~isempty(CellTracks(trackID).parentTrack) )
                 StraightenTrack(CellTracks(trackID).parentTrack);
@@ -89,6 +92,8 @@ function bChangedStart = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
             if ( isempty(newFamilyID) )
                 return;
             end
+            
+            splitTrack = CellFamilies(newFamilyID).rootTrackID;
             
             StraightenTrack(CellFamilies(newFamilyID).rootTrackID);
             if ( ~isempty(CellTracks(trackID).parentTrack) )
