@@ -63,6 +63,8 @@ SegmentationEdits.changedHulls = [];
 SegmentationEdits.maxEditedFrame = length(HashedCells);
 SegmentationEdits.editTime = [];
 
+GraphEdits = [];
+
 oldCONSTANTS = CONSTANTS;
 
 %find the first image

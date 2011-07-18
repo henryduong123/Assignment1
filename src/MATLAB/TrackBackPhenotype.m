@@ -79,13 +79,17 @@ function bAssign = assignBackTracks(t, costMatrix, trackedHulls, nextHulls, bPro
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
     [minOutCosts,bestOutgoing] = min(costMatrix,[],2);
     
+    bAssign = false(size(costMatrix));
+    
+    if ( isempty(costMatrix) )
+        return;
+    end
+    
     bestOutgoing  = bestOutgoing';
     bMatchedCol = false(size(bestIncoming));
     bMatched = (bestIncoming(bestOutgoing) == (1:length(bestOutgoing)));
     bMatchedCol(bestOutgoing(bMatched)) = 1;
     matchedIdx = find(bMatched);
-    
-    bAssign = false(size(costMatrix));
     
     % Assign matched edges
 	for i=1:length(matchedIdx)
