@@ -74,4 +74,10 @@ else
     index = find([CellTracks(trackID).hulls]~=0, 1,'last');
     CellTracks(trackID).endTime = CellHulls(CellTracks(trackID).hulls(index)).time;
 end
+
+if ( ~isempty(CellFamilies(oldFamilyID).tracks) )
+    CellFamilies(oldFamilyID).startTime = min([CellTracks(CellFamilies(oldFamilyID).tracks).startTime]);
+    CellFamilies(oldFamilyID).endTime = max([CellTracks(CellFamilies(oldFamilyID).tracks).endTime]);
+end
+
 end

@@ -28,6 +28,9 @@ function ExtendTrackWithHull(trackID, hullID)
         RehashCellTracks(trackID, time);
         CellTracks(trackID).startTime = time;
         hash = time - CellTracks(trackID).startTime + 1;
+        if(CellFamilies(CellTracks(trackID).familyID).startTime > time)
+            CellFamilies(CellTracks(trackID).familyID).startTime = time;
+        end
 %         error('ExtendTrackWithHull cannot extend tracks backwards before their start time.');
     end
     

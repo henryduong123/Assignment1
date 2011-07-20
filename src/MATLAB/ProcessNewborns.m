@@ -81,9 +81,15 @@ for i=1:size
         if(CONSTANTS.minParentCandidateTimeFrame >= parentTrackTimeFrame)
             parentCosts(j) = Inf;
         elseif(CONSTANTS.maxFrameDifference < abs(CellTracks(childTrackID).startTime - CellHulls(parentHullCandidates(j)).time))
-            parentCosts(j) = Inf;
+            if ( CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time )
+                bMitosisCost(j) = false;
+                parentCosts(j) = parentCosts(j) / 8;
+            else
+                parentCosts(j) = Inf;
+            end
         elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
             bMitosisCost(j) = false;
+            parentCosts(j) = parentCosts(j) / 2;
         elseif(~isempty(GetTimeOfDeath(parentTrackID)))
             parentCosts(j) = Inf;
         else
