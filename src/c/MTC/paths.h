@@ -47,4 +47,4 @@ public:
 
 int GetGlobalIdx(int t, int idx);
 int GetLocalIdx(int globalIdx);
-void BuildBestPaths(std::vector<CSourcePath*>* inEdges, CSourcePath** outEdges, int t, int occlLookcback = 0);
+void BuildBestPaths(std::map<int,int>& bestOutEdges, int t, int occlLookcback = 0);
