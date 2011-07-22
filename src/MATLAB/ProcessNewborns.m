@@ -38,6 +38,8 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
     end
 end
 
+GlobalPatching();
+
 costMatrix = GetCostMatrix();
 
 size = length(families);
@@ -68,7 +70,6 @@ for i=1:size
 
     %Get the costs of the possible connections
     parentCosts = costMatrix(parentHullCandidates,childHullID);
-    bMitosisCost = true(1,nnz(parentCosts));
     
     %Massage the costs a bit
     for j=1:length(parentHullCandidates)
@@ -81,15 +82,9 @@ for i=1:size
         if(CONSTANTS.minParentCandidateTimeFrame >= parentTrackTimeFrame)
             parentCosts(j) = Inf;
         elseif(CONSTANTS.maxFrameDifference < abs(CellTracks(childTrackID).startTime - CellHulls(parentHullCandidates(j)).time))
-            if ( CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time )
-                bMitosisCost(j) = false;
-                parentCosts(j) = parentCosts(j) / 8;
-            else
-                parentCosts(j) = Inf;
-            end
+            parentCosts(j) = Inf;
         elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
-            bMitosisCost(j) = false;
-            parentCosts(j) = parentCosts(j) / 2;
+            parentCosts(j) = Inf;
         elseif(~isempty(GetTimeOfDeath(parentTrackID)))
             parentCosts(j) = Inf;
         else
@@ -99,9 +94,6 @@ for i=1:size
             parentCosts(j) = parentCosts(j) + SiblingDistance(childHullID,sibling);
         end
         if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
-            if ( nnz(GraphEdits(parentHullCandidates(j),:)) == 1 )
-                bMitosisCost(j) = false;
-            end
             parentCosts(j) = costMatrix(parentHullCandidates,childHullID);
         end
     end
@@ -130,19 +122,11 @@ for i=1:size
         end
     end
     
-    % If the parent future is long enough create a mitosis, otherwise patch up track with parent
-    if ( bMitosisCost(index) )
-        connectTime = CellHulls(parentHullID).time+1;
-        if( CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime)...
-            || (GraphEdits(parentHullID,childHullID) > 0 && nnz(GraphEdits(parentHullID,:)) > 1) )
-            ChangeTrackParent(parentTrackID,connectTime,childTrackID);
-        end
-    elseif ( isempty(CellTracks(parentTrackID).childrenTracks) )
-        if ( CellTracks(childTrackID).startTime <= CellTracks(parentTrackID).endTime )
-            RemoveFromTree(CellTracks(childTrackID).startTime, parentTrackID, 'no');
-        end
-        ChangeLabel(CellTracks(childTrackID).startTime, childTrackID, parentTrackID);
-        RehashCellTracks(parentTrackID,CellTracks(parentTrackID).startTime);
+    % If the parent future is long enough create a mitosis
+    connectTime = CellHulls(parentHullID).time+1;
+    if( CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime)...
+        || (GraphEdits(parentHullID,childHullID) > 0 && nnz(GraphEdits(parentHullID,:)) > 1) )
+        ChangeTrackParent(parentTrackID,connectTime,childTrackID);
     end
 end
 

@@ -120,7 +120,7 @@ int DepthFirstBestPathSearch(CSourcePath path, int bestGIdx, int t, int tEnd, in
 	return bestGIdx;
 }
 
-void BuildBestPaths(std::vector<CSourcePath*>* inEdges, CSourcePath** outEdges, int t, int occlLookback)
+void BuildBestPaths(std::map<int,int>& bestOutEdges, int t, int occlLookback)
 {
 	if ( t-occlLookback < 0 )
 		return;
@@ -140,8 +140,7 @@ void BuildBestPaths(std::vector<CSourcePath*>* inEdges, CSourcePath** outEdges, 
 		int bestGIdx = DepthFirstBestPathSearch(srcPath, -1, t+1, tEnd, occlLookback);
 		if ( bestGIdx >= 0 )
 		{
-			int locIdx = GetLocalIdx(bestGIdx);
-			inEdges[locIdx].push_back(gConnectOut[startGIdx][bestGIdx]);
+			bestOutEdges[startGIdx] = bestGIdx;
 		}
 	}
 }

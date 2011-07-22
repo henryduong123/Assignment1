@@ -26,6 +26,7 @@ system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release ".
 % clears out mex cache so src/mexMAT.mexw32 can be overwritten
 clear mex
 system('copy ..\c\mexMAT\Release\mexMAT.dll .\mexMAT.mexw32');
+system('copy ..\c\MTC\Release\MTC.exe .\');
 system('copy ..\c\MTC\Release\MTC.exe ..\..\bin\');
 
 mcc -m LEVer.m -d ..\..\bin\.

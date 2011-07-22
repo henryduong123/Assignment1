@@ -96,6 +96,27 @@ double FindMinCostIn(int ID)
 	return cmin;
 }
 
+int FindMinInEdgeIdx(int nextGIdx)
+{
+	double cmin = dbltype::infinity();
+	int bestIdx = -1;
+
+	std::map<int,CSourcePath*>::iterator cIter = gConnectIn[nextGIdx].begin();
+	while ( cIter != gConnectIn[nextGIdx].end() )
+	{
+		CSourcePath* inPath = cIter->second;
+		if ( inPath->cost < cmin )
+		{
+			cmin = inPath->cost;
+			bestIdx = cIter->first;
+		}
+
+		++cIter;
+	}
+
+	return bestIdx;
+}
+
 int FindMinCostIdx(std::vector<CSourcePath*>& edges)
 {
 	int minidx = -1;
@@ -120,80 +141,61 @@ int main(int argc, char* argv[])
 	if ( outputargidx < 0 )
 		return 0;
 
-	CSourcePath** outEdges = new CSourcePath*[gMaxDetections];
-	std::vector<CSourcePath*>* inEdges = new std::vector<CSourcePath*>[gMaxDetections];
-	
-for ( int t=0; t < gNumFrames-1; ++t )
-			
+	std::map<int,int> bestOutEdges;
 
-//			for ( int t=215; t < gNumFrames-1; ++t )
-
+	for ( int t=0; t < gNumFrames-1; ++t )
 	{
-		ClearEdges(inEdges, outEdges);
-		BuildBestPaths(inEdges, outEdges, t);
+		bestOutEdges.clear();
+		BuildBestPaths(bestOutEdges, t);
 
 		//Occlusions
 		for ( int iLookback=1; iLookback < 2; ++iLookback )
 		{
-			BuildBestPaths(inEdges, outEdges, t, iLookback);
+			BuildBestPaths(bestOutEdges, t, iLookback);
 		}
 
 		printf("t = %d, %d detections\n", t, rgDetectLengths[t]);
 
 		for ( int destPtIdx=0; destPtIdx < rgDetectLengths[t+1]; ++destPtIdx)
 		{
-			if ( inEdges[destPtIdx].size() == 0 )
+			int nextGIdx = GetGlobalIdx(t+1, destPtIdx);
+			int bestTrackletIdx = FindMinInEdgeIdx(nextGIdx);
+			if ( bestTrackletIdx < 0 )
 				continue;
 
-			int bestTrackletIdx = FindMinCostIdx(inEdges[destPtIdx]);
-			if ( bestTrackletIdx < 0 )
+			if ( (bestOutEdges.count(bestTrackletIdx) == 0) || bestOutEdges[bestTrackletIdx] != nextGIdx )
 				continue;
 
 			//int ID=GetGlobalIdx(inEdges[destPtIdx][bestTrackletIdx]->frame[1], inEdges[destPtIdx][bestTrackletIdx]->index[1]);
 			//if (FindMinCostIn(ID)!=inEdges[destPtIdx][bestTrackletIdx]->cost)
 			//	continue;
 
-			int newTrackletID = inEdges[destPtIdx][bestTrackletIdx]->trackletID;
+			int newTrackletID = gConnectOut[bestTrackletIdx][nextGIdx]->trackletID;
 
 			if ( newTrackletID < 0 )
 			{
 				//Add new tracklet to list etc. and set id
 				newTrackletID = gAssignedTracklets.size();
-				inEdges[destPtIdx][bestTrackletIdx]->trackletID = newTrackletID;
+				gConnectOut[bestTrackletIdx][nextGIdx]->trackletID = newTrackletID;
 
 				tPathList newList;
 				gAssignedTracklets.push_back(newList);
-							
-				int srcGIdx = GetGlobalIdx(inEdges[destPtIdx][bestTrackletIdx]->frame[0], inEdges[destPtIdx][bestTrackletIdx]->index[0]);
-				gAssignedTrackID[srcGIdx] = newTrackletID;
+
+				gAssignedTrackID[bestTrackletIdx] = newTrackletID;
 			}
 
 			//Add path to tracklet list
-			gAssignedTracklets[newTrackletID].push_back(inEdges[destPtIdx][bestTrackletIdx]);
+			gAssignedTracklets[newTrackletID].push_back(gConnectOut[bestTrackletIdx][nextGIdx]);
 
 			//Keep track of assignment for fast lookup
-			int srcGIdx = GetGlobalIdx(inEdges[destPtIdx][bestTrackletIdx]->frame[0], inEdges[destPtIdx][bestTrackletIdx]->index[0]);
-			int destGIdx = GetGlobalIdx(t+1, destPtIdx);
-			gAssignedConnectIn[destGIdx] = srcGIdx;
-			gAssignedConnectOut[srcGIdx] = destGIdx;
-			gAssignedTrackID[destGIdx] = bestTrackletIdx;
+			gAssignedConnectIn[nextGIdx] = bestTrackletIdx;
+			gAssignedConnectOut[bestTrackletIdx] = nextGIdx;
+			gAssignedTrackID[nextGIdx] = newTrackletID;
 		}
-				
-		for ( int destPtIdx=0; destPtIdx < rgDetectLengths[t+1]; ++destPtIdx)
-		{
-			if ( inEdges[destPtIdx].size() != 0 )
-				continue;
-			
-			gdestGIdx = GetGlobalIdx(t+1, destPtIdx);
-			//CSourcePath * BestSrc = gConnectIn[gdestGIdx];
-		}
-
 	}
 
 	WriteTracklets(argc, argv, 2);
 
-	delete[] outEdges;
-	delete[] inEdges;
 	system("echo %TIME% >> ttt.txt");
 
 }
