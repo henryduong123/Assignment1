@@ -6,7 +6,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function WriteSegData(objsSegment,DatasetName)
-sz=[1024 1344];
+
+global CONSTANTS;
+
+fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' SignificantDigits(1) '.TIF'];
+[im map]=imread(fname);
+if isempty(im)
+    fprintf('error - unable to extract image size - tracking will fail\n');
+end
+sz=size(im);
+
 th=max([objsSegment.t]);
 HashedHulls=cell(th,1);
 

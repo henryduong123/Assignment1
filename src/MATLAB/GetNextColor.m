@@ -9,13 +9,16 @@ function color = GetNextColor()
 %Takes the global Colors list and selects the next in the list and returns
 %it
 
-
 global Colors
 persistent index
 
 %init index
 if(isempty(index))
     index=1;
+end
+
+if isempty(Colors)
+    Colors  = CreateColors();
 end
 
 color.background = Colors(index,1:3);
