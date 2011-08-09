@@ -34,6 +34,10 @@ if(isempty(index))
     index=1;
 end
 
+if isempty(Colors)
+    Colors  = CreateColors();
+end
+
 color.background = Colors(index,1:3);
 color.text = Colors(index,4:6);
 color.backgroundDark = Colors(index,7:9);
