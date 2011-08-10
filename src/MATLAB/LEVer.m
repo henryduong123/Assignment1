@@ -1,3 +1,4 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     This file is part of LEVer.exe
@@ -38,7 +39,7 @@ if(~isempty(Figures))
     end
 end
 
-versionString = '5.14 Adult';
+versionString = '5.15 Adult';
 
 if(OpenData(versionString))
     InitializeFigures();
