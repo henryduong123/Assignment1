@@ -25,10 +25,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function GraphEditRemoveEdge(time, parentTrackID, trackID)
-    global GraphEdits
+    global CellTracks GraphEdits
     
     parentHull = getNearestPrevHull(time-1, parentTrackID);
     nextHull = getNearestNextHull(time, trackID);
+    
+    if ( parentHull == 0 && ~isempty(CellTracks(parentTrackID).parentTrack) )
+        parentTrackID = CellTracks(parentTrackID).parentTrack;
+        parentHull = getNearestPrevHull(time-1, parentTrackID);
+    end
     
     if ( parentHull == 0 || nextHull == 0 )
         return;
