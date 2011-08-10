@@ -5,14 +5,28 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function TestDataIntegrity(correct)
-%TestDataIntegrity(correct) tests to make sure that the database is consistant.
+function TestDataIntegrity(correct, debugLevel)
+%TestDataIntegrity(correct,debugLevel) tests to make sure that the database is consistant.
 %Takes the CellTracks as the most accurate.  If correct==1, this
 %function will attempt to correct the error using the data from CellTracks
 %***USE SPARINGLY, TAKES A LOT OF TIME***
 
 
 global CellTracks CellHulls CellFamilies HashedCells
+
+if ( ~exist('correct','var') )
+    correct = 0;
+end
+
+% Optional debugLevel argument selects data integrity scan level, if
+% omitted then we run no scan
+if ( ~exist('debugLevel','var') )
+    debugLevel = 0;
+end
+
+if ( debugLevel == 0 )
+    return;
+end
 
 hullsList = [];
 fprintf('Checking CellTracks...');
