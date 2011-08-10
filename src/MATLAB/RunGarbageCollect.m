@@ -1,5 +1,7 @@
 function RunGarbageCollect(currentHull)
-    global Figures CellTracks
+    global Figures CellTracks CellFamilies
+    
+%     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
     try
         SweepDeleted();
@@ -13,9 +15,12 @@ function RunGarbageCollect(currentHull)
         end
     end
     
-    trackID = GetTrackID(currentHull);
+    currentTrackID = GetTrackID(currentHull);
+    currentFamilyID = CellTracks(currentTrackID).familyID;
+    
+    Figures.tree.familyID = currentFamilyID;
     
     DrawCells();
-    DrawTree(CellTracks(trackID).familyID);
+    DrawTree(currentFamilyID);
 end
 

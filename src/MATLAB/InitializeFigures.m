@@ -331,11 +331,13 @@ function tryMergeSelectedCells()
 end
 
 function learnFromEdits(src,evnt)
-    global CellFamilies HashedCells SegmentationEdits Figures
+    global CellFamilies CellTracks HashedCells SegmentationEdits Figures
     
     if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls)) && isempty(SegmentationEdits.editTime)) )
         return;
     end
+    
+    currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
     try
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
@@ -357,8 +359,10 @@ function learnFromEdits(src,evnt)
     
     UpdateSegmentationEditsMenu();
     
-    DrawCells();
-    DrawTree(Figures.tree.familyID);
+%     DrawCells();
+%     DrawTree(Figures.tree.familyID);
+    
+    RunGarbageCollect(currentHull);
     
     History('Push');
     LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
