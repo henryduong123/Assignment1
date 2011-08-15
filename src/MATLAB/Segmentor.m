@@ -42,6 +42,12 @@ for t = tStart:tStep:tEnd
     fprintf('%d%%...',floor(floor(t/tStep)/numImages*100));
     
     [im map]=imread(fname);
+    % Handle "color" images by averaging the color channels to get
+    % intensity (should all be the same for all channels)
+    if ( ndims(im) > 2 )
+        im = mean(im,3);
+    end
+    
     im=mat2gray(im);
     
     bwDark=0*im;
