@@ -19,6 +19,8 @@ if(isempty(CellFamilies))
         'tracks',       {trackID},...
         'startTime',    {t},...
         'endTime',      {t});
+    
+    curFamilyID = 1;
 else
     %get next family ID
     curFamilyID = length(CellFamilies) + 1;

@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [costMatrix bOutAffected bInAffected] = GetCostSubmatrix(fromHulls, toHulls)
+function [costMatrix bFromAffected bToAffected] = GetCostSubmatrix(fromHulls, toHulls)
 %     global Costs
 %     inCostMatrix = Costs;
     inCostMatrix = GetCostMatrix();
@@ -25,11 +25,11 @@ function [costMatrix bOutAffected bInAffected] = GetCostSubmatrix(fromHulls, toH
         end
     end
 
-    bInAffected = any(costMatrix,1);
-    costMatrix = costMatrix(:,bInAffected);
+    bToAffected = any(costMatrix,1);
+    costMatrix = costMatrix(:,bToAffected);
     
-    bOutAffected = any(costMatrix,2);
-    costMatrix = full(costMatrix(bOutAffected,:));
+    bFromAffected = any(costMatrix,2);
+    costMatrix = full(costMatrix(bFromAffected,:));
 
     costMatrix(costMatrix == 0) = Inf;
 end

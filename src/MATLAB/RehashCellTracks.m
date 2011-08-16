@@ -23,7 +23,8 @@ global CellTracks CellHulls
 
 if ( ~exist('newStartTime','var') )
     nzidx = find(CellTracks(trackID).hulls,1,'first');
-    newStartTime = CellTracks(trackID).startTime + nzidx - 1;
+%     newStartTime = CellTracks(trackID).startTime + nzidx - 1;
+    newStartTime = CellHulls(CellTracks(trackID).hulls(nzidx)).time;
 end
 
 %clean out empty history first
