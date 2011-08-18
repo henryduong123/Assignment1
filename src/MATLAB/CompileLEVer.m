@@ -1,9 +1,25 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 tic
 
@@ -11,14 +27,6 @@ vstoolroot = getenv('VS90COMNTOOLS');
 if ( isempty(vstoolroot) )
     error('Cannot compile MTC and mexMAT without Visual Studio 2008');
 end
-
-% buildDirList = {'..\c\MTC\Release' '..\c\MTC\Intermediate' '..\c\mexMAT\Release' '..\c\mexMAT\Intermediate'};
-% 
-% for i=1:length(buildDirList)
-%     if ( exist(buildDirList{i},'dir') )
-%         rmdir(buildDirList{i}, 's');
-%     end
-% end
 
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\MTC.sln"']);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\mexMAT.sln"']);
