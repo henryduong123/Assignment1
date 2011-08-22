@@ -30,6 +30,10 @@ if ( isempty(vstoolroot) )
     error('Cannot compile MTC and mexMAT without Visual Studio 2008');
 end
 
+if ( ~exist('..\..\bin','dir') )
+    mkdir('..\..\bin');
+end
+
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\MTC.sln"']);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\mexMAT.sln"']);
 
