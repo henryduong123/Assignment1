@@ -29,6 +29,8 @@ for dd=1:length(dlist)
     CONSTANTS.datasetName=dlist(dd).name;
     CONSTANTS.matFullFile=[directory_name '\' CONSTANTS.datasetName '_LEVer.mat'];
     if exist(CONSTANTS.matFullFile,'file'),continue,end
+    TouchFile=[];
+    save(CONSTANTS.matFullFile,'TouchFile');
     
     tic
     imageAlpha=1.5;
@@ -100,11 +102,11 @@ for dd=1:length(dlist)
     fprintf('Finalizing Data...');
     ConvertTrackingData(objHulls,gConnect);
     fprintf('Done\n');
+    
+    SaveLEVerState([CONSTANTS.matFullFile]);
 
 
-    SaveData(1);
 
-    LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end %dd
 
 
