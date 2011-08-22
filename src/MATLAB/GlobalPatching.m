@@ -1,14 +1,25 @@
 function GlobalPatching()
-    global CellFamilies CellTracks CONSTANTS GraphEdits
+    global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits
     
     childHulls = arrayfun(@getRootHullID, CellFamilies, 'UniformOutput',0);
     childHulls = [childHulls{:}];
     
     costMatrix = GetCostMatrix();
-    costMatrix(GraphEdits==2) = 0;
+    % Zero all secondary-edited mitosis edges so they cannot be patched
+%     costMatrix(GraphEdits==2) = 0;
+    % As stated elsewhere linear/binary indexing of large sparse cost
+    % matrices is unsupported: see comments in GetCostMatrix()
+    [r,c] = find(GraphEdits==2);
+    for i=1:length(r)
+        costMatrix(r(i),c(i)) = 0;
+    end
     
     costMatrix = costMatrix(:,childHulls);
     parentHulls = find(any(costMatrix > 0,2));
+    
+    % Don't consider deleted hulls as parents
+    bDeleted = [CellHulls(parentHulls).deleted];
+    parentHulls = parentHulls(~bDeleted);
     
     costMatrix = costMatrix(parentHulls,:);
     
