@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -51,7 +51,7 @@ double CCDist(int t0,int i0,int t1,int i1)
 			// connected!
 			return rgDetect[t0][i0].DarkConnectedCost[i];
 	}
-	return CCMAX+1.; //dbltype::infinity();
+	return CCMAX+1.;
 
 
 } // CCDist
@@ -165,12 +165,6 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 	if (bCheck)
 		return 1.;
 
-	if  ((267<=frame[srcFrameIdx]<=269))
-	{
-		velo_max*= 3;
-		cc_max*= 3;
-	}
-
 	LocalCost=3*CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+1],index[srcFrameIdx+1],velo_max,cc_max);
 		
 	if ( LocalCost == dbltype::infinity() )			
@@ -202,7 +196,6 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		if (nDestiny2==index[srcFrameIdx+1]) 
 			LocalCost*=0.5;
 	}
-
 
 	dlocnX=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].X);
 	dlocnY=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].Y);

@@ -1,3 +1,6 @@
+% MergeSplitCells.m - Attempt to merge cells that are oversegmented and 
+% propagate the merge forward in time.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -27,10 +30,9 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     replaceCell = [];
     
     t = Figures.time;
-%     [mergeObj, deleteCells] = FindMergedCell(t, clickPt);
     [mergeObj, deleteCells] = CreateMergedCell(mergeCells);
     
-	if ( isempty(mergeObj) || isempty(deleteCells) )
+    if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
     end
     
@@ -114,13 +116,6 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
             return;
         end
         
-%         checkPt = CellHulls(affectedHulls(mergeIdx)).centerOfMass;
-%         [mergeObj, deleteCells] = FindMergedCell(t+1, [checkPt(2) checkPt(1)]);
-
-%         [mergeObj, deleteCells] = CreateMergedCell(nextMergeCells);
-%         if ( isempty(mergeObj) || isempty(deleteCells) )
-%             return;
-%         end
         mergedHull = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, nextMergeCells);
         
         for i=1:length(propHulls)

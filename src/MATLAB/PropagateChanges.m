@@ -1,3 +1,6 @@
+% PropagateChanges.m - Propagate edit changes (split cells) forward in
+% time.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -84,11 +87,7 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
             if ( any(GraphEdits(nextHulls(i),:)) || any(GraphEdits(:,nextHulls(i))) )
                 continue;
             end
-
-%             if ( ~all(checkTrackLengths(splitHulls(~bFollowSplit),5)) )
-%                 continue;
-%             end
-
+            
             newHulls = attemptNextFrameSplit(t, nextHulls(i), splitHulls);
             if ( isempty(newHulls) )
                 continue;
@@ -151,7 +150,6 @@ function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
 
     newHullIDs = [];
     oldCOM = CellHulls(hullID).centerOfMass;
-%     oldTracks = [HashedCells{CellHulls(hull).time}.trackID];
 
     newHulls = ResegmentHull(CellHulls(hullID), k);
     if ( isempty(newHulls) )

@@ -1,3 +1,6 @@
+% BuildConnectedDistance.m - Build or update cell connected-component
+% distances in ConnectedDist sturcture.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -81,14 +84,8 @@ function UpdateDistances(updateCell, t, tNext)
         if ( ~isempty(isect) )
             isectDist = 1 - (length(isect) / min(length(CellHulls(updateCell).indexPixels), length(CellHulls(nextCells(i)).indexPixels)));
             SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
-%             SetDistance(updateCell, nextCells(i), 0, tNext-t);
             continue;
         end
-        
-%         [X,Y] = ndgrid(1:length(r), 1:length(rNext));
-%         ccDistSq = ((r(X)-rNext(Y)).^2 + (c(X)-cNext(Y)).^2);
-%         ccMinDistSq = min(ccDistSq(:));
-
         ccMinDistSq = Inf;
         for k=1:length(r)
             ccDistSq = (rNext-r(k)).^2 + (cNext-c(k)).^2;

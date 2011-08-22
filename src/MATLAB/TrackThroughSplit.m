@@ -1,3 +1,6 @@
+% TrackThroughSplit.m - Retrack and update costs for cells due to a user
+% or propagated split/add.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -53,26 +56,11 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls,
     if ( isempty(trackHulls) )
         return;
     end
-    
-%     oldTracks = [HashedCells{t-1}(bTrackHull).trackID];
-    
-%     % TODO: don't muck up edited tracks (labels)
-%     for i=1:length(oldTracks)
-%         hashTime = t - CellTracks(oldTracks(i)).startTime + 1;
-%         if ( length(CellTracks(oldTracks(i)).hulls) >= hashTime )
-%             CellTracks(oldTracks(i)).hulls(hashTime) = 0;
-%         end
-%     end
 
     UpdateTrackingCosts(t-1, trackHulls, newHulls);
     
     [costMatrix, bOutTracked, bInTracked] = GetCostSubmatrix(trackHulls, curHulls);
-%     extendTracks = oldTracks(bOutTracked);
     extendHulls = trackHulls(bOutTracked);
     affectedHulls = curHulls(bInTracked);
-    
-%     % Dump unaffected tracks from the force-keep list
-%     affectedTracks = curTracks(bAffected);
-%     forceTracks = intersect(forceTracks,
-%     union(oldTracks,affectedTracks));
 end
+

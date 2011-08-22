@@ -1,3 +1,6 @@
+% ToggleCellSelection.m - Toggle whether cellID is in the currently
+% selected cell set.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

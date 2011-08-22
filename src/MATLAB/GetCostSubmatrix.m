@@ -1,3 +1,6 @@
+% GetCostSubmatrix.m - Get submatrix from sparse cost matrix at the given
+% from and to hullIDs
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,14 +25,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [costMatrix bFromAffected bToAffected] = GetCostSubmatrix(fromHulls, toHulls)
-%     global Costs
-%     inCostMatrix = Costs;
     inCostMatrix = GetCostMatrix();
     
     % Get costMatrix representing costs from fromHulls to toHulls
-%     [r c] = ndgrid(fromHulls, toHulls);
-%     costIdx = sub2ind(size(inCostMatrix), r, c);
-%     costMatrix = full(inCostMatrix(costIdx));
+    %[r c] = ndgrid(fromHulls, toHulls);
+    %costIdx = sub2ind(size(inCostMatrix), r, c);
+    %costMatrix = full(inCostMatrix(costIdx));
     
     % Vectorized implementation of this code is commented out above
     % because we cannot use more than 46K square elements in a matrix in

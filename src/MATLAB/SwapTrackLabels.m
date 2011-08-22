@@ -1,3 +1,6 @@
+% SwapTrackLabels.m - This function will swap the hulls of the two tracks
+% from the given time forward.  Any children will also be swaped
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SwapTrackLabels(time,trackID1,trackID2)
-%This function will swap the hulls of the two tracks from the given time
-%forward.  Any children will also be swaped
-
 
 global CellTracks CellHulls SegmentationEdits
 
@@ -53,13 +53,6 @@ CellTracks(trackID1).hulls = [CellTracks(trackID1).hulls track2Hulls];
 CellTracks(trackID2).hulls = [CellTracks(trackID2).hulls track1Hulls];
 
 %update times
-% index = find(CellTracks(trackID1).hulls,1,'first');
-% startTime1 = CellHulls(CellTracks(trackID1).hulls(index)).time;
-% index = find(CellTracks(trackID2).hulls,1,'first');
-% startTime2 = CellHulls(CellTracks(trackID2).hulls(index)).time;
-% RehashCellTracks(trackID1,startTime1);
-% RehashCellTracks(trackID2,startTime2);
-
 CellTracks(trackID1).startTime = CellHulls(CellTracks(trackID1).hulls(1)).time;
 CellTracks(trackID2).startTime = CellHulls(CellTracks(trackID2).hulls(1)).time;
 CellTracks(trackID1).endTime = CellHulls(CellTracks(trackID1).hulls(find([CellTracks(trackID1).hulls]~=0,1,'last'))).time;

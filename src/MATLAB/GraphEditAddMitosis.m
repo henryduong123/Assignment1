@@ -1,3 +1,6 @@
+% GraphEditAddMitosis.m - Add edges to GraphEdits structure for a user
+% specified mitosis.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

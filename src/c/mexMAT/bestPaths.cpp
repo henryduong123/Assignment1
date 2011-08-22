@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -147,11 +147,6 @@ int bestPathDFS(int t, int tEnd, CSourcePath path, int bestNextHull)
 				continue;
 
 			bFinishedSearch = false;
-
-			//if ( CheckLeavesExtents(path.frame, path.index, 0) )
-			//{
-			//	bestGIdx = AddBestPath(path, bestGIdx);
-			//}
 
 			path.pushPoint(nextHull);
 

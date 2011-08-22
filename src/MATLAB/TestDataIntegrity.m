@@ -1,3 +1,8 @@
+% TestDataIntegrity(correct) tests to make sure that the database is consistant.
+% Takes the CellTracks as the most accurate.  If correct==1, this
+% function will attempt to correct the error using the data from CellTracks
+% ***USE SPARINGLY, TAKES A LOT OF TIME***
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,11 +27,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function TestDataIntegrity(correct)
-%TestDataIntegrity(correct) tests to make sure that the database is consistant.
-%Takes the CellTracks as the most accurate.  If correct==1, this
-%function will attempt to correct the error using the data from CellTracks
-%***USE SPARINGLY, TAKES A LOT OF TIME***
-
 
 global CellTracks CellHulls CellFamilies HashedCells
 
@@ -38,7 +38,6 @@ iterations = length(CellTracks);
 for i=1:length(CellTracks)
     progress = progress+1;
     Progressbar(progress/iterations);
-%     fprintf(', %d',i);
     %% Check child/parent/sibling relationships
     if(~isempty(CellTracks(i).parentTrack))
         if(isempty(find(CellTracks(CellTracks(i).parentTrack).childrenTracks==i, 1)))
@@ -59,12 +58,6 @@ for i=1:length(CellTracks)
             end
         end
     end
-%     if(isempty(CellTracks(i).familyID) || isempty(CellTracks(i).hulls) || isempty(CellTracks(i).startTime) || isempty(CellTracks(i).endTime) || isempty(CellTracks(i).color))
-%         if(~isempty(CellTracks(i).familyID) || ~isempty(CellTracks(i).hulls) || ~isempty(CellTracks(i).startTime) || ~isempty(CellTracks(i).endTime) || ~isempty(CellTracks(i).color))
-%             ClearTrack(i);
-%             error(['Track ' num2str(i) ' is suppose to cleared out but still has data']);
-%         end
-%     end
     
     %% check if the current track is in the correct family and not in any
     %other
@@ -154,14 +147,12 @@ if(~isempty(missingHulls))
         for i=1:length(missingHulls)
             progress = progress+1;
             Progressbar(progress/iterations);
-%             if(isempty(CellHulls(missingHulls(i)).points))
-                if(any([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i)))
-                    RemoveHullFromTrack(missingHulls(i),...
-                        HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))).trackID);
-                    HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))) = [];
-                end
-                CellHulls(missingHulls(i)).deleted = 1;
-%             end
+            if(any([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i)))
+                RemoveHullFromTrack(missingHulls(i),...
+                    HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))).trackID);
+                HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))) = [];
+            end
+            CellHulls(missingHulls(i)).deleted = 1;
         end
     else
         error('HullsList ~= CellHulls');

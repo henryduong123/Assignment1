@@ -1,3 +1,6 @@
+% ResegmentHull.m - Splits hull int k pieces using kmeans, returns the 
+% k split hulls or [] if there are errors.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newHulls = ResegmentHull(hull, k, bUserEdit)
-% Splits hull int k pieces using kmeans, returns the k split hulls or [] if
-% there are errors.
-
 
 global CONSTANTS
 

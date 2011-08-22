@@ -1,3 +1,5 @@
+% LEVer.m - This is the main program function for the LEVer application.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +24,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function LEVer()
-%Main program
-
 
 global Figures
 
@@ -37,7 +37,7 @@ if(~isempty(Figures))
     end
 end
 
-versionString = '5.1 E';
+versionString = '6.0 E';
 
 if(OpenData(versionString))
     InitializeFigures();

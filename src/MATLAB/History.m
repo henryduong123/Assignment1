@@ -1,3 +1,18 @@
+% History.m - 
+% This will keep track of any state changes.  Call this function once the
+% new state is established. After the changes take place.
+% Possible actions are:
+% History('Push') = save current state to the stack
+% History('Pop') = retrive the last state
+% History('Redo') = will 'push' the last 'pop' back on the stack
+% History('Init') = will initilize the history stack
+% History('Top') = will reinstate the top state without changing any history
+% stack pointers.
+%
+% Stack size will be set from CONSTANTS.historySize
+% All of the data structures are saved on the stack, so do not set this
+% value too high or you might run out of working memory
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,20 +37,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function History(action)
-%This will keep track of any state changes.  Call this function once the
-%new state is established. After the changes take place.
-%Possible actions are:
-%History('Push') = save current state to the stack
-%History('Pop') = retrive the last state
-%History('Redo') = will 'push' the last 'pop' back on the stack
-%History('Init') = will initilize the history stack
-%History('Top') = will reinstate the top state without changing any history
-%stack pointers.
-%
-%Stack size will be set from CONSTANTS.historySize
-%All of the data structures are saved on the stack, so do not set this
-%value too high or you might run out of working memory
-
 
 global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs GraphEdits ConnectedDist CellPhenotypes SegmentationEdits
 

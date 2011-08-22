@@ -1,3 +1,7 @@
+% PartialImageSegment.m - Find segmentation results in a small portion of
+% an image centered at a clicked point, used to attempt to add missed
+% segmentaitons based on user input.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -42,8 +46,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
     
     % Build the subimage to be segmented
     subImg = img(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
-    
-%     hold off;figure;imagesc(subImg);colormap(gray);hold on;
     
     objs = [];
     
@@ -106,9 +108,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
     stats=regionprops(CC,'eccentricity');
     d=bwdist(~bwCells);
     
-%     [tr,tc] = find(LCenters>0);
-%     plot(tc,tr,'.r');
-    
     num=max(LCenters(:));
     for n=1:num
         pix=find(LCenters==n);
@@ -131,10 +130,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
 
         bwDarkInterior=bwDarkCenters&bwPoly;
         DarkRat=length(find(bwDarkInterior))/length(find(bwPoly));
-%         if  HaloRat>0.5   || igRat<.1 ||(DarkRat<.5 && igRat<.5 && length(pix)<175)
-%             bwCells(pix)=0;
-%             continue
-%         end
         dmax=max(d(pix));
         if dmax>4
             bwCells(pix(d(pix)<2))=0;
@@ -145,11 +140,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
 
     CC = bwconncomp(bwCells,8);
     LCenters = labelmatrix(CC);
-    
-%     [tr,tc] = find(LCenters>0);
-%     plot(tc,tr,'og');
-
-%     hold off;figure;imagesc(subImg);colormap(gray);hold on;
     
     stats=regionprops(CC,'area','Eccentricity');
     idx = find([stats.Area] >=25);
@@ -171,8 +161,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
         end
         % it's a keeper!
         bwCellFG(pix)=1;
-
-%         plot(c(ch),r(ch),'-r','linewidth',1.5)
         
         glc = c + coordMin(1);
         glr = r + coordMin(2);
@@ -180,8 +168,6 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
         no=[];
         no.points=[glc(ch),glr(ch)];
         no.centerOfMass = mean([glr glc]);
-
-        %no.indPixels=pix;
         no.indexPixels = sub2ind(imSize, glr,glc);
         no.imagePixels=img(no.indexPixels);
         % surround completely by Halo?
@@ -215,7 +201,7 @@ function hull = PartialImageSegment(img, centerPt, subSize, alpha)
 		ch = convhull(r,c);
 		
 		bwPoly = poly2mask(c(ch),r(ch),size(subImg,1),size(subImg,2));
-		if length(find(bwCellFG & bwPoly))
+        if (length(find(bwCellFG & bwPoly)))
             continue;
         end
         

@@ -1,3 +1,6 @@
+% AddNewSegmentHull.m - Attempt to add a completely new segmentation near
+% the clicked point.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -58,8 +61,6 @@ function newTrackID = AddNewSegmentHull(clickPt)
     newFamilyIDs = NewCellFamily(newHullID, newHull.time);
     
     newTrackID = TrackSplitHulls(newHullID, oldTracks, newHull.centerOfMass);
-    
-%     newTrackID = [CellFamilies(newFamilyIDs).rootTrackID];
 end
 
 %TODO: Maybe handle convex hull intersection instead of interior points as

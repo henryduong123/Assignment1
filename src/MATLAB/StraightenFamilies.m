@@ -1,3 +1,7 @@
+% StraightenFamilies.m - Call StraightenTrack on all cell families, in
+% essence reversing the effects of ProcessNewborns and recovering tracking
+% information.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

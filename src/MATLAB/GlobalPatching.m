@@ -1,3 +1,6 @@
+% GlobalPatching.m - Patch together tracks which may not have matched
+% during tracking, patching globally lowest cost first.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

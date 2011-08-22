@@ -1,3 +1,7 @@
+% ExtendTrackWithHull.m - This function is similar to AddHullToTrack but it
+% orphans child tracks if a track is extended past its mitosis or before
+% its genesis.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,9 +25,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% This function is similar to AddHullToTrack but it specifically doesn't
-% handle adding hulls before a track start.  Also it orphans child tracks
-% if a track is extended past it's mitosis
 function ExtendTrackWithHull(trackID, hullID)
     global CellTracks CellFamilies CellHulls
 
@@ -47,7 +48,6 @@ function ExtendTrackWithHull(trackID, hullID)
         if(CellFamilies(CellTracks(trackID).familyID).startTime > time)
             CellFamilies(CellTracks(trackID).familyID).startTime = time;
         end
-%         error('ExtendTrackWithHull cannot extend tracks backwards before their start time.');
     end
     
     CellTracks(trackID).hulls(hash) = hullID;

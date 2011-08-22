@@ -1,3 +1,6 @@
+% GraphEditMoveMitosis.m - Add edges to GraphEdits structure for a user
+% changing the time of a mitosis event.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

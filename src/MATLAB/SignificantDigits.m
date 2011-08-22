@@ -1,3 +1,6 @@
+% SignificantDigits will see how many digits the image file name needs for
+% each frame and then will convert num to the appropriate string
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function digits = SignificantDigits(num)
-% SignificantDigits will see how many digits the image file name needs for
-% each frame and then will convert num to the appropriate string
-
 
 global CONSTANTS
 digits = '';

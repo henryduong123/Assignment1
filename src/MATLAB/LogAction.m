@@ -1,3 +1,9 @@
+% Log is used to keep track of what changes have been made.  It will
+% append entries into a csv file to be opened in excel
+% action = a string to represent what the action is.
+% oldValue and newValue are used to show what numbers are changed. Please
+% use the action string to denote what the values represent
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,12 +28,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function LogAction(action,oldValue,newValue,callstack)
-%Log is used to keep track of what changes have been made.  It will
-%append entries into a csv file to be opened in excel
-%action = a string to represent what the action is.
-%oldValue and newValue are used to show what numbers are changed. Please
-%use the action string to denote what the values represent
-
 
 global Figures CONSTANTS Log
 time = clock;%[year month day hour minute seconds]
@@ -98,8 +98,6 @@ end
 
 fprintf(file,row);
 fclose(file);
-
-% TestDataIntegrity(0)
 end
 
 function row = reconstructLog(row)

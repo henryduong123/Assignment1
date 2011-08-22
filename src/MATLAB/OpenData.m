@@ -1,3 +1,8 @@
+% OpenData.m - 
+% Opens the data file either from a previous state of LEVer or from tracking
+% results.  If the latter, the data will be converted to LEVer's data scheme
+% and save out to a new file.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,10 +27,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function opened = OpenData(versionString)
-%Opens the data file either from a previous state of LEVer or from tracking
-%results.  If the latter, the data will be converted to LEVer's data scheme
-%and save out to a new file.
-
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits
 
@@ -140,7 +141,7 @@ switch answer
                     if(ishandle(Figures.cells.handle))
                         close Figures.cells.handle
                     end
-                catch
+                catch exception
                 end
                 
                 rootImageFolder = CONSTANTS.rootImageFolder;
@@ -206,9 +207,6 @@ if ( bUpdated )
         SaveLEVerState([settings.matFilePath settings.matFile]);
     end
 end
-
-% StraightenFamilies();
-% ProcessNewborns(1:length(CellFamilies),length(HashedCells));
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');

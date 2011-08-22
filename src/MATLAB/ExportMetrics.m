@@ -1,3 +1,6 @@
+% ExportMetrics.m - Export various cell track metrics for use in external
+% analysis.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -94,7 +97,7 @@ end
 trackMetric.death = GetTimeOfDeath(trackID);
 trackMetric.familyID = track.familyID;
 
-velosities = [];
+velocities = [];
 areas = [];
 intensities = [];
 
@@ -111,17 +114,17 @@ for i=1:length(track.hulls)-1
     dist = sqrt((CellHulls(track.hulls(j)).centerOfMass(1)-CellHulls(track.hulls(i)).centerOfMass(1))^2 + ...
         (CellHulls(track.hulls(j)).centerOfMass(2)-CellHulls(track.hulls(i)).centerOfMass(2))^2);
     v = dist/(j-i);
-    velosities = [velosities v];
+    velocities = [velocities v];
     areas = [areas length(CellHulls(track.hulls(i)).indexPixels)];
     intensities = [intensities CellHulls(track.hulls(i)).imagePixels'];
 end
 if(track.hulls(length(track.hulls)))
     areas = [areas length(CellHulls(track.hulls(length(track.hulls))).indexPixels)];%i only goes to length -1;
 end
-trackMetric.meanSpeed = mean(velosities);
-trackMetric.minSpeed = min(velosities);
-trackMetric.maxSpeed = max(velosities);
-trackMetric.standardDeviationSpeed = sqrt(var(velosities));
+trackMetric.meanSpeed = mean(velocities);
+trackMetric.minSpeed = min(velocities);
+trackMetric.maxSpeed = max(velocities);
+trackMetric.standardDeviationSpeed = sqrt(var(velocities));
 trackMetric.meanArea = mean(areas);
 trackMetric.minArea = min(areas);
 trackMetric.maxArea = max(areas);

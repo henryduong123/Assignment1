@@ -1,3 +1,6 @@
+% ExportTree.m - This will draw the family tree of the given family. This
+% is designed for exporting tree with no numeric labels for publication purpose
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ExportTree(src, evt)
-%This will draw the family tree of the given family. This is designed
-% for exporting tree with no numeric labels for publication purpose
-
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
 figure
@@ -62,17 +62,10 @@ hold on
 
 [xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
 
-% set(underAxes,...
-%     'XLim',     [xMin-1 xMax+1]);
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
 UpdateTimeIndicatorLine();
-% gObjects = get(Figures.tree.axesHandle,'children');
-% parfor i=1:length(gObjects)
-%     set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
-%         'IconDisplayStyle','off'); % Exclude line from legend
-% end
 phenoHandles = [];
 for i=1:length(phenoScratch.phenoLegendSet)
     if 0==phenoScratch.phenoLegendSet(i),continue,end
@@ -171,12 +164,6 @@ elseif(isempty(GetTimeOfDeath(trackID)))
         'MarkerFaceColor',  'w',...
         'MarkerSize',       circleSize,...
         'UserData',         trackID);
-%     text(xVal,yMin,num2str(trackID),...
-%         'HorizontalAlignment',  'center',...
-%         'FontSize',             FontSize,...
-%         'color',                color.text,...
-%         'UserData',             trackID,...
-%         'uicontextmenu',        Figures.tree.contextMenuHandle);
 else
     yPhenos = GetTrackPhenoypeTimes(trackID);
     
@@ -192,12 +179,6 @@ else
         'MarkerEdgeColor',  'r',...
         'MarkerSize',       circleSize,...
         'UserData',         trackID);
-%     text(xVal,yMin,num2str(trackID),...
-%         'HorizontalAlignment',  'center',...
-%         'FontSize',             FontSize,...
-%         'color',                'r',...
-%         'UserData',             trackID,...
-%         'uicontextmenu',        Figures.tree.contextMenuHandle);
     phenoScratch.phenoLegendSet(1)=1;
 end
 end

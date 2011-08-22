@@ -1,3 +1,5 @@
+% Progressbar.m - Displays a progressbar window.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,9 +23,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%this m-file modified by Quan Quach on 12/12/07
-%email: quan.quach@gmail.com
-%Original Author: Steve Hoelzer
+% this m-file modified by Quan Quach on 12/12/07
+% email: quan.quach@gmail.com
+% Original Author: Steve Hoelzer
 function [stopBar] =  Progressbar(fractiondone, position)
 
 if(~exist('fractiondone'))

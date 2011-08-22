@@ -1,3 +1,19 @@
+%ChangLabel(time,oldTrackID,newTrackID)
+%This will attempt to change the trackID from a given time until the end of
+%the track.  However, the trackID will only be changed up to the point that
+%the newTrackID does not exist.  If when moving hulls from the oldTrack to
+%the newTrack, there is a hull already in the newTrack for a given frame,
+%this function will return without moving any more hulls.
+%
+%If the whole oldTrack ends up moving over to the newTrack, and the
+%oldTrack has a sibling, the oldTrack's sibling will be merged into the
+%parent.
+%
+%Anytime that the oldTrack can be fully moved from the given time all the
+%way to the endTime of the track, the oldTrack's subtree will move with it.
+%The only time that the subtree would not move with the change would be as
+%stated above.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,22 +38,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ChangeLabel(time,oldTrackID,newTrackID)
-%ChangLabel(time,oldTrackID,newTrackID)
-%This will attempt to change the trackID from a given time until the end of
-%the track.  However, the trackID will only be changed up to the point that
-%the newTrackID does not exist.  If when moving hulls from the oldTrack to
-%the newTrack, there is a hull already in the newTrack for a given frame,
-%this function will return without moving any more hulls.
-%
-%If the whole oldTrack ends up moving over to the newTrack, and the
-%oldTrack has a sibling, the oldTrack's sibling will be merged into the
-%parent.
-%
-%Anytime that the oldTrack can be fully moved from the given time all the
-%way to the endTime of the track, the oldTrack's subtree will move with it.
-%The only time that the subtree would not move with the change would be as
-%stated above.
-
 
 global CellTracks CellHulls SegmentationEdits
 

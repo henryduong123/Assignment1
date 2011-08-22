@@ -1,3 +1,7 @@
+% CheckGraphEdits.m - Depending on tracking direction add and remove
+% to/from hulls so that all user graph edits are accounted for within the
+% tracker.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,8 +25,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Depending on tracking direction add and remove to/from hulls so that all
-% user graph edits are accounted for within the tracker.
 function [trackHulls,nextHulls] = CheckGraphEdits(dir, fromHulls, toHulls)
     global GraphEdits CellHulls
     

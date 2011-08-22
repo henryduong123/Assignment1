@@ -1,3 +1,5 @@
+% UpdateTrackingCosts.m - Update the tracking costs tracking from trackHulls to nextHulls
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,7 +23,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Update the tracking costs tracking from trackHulls to nextHulls
 function UpdateTrackingCosts(t, trackHulls, nextHulls)
     global CellHulls HashedCells CellTracks Costs
     

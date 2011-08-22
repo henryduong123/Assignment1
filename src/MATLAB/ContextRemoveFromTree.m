@@ -1,3 +1,6 @@
+% ContextRemoveFromTree.m - context menu callback function remove track or
+% partial track from its current tree
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ContextRemoveFromTree(time,trackID)
-%context menu callback function
-
 
 global CellTracks
 

@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -92,9 +92,6 @@ double calcFullCellDist(int startCellIdx, int nextCellIdx, double vmax, double c
 	if ( (cdist > ccmax) && (hdist > (vmax/2.0)) )
 		return DoubleLims::infinity();
 
-	//if ( (cdist > ccmax/2) && (hdist > vmax/2) )
-	//	return DoubleLims::infinity();
-
 	double sdist = ((double) (nmax - nmin)) / nmax;
 
 	return (10.0*hdist + 100.0*sdist + 1000.0*cdist);
@@ -136,9 +133,6 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	{
 		double dlcd = calcHullDist(path[k], path[k+1]);
 
-		//if ( getCellTime(path[k]) == 104 )
-		//	vmax = 3.0*gVMax;
-
 		if ( dlcd > vmax )
 			return DoubleLims::infinity();
 	}
@@ -146,12 +140,6 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	// Just return non-infinite for a successful check.
 	if ( bCheck )
 		return 1.0;
-
-	//if ( 267 <= getCellTime(path[srcIdx]) <= 269 )
-	//{
-	//	vmax *= 3.0;
-	//	ccmax *= 3.0;
-	//}
 
 	double localCost = 3*calcFullCellDist(path[srcIdx], path[srcIdx+1], vmax, ccmax);
 

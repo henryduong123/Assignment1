@@ -1,3 +1,7 @@
+% FindMergedCell.m - Gets original (partial) segmentation from cells which
+% were split and a list of the split cells which intersect the original
+% segmentation component.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,9 +25,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Gets original (partial) segmentation from cells which were split and a
-% list of the split cells which intersect the original segmentation
-% component.
 function [newObj mergeHulls] = FindMergedCell(t, centerPt)
     global CONSTANTS CellHulls HashedCells
 

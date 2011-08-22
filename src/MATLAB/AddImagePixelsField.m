@@ -1,3 +1,8 @@
+% AddImagePixelsField.m - 
+% Adds the imagePixels field to older LEVer v3 hull structures, also fixes a
+% bug in the old addNewSegmentHull code that could cause indexPixels to be
+% non-integer valued
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,9 +26,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Adds the imagePixels field to older LEVer v3 hull structures, also fixes a
-% bug in the old addNewSegmentHull code that could cause indexPixels to be
-% non-integer valued
 function AddImagePixelsField()
     global CONSTANTS CellHulls HashedCells
     

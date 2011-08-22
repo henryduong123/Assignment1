@@ -1,3 +1,5 @@
+% TogglePlay.m - Turn the movie play timer on and off depending on previous state
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +24,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function TogglePlay(src,evnt)
-% Turn the timer on and off depending on previous state
-
 
 global Figures
 

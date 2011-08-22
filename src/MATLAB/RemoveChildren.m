@@ -1,3 +1,7 @@
+% RemoveChildren(trackID) removes the children of the given track and moves
+% them to thier own trees.  Those new trees are attempted to be added to
+% other trees. eg ProcessNewborns
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,10 +26,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function RemoveChildren(trackID)
-% RemoveChildren(trackID) removes the children of the given track and moves
-% them to thier own trees.  Those new trees are attempted to be added to
-% other trees. eg ProcessNewborns
-
 
 global CellTracks
 
@@ -35,6 +35,4 @@ while ~isempty(CellTracks(trackID).childrenTracks)
 end
 
 CellTracks(trackID).childrenTracks = [];
-%run processNewborns on them
-% ProcessNewborns(familyIDs);
 end

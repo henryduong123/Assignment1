@@ -1,3 +1,5 @@
+% DrawTree.m - This will draw the family tree of the given family.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +24,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function DrawTree(familyID)
-%This will draw the family tree of the given family.
-
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
    
@@ -46,22 +46,6 @@ trackID = CellFamilies(familyID).tracks(1);
 
 figure(Figures.tree.handle);
 delete(gca);
-% delete(gca);
-% hold off
-% 
-% underAxes = axes;
-% 
-% set(underAxes,...
-%     'YDir',            'reverse',...
-%     'YLim',             [0 length(HashedCells)],...
-%     'Position',         [.07 .06 .80 .90],...
-%     'YAxisLocation',    'right',...  
-%     'YLim',             [0 length(HashedCells)*CONSTANTS.timeResolution/60],...
-%     'XColor',           'w',...
-%     'XTick',            [],...
-%     'Box',              'off');
-% ylabel('Time (Hours)');
-% axis off
 
 overAxes = axes;
     
@@ -77,17 +61,10 @@ hold on
 
 [xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
 
-% set(underAxes,...
-%     'XLim',     [xMin-1 xMax+1]);
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
 UpdateTimeIndicatorLine();
-% gObjects = get(Figures.tree.axesHandle,'children');
-% parfor i=1:length(gObjects)
-%     set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
-%         'IconDisplayStyle','off'); % Exclude line from legend
-% end
 phenoHandles = [];
 for i=1:length(phenoScratch.phenoLegendSet)
     if 0==phenoScratch.phenoLegendSet(i),continue,end

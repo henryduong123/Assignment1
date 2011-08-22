@@ -1,3 +1,10 @@
+% AddSingleHullToTrack(oldTrackID,newTrackID)
+% This function is indended for the oldTrack to be just a single hull,
+% typicaly when a hull has been split and now that new hull is being added
+% to a track.  This function takes the hull and merges it into the
+% newTrack.  The parent and child relationships of the newTrack will be
+% maintained.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,13 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function AddSingleHullToTrack(oldTrackID,newTrackID)
-% AddSingleHullToTrack(oldTrackID,newTrackID)
-% This function is indended for the oldTrack to be just a single hull,
-% typicaly when a hull has been split and now that new hull is being added
-% to a track.  This function takes the hull and merges it into the
-% newTrack.  The parent and child relationships of the newTrack will be
-% maintained.
-
 
 global CellTracks HashedCells CellFamilies Figures
 

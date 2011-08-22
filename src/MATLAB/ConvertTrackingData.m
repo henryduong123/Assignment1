@@ -1,3 +1,6 @@
+% ConvertTrackingData.m - Takes the data structure from the tracking data
+% and creates LEVer's data scheme
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ConvertTrackingData(objHulls,gConnect)
-%Takes the data structure from the tracking data and creates LEVer's data
-%scheme
-
 
 global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
 
@@ -47,7 +47,6 @@ GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Cos
 connDist = cell(1,length(objHulls));
 
 %Initialize Structures
-% HashedCells = cell(0,length(objHulls));
 cellHulls = struct(...
     'time',             {},...
     'points',           {},...

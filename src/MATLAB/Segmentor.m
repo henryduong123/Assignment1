@@ -1,3 +1,10 @@
+% Segmentor.m - Cell image segmentation algorithm.
+% Segmentor is to be run as a seperate compiled function for parallel
+% processing.  It will process tLength-tStart amount of images.  Call this
+% function for the number of processors on the machine.
+
+% mcc -o Segmentor -m Segmentor.m
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,15 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
-% Segmentor is to be run as a seperate compiled function for parallel
-% processing.  It will process tLength-tStart amount of images.  Call this
-% function for the number of processors on the machine.
-
-% mcc -o Segmentor -m Segmentor.m
-
-
-% global CONSTANTS
-
 
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
@@ -75,7 +73,6 @@ for t = tStart:tStep:tEnd
     lDark=graythresh(pix);
     bwDark(im<lDark)=1;
     
-    % bwNorm=GetNormalVectors(bwHalo,bwDark);
     bwNorm=0*bwDark;
     se=strel('square',3);
     gd=imdilate(im,se);
@@ -89,7 +86,6 @@ for t = tStart:tStep:tEnd
     bwDarkCenters=(bwDark & bwmask );
     d=bwdist(~bwDarkCenters);
     bwDarkCenters(d<2)=0;
-    %
     
     bwHaloMask=imdilate(bwHalo,seBig);
     
@@ -105,10 +101,7 @@ for t = tStart:tStep:tEnd
     stats = regionprops(CC, 'Area');
     idx = find([stats.Area] < 500);
     bwHoles = ismember(LHoles, idx);
-    
-    % [r c]=find(bwHoles);
-    % plot(c,r,'.c');
-    
+
     bwCells=bwDarkCenters| bwHoles|bwNorm;
     bwCells(~bwHaloMask)=0;
     
@@ -118,16 +111,10 @@ for t = tStart:tStep:tEnd
     
     bwCells(bwig)=0;
     
-    % bwTails=imdilate(bwDarkCenters,strel('square',3));
     bwTails=bwDarkCenters;
     bwTails(bwHalo)=0;
     CC = bwconncomp(bwTails,8);
     LTails = labelmatrix(CC);
-    
-    % hold off;imagesc(im);colormap(gray);hold on;
-    % title(num2str(t));
-    % [r c]=find(bwTails|bwCells);
-    % plot(c,r,'.g')
     
     CC = bwconncomp(bwCells,8);
     LCenters = labelmatrix(CC);
@@ -141,11 +128,6 @@ for t = tStart:tStep:tEnd
             bwCells(pix)=0;
             continue
         end
-        
-        %     if length(find(bwDarkCenters(pix)))<1
-        %         bwCells(pix)=0;
-        %         continue
-        %     end
         
         bwPoly=logical(0*im);
         bwPoly(pix)=1;
@@ -162,16 +144,13 @@ for t = tStart:tStep:tEnd
         
         bwDarkInterior=bwDarkCenters&bwPoly;
         DarkRat=length(find(bwDarkInterior))/length(find(bwPoly));
-        %         fprintf(1,'%d, %2.3f, %2.3f, %2.3f %d\n',n ,igRat, DarkRat,HaloRat,length(pix));
         if  HaloRat>0.5   || igRat<.1 ||(DarkRat<.5 && igRat<.5 && length(pix)<175)
-            %         plot(c(ch),r(ch),'-y')
             bwCells(pix)=0;
             continue
         end
         dmax=max(d(pix));
         if dmax>4
             bwCells(pix(d(pix)<2))=0;
-            %         bwCells(pix(find(d(pix)<2)))=0;
         end
         
     end
@@ -197,15 +176,10 @@ for t = tStart:tStep:tEnd
         ch=convhull(r,c);
         % one  last check for parasites
         if length(find(im(pix)>lDark))/length(pix)> 0.5
-            %         plot(c(ch),r(ch),'-c')
             continue
         end
         % it's a keeper!
         bwCellFG(pix)=1;
-        
-        
-        
-        %     plot(c(ch),r(ch),'-r','linewidth',1.5)
         
         no=[];
         no.t=t;
@@ -272,10 +246,6 @@ for t = tStart:tStep:tEnd
         no.Eccentricity=stats(idx(i)).Eccentricity;
         no.imPixels=im(pix);
         objs=[objs no];
-        
-        %     plot(c(ch),r(ch),'-m')
-        %     plot(c(ch),r(ch),'-r','linewidth',1.5)
-        %     drawnow
     end
 end
 

@@ -1,3 +1,8 @@
+%This will remove the tree rooted at the given trackID from the given
+%oldFamily and put them in the newFamily
+%This DOES NOT make the parent child relationship, it is just updates the
+%CellFamilies data structure.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,11 +27,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
-%This will remove the tree rooted at the given trackID from the given
-%oldFamily and put them in the newFamily
-%This DOES NOT make the parent child relationship, it is just updates the
-%CellFamilies data structure.
-
 
 global CellFamilies CellTracks
 
@@ -36,7 +36,6 @@ trackList = traverseTree(newFamilyID,trackID);
 %remove tracks from family
 for i=1:length(trackList)
     CellTracks(trackList(i)).familyID = newFamilyID;
-%     RemoveTrackFromFamily(trackList(i));
 end
 
 if(isempty(CellFamilies(oldFamilyID).tracks))

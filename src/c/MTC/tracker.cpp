@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -181,10 +181,6 @@ int main(int argc, char* argv[])
 
 			if ( (bestOutEdges.count(bestTrackletIdx) == 0) || bestOutEdges[bestTrackletIdx] != nextGIdx )
 				continue;
-
-			//int ID=GetGlobalIdx(inEdges[destPtIdx][bestTrackletIdx]->frame[1], inEdges[destPtIdx][bestTrackletIdx]->index[1]);
-			//if (FindMinCostIn(ID)!=inEdges[destPtIdx][bestTrackletIdx]->cost)
-			//	continue;
 
 			int newTrackletID = gConnectOut[bestTrackletIdx][nextGIdx]->trackletID;
 

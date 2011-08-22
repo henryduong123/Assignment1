@@ -32,7 +32,7 @@ function TrackBackPhenotype(leafHulls, keyframeHulls)
     
     startHulls = union(leafHulls, keyframeHulls);
     
-	for i=1:length(startHulls)
+    for i=1:length(startHulls)
         goodTracks(i).hulls = startHulls(i);
         goodTracks(i).startTime = CellHulls(startHulls(i)).time;
         goodTracks(i).endTime = CellHulls(startHulls(i)).time;
@@ -108,14 +108,14 @@ function bAssign = assignBackTracks(t, costMatrix, trackedHulls, nextHulls, bPro
     matchedIdx = find(bMatched);
     
     % Assign matched edges
-	for i=1:length(matchedIdx)
+    for i=1:length(matchedIdx)
         if ( minOutCosts(matchedIdx(i)) == Inf )
             continue;
         end
-        
+
         assignHull = nextHulls(bestOutgoing(matchedIdx(i)));
         extHull = trackedHulls(matchedIdx(i));
-        
+
 %         [tracks, hash] = extendBackTrack(extHull, assignHull, tracks, hash);
         assignHullToTrack(t, assignHull, extHull, bPropForward);
         bAssign(matchedIdx(i), bestOutgoing(matchedIdx(i))) = 1;

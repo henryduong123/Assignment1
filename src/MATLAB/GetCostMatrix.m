@@ -1,3 +1,6 @@
+% GetCostMatrix.m - Get sparse cost matrix zeroing edges based on user
+% edits in GraphEdits structure.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

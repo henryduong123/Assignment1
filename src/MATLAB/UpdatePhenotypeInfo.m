@@ -1,3 +1,6 @@
+% UpdatePhenotypeInfo.m - Attempt to update old LEVer file type phenotype
+% info to the new format.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

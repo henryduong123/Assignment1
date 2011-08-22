@@ -1,3 +1,6 @@
+% ContextChangeLabel.m - Context menu callback function for changing track
+% labels
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ContextChangeLabel(time,trackID)
-%context menu callback function
-
 
 global CellTracks HashedCells CellFamilies
 
@@ -59,40 +60,21 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
             return
     end
 elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
-%     choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
-%         'Swap Labels?','Forward','This Frame','Cancel','Cancel');
-%     switch choice
-%         case 'Forward'
-            try
-                GraphEditSetEdge(time,trackID,newTrackID);
-                GraphEditSetEdge(time,newTrackID,trackID);
-                SwapTrackLabels(time,trackID,newTrackID);
-                History('Push');
-            catch errorMessage
-                try
-                    ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-                    return
-                catch errorMessage2
-                    fprintf('%s',errorMessage2.message);
-                    return
-                end
-            end
-            LogAction('Swapped Labels',trackID,newTrackID);
-%         case 'This Frame'
-%             History('Push');
-%             try
-%                 SwapHulls(time,trackID,newTrackID);
-%             catch errorMessage
-%                 try
-%                     ErrorHandeling(['SwapHulls(' num2str(time) ' ' num2str(trackID) num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-%                 catch errorMessage2
-%                     fprintf(errorMessage2.message);
-%                     return
-%                 end
-%             end
-%         case 'Cancel'
-%             return
-%     end
+    try
+        GraphEditSetEdge(time,trackID,newTrackID);
+        GraphEditSetEdge(time,newTrackID,trackID);
+        SwapTrackLabels(time,trackID,newTrackID);
+        History('Push');
+    catch errorMessage
+        try
+            ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    LogAction('Swapped Labels',trackID,newTrackID);
 elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
     hullID = CellTracks(trackID).hulls(1);
     try

@@ -1,3 +1,6 @@
+% CheckFileVersionString.m - Checks if the version string in a LEVer file
+% is greater than or equal to the current LEVer version.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

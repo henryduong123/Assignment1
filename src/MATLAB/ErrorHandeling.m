@@ -1,3 +1,9 @@
+% ErrorHandeling.m - 
+%***Possibly Throws Error***
+% ErrorHandeling(errorMessage) will attempt to fix the issue and log the
+% error.  If unsuccessful, another log entery will be made and will throw
+% the new error.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,11 +28,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ErrorHandeling(errorMessage, errStack)
-%***Possibly Throws Error***
-% ErrorHandeling(errorMessage) will attempt to fix the issue and log the
-% error.  If unsuccessful, another log entery will be made and will throw
-% the new error.
-
 
 global Figures
 

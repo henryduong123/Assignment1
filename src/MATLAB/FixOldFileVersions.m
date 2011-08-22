@@ -1,3 +1,6 @@
+% FixOldFileVersions.m - Used during OpenData.m to update older LEVer data
+% files.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

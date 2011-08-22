@@ -1,3 +1,15 @@
+% RehashedCellTracks(trackID,newStartTime) will rearange the hulls in the
+% given track so that the newTime will hash correctly.
+% The hulls are hashed so that the index into the cell array is time of hull
+% subtract start time of track.  eg hash = time of hull -
+% CellTracks(i).startTime
+%
+% If newStartTime == oldStartTime, only the endTime will change.  Good for
+% removing all of the 0's at the end of the hulls list for a given track.
+%
+% ***WARNING*** if oldStartTime < newStartTime and there are hulls within
+% [oldStartTime newStartTime) THEY WILL BE REMOVED FROM THE TRACK!!!
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,24 +34,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function RehashCellTracks(trackID, newStartTime)
-%RehashedCellTracks(trackID,newStartTime) will rearange the hulls in the
-%given track so that the newTime will hash correctly.
-%The hulls are hashed so that the index into the cell array is time of hull
-%subtract start time of track.  eg hash = time of hull -
-%CellTracks(i).startTime
-%
-%If newStartTime == oldStartTime, only the endTime will change.  Good for
-%removing all of the 0's at the end of the hulls list for a given track.
-%
-%***WARNING*** if oldStartTime < newStartTime and there are hulls within
-%[oldStartTime newStartTime) THEY WILL BE REMOVED FROM THE TRACK!!!
-
 
 global CellTracks CellHulls
 
 if ( ~exist('newStartTime','var') )
     nzidx = find(CellTracks(trackID).hulls,1,'first');
-%     newStartTime = CellTracks(trackID).startTime + nzidx - 1;
     newStartTime = CellHulls(CellTracks(trackID).hulls(nzidx)).time;
 end
 

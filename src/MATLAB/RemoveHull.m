@@ -1,3 +1,7 @@
+% RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
+% hull will have a flag set that means that it does not exist anywhere and
+% should not be drawn on the cells figure
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,10 +26,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function RemoveHull(hullID, bDontUpdateTree)
-% RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
-% hull will have a flag set that means that it does not exist anywhere and
-% should not be drawn on the cells figure
-
 
 global HashedCells CellHulls CellTracks CellFamilies SegmentationEdits
 

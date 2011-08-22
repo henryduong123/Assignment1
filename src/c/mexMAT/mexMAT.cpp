@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -52,9 +52,6 @@ int gConstraintFrames;
 
 const double gVMax = 80.0;
 const double gCCMax = 40.0;
-//const double gAMax;
-
-//
 
 void checkInputs(int nrhs, const mxArray* prhs[], int expectNumArgs, char* expectTypes[])
 {
@@ -106,10 +103,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	if ( mxGetNumberOfElements(prhs[0]) != 1 )
 		mexErrMsgTxt("Parameter 1 must be a scalar frame number.");
 
-	//const mxArray* gConstants = mexGetVariablePtr("global", "CONSTANTS");
-	//if ( gConstants == NULL )
-	//	mexErrMsgTxt("Global CONSTANTS variable unavailable.");
-
 	int dir = ((int) mxGetScalar(prhs[0]));
 	gWindowSize = ((int) mxGetScalar(prhs[1]));
 
@@ -128,7 +121,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	if ( gNumFrames < 2 || otherDim > 1 )
 		mexErrMsgTxt("HashedCells must be a 1xN hashed cell structure.");
 
-	//gWindowSize = mxGetN(gTrackHulls);
 	otherDim = mxGetM(gTrackHulls);
 	if ( gWindowSize < 2 || otherDim > 1 )
 		mexErrMsgTxt("Parameter 2 must contain at least two cell rows.");

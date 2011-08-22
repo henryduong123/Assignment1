@@ -1,3 +1,6 @@
+% ExportImage.m - this function is intended to create a high resolution
+% file of the given figure for printing or sharing
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ExportImage(figureHandle)
-%this function is intended to create a high resolution file of the given
-%figure for printing or sharing
-
 
 global Figures
 

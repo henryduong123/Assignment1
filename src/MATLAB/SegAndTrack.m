@@ -1,3 +1,6 @@
+% SegAndTrack.m - Spawns segmentation and tracking routines to identify and
+% track cells in a sequence of microscope images.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -53,8 +56,6 @@ numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors<4),numProcessors = 4;end
 
 fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
-
-% step = ceil(numberOfImages/numProcessors);
 
 if(~isempty(dir('.\segmentationData')))
     system('rmdir /S /Q .\segmentationData');

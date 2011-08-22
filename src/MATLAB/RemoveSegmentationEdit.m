@@ -1,3 +1,6 @@
+% RemoveSegmentationEdit.m - Remove the user edit listing for a cell that
+% has been deleted.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

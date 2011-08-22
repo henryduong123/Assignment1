@@ -1,3 +1,12 @@
+% newFamily = RemoveFromTree(time,trackID,dealWithSibling)
+% This will remove the track and any of its children from its current family
+% and create a new family rooted at the given track
+% If you want the current track's sibling to be combined with its parent,
+% pass combineSiblingWithParent='yes' otherwise 'no'
+%
+% ***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
+% THERE WILL BE ISSUES WITH THE DATA****
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,15 +31,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
-%newFamily = RemoveFromTree(time,trackID,dealWithSibling)
-%This will remove the track and any of its children from its current family
-%and create a new family rooted at the given track
-%If you want the current track's sibling to be combined with its parent,
-%pass combineSiblingWithParent='yes' otherwise 'no'
-%
-%***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
-%THERE WILL BE ISSUES WITH THE DATA****
-
 
 global CellFamilies CellTracks CellHulls
 
@@ -76,9 +76,7 @@ CellTracks(trackID).childrenTracks = [];
 %clean up old track
 if(isempty(find([CellTracks(trackID).hulls]~=0, 1)))
     if(~isempty(CellTracks(trackID).siblingTrack)&& strcmp(combineSiblingWithParent,'yes'))
-%         if(~isempty(CellTracks(CellTracks(trackID).parentTrack).startTime))
-            CombineTrackWithParent(CellTracks(trackID).siblingTrack);
-%         end
+        CombineTrackWithParent(CellTracks(trackID).siblingTrack);
     end
     RemoveTrackFromFamily(trackID);
     if(~isempty(CellTracks(trackID).parentTrack))

@@ -1,3 +1,6 @@
+% GetTrackPhenoypeTimes.m - Get the frame times at which a phenotype has
+% been marked on trackID.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

@@ -1,3 +1,10 @@
+%ChangeTrackParent(parentTrackID,time,childTrackID) will take the
+%childTrack and connect it to the parent track.  It also takes the hulls
+%that exist in the parent track that are come after the childTrack root and
+%makes a new track with said hulls.  When finished there should be a new
+%track and the child track that are siblings with the parent track being
+%the parent.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,13 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ChangeTrackParent(parentTrackID,time,childTrackID)
-%ChangeTrackParent(parentTrackID,time,childTrackID) will take the
-%childTrack and connect it to the parent track.  It also takes the hulls
-%that exist in the parent track that are come after the childTrack root and
-%makes a new track with said hulls.  When finished there should be a new
-%track and the child track that are siblings with the parent track being
-%the parent.
-
 
 global CellTracks CellFamilies
 
@@ -61,10 +61,6 @@ CellTracks(parentTrackID).childrenTracks(childIndex) = childTrackID;
 if(~isempty(CellTracks(childTrackID).siblingTrack))
     CellTracks(CellTracks(childTrackID).siblingTrack).siblingTrack = [];
     CombineTrackWithParent(CellTracks(childTrackID).siblingTrack);
-%     ChangeLabel(CellTracks(CellTracks(childTrackID).siblingTrack).startTime,...
-%         CellTracks(childTrackID).siblingTrack,CellTracks(childTrackID).parentTrack);
-%     index = CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks == childTrackID;
-%     CellTracks(CellTracks(childTrackID).parentTrack).childrenTracks(index) = [];
 end
 CellTracks(childTrackID).parentTrack = parentTrackID;
 

@@ -17,7 +17,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with LEVer in file "gnu gpl v3.txt".  If not, see 
 //    <http://www.gnu.org/licenses/>.
-
+//
 //
 //***********************************************************************
 
@@ -53,7 +53,6 @@ int BuildHistoryPath(CSourcePath* historyPath, CSourcePath* path, int occlLookba
 	{
 		CSourcePath* histpath = gConnectIn[pathStartGIdx][histIdx];
 		// Single segment agreement requirement
-		//if ( histpath->frame.size() > 2+occlLookback && (histpath->frame[2+occlLookback] == path->frame[1]) && (histpath->index[2+occlLookback] == path->index[1]) )
 		if ( histpath->frame.size() > 2	)
 			histTrackID = histpath->trackletID;
 	}

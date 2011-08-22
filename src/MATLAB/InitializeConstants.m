@@ -1,3 +1,6 @@
+% InitializeConstants.m - Initialize and add constant values to the global
+% CONSTANTS structure.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -23,7 +26,6 @@
 
 function InitializeConstants()
 %Set all constants here
-
 
 AddConstant('imageAlpha',1.5);
 AddConstant('maxPixelDistance',40,1);

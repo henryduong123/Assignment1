@@ -1,3 +1,7 @@
+% Removes a hull from a track deleting the track if necessary.  If
+% bUpdateTree is specified, a track with a significant number of zeros in
+% the middle will be split as well.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,9 +25,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Removes a hull from a track deleting the track if necessary.  If
-% bUpdateTree is specified, a track with a significant number of zeros in
-% the middle will be split as well.
 function [bChangedStart,splitTrack] = RemoveHullFromTrack(hullID, trackID, bUpdateTree, dir)
     global CellTracks CellHulls CellFamilies
     

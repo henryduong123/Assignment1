@@ -1,3 +1,6 @@
+% GetNextColor.m - Takes the global Colors list and selects the next in the
+% list and returns it
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function color = GetNextColor()
-%Takes the global Colors list and selects the next in the list and returns
-%it
-
 
 global Colors
 persistent index

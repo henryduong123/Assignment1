@@ -1,3 +1,12 @@
+% function AddHullToTrack(hullID,trackID,previousHullID)
+%  The hullID will be added to the track
+%
+%  If trackID is given, previousHullID is not used.  Safe to
+%  send [] for either trackID or previousHullID.
+%  Prereq to leave trackID empty - Track to be added to exists and the
+%  previousHullID exists in that track.  Also, it has been
+%  removed from any previous track assosiation.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,15 +31,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function AddHullToTrack(hullID,trackID,previousHullID)
-% function AddHullToTrack(hullID,trackID,previousHullID)
-%The hullID will be added to the track
-%
-%If trackID is given, previousHullID is not used.  Safe to
-%send [] for either trackID or previousHullID.
-%Prereq to leave trackID empty - Track to be added to exists and the
-%previousHullID exists in that track.  Also, it has been
-%removed from any previous track assosiation.
-
 
 global HashedCells CellTracks CellFamilies CellHulls
 

@@ -1,3 +1,8 @@
+% MarkHullAsEdited(hullID,time) will flag the given hull(s) in HashedCells as
+% edited.  Pass time in if known (function runs faster) and if all the
+% hulls are on the same frame.  Pass unmark=1 if you want the hull to be
+% unflaged.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,10 +27,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function MarkHullAsEdited(hullIDs,time,unmark)
-% MarkHullAsEdited(hullID,time) will flag the given hull(s) in HashedCells as
-% edited.  Pass time in if known (function runs faster) and if all the
-% hulls are on the same frame.  Pass unmark=1 if you want the hull to be
-% unflaged.
 
 global HashedCells CellHulls
 

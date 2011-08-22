@@ -1,3 +1,6 @@
+% CreateContextMenuCells.m - creates the context menu for the figure that
+% displays the tree data and the subsequent function calls
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function CreateContextMenuTree()
-%creates the context menu for the figure that displays the tree data and
-%the subsequent function calls
-
 
 global Figures
 
@@ -43,14 +43,6 @@ uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Change Label',...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
-
-% uimenu(Figures.tree.contextMenuHandle,...
-%     'Label',        'Change Parent',...
-%     'CallBack',     @changeParent);
-
-% uimenu(Figures.tree.contextMenuHandle,...
-%     'Label',        'Remove From Tree',...
-%     'CallBack',     @removeFromTree);
 
 uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Properties',...

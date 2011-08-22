@@ -1,3 +1,6 @@
+% UpdateTimeIndicatorLine.m - Changes the postition of the Red Line that
+% indicates the current time displayed
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function UpdateTimeIndicatorLine()
-%Changes the postition of the Red Line that indicates the current time
-%displayed
-
 
 global Figures
 

@@ -1,3 +1,6 @@
+% GetTimeOfDeath.m - Returns the time of death for a cell track based on
+% phenotype, if not marked as dead, returns []
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

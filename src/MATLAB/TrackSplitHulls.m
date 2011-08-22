@@ -1,3 +1,5 @@
+% TrackSplitHulls.m - Retrack user split or added hulls.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -43,7 +45,7 @@ function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
         UpdateTrackingCosts(t, changedHulls, nextHulls);
     end
     
-    % All chnaged hulls get added (this may include track changes)
+    % All changed hulls get added (this may include track changes)
     AddSegmentationEdit([],changedHulls);
     
     trackIDs = [HashedCells{t}(ismember([HashedCells{t}.hullID],newHulls)).trackID];

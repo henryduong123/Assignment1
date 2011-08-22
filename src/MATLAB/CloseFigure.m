@@ -1,3 +1,5 @@
+% CloseFigure.m - Closes both figures and cleans up the Figures global var
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,8 +24,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function CloseFigure(varargin)
-%Closes both figures and cleans up the Figures global var
-
 
 global Figures
 if(isempty(Figures))

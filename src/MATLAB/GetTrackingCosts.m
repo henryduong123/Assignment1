@@ -1,3 +1,7 @@
+% GetTrackingCosts.m - Get costs for tracking from trackHulls in frame t to
+% all hulls (except avoidHulls) in frame tNext. This function uses the
+% mexMAT library to do the depth-first search and calculate costs.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

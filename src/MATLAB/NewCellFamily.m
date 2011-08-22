@@ -1,3 +1,6 @@
+% NewCellFamily.m - Create a empty Family that will contain one track that
+% contains only one hull
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function curFamilyID = NewCellFamily(cellHullID,t)
-%Create a empty Family that will contain one track that contains only one
-%hull
-
 
 global CellFamilies
 

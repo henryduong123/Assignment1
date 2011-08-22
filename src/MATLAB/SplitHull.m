@@ -1,3 +1,6 @@
+% SplitHull.m - Attempt to split hull corresponding to hullId into k pieces
+% and update associated data structures if successful.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackIDs = SplitHull(hullID, k)
-% Attempt to split hull corresponding to hullId into k pieces, and update
-% associated data structures if successful.
-
 
 global CellHulls CellFamilies HashedCells GraphEdits
 
@@ -53,7 +53,6 @@ for i=2:length(newHulls)
     newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
     newHullIDs = [newHullIDs length(CellHulls)];
 end
-% newTrackIDs = [CellFamilies(newFamilyIDs).rootTrackID];
 
 newTrackIDs = TrackSplitHulls(newHullIDs, oldTracks, oldCOM);
 end

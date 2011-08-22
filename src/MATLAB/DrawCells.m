@@ -1,3 +1,10 @@
+% DrawCells.m - 
+% This will display the image with the cells outlined and labeled unless the
+% labels are turned off, in which case only the image is displayed
+% All the cells that are part of the family will be have circular labels and
+% will be more boldly colored, others will be with square labels and be
+% slightly grayed out
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,12 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function DrawCells()
-%This will display the image with the cells outlined and labeled unless the
-%labels are turned off, in which case only the image is displayed
-%All the cells that are part of the family will be have circular labels and
-%will be more boldly colored, others will be with square labels and be
-%slightly grayed out
-
 
 global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS
 
@@ -192,6 +193,4 @@ plot([CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)
     'UserData',         trackID,...
     'uicontextmenu',    Figures.cells.contextMenuHandle,...
     'Tag',              'SiblingRelationship');
-
-% set(Figures.cells.removeMenu,'Visible','on');
 end

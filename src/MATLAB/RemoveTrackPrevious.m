@@ -1,3 +1,5 @@
+% RemoveTrackPrevious.m - Remove all segmentations on the current track.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -36,8 +38,6 @@ function hullIDs = RemoveTrackPrevious(trackID, endHullID)
             return;
         end
     end
-    
-%     rmNum = endTime - startTime + 1;
     
     bNeedsUpdate = 0;
     hulls = CellTracks(trackID).hulls;

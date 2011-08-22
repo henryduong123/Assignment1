@@ -1,3 +1,6 @@
+% TrackThroughMerge.m - Retrack and update costs for cells due to a user
+% or propagated merge.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

@@ -1,3 +1,9 @@
+% InitializeFigures.m - 
+% Creates two figures one for the cell image and the other for the family
+% tree.
+% Figures will have all the menus, button actions, and context menus set up
+% here
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,11 +28,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function InitializeFigures()
-%Creates two figures one for the cell image and the other for the family
-%tree.
-%Figures will have all the menus, button actions, and context menus set up
-%here
-
 
 global Figures CONSTANTS HashedCells
 
@@ -114,8 +115,6 @@ if(~isempty(oldTreeHandle) && ishandle(oldTreeHandle))
     close(oldTreeHandle);
 end
 
-% pos = get(Figures.cells.handle,'Position');
-% position = [pos(3)-120 pos(4)-30 100 20];
 Figures.cells.learnButton = uicontrol(...
     'Parent',       Figures.cells.handle,...
     'Style',        'pushbutton',...
@@ -335,8 +334,6 @@ function learnFromEdits(src,evnt)
     
     try
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-%         PropagateBackward(length(HashedCells));
-%         StraightenFamilies();
         ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
     catch err
         try

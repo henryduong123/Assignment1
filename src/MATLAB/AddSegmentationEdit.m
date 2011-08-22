@@ -1,3 +1,6 @@
+% AddSegmentationEdit.m - Make note of a user segmentation edit for later
+% learn from edit operations.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

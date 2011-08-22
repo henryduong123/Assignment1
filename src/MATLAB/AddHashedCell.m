@@ -1,3 +1,6 @@
+% AddHashedCell.m - This will either add an entry to HashedHulls or update an entry based on
+% cellHullID
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,16 +25,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function AddHashedCell(t,cellHullID,cellTrackID)
-%This will either add an entry to HashedHulls or update an entry based on
-%cellHullID
-
 
 global HashedCells
 
 if(isempty(HashedCells))
     HashedCells{t}(1).hullID = cellHullID;
     HashedCells{t}(1).trackID = cellTrackID;
-%     HashedCells = {struct('hullID',{cellHullID},'trackID',{cellTrackID})};
 else
     if(t > length(HashedCells))
         HashedCells{t}(1).hullID = cellHullID;

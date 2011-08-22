@@ -1,3 +1,5 @@
+% FindFamiliesAfter.m - Find the set of families which start after the beginning of this track
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -21,8 +23,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% Find the set of families which start after the beginning of this track
 function families = FindFamiliesAfter(trackID)
     global CellTracks CellFamilies
     

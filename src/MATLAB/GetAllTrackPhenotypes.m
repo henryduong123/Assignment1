@@ -1,3 +1,6 @@
+% GetAllTrackPhenotypes.m - Get all the phenotypes and associated hullIDs
+% which have been set along a given track.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

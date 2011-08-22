@@ -1,3 +1,5 @@
+% GenerateAVI.m - Create AVI movie from currently open LEVer dataset.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -34,7 +36,6 @@ nframes = length(HashedCells);
 
 xLim = get(get(Figures.cells.handle, 'CurrentAxes'),'XLim');
 yLim = get(get(Figures.cells.handle, 'CurrentAxes'),'YLim');
-% dim = [2*floor(xLim(2)-xLim(1)) floor(yLim(2)-yLim(1))];
 mp=get(0,'monitorpositions');
 idxPrimaryMonitor = find(mp(:,1)==1 & mp(:,2)==1);
 if isempty(idxPrimaryMonitor)

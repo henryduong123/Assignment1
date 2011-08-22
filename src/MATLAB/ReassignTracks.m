@@ -1,3 +1,6 @@
+% ReassignTracks.m - Using cost submatrix appropriately reassign tracking
+% over the given hulls.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

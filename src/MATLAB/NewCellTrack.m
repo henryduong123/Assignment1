@@ -1,3 +1,7 @@
+% NewCellTrack.m - Creates a new track in the Family that contains just the
+% given hull.
+% ***Use this with empty Families only***
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,9 +26,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function curCellTrackID = NewCellTrack(familyID,cellHullID,t)
-%Creates a new track in the Family that contains just the given hull.
-%***Use this with empty Families only***
-
 
 global CellTracks
 

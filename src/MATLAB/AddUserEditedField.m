@@ -1,3 +1,6 @@
+% AddUserEditedField.m - Update older LEVer file format by adding the
+% userEdited field to the CellHulls structure.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter

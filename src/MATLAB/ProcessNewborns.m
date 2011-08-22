@@ -1,3 +1,7 @@
+% ProcessNewborns.m - 
+% This takes all the families with start times > 1 and attempts to attach
+% that families' tracks to other families that start before said family
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -22,18 +26,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ProcessNewborns(families, tFinal)
-%This takes all the families with start times > 1 and attempts to attach
-%that families' tracks to other families that start before said family
-
 
 global CellFamilies CellTracks CellHulls HashedCells CONSTANTS GraphEdits Figures
-
-% If unspecified start looking for children in frame 2
-% if ( ~exist('tStart','var') )
-%     tStart = 2;
-% else
-%     tStart = max(tStart, 2);
-% end
 
 if ( ~exist('families','var') )
     families = 1:length(CellFamilies);
@@ -146,50 +140,6 @@ for i=1:size
     end
 end
 
-%trim the tree
-% 
-% for i=1:length(families)
-%     if ( isempty(CellFamilies(families(i)).startTime) )
-%         continue;
-%     end
-%     
-%     if ( CellFamilies(families(i)).endTime < tFinal )
-%         continue;
-%     end
-%     
-%     removeTracks = [];
-%     for j=1:length(CellFamilies(families(i)).tracks)
-%         trackID = CellFamilies(families(i)).tracks(j);
-%         if ( ~validBranch(trackID, tFinal) )
-%             removeTracks = [removeTracks trackID];
-%         end
-%     end
-%     
-%     j = 1;
-%     while( j <= length(removeTracks) )
-%         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
-%         parentTrack = CellTracks(removeTracks(j)).parentTrack;
-%         if ( any(ismember(removeTracks, siblingTrack)) && ~any(ismember(removeTracks, parentTrack)) && ~checkEditedTrack(parentTrack) )
-%             removeTracks = [removeTracks parentTrack];
-%         end
-%         j = j + 1;
-%     end
-%     
-%     for j=1:length(removeTracks)
-%         removeID = removeTracks(j);
-%         
-%         if ( isempty(CellTracks(removeID).startTime) )
-%             continue;
-%         end
-%         
-%         siblingTrack = CellTracks(removeTracks(j)).siblingTrack;
-%         if ( any(ismember(removeTracks, siblingTrack)) )
-%             [removeID mergeID] = findRemoveSibling(removeTracks(j), siblingTrack);
-%         end
-%         RemoveFromTree(CellTracks(removeID).startTime, removeID, 'yes');
-%     end
-% end
-
 if ( rootHull > 0 )
     trackID = GetTrackID(rootHull);
     if ( ~isempty(trackID) )
@@ -197,68 +147,5 @@ if ( rootHull > 0 )
     end
 end
 
-end
-
-function [removeID mergeID] = findRemoveSibling(trackID, siblingID)
-    global CellTracks
-    
-    removeID = trackID;
-    mergeID = siblingID;
-    
-    parentID = CellTracks(trackID).parentTrack;
-    
-    parentHull = CellTracks(parentID).hulls(end);
-    hull = CellTracks(trackID).hulls(1);
-    siblingHull = CellTracks(siblingID).hulls(1);
-    
-    if ( parentHull == 0 || hull == 0 || siblingHull == 0 )
-        return;
-    end
-    
-    costMatrix = GetCostMatrix();
-    
-    hullCost = costMatrix(parentHull,hull);
-    siblingCost = costMatrix(parentHull,siblingHull);
-    
-    if ( hullCost < siblingCost )
-        removeID = siblingID;
-        mergeID = trackID;
-    end
-end
-
-function bValid = validBranch(trackID, tFinal)
-    global CellTracks
-    
-    bLeaf = isLeafBranch(trackID);
-    bValid = (~bLeaf || (CellTracks(trackID).endTime >= tFinal) ...
-        || (GetTrackPhenotype(trackID) ~= 0));
-    
-    if ( bLeaf && ~bValid )
-        bValid = checkEditedTrack(trackID);
-    end
-end
-
-function bEdited = checkEditedTrack(trackID)
-    global CellTracks GraphEdits
-    
-    bEdited = 0;
-    
-    parentID = CellTracks(trackID).parentTrack;
-    if ( isempty(parentID) )
-        return;
-    end
-    
-    parentHull = CellTracks(parentID).hulls(end);
-	hull = CellTracks(trackID).hulls(1);
-    
-    if ( GraphEdits(parentHull,hull) > 0 )
-        bEdited = 1;
-    end
-end
-
-function bLeaf = isLeafBranch(trackID)
-    global CellTracks
-    
-    bLeaf = (isempty(CellTracks(trackID).childrenTracks) && ~isempty(CellTracks(trackID).parentTrack));
 end
 
