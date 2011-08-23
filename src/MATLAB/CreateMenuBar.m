@@ -209,7 +209,7 @@ SaveDataAs();
 end
 
 function printFigure(src,evnt)
-printdlg;
+printdlg(gcf);
 end
 
 function makeMovie(src,evnt)

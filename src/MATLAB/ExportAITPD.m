@@ -33,6 +33,10 @@ iterations = length(CellTracks);
 for i = 1:length(CellTracks)
     progress = progress+1;
     Progressbar(progress/iterations);
+    % Don't compile data for deleted tracks
+    if ( isempty(CellTracks(i).startTime) )
+        continue;
+    end
     Trellis = [Trellis compileTrackData(CellTracks(i),i)];
 end
 Progressbar(1);%clear it out
