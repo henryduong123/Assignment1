@@ -33,6 +33,10 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         bPropForward = 0;
     end
     
+    if ( isempty(extendHulls) || isempty(affectedHulls) )
+        return;
+    end
+    
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
     [minOutCosts,bestOutgoing] = min(costMatrix,[],2);
     
