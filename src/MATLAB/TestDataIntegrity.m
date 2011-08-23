@@ -1,5 +1,5 @@
-% TestDataIntegrity(correct) tests to make sure that the database is consistant.
-% Takes the CellTracks as the most accurate.  If correct==1, this
+% TestDataIntegrity(correct, debugLevel) tests to make sure that the database
+% is consistant. Takes the CellTracks as the most accurate.  If correct==1, this
 % function will attempt to correct the error using the data from CellTracks
 % ***USE SPARINGLY, TAKES A LOT OF TIME***
 
@@ -26,13 +26,26 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function TestDataIntegrity(correct)
+function TestDataIntegrity(correct, debugLevel)
 
 global CellTracks CellHulls CellFamilies HashedCells
 
+if ( ~exist('correct','var') )
+    correct = 0;
+end
+
+% Optional debugLevel argument selects data integrity scan level, if
+% omitted then we run no scan
+if ( ~exist('debugLevel','var') )
+    debugLevel = 0;
+end
+
+if ( debugLevel == 0 )
+    return;
+end
+
 hullsList = [];
 fprintf('Checking CellTracks...');
-AddFields();
 progress = 0;
 iterations = length(CellTracks);
 for i=1:length(CellTracks)
@@ -90,7 +103,6 @@ for i=1:length(CellTracks)
         end
         
         for j=1:length(CellFamilies)
-%             fprintf('CellFamilies %d ',j);
             if(currentFamily==j),continue,end
             index = find(CellFamilies(j).tracks==i);
             if(~isempty(index))
@@ -106,7 +118,6 @@ for i=1:length(CellTracks)
     
     %% check hulls for a given track
     for j=1:length(CellTracks(i).hulls)
-%         fprintf('Hulls %d ',j);
         if(~CellTracks(i).hulls(j)),continue,end
         if(any(ismember(hullsList,CellTracks(i).hulls(j))))
             tracks = [];
@@ -134,10 +145,8 @@ for i=1:length(CellTracks)
     end
     
 end
-% fprintf('\n');
 
 %% check CellHulls
-% if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
 missingHulls = find(~[CellHulls.deleted]);
 missingHulls = missingHulls(find(~ismember(missingHulls,hullsList)));
 if(~isempty(missingHulls))

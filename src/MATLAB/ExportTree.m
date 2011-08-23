@@ -32,13 +32,9 @@ set(gcf,'name',CONSTANTS.datasetName)
 set(gcf,'numbertitle','off')
 set(gcf,'color','w')
 familyID=Figures.tree.familyID;
-if(isfield(CellTracks,'phenotype'))     
-    phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
-    phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
-else
-   phenoScratch.phenoColors = [];
-   phenoScratch.phenoLegendSet = [];    
-end
+
+phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
+phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
 
 if(~isfield(CONSTANTS,'timeResolution'))
     CONSTANTS.timeResolution = 10;

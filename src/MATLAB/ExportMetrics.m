@@ -90,7 +90,8 @@ trackMetric.parent = track.parentTrack;
 trackMetric.children = track.childrenTracks;
 pheno = GetTrackPhenotype(trackID);
 if( pheno > 0 )
-    trackMetric.phenotype = CellPhenotypes.descriptions{pheno};
+    % Replace \ with \\ so that fprintf properly outputs latex phenotypes
+    trackMetric.phenotype = regexprep(CellPhenotypes.descriptions{pheno},'\\','\\\\');
 else
     trackMetric.phenotype = '';
 end
