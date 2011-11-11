@@ -154,8 +154,6 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 	for (  k=startIdx; k < frame.size()-1; ++k )
 	{
 		dlcd=HullDist(frame[k],index[k],frame[k+1],index[k+1]);
-		if ((frame[k]==104))
-			velo_max*=3.;
 		if (dlcd > velo_max)										
 			return dbltype::infinity();
 
@@ -171,7 +169,7 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		return dbltype::infinity();
 
 	if (srcFrameIdx>0)
-		LocalCost+=CCHullDist(frame[srcFrameIdx-1],index[srcFrameIdx-1],frame[srcFrameIdx+1],index[srcFrameIdx+1],velo_max,cc_max);
+		LocalCost+=CCHullDist(frame[srcFrameIdx-1],index[srcFrameIdx-1],frame[srcFrameIdx+1],index[srcFrameIdx+1], 2*velo_max, 2*cc_max);
 	else
 		LocalCost*=2;
 	
@@ -179,7 +177,7 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		return dbltype::infinity();
 	
 	if ((srcFrameIdx<frame.size()-2))
-		LocalCost+=CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+2],index[srcFrameIdx+2],velo_max,cc_max);
+		LocalCost+=CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+2],index[srcFrameIdx+2], 2*velo_max, 2*cc_max);
 	else
 		LocalCost*=2;
 	
