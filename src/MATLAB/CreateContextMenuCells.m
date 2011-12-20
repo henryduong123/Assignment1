@@ -1,14 +1,30 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CreateContextMenuCells.m - creates the context menu for the figure that
+% displays the image data and the subsequent function calls
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function CreateContextMenuCells()
-%creates the context menu for the figure that displays the image data and
-%the subsequent function calls
-
 
 global Figures CellPhenotypes CellTracks
 
@@ -17,17 +33,9 @@ if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
     CellPhenotypes.contextMenuID=[];
     CellPhenotypes.hullPhenoSet = zeros(2,0);
 end
-    
-% if ~isfield(CellTracks,'phenotype')
-%     CellTracks(1).phenotype=0;
-% end
 
 figure(Figures.cells.handle);
 Figures.cells.contextMenuHandle = uicontextmenu;
-
-% Figures.cells.contextMenuLabelHandle = uimenu(Figures.cells.contextMenuHandle,...
-%     'Label',        'Click to Show Which Cell Is Selected',...
-%     'CallBack',     @cellSelected);
 
 Figures.cells.removeMenu = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove Mitosis',...
@@ -42,10 +50,6 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Label',...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
-
-% uimenu(Figures.cells.contextMenuHandle,...
-%     'Label',        'Change Parent',...
-%     'CallBack',     @changeParent);
 
 addHull = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Number of Cells',...
@@ -82,11 +86,6 @@ uimenu(Figures.cells.contextMenuHandle,...
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Delete Track',...
     'CallBack',     @removeTrackPrevious);
-
-% uimenu(Figures.cells.contextMenuHandle,...
-%     'Label',        'Mark Death',...
-%     'CallBack',     @markDeath,...
-%     'Separator',    'on');
 
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove From Tree',...
@@ -175,9 +174,6 @@ global CellTracks Figures HashedCells
 
 [hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
-
-% answer = inputdlg({['Enter new sibling of ' num2str(trackID)],'Enter Time of Mitosis'},...
-%     'Add Mitosis',1,{'',num2str(Figures.time)});
 
 answer = inputdlg({['Enter new sister of cell' num2str(trackID)]},...
     'Add Mitosis',1,{''});

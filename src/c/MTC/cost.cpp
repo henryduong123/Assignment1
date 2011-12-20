@@ -1,9 +1,25 @@
-//******************************************************
+//***********************************************************************
 //
-//    This file is part of LEVer.exe
-//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//    Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+// 
+//    This file is part of LEVer - the tool for stem cell lineaging. See
+//    https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+// 
+//    LEVer is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    LEVer is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with LEVer in file "gnu gpl v3.txt".  If not, see 
+//    <http://www.gnu.org/licenses/>.
 //
-//******************************************************
+//
+//***********************************************************************
 
 #include "tracker.h"
 
@@ -35,7 +51,7 @@ double CCDist(int t0,int i0,int t1,int i1)
 			// connected!
 			return rgDetect[t0][i0].DarkConnectedCost[i];
 	}
-	return CCMAX+1.; //dbltype::infinity();
+	return CCMAX+1.;
 
 
 } // CCDist
@@ -138,8 +154,6 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 	for (  k=startIdx; k < frame.size()-1; ++k )
 	{
 		dlcd=HullDist(frame[k],index[k],frame[k+1],index[k+1]);
-		if ((frame[k]==104))
-			velo_max*=3.;
 		if (dlcd > velo_max)										
 			return dbltype::infinity();
 
@@ -149,19 +163,13 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 	if (bCheck)
 		return 1.;
 
-	if  ((267<=frame[srcFrameIdx]<=269))
-	{
-		velo_max*= 3;
-		cc_max*= 3;
-	}
-
 	LocalCost=3*CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+1],index[srcFrameIdx+1],velo_max,cc_max);
 		
 	if ( LocalCost == dbltype::infinity() )			
 		return dbltype::infinity();
 
 	if (srcFrameIdx>0)
-		LocalCost+=CCHullDist(frame[srcFrameIdx-1],index[srcFrameIdx-1],frame[srcFrameIdx+1],index[srcFrameIdx+1],velo_max,cc_max);
+		LocalCost+=CCHullDist(frame[srcFrameIdx-1],index[srcFrameIdx-1],frame[srcFrameIdx+1],index[srcFrameIdx+1], 2*velo_max, 2*cc_max);
 	else
 		LocalCost*=2;
 	
@@ -169,7 +177,7 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		return dbltype::infinity();
 	
 	if ((srcFrameIdx<frame.size()-2))
-		LocalCost+=CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+2],index[srcFrameIdx+2],velo_max,cc_max);
+		LocalCost+=CCHullDist(frame[srcFrameIdx],index[srcFrameIdx],frame[srcFrameIdx+2],index[srcFrameIdx+2], 2*velo_max, 2*cc_max);
 	else
 		LocalCost*=2;
 	
@@ -186,7 +194,6 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		if (nDestiny2==index[srcFrameIdx+1]) 
 			LocalCost*=0.5;
 	}
-
 
 	dlocnX=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].X);
 	dlocnY=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].Y);

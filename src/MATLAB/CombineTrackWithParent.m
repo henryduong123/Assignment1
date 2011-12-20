@@ -1,11 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function CombineTrackWithParent(trackID)
 % CombineTrackWithParent(trackID)
 %Combine childTrack with its parent track - in otherwords the childtrack
 %will be merged into the parent track making it all one edge.
@@ -15,6 +7,30 @@ function CombineTrackWithParent(trackID)
 %***Make sure that the sibling of the given track has been delt with prior
 %to calling this function. IT WILL BE LOST
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function CombineTrackWithParent(trackID)
 
 global CellFamilies CellTracks CellHulls
 

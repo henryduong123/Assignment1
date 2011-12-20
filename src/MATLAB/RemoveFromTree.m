@@ -1,20 +1,36 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% newFamily = RemoveFromTree(time,trackID,dealWithSibling)
+% This will remove the track and any of its children from its current family
+% and create a new family rooted at the given track
+% If you want the current track's sibling to be combined with its parent,
+% pass combineSiblingWithParent='yes' otherwise 'no'
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+% ***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
+% THERE WILL BE ISSUES WITH THE DATA****
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
-%newFamily = RemoveFromTree(time,trackID,dealWithSibling)
-%This will remove the track and any of its children from its current family
-%and create a new family rooted at the given track
-%If you want the current track's sibling to be combined with its parent,
-%pass combineSiblingWithParent='yes' otherwise 'no'
-%
-%***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
-%THERE WILL BE ISSUES WITH THE DATA****
-
 
 global CellFamilies CellTracks CellHulls
 
@@ -60,9 +76,7 @@ CellTracks(trackID).childrenTracks = [];
 %clean up old track
 if(isempty(find([CellTracks(trackID).hulls]~=0, 1)))
     if(~isempty(CellTracks(trackID).siblingTrack)&& strcmp(combineSiblingWithParent,'yes'))
-%         if(~isempty(CellTracks(CellTracks(trackID).parentTrack).startTime))
-            CombineTrackWithParent(CellTracks(trackID).siblingTrack);
-%         end
+        CombineTrackWithParent(CellTracks(trackID).siblingTrack);
     end
     RemoveTrackFromFamily(trackID);
     if(~isempty(CellTracks(trackID).parentTrack))

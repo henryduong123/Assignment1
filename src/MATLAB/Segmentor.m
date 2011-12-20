@@ -1,21 +1,35 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
+% Segmentor.m - Cell image segmentation algorithm.
 % Segmentor is to be run as a seperate compiled function for parallel
 % processing.  It will process tLength-tStart amount of images.  Call this
 % function for the number of processors on the machine.
 
 % mcc -o Segmentor -m Segmentor.m
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% global CONSTANTS
+function objs = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
     
-
 objs=[];
 if(ischar(tStart)),tStart = str2double(tStart);end
 if(ischar(tStep)),tStep = str2double(tStep);end
@@ -42,6 +56,12 @@ for t = tStart:tStep:tEnd
     fprintf('%d%%...',floor(floor(t/tStep)/numImages*100));
     
     [im map]=imread(fname);
+    % Handle "color" images by averaging the color channels to get
+    % intensity (should all be the same for all channels)
+    if ( ndims(im) > 2 )
+        im = mean(im,3);
+    end
+    
     im=mat2gray(im);
     
     level=imageAlpha*graythresh(im);

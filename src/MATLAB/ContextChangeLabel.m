@@ -1,13 +1,30 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ContextChangeLabel.m - Context menu callback function for changing track
+% labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ContextChangeLabel(time,trackID)
-%context menu callback function
-
 
 global CellTracks HashedCells CellFamilies
 
@@ -43,40 +60,21 @@ elseif(length(CellTracks)<newTrackID || isempty(CellTracks(newTrackID).hulls))
             return
     end
 elseif(~isempty(find([HashedCells{time}.trackID]==newTrackID,1)))
-%     choice = questdlg(['Label ' num2str(newTrackID) ' exist on this frame. Would you like these labels to swap from here forward or just this frame?'],...
-%         'Swap Labels?','Forward','This Frame','Cancel','Cancel');
-%     switch choice
-%         case 'Forward'
-            try
-                GraphEditSetEdge(time,trackID,newTrackID);
-                GraphEditSetEdge(time,newTrackID,trackID);
-                SwapTrackLabels(time,trackID,newTrackID);
-                History('Push');
-            catch errorMessage
-                try
-                    ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-                    return
-                catch errorMessage2
-                    fprintf('%s',errorMessage2.message);
-                    return
-                end
-            end
-            LogAction('Swapped Labels',trackID,newTrackID);
-%         case 'This Frame'
-%             History('Push');
-%             try
-%                 SwapHulls(time,trackID,newTrackID);
-%             catch errorMessage
-%                 try
-%                     ErrorHandeling(['SwapHulls(' num2str(time) ' ' num2str(trackID) num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-%                 catch errorMessage2
-%                     fprintf(errorMessage2.message);
-%                     return
-%                 end
-%             end
-%         case 'Cancel'
-%             return
-%     end
+    try
+        GraphEditSetEdge(time,trackID,newTrackID);
+        GraphEditSetEdge(time,newTrackID,trackID);
+        SwapTrackLabels(time,trackID,newTrackID);
+        History('Push');
+    catch errorMessage
+        try
+            ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    LogAction('Swapped Labels',trackID,newTrackID);
 elseif(isempty(CellTracks(trackID).parentTrack) && isempty(CellTracks(trackID).childrenTracks) && 1==length(CellTracks(trackID).hulls))
     hullID = CellTracks(trackID).hulls(1);
     try

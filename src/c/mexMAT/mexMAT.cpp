@@ -1,9 +1,25 @@
-//******************************************************
+//***********************************************************************
 //
-//    This file is part of LEVer.exe
-//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//    Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+// 
+//    This file is part of LEVer - the tool for stem cell lineaging. See
+//    https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+// 
+//    LEVer is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    LEVer is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with LEVer in file "gnu gpl v3.txt".  If not, see 
+//    <http://www.gnu.org/licenses/>.
 //
-//******************************************************
+//
+//***********************************************************************
 
 #include "mexMAT.h"
 
@@ -90,10 +106,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	if ( mxGetNumberOfElements(prhs[0]) != 1 )
 		mexErrMsgTxt("Parameter 1 must be a scalar frame number.");
 
-	//const mxArray* gConstants = mexGetVariablePtr("global", "CONSTANTS");
-	//if ( gConstants == NULL )
-	//	mexErrMsgTxt("Global CONSTANTS variable unavailable.");
-
 	int dir = ((int) mxGetScalar(prhs[0]));
 	gWindowSize = ((int) mxGetScalar(prhs[1]));
 
@@ -112,7 +124,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	if ( gNumFrames < 2 || otherDim > 1 )
 		mexErrMsgTxt("HashedCells must be a 1xN hashed cell structure.");
 
-	//gWindowSize = mxGetN(gTrackHulls);
 	otherDim = mxGetM(gTrackHulls);
 	if ( gWindowSize < 2 || otherDim > 1 )
 		mexErrMsgTxt("Parameter 2 must contain at least two cell rows.");

@@ -1,15 +1,32 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OpenData.m - 
+% Opens the data file either from a previous state of LEVer or from tracking
+% results.  If the latter, the data will be converted to LEVer's data scheme
+% and save out to a new file.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function opened = OpenData(versionString)
-%Opens the data file either from a previous state of LEVer or from tracking
-%results.  If the latter, the data will be converted to LEVer's data scheme
-%and save out to a new file.
-
 
 global Figures Colors CONSTANTS CellFamilies CellHulls HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits
 
@@ -124,7 +141,7 @@ switch answer
                     if(ishandle(Figures.cells.handle))
                         close Figures.cells.handle
                     end
-                catch
+                catch exception
                 end
                 
                 rootImageFolder = CONSTANTS.rootImageFolder;
@@ -190,9 +207,6 @@ if ( bUpdated )
         SaveLEVerState([settings.matFilePath settings.matFile]);
     end
 end
-
-% StraightenFamilies();
-% ProcessNewborns(1:length(CellFamilies),length(HashedCells));
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');

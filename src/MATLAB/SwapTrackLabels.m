@@ -1,14 +1,30 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SwapTrackLabels.m - This function will swap the hulls of the two tracks
+% from the given time forward.  Any children will also be swaped
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SwapTrackLabels(time,trackID1,trackID2)
-%This function will swap the hulls of the two tracks from the given time
-%forward.  Any children will also be swaped
-
 
 global CellTracks CellHulls SegmentationEdits
 
@@ -37,13 +53,6 @@ CellTracks(trackID1).hulls = [CellTracks(trackID1).hulls track2Hulls];
 CellTracks(trackID2).hulls = [CellTracks(trackID2).hulls track1Hulls];
 
 %update times
-% index = find(CellTracks(trackID1).hulls,1,'first');
-% startTime1 = CellHulls(CellTracks(trackID1).hulls(index)).time;
-% index = find(CellTracks(trackID2).hulls,1,'first');
-% startTime2 = CellHulls(CellTracks(trackID2).hulls(index)).time;
-% RehashCellTracks(trackID1,startTime1);
-% RehashCellTracks(trackID2,startTime2);
-
 CellTracks(trackID1).startTime = CellHulls(CellTracks(trackID1).hulls(1)).time;
 CellTracks(trackID2).startTime = CellHulls(CellTracks(trackID2).hulls(1)).time;
 CellTracks(trackID1).endTime = CellHulls(CellTracks(trackID1).hulls(find([CellTracks(trackID1).hulls]~=0,1,'last'))).time;

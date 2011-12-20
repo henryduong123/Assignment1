@@ -1,13 +1,30 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CreateMenuBar.m - This sets up the custom menu bar for the given figure
+% handles
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function CreateMenuBar(handle)
-%This sets up the custom menu bar for the given figure handle
-
 
 global Figures
 
@@ -25,19 +42,6 @@ viewMenu = uimenu(...
     'Parent',           handle,...
     'Label',            'View',...
     'HandleVisibility', 'callback');
-
-% uimenu(...
-%     'Parent',           handle,...
-%     'Label',            '  ',...
-%     'HandleVisibility', 'callback',...
-%     'Enable',           'off');
-% 
-% learnEditsMenu = uimenu(...
-%     'Parent',           handle,...
-%     'Label',            'Learn From Edits!',...
-%     'HandleVisibility', 'callback',...
-%     'Callback',         @learnFromEdits,...
-%     'Enable',           'off');
 
 uimenu(...
     'Parent',           fileMenu,...
@@ -67,14 +71,6 @@ uimenu(...
     'Label',            'Save As...',...
     'HandleVisibility', 'callback', ...
     'Callback',         @saveFileAs);
-
-uimenu(...
-    'Parent',           fileMenu,...
-    'Label',            'Export Image',...
-    'Separator',        'on',...
-    'HandleVisibility', 'callback', ...
-    'Callback',         @exportImage,...
-    'Visible',          'off');
 
 uimenu(...
     'Parent',           fileMenu,...
@@ -212,12 +208,8 @@ function saveFileAs(src,evnt)
 SaveDataAs();
 end
 
-function exportImage(src,evnt)
-ExportImage(src);
-end
-
 function printFigure(src,evnt)
-printdlg;
+printdlg(gcf);
 end
 
 function makeMovie(src,evnt)
@@ -311,34 +303,3 @@ end
 DrawTree(CellTracks(answer).familyID);
 DrawCells();
 end
-
-% function learnFromEdits(src,evnt)
-%     global CellFamilies SegmentationEdits Figures
-%     
-%     if ( isempty(SegmentationEdits) || isempty(SegmentationEdits.changedHulls) || isempty(SegmentationEdits.newHulls) )
-%         return;
-%     end
-%     
-%     try
-%         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-%         ProcessNewborns(1:length(CellFamilies));
-%     catch err
-%         try
-%             ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
-%             return;
-%         catch err2
-%             fprintf('%s',err2.message);
-%             return;
-%         end
-%     end
-%     
-%     SegmentationEdits.newHulls = [];
-%     SegmentationEdits.changedHulls = [];
-%     UpdateSegmentationEditsMenu();
-%     
-%     DrawCells();
-%     DrawTree(Figures.tree.familyID);
-%     
-%     History('Push');
-%     LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
-% end

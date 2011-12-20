@@ -1,13 +1,30 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ExtendTrackWithHull.m - This function is similar to AddHullToTrack but it
+% orphans child tracks if a track is extended past its mitosis or before
+% its genesis.
 
-% This function is similar to AddHullToTrack but it specifically doesn't
-% handle adding hulls before a track start.  Also it orphans child tracks
-% if a track is extended past it's mitosis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function ExtendTrackWithHull(trackID, hullID)
     global CellTracks CellFamilies CellHulls
 
@@ -31,7 +48,6 @@ function ExtendTrackWithHull(trackID, hullID)
         if(CellFamilies(CellTracks(trackID).familyID).startTime > time)
             CellFamilies(CellTracks(trackID).familyID).startTime = time;
         end
-%         error('ExtendTrackWithHull cannot extend tracks backwards before their start time.');
     end
     
     CellTracks(trackID).hulls(hash) = hullID;

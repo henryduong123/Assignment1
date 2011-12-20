@@ -1,9 +1,25 @@
-//******************************************************
+//***********************************************************************
 //
-//    This file is part of LEVer.exe
-//    (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+//    Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+// 
+//    This file is part of LEVer - the tool for stem cell lineaging. See
+//    https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+// 
+//    LEVer is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    LEVer is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with LEVer in file "gnu gpl v3.txt".  If not, see 
+//    <http://www.gnu.org/licenses/>.
 //
-//******************************************************
+//
+//***********************************************************************
 
 #include "mexMAT.h"
 
@@ -76,9 +92,6 @@ double calcFullCellDist(int startCellIdx, int nextCellIdx, double vmax, double c
 	if ( (cdist > ccmax) && (hdist > (vmax/2.0)) )
 		return DoubleLims::infinity();
 
-	//if ( (cdist > ccmax/2) && (hdist > vmax/2) )
-	//	return DoubleLims::infinity();
-
 	double sdist = ((double) (nmax - nmin)) / nmax;
 
 	return (10.0*hdist + 100.0*sdist + 1000.0*cdist);
@@ -120,9 +133,6 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	{
 		double dlcd = calcHullDist(path[k], path[k+1]);
 
-		//if ( getCellTime(path[k]) == 104 )
-		//	vmax = 3.0*gVMax;
-
 		if ( dlcd > vmax )
 			return DoubleLims::infinity();
 	}
@@ -130,12 +140,6 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	// Just return non-infinite for a successful check.
 	if ( bCheck )
 		return 1.0;
-
-	//if ( 267 <= getCellTime(path[srcIdx]) <= 269 )
-	//{
-	//	vmax *= 3.0;
-	//	ccmax *= 3.0;
-	//}
 
 	double localCost = 3*calcFullCellDist(path[srcIdx], path[srcIdx+1], vmax, ccmax);
 

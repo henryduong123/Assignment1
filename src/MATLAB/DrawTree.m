@@ -1,13 +1,29 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DrawTree.m - This will draw the family tree of the given family.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function DrawTree(familyID)
-%This will draw the family tree of the given family.
-
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
    
@@ -30,22 +46,6 @@ trackID = CellFamilies(familyID).tracks(1);
 
 figure(Figures.tree.handle);
 delete(gca);
-% delete(gca);
-% hold off
-% 
-% underAxes = axes;
-% 
-% set(underAxes,...
-%     'YDir',            'reverse',...
-%     'YLim',             [0 length(HashedCells)],...
-%     'Position',         [.07 .06 .80 .90],...
-%     'YAxisLocation',    'right',...  
-%     'YLim',             [0 length(HashedCells)*CONSTANTS.timeResolution/60],...
-%     'XColor',           'w',...
-%     'XTick',            [],...
-%     'Box',              'off');
-% ylabel('Time (Hours)');
-% axis off
 
 overAxes = axes;
     
@@ -61,17 +61,10 @@ hold on
 
 [xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
 
-% set(underAxes,...
-%     'XLim',     [xMin-1 xMax+1]);
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
 UpdateTimeIndicatorLine();
-% gObjects = get(Figures.tree.axesHandle,'children');
-% parfor i=1:length(gObjects)
-%     set(get(get(gObjects(i),'Annotation'),'LegendInformation'),...
-%         'IconDisplayStyle','off'); % Exclude line from legend
-% end
 phenoHandles = [];
 for i=1:length(phenoScratch.phenoLegendSet)
     if 0==phenoScratch.phenoLegendSet(i),continue,end

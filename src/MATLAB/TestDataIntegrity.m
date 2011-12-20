@@ -1,16 +1,32 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TestDataIntegrity(correct, debugLevel) tests to make sure that the database
+% is consistant. Takes the CellTracks as the most accurate.  If correct==1, this
+% function will attempt to correct the error using the data from CellTracks
+% ***USE SPARINGLY, TAKES A LOT OF TIME***
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function TestDataIntegrity(correct, debugLevel)
-%TestDataIntegrity(correct,debugLevel) tests to make sure that the database is consistant.
-%Takes the CellTracks as the most accurate.  If correct==1, this
-%function will attempt to correct the error using the data from CellTracks
-%***USE SPARINGLY, TAKES A LOT OF TIME***
-
 
 global CellTracks CellHulls CellFamilies HashedCells
 
@@ -30,13 +46,11 @@ end
 
 hullsList = [];
 fprintf('Checking CellTracks...');
-AddFields();
 progress = 0;
 iterations = length(CellTracks);
 for i=1:length(CellTracks)
     progress = progress+1;
     Progressbar(progress/iterations);
-%     fprintf(', %d',i);
     %% Check child/parent/sibling relationships
     if(~isempty(CellTracks(i).parentTrack))
         if(isempty(find(CellTracks(CellTracks(i).parentTrack).childrenTracks==i, 1)))
@@ -57,12 +71,6 @@ for i=1:length(CellTracks)
             end
         end
     end
-%     if(isempty(CellTracks(i).familyID) || isempty(CellTracks(i).hulls) || isempty(CellTracks(i).startTime) || isempty(CellTracks(i).endTime) || isempty(CellTracks(i).color))
-%         if(~isempty(CellTracks(i).familyID) || ~isempty(CellTracks(i).hulls) || ~isempty(CellTracks(i).startTime) || ~isempty(CellTracks(i).endTime) || ~isempty(CellTracks(i).color))
-%             ClearTrack(i);
-%             error(['Track ' num2str(i) ' is suppose to cleared out but still has data']);
-%         end
-%     end
     
     %% check if the current track is in the correct family and not in any
     %other
@@ -95,7 +103,6 @@ for i=1:length(CellTracks)
         end
         
         for j=1:length(CellFamilies)
-%             fprintf('CellFamilies %d ',j);
             if(currentFamily==j),continue,end
             index = find(CellFamilies(j).tracks==i);
             if(~isempty(index))
@@ -111,7 +118,6 @@ for i=1:length(CellTracks)
     
     %% check hulls for a given track
     for j=1:length(CellTracks(i).hulls)
-%         fprintf('Hulls %d ',j);
         if(~CellTracks(i).hulls(j)),continue,end
         if(any(ismember(hullsList,CellTracks(i).hulls(j))))
             tracks = [];
@@ -139,10 +145,8 @@ for i=1:length(CellTracks)
     end
     
 end
-% fprintf('\n');
 
 %% check CellHulls
-% if(length(hullsList)~=length(find([CellHulls.deleted]==0)))
 missingHulls = find(~[CellHulls.deleted]);
 missingHulls = missingHulls(find(~ismember(missingHulls,hullsList)));
 if(~isempty(missingHulls))
@@ -152,14 +156,12 @@ if(~isempty(missingHulls))
         for i=1:length(missingHulls)
             progress = progress+1;
             Progressbar(progress/iterations);
-%             if(isempty(CellHulls(missingHulls(i)).points))
-                if(any([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i)))
-                    RemoveHullFromTrack(missingHulls(i),...
-                        HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))).trackID);
-                    HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))) = [];
-                end
-                CellHulls(missingHulls(i)).deleted = 1;
-%             end
+            if(any([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i)))
+                RemoveHullFromTrack(missingHulls(i),...
+                    HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))).trackID);
+                HashedCells{CellHulls(missingHulls(i)).time}(find([HashedCells{CellHulls(missingHulls(i)).time}.hullID]==missingHulls(i))) = [];
+            end
+            CellHulls(missingHulls(i)).deleted = 1;
         end
     else
         error('HullsList ~= CellHulls');

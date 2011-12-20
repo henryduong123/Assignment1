@@ -1,16 +1,33 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% InitializeFigures.m - 
+% Creates two figures one for the cell image and the other for the family
+% tree.
+% Figures will have all the menus, button actions, and context menus set up
+% here
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function InitializeFigures()
-%Creates two figures one for the cell image and the other for the family
-%tree.
-%Figures will have all the menus, button actions, and context menus set up
-%here
-
 
 global Figures CONSTANTS HashedCells
 
@@ -98,8 +115,6 @@ if(~isempty(oldTreeHandle) && ishandle(oldTreeHandle))
     close(oldTreeHandle);
 end
 
-% pos = get(Figures.cells.handle,'Position');
-% position = [pos(3)-120 pos(4)-30 100 20];
 Figures.cells.learnButton = uicontrol(...
     'Parent',       Figures.cells.handle,...
     'Style',        'pushbutton',...
@@ -319,8 +334,6 @@ function learnFromEdits(src,evnt)
     
     try
         PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-%         PropagateBackward(length(HashedCells));
-%         StraightenFamilies();
         ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
     catch err
         try

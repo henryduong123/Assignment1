@@ -1,25 +1,42 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% History.m - 
+% This will keep track of any state changes.  Call this function once the
+% new state is established. After the changes take place.
+% Possible actions are:
+% History('Push') = save current state to the stack
+% History('Pop') = retrive the last state
+% History('Redo') = will 'push' the last 'pop' back on the stack
+% History('Init') = will initilize the history stack
+% History('Top') = will reinstate the top state without changing any history
+% stack pointers.
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+% Stack size will be set from CONSTANTS.historySize
+% All of the data structures are saved on the stack, so do not set this
+% value too high or you might run out of working memory
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function History(action)
-%This will keep track of any state changes.  Call this function once the
-%new state is established. After the changes take place.
-%Possible actions are:
-%History('Push') = save current state to the stack
-%History('Pop') = retrive the last state
-%History('Redo') = will 'push' the last 'pop' back on the stack
-%History('Init') = will initilize the history stack
-%History('Top') = will reinstate the top state without changing any history
-%stack pointers.
-%
-%Stack size will be set from CONSTANTS.historySize
-%All of the data structures are saved on the stack, so do not set this
-%value too high or you might run out of working memory
-
 
 global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs GraphEdits ConnectedDist CellPhenotypes SegmentationEdits
 

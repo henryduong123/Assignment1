@@ -1,9 +1,28 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PropagateChanges.m - Propagate edit changes (split cells) forward in
+% time.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function tStart = PropagateChanges(changedHulls, editedHulls)
     global CellHulls HashedCells GraphEdits
@@ -68,11 +87,7 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
             if ( any(GraphEdits(nextHulls(i),:)) || any(GraphEdits(:,nextHulls(i))) )
                 continue;
             end
-
-%             if ( ~all(checkTrackLengths(splitHulls(~bFollowSplit),5)) )
-%                 continue;
-%             end
-
+            
             newHulls = attemptNextFrameSplit(t, nextHulls(i), splitHulls);
             if ( isempty(newHulls) )
                 continue;
@@ -135,7 +150,6 @@ function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
 
     newHullIDs = [];
     oldCOM = CellHulls(hullID).centerOfMass;
-%     oldTracks = [HashedCells{CellHulls(hull).time}.trackID];
 
     newHulls = ResegmentHull(CellHulls(hullID), k);
     if ( isempty(newHulls) )
