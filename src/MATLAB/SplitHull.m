@@ -26,20 +26,26 @@
 
 function newTrackIDs = SplitHull(hullID, k)
 
-global CellHulls CellFamilies HashedCells GraphEdits
+global CellHulls CellFeatures CellFamilies HashedCells GraphEdits
 
 oldCOM = CellHulls(hullID).centerOfMass;
 oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
 
-newHulls = ResegmentHull(CellHulls(hullID), k, 1);
+% newHulls = ResegmentHull(CellHulls(hullID), k, 1);
+[newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), CellFeatures(hullID), k);
 
 if ( isempty(newHulls) )
     newTrackIDs = [];
     return;
 end
 
+for i=1:length(newHulls)
+    newHulls(i).userEdited = 1;
+end
+
 % Just arbitrarily assign clone's hull for now
 CellHulls(hullID) = newHulls(1);
+CellFeatures(hullID) = newFeatures(1);
 newHullIDs = hullID;
 
 % Drop old graphedits on a manual split
@@ -50,6 +56,7 @@ GraphEdits(:,hullID) = 0;
 newFamilyIDs = [];
 for i=2:length(newHulls)
     CellHulls(end+1) = newHulls(i);
+    CellFeatures(end+1) = newFeatures(i);
     newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
     newHullIDs = [newHullIDs length(CellHulls)];
 end

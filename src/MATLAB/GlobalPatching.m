@@ -74,6 +74,14 @@ function GlobalPatching()
             continue;
         end
         
+        parentScore = GetTrackSegScore(parentTrack);
+        childScore = GetTrackSegScore(childTrack);
+        
+        if ( parentScore < CONSTANTS.minTrackScore || childScore < CONSTANTS.minTrackScore )
+            costMatrix(r(idx),c(idx)) = 0;
+            continue;
+        end
+        
         if ( CellTracks(childTrack).startTime <= CellTracks(parentTrack).endTime )
             RemoveFromTree(CellTracks(childTrack).startTime, parentTrack, 'no');
         end

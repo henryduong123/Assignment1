@@ -24,9 +24,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ConvertTrackingData(objHulls,gConnect)
+function ConvertTrackingData(objHulls,gConnect, features)
 
-global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
+global CONSTANTS Costs GraphEdits CellHulls CellFeatures CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
 
 %ensure that the globals are empty
 Costs = [];
@@ -38,6 +38,8 @@ HashedCells = [];
 ConnectedDist = [];
 CellPhenotypes = [];
 Log = [];
+
+CellFeatures = [];
 
 CONSTANTS.imageSize = unique([objHulls(:).imSize]);
 
@@ -56,6 +58,18 @@ cellHulls = struct(...
     'deleted',          {},...
     'userEdited',       {});
 
+%Initialize Structures
+locCellFeatures = struct(...
+    'darkRatio',        {},...
+    'haloRatio',        {},...
+    'igRatio',          {},...
+    'darkIntRatio',     {},...
+    'brightInterior',	{},...
+    'polyPix',          {},...
+    'perimPix',         {},...
+    'igPix',            {},...
+    'haloPix',          {});
+
 CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
 
 %loop through the Hulls
@@ -69,9 +83,20 @@ parfor i=1:length(objHulls)
     cellHulls(i).userEdited      =  0;
     
     connDist{i} = updateConnectedDistance(objHulls(i), objHulls, objHulls(i).DarkConnectedHulls);
+    
+    locCellFeatures(i).darkRatio       = features(i).darkRatio;
+    locCellFeatures(i).haloRatio       = features(i).haloRatio;
+    locCellFeatures(i).igRatio         = features(i).igRatio;
+    locCellFeatures(i).darkIntRatio	= features(i).darkIntRatio;
+    locCellFeatures(i).brightInterior	= features(i).brightInterior;
+    locCellFeatures(i).polyPix         = features(i).polyPix;
+    locCellFeatures(i).perimPix        = features(i).perimPix;
+    locCellFeatures(i).igPix           = features(i).igPix;
+    locCellFeatures(i).haloPix         = features(i).haloPix;
 end
 ConnectedDist = connDist;
 CellHulls = cellHulls;
+CellFeatures = locCellFeatures;
 
 %walk through the tracks
 progress = 1;

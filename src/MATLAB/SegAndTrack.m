@@ -51,6 +51,7 @@ fileList = dir([CONSTANTS.rootImageFolder CONSTANTS.imageDatasetName '*.tif']);
 numberOfImages = length(fileList);
 
 cellSegments = [];
+cellFeat = [];
 numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors<4),numProcessors = 4;end
@@ -82,12 +83,14 @@ for i=1:numProcessors
     fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
     load(fileName);
     cellSegments = [cellSegments objs];
+    cellFeat = [cellFeat features];
     pause(1)
 end
 
 segtimes = [cellSegments.t];
 [srtseg srtidx] = sort(segtimes);
 cellSegments = cellSegments(srtidx);
+cellFeat = cellFeat(srtidx);
 
 fprintf('Please wait...');
 
@@ -112,7 +115,7 @@ tTrack=toc;
 [objHulls gConnect HashedHulls] = ReadTrackData(cellSegments,CONSTANTS.datasetName);
 
 fprintf('Finalizing Data...');
-ConvertTrackingData(objHulls,gConnect);
+ConvertTrackingData(objHulls,gConnect,cellFeat);
 fprintf('Done\n');
 
 InitializeFigures();

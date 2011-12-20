@@ -81,12 +81,19 @@ for i=1:size
     %Get the costs of the possible connections
     parentCosts = costMatrix(parentHullCandidates,childHullID);
     
+    childScore = GetTrackSegScore(childTrackID);
+    if ( childScore < CONSTANTS.minTrackScore )
+        continue
+    end
+    
     %Massage the costs a bit
     for j=1:length(parentHullCandidates)
         %Get the length of time that the parentCandidate exists
         parentTrackID = GetTrackID(parentHullCandidates(j));
         if(isempty(parentTrackID)),continue,end
         parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
+        
+        parentScore = GetTrackSegScore(parentTrackID);
 
         %Change the cost of the candidates
         if(CONSTANTS.minParentCandidateTimeFrame >= parentTrackTimeFrame)
@@ -96,6 +103,8 @@ for i=1:size
         elseif(CONSTANTS.minParentFuture >= CellTracks(parentTrackID).endTime - CellHulls(parentHullCandidates(j)).time)
             parentCosts(j) = Inf;
         elseif(~isempty(GetTimeOfDeath(parentTrackID)))
+            parentCosts(j) = Inf;
+        elseif ( parentScore < CONSTANTS.minTrackScore )
             parentCosts(j) = Inf;
         else
             siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;

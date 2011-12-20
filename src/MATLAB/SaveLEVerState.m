@@ -24,8 +24,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SaveLEVerState(filename)
-    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log
+    global CellFamilies CellHulls CellFeatures CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log
     
-    save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
+    save(filename,'CellFamilies','CellHulls','CellFeatures','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log');
 end

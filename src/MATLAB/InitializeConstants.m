@@ -40,4 +40,5 @@ AddConstant('clickMargin',500, 1);
 AddConstant('timeResolution',10); %in frames per min
 AddConstant('dMaxConnectComponent',40,1);
 AddConstant('dMaxCenterOfMass',40,1);
+AddConstant('minTrackScore',0.7,1);
 end

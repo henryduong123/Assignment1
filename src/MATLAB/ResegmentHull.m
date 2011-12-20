@@ -1,4 +1,4 @@
-% ResegmentHull.m - Splits hull int k pieces using kmeans, returns the 
+% ResegmentHull.m - Splits hull into k pieces using kmeans, returns the 
 % k split hulls or [] if there are errors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
