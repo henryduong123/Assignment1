@@ -24,11 +24,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newHulls = ResegmentHull(hull, k, bUserEdit)
+function [newHulls newFeatures] = ResegmentHull(hull, feature, k, bUserEdit)
 
 global CONSTANTS
 
 newHulls = [];
+newFeatures = [];
 
 if ( ~exist('bUserEdit','var') )
     bUserEdit = 0;
@@ -36,7 +37,7 @@ end
 
 % k-means clustering of (x,y) coordinates of cell interior
 [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
-kIdx = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+[kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
 
 if ( any(isnan(kIdx)) )
     return;
@@ -72,4 +73,59 @@ for i=1:k
     
     newHulls = [newHulls nh];
 end
+
+% Calculate new features if passed in feature structure is valids
+if ( isempty(feature) )
+    return;
+end
+
+[bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(hull.time, CONSTANTS.imageAlpha);
+
+[polyr polyc] = ind2sub(CONSTANTS.imageSize, feature.polyPix);
+
+polydist = Inf*ones(length((polyr)),k);
+for i=1:k
+    polydist(:,i) = ((polyr-centers(i,2)).^2 + (polyc-centers(i,1)).^2);
+end
+
+[dump,polyidx] = min(polydist,[],2);
+
+for i=1:k
+	nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
+    if ( feature.brightInterior )
+        nf.darkRatio = nnz(bwDark(pix)) / length(pix);
+        nf.haloRatio = HaloRat;
+        nf.igRatio = igRat;
+        nf.darkIntRatio = DarkRat;
+        nf.brightInterior = 1;
+
+        nf.polyPix = polyPix;
+        nf.perimPix = perimPix;
+        nf.igPix = find(bwig(perimPix));
+        nf.haloPix = find(bwHalo(perimPix));
+    else
+        polyPix = feature.polyPix(polyidx==i);
+        perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
+        
+        igRat = nnz(bwig(perimPix)) / length(perimPix);
+        HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
+        bwDarkInterior = bwDarkCenters(polyPix);
+        DarkRat = nnz(bwDarkInterior) / length(polyPix);
+
+        idxPix = newHulls(i).indexPixels;
+        nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
+        nf.haloRatio = HaloRat;
+        nf.igRatio = igRat;
+        nf.darkIntRatio = DarkRat;
+        nf.brightInterior = 0;
+
+        nf.polyPix = polyPix;
+        nf.perimPix = perimPix;
+        nf.igPix = find(bwig(perimPix));
+        nf.haloPix = find(bwHalo(perimPix));
+    end
+    
+    newFeatures = [newFeatures nf];
+end
+
 end

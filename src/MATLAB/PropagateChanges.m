@@ -114,12 +114,12 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
 % TODO: This was the constraint to only split into actually tracked hulls
     while ( length(desireSplitHulls) > 1 )
         % Try to split
-        [newHulls oldCOM] = splitNextFrame(hull, length(desireSplitHulls));
+        [newHulls oldHull oldFeat] = splitNextFrame(hull, length(desireSplitHulls));
         if ( isempty(newHulls) )
             return;
         end
 
-        TrackThroughSplit(t+1, newHulls, oldCOM);
+        TrackThroughSplit(t+1, newHulls, oldHull.centerOfMass);
         
         checkHulls = [HashedCells{t}.hullID];
         nextHulls = [HashedCells{t+1}.hullID];
@@ -139,19 +139,26 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
             break;
         end
         
-        revertSplit(t+1, hull, newHulls);
+        revertSplit(t+1, hull, newHulls, oldHull, oldFeat);
         desireSplitHulls = trackedSplitHulls;
         newHulls = [];
     end
 end
 
-function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
-    global CellHulls
+function [newHullIDs oldHull oldFeat] = splitNextFrame(hullID, k)
+    global CellHulls CellFeatures
 
     newHullIDs = [];
-    oldCOM = CellHulls(hullID).centerOfMass;
+    
+    oldHull = CellHulls(hullID);
+    oldFeat = [];
+    
+    if ( ~isempty(CellFeatures) )
+        oldFeat = CellFeatures(hullID);
+    end
 
-    newHulls = ResegmentHull(CellHulls(hullID), k);
+    [newHulls newFeats] = ResegmentHull(CellHulls(hullID), oldFeat, k);
+	%[newHulls newFeats] = WatershedSplitCell(CellHulls(hullID), oldFeat, k);
     if ( isempty(newHulls) )
         return;
     end
@@ -166,6 +173,12 @@ function [newHullIDs oldCOM] = splitNextFrame(hullID, k)
         CellHulls(end+1) = newHulls(i);
         newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
         newHullIDs = [newHullIDs length(CellHulls)];
+    end
+    
+    if ( ~isempty(CellFeatures) )
+        for i=1:length(newHullIDs)
+            CellFeatures(newHullIDs(i)) = newFeats(i);
+        end
     end
 end
 
@@ -213,8 +226,8 @@ function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHull
     end
 end
 
-function revertSplit(t, hull, newHulls)
-    global CONSTANTS CellHulls HashedCells CellTracks CellFamilies Costs GraphEdits ConnectedDist
+function revertSplit(t, hull, newHulls, oldHull, oldFeat)
+    global CONSTANTS CellHulls CellFeatures HashedCells CellTracks CellFamilies Costs GraphEdits ConnectedDist
     
     rmHulls = setdiff(newHulls,hull);
     
@@ -235,22 +248,29 @@ function revertSplit(t, hull, newHulls)
     
     BuildConnectedDistance(hull,1);
     
-    % Merge cells and remove split cells
-    mergedIdxPix = vertcat(CellHulls(newHulls).indexPixels);
-    mergedImgPix = vertcat(CellHulls(newHulls).imagePixels);
+    CellHulls(hull) = oldHull;
     
-    [mergedIdxPix,srtIdx] = sort(mergedIdxPix);
-    mergedImgPix = mergedImgPix(srtIdx);
+    % Reset cell features if valid
+    if ( ~isempty(CellFeatures) )
+        CellFeatures(hull) = oldFeat;
+    end
     
-    [r c] = ind2sub(CONSTANTS.imageSize, mergedIdxPix);
-    chIdx = convhull(c,r);
-    
-    CellHulls(hull).indexPixels = mergedIdxPix;
-    CellHulls(hull).imagePixels = mergedImgPix;
-    CellHulls(hull).centerOfMass = mean([r c]);
-    CellHulls(hull).points = [c(chIdx) r(chIdx)];
-    
-    CellHulls = CellHulls(leaveHulls);
+%     % Merge cells and remove split cells
+%     mergedIdxPix = vertcat(CellHulls(newHulls).indexPixels);
+%     mergedImgPix = vertcat(CellHulls(newHulls).imagePixels);
+%     
+%     [mergedIdxPix,srtIdx] = sort(mergedIdxPix);
+%     mergedImgPix = mergedImgPix(srtIdx);
+%     
+%     [r c] = ind2sub(CONSTANTS.imageSize, mergedIdxPix);
+%     chIdx = convhull(c,r);
+%     
+%     CellHulls(hull).indexPixels = mergedIdxPix;
+%     CellHulls(hull).imagePixels = mergedImgPix;
+%     CellHulls(hull).centerOfMass = mean([r c]);
+%     CellHulls(hull).points = [c(chIdx) r(chIdx)];
+%     
+%     CellHulls = CellHulls(leaveHulls);
 end
 
 function bFullLength = checkTrackLengths(hulls, minlength)

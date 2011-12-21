@@ -25,15 +25,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackID = AddNewSegmentHull(clickPt)
-    global CONSTANTS CellHulls HashedCells Figures
+    global CONSTANTS CellHulls CellFeatures HashedCells Figures
 
     fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(Figures.time) '.TIF'];
     [img colrMap] = imread(fileName);
     img = mat2gray(img);
     
-    newObj = PartialImageSegment(img, clickPt, 200, 1.0);
+    [newObj newFeat] = PartialImageSegment(img, clickPt, 200, 1.0);
 
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
+    newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     
     oldTracks = [HashedCells{Figures.time}.trackID];
     
@@ -48,16 +49,26 @@ function newTrackID = AddNewSegmentHull(clickPt)
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
         newHull.imagePixels = img(newHull.indexPixels);
+        
+        newFeature.polyPix = newHull.indexPixels;
     else
         newHull.time = Figures.time;
         newHull.points = newObj.points;
         newHull.centerOfMass = newObj.centerOfMass;
         newHull.indexPixels = newObj.indexPixels;
         newHull.imagePixels = newObj.imagePixels;
+        
+        newFeature = newFeat;
     end
 
     newHullID = length(CellHulls)+1;
     CellHulls(newHullID) = newHull;
+    
+    % Set feature if valid
+    if ( ~isempty(CellFeatures) )
+        CellFeatures(newHullID) = newFeature;
+    end
+    
     newFamilyIDs = NewCellFamily(newHullID, newHull.time);
     
     newTrackID = TrackSplitHulls(newHullID, oldTracks, newHull.centerOfMass);

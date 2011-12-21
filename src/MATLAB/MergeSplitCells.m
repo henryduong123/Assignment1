@@ -25,12 +25,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
-    global Figures CellHulls HashedCells CellTracks SegmentationEdits CellFamilies
+    global Figures CellHulls CellFeatures HashedCells CellTracks SegmentationEdits CellFamilies
     
     replaceCell = [];
     
     t = Figures.time;
-    [mergeObj, deleteCells] = CreateMergedCell(mergeCells);
+    [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(mergeCells);
     
     if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
@@ -51,6 +51,11 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     CellHulls(replaceCell).centerOfMass = mergeObj.centerOfMass;
     CellHulls(replaceCell).deleted = 0;
     CellHulls(replaceCell).userEdited = 1;
+    
+    % Set features if valid
+    if ( ~isempty(CellFeatures) )
+        CellFeatures(replaceCell) = mergeFeat;
+    end
     
     [costMatrix, extendHulls, affectedHulls] = TrackThroughMerge(t, replaceCell);
     if ( isempty(costMatrix) )
@@ -171,7 +176,7 @@ function propHulls = getPropagationCells(t, mergeCells)
 end
 
 function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
-    global CellHulls
+    global CellHulls CellFeatures
     
     mergedIdx = find(checkHulls == mergedHull);
     bDeleteHulls = ismember(nextHulls, deleteHulls);
@@ -189,7 +194,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
         return;
     end
     
-    [mergeObj, deleteCells] = CreateMergedCell(nextMergeHulls);
+    [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(nextMergeHulls);
     if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
     end
@@ -202,6 +207,11 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     CellHulls(replaceIdx).points = mergeObj.points;
     CellHulls(replaceIdx).centerOfMass = mergeObj.centerOfMass;
     CellHulls(replaceIdx).deleted = 0;
+    
+    % Set features if valid
+    if ( ~isempty(CellFeatures) )
+        CellFeatures(replaceIdx) = mergeFeat;
+    end
     
     for i=1:length(deleteCells)
         RemoveHull(deleteCells(i), 1);

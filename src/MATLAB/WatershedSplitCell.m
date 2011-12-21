@@ -1,28 +1,16 @@
 function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
     global CONSTANTS
-    
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(cell.time) '.TIF'];
-    if exist(fileName,'file')
-        [img colrMap] = imread(fileName);
-    else
-        img=zeros(CONSTANTS.imageSize);
-    end
-    imgray = mat2gray(img);
 
     newHulls = [];
     newFeatures = [];
 
     [r c] = ind2sub(CONSTANTS.imageSize,cell.indexPixels);
-    [polyr polyc] = ind2sub(CONSTANTS.imageSize,cellFeat.polyPix);
     
-    xlims = clamp([min(c)-5 max(c)+5], 1, CONSTANTS.imageSize(2));
-    ylims = clamp([min(r)-5 max(r)+5], 1, CONSTANTS.imageSize(1));
+    xlims = Clamp([min(c)-5 max(c)+5], 1, CONSTANTS.imageSize(2));
+    ylims = Clamp([min(r)-5 max(r)+5], 1, CONSTANTS.imageSize(1));
     
-    locr = r - ylims(1);
-    locc = c - xlims(1);
-    
-    locpolyr = polyr - ylims(1);
-    locpolyc = polyc - xlims(1);
+    locr = r - ylims(1) + 1;
+    locc = c - xlims(1) + 1;
     
     locsz = [ylims(2)-ylims(1) xlims(2)-xlims(1)]+1;
     
@@ -39,7 +27,7 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
     D(~locbw) = -Inf;
     L = watershed(D);
     
-    figure;imagesc(L);colormap(gray);hold on;
+%     figure;imagesc(L);colormap(gray);hold on;
 
     kmins = Inf*ones(1,k);
     kidx = zeros(1,k);
@@ -73,23 +61,16 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
 %         centers(i,:) = mean([tmpr tmpc],1);
         
         locdist(:,i) = ((locr-centers(i,1)).^2 + (locc-centers(i,2)).^2);
-        polydist(:,i) = ((locpolyr-centers(i,1)).^2 + (locpolyc-centers(i,2)).^2);
     end
     
     [dump,ptidx] = min(locdist,[],2);
-    [dump,polyidx] = min(polydist,[],2);
     
-    [bwDark bwDarkCenters bwig bwHalo] = segDarkCenters(imgray, CONSTANTS.imageAlpha);
+    [bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(cell.time, CONSTANTS.imageAlpha);
     
     cmap = hsv(k);
     for i=1:k
         pts = [locr(ptidx==i) locc(ptidx==i)];
-        plot(pts(:,2),pts(:,1), '.', 'Color',cmap(i,:));
-        
-        polypts = [locpolyr(polyidx==i) locpolyc(polyidx==i)];
-%         bLocal = (polypts(:,1)>0 & polypts(:,2)>0);
-%         polypts = polypts(bLocal,:);
-%         plot(polypts(:,2),polypts(:,1), 'o', 'Color',cmap(i,:));
+%         plot(pts(:,2),pts(:,1), '.', 'Color',cmap(i,:));
         
         hullr = r(ptidx==i);
         hullc = c(ptidx==i);
@@ -102,15 +83,37 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
         
         nh = struct('time',{cell.time}, 'points',{pts}, 'centerOfMass',{com}, 'indexPixels',{idxPix}, 'imagePixels',{imPix}, 'deleted',{0}, 'userEdited',{0});
         newHulls = [newHulls nh];
-        
+    end
+    
+    % Calculate new features if passed in feature structure is valids
+    if ( isempty(cellFeat) )
+        return;
+    end
+    
+    [polyr polyc] = ind2sub(CONSTANTS.imageSize,cellFeat.polyPix);
+    locpolyr = polyr - ylims(1) + 1;
+    locpolyc = polyc - xlims(1) + 1;
+    
+    polydist = Inf*ones(length((locpolyr)),k);
+    for i=1:k
+        polydist(:,i) = ((locpolyr-centers(i,1)).^2 + (locpolyc-centers(i,2)).^2);
+    end
+    
+    [dump,polyidx] = min(polydist,[],2);
+    
+    for i=1:k
+        polypts = [locpolyr(polyidx==i) locpolyc(polyidx==i)];
+%         bLocal = (polypts(:,1)>0 & polypts(:,2)>0);
+%         polypts = polypts(bLocal,:);
+%         plot(polypts(:,2),polypts(:,1), 'o', 'Color',cmap(i,:));
+
         nf = [];
-        
         if ( cellFeat.brightInterior )
             nf.darkRatio = nnz(bwDark(pix)) / length(pix);
             nf.haloRatio = HaloRat;
             nf.igRatio = igRat;
             nf.darkIntRatio = DarkRat;
-            nf.brightInterior = 0;
+            nf.brightInterior = 1;
 
             nf.polyPix = polyPix;
             nf.perimPix = perimPix;
@@ -120,9 +123,9 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
             polyPix = cellFeat.polyPix(polyidx==i);
             perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
             
-            [tr tc] = ind2sub(CONSTANTS.imageSize, perimPix);
-            loctr = tr - ylims(1);
-            loctc = tc - xlims(1);
+%             [tr tc] = ind2sub(CONSTANTS.imageSize, perimPix);
+%             loctr = tr - ylims(1);
+%             loctc = tc - xlims(1);
             
 %             bLocal = (loctr>0 & loctc>0);
 %             loctr = loctr(bLocal);
@@ -137,6 +140,7 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
             DarkRat = nnz(bwDarkInterior) / length(polyPix);
 
             %
+            idxPix = newHulls(i).indexPixels;
             nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
             nf.haloRatio = HaloRat;
             nf.igRatio = igRat;
@@ -151,41 +155,4 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
         
         newFeatures = [newFeatures nf];
     end
-end
-
-function x_clamped = clamp(x, minval, maxval)
-    x_clamped = max(cat(3,x,minval*ones(size(x))),[],3);
-    x_clamped = min(cat(3,x_clamped,maxval*ones(size(x))),[],3);
-end
-
-function [bwDark bwDarkCenters bwig bwHalo] = segDarkCenters(im, imageAlpha)
-    % rerun part of seg
-    level=imageAlpha*graythresh(im);
-    bwHalo=im2bw(im,level);
-
-    bwDark=0*im;
-    seBig=strel('square',19);
-
-    se=strel('square',3);
-    gd=imdilate(im,se);
-    ge=imerode(im,se);
-    ig=gd-ge;
-    lig=graythresh(ig);
-    bwig=im2bw(ig,lig);
-
-    bwmask=imclose(bwig,seBig);
-    % find dark chewy centers
-    CC = bwconncomp(bwmask,8);
-    LHaloMask = labelmatrix(CC);
-    num=max(LHaloMask(:));
-    for n=1:num
-        pix=find(LHaloMask==n & ~bwHalo);
-        level=graythresh(im(pix));
-        bwpix=im2bw(im(pix),level);
-        bwDark(pix(find(~bwpix)))=1;
-    end
-
-    bwDarkCenters=(bwDark & bwmask );
-    d=bwdist(~bwDarkCenters);
-    bwDarkCenters(d<2)=0;
 end

@@ -31,8 +31,14 @@ global CellHulls CellFeatures CellFamilies HashedCells GraphEdits
 oldCOM = CellHulls(hullID).centerOfMass;
 oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
 
-% newHulls = ResegmentHull(CellHulls(hullID), k, 1);
-[newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), CellFeatures(hullID), k);
+if ( isempty(CellFeatures) )
+    splitFeat = [];
+else
+    splitFeat = CellFeatures(hullID);
+end
+
+% [newHulls newFeatures] = ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
+[newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), splitFeat, k);
 
 if ( isempty(newHulls) )
     newTrackIDs = [];
@@ -45,7 +51,12 @@ end
 
 % Just arbitrarily assign clone's hull for now
 CellHulls(hullID) = newHulls(1);
-CellFeatures(hullID) = newFeatures(1);
+
+% Set features if valid
+if ( ~isempty(CellFeatures) )
+    CellFeatures(hullID) = newFeatures(1);
+end
+
 newHullIDs = hullID;
 
 % Drop old graphedits on a manual split
@@ -56,7 +67,12 @@ GraphEdits(:,hullID) = 0;
 newFamilyIDs = [];
 for i=2:length(newHulls)
     CellHulls(end+1) = newHulls(i);
-    CellFeatures(end+1) = newFeatures(i);
+    
+    % Set features if valid
+    if ( ~isempty(CellFeatures) )
+        CellFeatures(end+1) = newFeatures(i);
+    end
+    
     newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
     newHullIDs = [newHullIDs length(CellHulls)];
 end
