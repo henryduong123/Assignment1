@@ -1,24 +1,24 @@
-function [bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(t, imageAlpha)
+function [bwDark bwig bwHalo] = SegDarkCenters(t, imageAlpha)
     global CONSTANTS
     
-%     persistent cachedArg cachedRes
-%     
-%     cacheSize = 2;
-%     if ( isempty(cachedRes) )
-%         cachedRes = struct('bwDark', cell(1,cacheSize), 'bwDarkCenters', cell(1,cacheSize), 'bwig', cell(1,cacheSize), 'bwHalo', cell(1,cacheSize));
-%     end
-%     
-%     % Assumes imageAlpha on [0,2]
-%     argChk = t + (imageAlpha / 3);
-%     
-%     % Check cache for arguments
-%     cacheIdx = find(cachedArg == argChk);
-%     if ( ~isempty(cacheIdx) )
-%         bwDark = cachedRes(cacheIdx).bwDark;
+    persistent cachedArg cachedRes
+    
+    cacheSize = 2;
+    if ( isempty(cachedRes) )
+        cachedRes = struct('bwDark', cell(1,cacheSize), 'bwDarkCenters', cell(1,cacheSize), 'bwig', cell(1,cacheSize), 'bwHalo', cell(1,cacheSize));
+    end
+    
+    % Assumes imageAlpha on [0,2]
+    argChk = t + (imageAlpha / 3);
+    
+    % Check cache for arguments
+    cacheIdx = find(cachedArg == argChk);
+    if ( ~isempty(cacheIdx) )
+        bwDark = cachedRes(cacheIdx).bwDark;
 %         bwDarkCenters = cachedRes(cacheIdx).bwDarkCenters;
-%         bwig = cachedRes(cacheIdx).bwig;
-%         bwHalo = cachedRes(cacheIdx).bwHalo;
-%     end
+        bwig = cachedRes(cacheIdx).bwig;
+        bwHalo = cachedRes(cacheIdx).bwHalo;
+    end
     
     fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(t) '.TIF'];
     if exist(fileName,'file')
@@ -54,23 +54,23 @@ function [bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(t, imageAlpha)
         bwDark(pix(find(~bwpix)))=1;
     end
 
-    bwDarkCenters=(bwDark & bwmask );
-    d=bwdist(~bwDarkCenters);
-    bwDarkCenters(d<2)=0;
+%     bwDarkCenters=(bwDark & bwmask );
+%     d=bwdist(~bwDarkCenters);
+%     bwDarkCenters(d<2)=0;
     
-%     % Update last cacheSlot
-%     if ( length(cachedArg) < cacheSize )
-%         cachedArg(end+1) = argChk;
-%     else
-%         for i=2:length(cachedArg)
-%             cachedArg(i-1) = cachedArg(i);
-%             cachedRes(i-1) = cachedRes(i);
-%         end
-%         cachedArg(end) = argChk;
-%     end
-%     
-%     cachedRes(length(cachedArg)).bwDark = bwDark;
+    % Update last cacheSlot
+    if ( length(cachedArg) < cacheSize )
+        cachedArg(end+1) = argChk;
+    else
+        for i=2:length(cachedArg)
+            cachedArg(i-1) = cachedArg(i);
+            cachedRes(i-1) = cachedRes(i);
+        end
+        cachedArg(end) = argChk;
+    end
+    
+    cachedRes(length(cachedArg)).bwDark = bwDark;
 %     cachedRes(length(cachedArg)).bwDarkCenters = bwDarkCenters;
-%     cachedRes(length(cachedArg)).bwig = bwig;
-%     cachedRes(length(cachedArg)).bwHalo = bwHalo;
+    cachedRes(length(cachedArg)).bwig = bwig;
+    cachedRes(length(cachedArg)).bwHalo = bwHalo;
 end

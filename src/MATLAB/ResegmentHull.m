@@ -79,7 +79,7 @@ if ( isempty(feature) )
     return;
 end
 
-[bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(hull.time, CONSTANTS.imageAlpha);
+[bwDark bwig bwHalo] = SegDarkCenters(hull.time, CONSTANTS.imageAlpha);
 
 [polyr polyc] = ind2sub(CONSTANTS.imageSize, feature.polyPix);
 
@@ -109,8 +109,9 @@ for i=1:k
         
         igRat = nnz(bwig(perimPix)) / length(perimPix);
         HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-        bwDarkInterior = bwDarkCenters(polyPix);
-        DarkRat = nnz(bwDarkInterior) / length(polyPix);
+%         bwDarkInterior = bwDarkCenters(polyPix);
+%         DarkRat = nnz(bwDarkInterior) / length(polyPix);
+        DarkRat = length(newHulls(i).indexPixels) / length(polyPix);
 
         idxPix = newHulls(i).indexPixels;
         nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
