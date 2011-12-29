@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function status = SegAndTrack()
-global CONSTANTS
+global CONSTANTS SegLevels
 
 status = 0;
 
@@ -52,6 +52,7 @@ numberOfImages = length(fileList);
 
 cellSegments = [];
 cellFeat = [];
+cellSegLevels = [];
 numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors<4),numProcessors = 4;end
@@ -65,7 +66,7 @@ end
 for i=1:numProcessors
     system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
         num2str(numberOfImages) ' "' CONSTANTS.rootImageFolder(1:end-1) '" "' CONSTANTS.datasetName '" ' ...
-        num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']); 
+        num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']);
     %use line below instead of the 3 lines above for non-parallel or to debug
 %     Segmentor(i,numProcessors,numberOfImages,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
 end
@@ -79,11 +80,14 @@ for i=1:numProcessors
     end
 end
 
+leveltimes = [];
 for i=1:numProcessors
     fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
     load(fileName);
     cellSegments = [cellSegments objs];
     cellFeat = [cellFeat features];
+    cellSegLevels = [cellSegLevels levels];
+    leveltimes = [leveltimes i:numProcessors:numberOfImages];
     pause(1)
 end
 
@@ -91,6 +95,9 @@ segtimes = [cellSegments.t];
 [srtseg srtidx] = sort(segtimes);
 cellSegments = cellSegments(srtidx);
 cellFeat = cellFeat(srtidx);
+
+[srtlevels srtidx] = sort(leveltimes);
+cellSegLevels = cellSegLevels(srtidx);
 
 fprintf('Please wait...');
 
@@ -117,6 +124,8 @@ tTrack=toc;
 fprintf('Finalizing Data...');
 ConvertTrackingData(objHulls,gConnect,cellFeat);
 fprintf('Done\n');
+
+SegLevels = cellSegLevels;
 
 InitializeFigures();
 

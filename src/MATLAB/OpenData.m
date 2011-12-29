@@ -28,7 +28,7 @@
 
 function opened = OpenData(versionString)
 
-global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits
+global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits SegLevels
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', versionString);
@@ -82,6 +82,7 @@ SegmentationEdits.editTime = [];
 
 CellFeatures = [];
 GraphEdits = [];
+SegLevels = [];
 
 oldCONSTANTS = CONSTANTS;
 

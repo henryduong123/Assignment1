@@ -79,7 +79,9 @@ if ( isempty(feature) )
     return;
 end
 
-[bwDark bwig bwHalo] = SegDarkCenters(hull.time, CONSTANTS.imageAlpha);
+% [bwDark bwig bwHalo] = SegDarkCenters(hull.time, CONSTANTS.imageAlpha);
+center = [hull.centerOfMass(2) hull.centerOfMass(1)];
+[bwDark bwig bwHalo] = PartialSegDarkCenters(center, hull.time, CONSTANTS.imageAlpha);
 
 [polyr polyc] = ind2sub(CONSTANTS.imageSize, feature.polyPix);
 

@@ -1,4 +1,4 @@
-function [bwDark bwig bwHalo] = SegDarkCenters(t, imageAlpha)
+function [bwDark bwig bwHalo graylevel] = SegDarkCenters(t, imageAlpha)
     global CONSTANTS
     
     persistent cachedArg cachedRes
@@ -30,6 +30,7 @@ function [bwDark bwig bwHalo] = SegDarkCenters(t, imageAlpha)
     
     % rerun part of seg
     level=imageAlpha*graythresh(im);
+    graylevel = level;
     bwHalo=im2bw(im,level);
 
     bwDark=false(size(im));

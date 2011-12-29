@@ -1,6 +1,7 @@
-function [objs features] = FrameSegmentor(im, t, imageAlpha)
+function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
     objs = [];
     features = [];
+    levels = struct('haloLevel',{[]}, 'igLevel',{[]});
     
     % Handle "color" images by averaging the color channels to get
     % intensity (should all be the same for all channels)
@@ -10,7 +11,8 @@ function [objs features] = FrameSegmentor(im, t, imageAlpha)
     
     im=mat2gray(im);
     
-    level=imageAlpha*graythresh(im);
+    levels.haloLevel = graythresh(im);
+    level=imageAlpha*levels.haloLevel;
     bwHalo=im2bw(im,level);
     
     bwDark=0*im;
@@ -20,7 +22,8 @@ function [objs features] = FrameSegmentor(im, t, imageAlpha)
     gd=imdilate(im,se);
     ge=imerode(im,se);
     ig=gd-ge;
-    lig=graythresh(ig);
+    levels.igLevel = graythresh(ig);
+    lig=levels.igLevel;
     bwig=im2bw(ig,lig);
     
     bwmask=imclose(bwig,seBig);

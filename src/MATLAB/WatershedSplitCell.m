@@ -65,7 +65,9 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
     
     [dump,ptidx] = min(locdist,[],2);
     
-    [bwDark bwig bwHalo] = SegDarkCenters(cell.time, CONSTANTS.imageAlpha);
+%     [bwDark bwig bwHalo] = SegDarkCenters(cell.time, CONSTANTS.imageAlpha);
+    center = [cell.centerOfMass(2) cell.centerOfMass(1)];
+    [bwDark bwig bwHalo] = PartialSegDarkCenters(center, cell.time, CONSTANTS.imageAlpha);
     
     cmap = hsv(k);
     for i=1:k

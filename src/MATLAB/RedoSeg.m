@@ -1,5 +1,5 @@
 function RedoSeg(imageAlpha)
-    global CONSTANTS CellHulls CellFeatures
+    global CONSTANTS CellHulls CellFeatures SegLevels
     
 %     CellHulls = [];
 %     CellFeatures = [];
@@ -9,6 +9,7 @@ function RedoSeg(imageAlpha)
 
     NewHulls = [];
     NewFeatures = [];
+    NewLevels = struct('haloLevel',{}, 'igLevel',{});
     
     for t=1:numberOfImages
         fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(t) '.TIF'];
@@ -18,8 +19,9 @@ function RedoSeg(imageAlpha)
         
         [im map]=imread(fileName);
     
-        [frmObjs frmFeatures] = FrameSegmentor(im, t, imageAlpha);
+        [frmObjs frmFeatures frmLevels] = FrameSegmentor(im, t, imageAlpha);
         NewFeatures = [NewFeatures frmFeatures];
+        NewLevels(t) = frmFeatures;
         
         frmHulls = struct('time',{}, 'points',{}, 'centerOfMass',{}, 'indexPixels',{}, 'imagePixels',{}, 'deleted',{}, 'userEdited',{});
         for i=1:length(frmObjs)

@@ -65,7 +65,9 @@ function [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(mergeCells)
         
         mergeFeat = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
         
-        [bwDark bwig bwHalo] = SegDarkCenters(mergeObj.time, CONSTANTS.imageAlpha);
+%         [bwDark bwig bwHalo] = SegDarkCenters(mergeObj.time, CONSTANTS.imageAlpha);
+        center = [mergeObj.centerOfMass(2) mergeObj.centerOfMass(1)];
+        [bwDark bwig bwHalo] = PartialSegDarkCenters(center, mergeObj.time, CONSTANTS.imageAlpha);
         
         allPolyPix = vertcat(CellFeatures(deleteCells).polyPix);
         [polyr polyc] = ind2sub(CONSTANTS.imageSize, allPolyPix);
