@@ -65,7 +65,9 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
     
     [dump,ptidx] = min(locdist,[],2);
     
-    [bwDark bwDarkCenters bwig bwHalo] = SegDarkCenters(cell.time, CONSTANTS.imageAlpha);
+%     [bwDark bwig bwHalo] = SegDarkCenters(cell.time, CONSTANTS.imageAlpha);
+    center = [cell.centerOfMass(2) cell.centerOfMass(1)];
+    [bwDark bwig bwHalo] = PartialSegDarkCenters(center, cell.time, CONSTANTS.imageAlpha);
     
     cmap = hsv(k);
     for i=1:k
@@ -125,8 +127,9 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
         igRat = nnz(bwig(perimPix)) / length(perimPix);
         HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
 
-        bwDarkInterior = bwDarkCenters(polyPix);
-        DarkRat = nnz(bwDarkInterior) / length(polyPix);
+%             bwDarkInterior = bwDarkCenters(polyPix);
+%             DarkRat = nnz(bwDarkInterior) / length(polyPix);
+            DarkRat = length(newHulls(i).indexPixels) / length(polyPix);
 
         %
         idxPix = newHulls(i).indexPixels;
@@ -146,6 +149,12 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
         else
             nf.brightInterior = 0;
         end       
+            nf.polyPix = polyPix;
+            nf.perimPix = perimPix;
+            nf.igPix = find(bwig(perimPix));
+            nf.haloPix = find(bwHalo(perimPix));
+        end
+        
         newFeatures = [newFeatures nf];
     end
 end

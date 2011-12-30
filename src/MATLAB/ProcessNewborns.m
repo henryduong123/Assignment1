@@ -48,6 +48,27 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
     end
 end
 
+% Remove any newly created parasite tracks from tree
+for i=1:length(families)
+    familyID = families(i);
+    for j=1:length(CellFamilies(familyID).tracks)
+        trackID = CellFamilies(familyID).tracks(j);
+        if ( GetTrackSegScore(trackID) >= CONSTANTS.minTrackScore || isempty(CellTracks(trackID).parentTrack) )
+            continue;
+        end
+        
+        parentHullID = getTrackHull(CellTracks(trackID).parentTrack, CellTracks(trackID).startTime-1);
+        childHullID = getTrackHull(trackID, CellTracks(trackID).startTime);
+        
+        if ( isempty(parentHullID) || GraphEdits(parentHullID,childHullID) > 0 )
+            continue;
+        end
+        
+        StraightenTrack(trackID);
+        RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+    end
+end
+
 GlobalPatching();
 
 costMatrix = GetCostMatrix();
@@ -156,5 +177,18 @@ if ( rootHull > 0 )
     end
 end
 
+end
+
+function hullID = getTrackHull(trackID,t)
+    global CellTracks
+    
+    hullID = [];
+    
+    hash = CellTracks(trackID).startTime - t + 1;
+    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
+        return;
+    end
+    
+    hullID = CellTracks(trackID).hulls(hash);
 end
 

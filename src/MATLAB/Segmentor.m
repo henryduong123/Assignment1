@@ -28,10 +28,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features] = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
+function [objs features levels] = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
     
 objs=[];
 features = [];
+levels = struct('haloLevel',{}, 'igLevel',{});
+
 if(ischar(tStart)),tStart = str2double(tStart);end
 if(ischar(tStep)),tStep = str2double(tStep);end
 if(ischar(tEnd)),tEnd = str2double(tEnd);end
@@ -58,14 +60,15 @@ for t = tStart:tStep:tEnd
     
     [im map]=imread(fname);
     
-    [frmObjs frmFeatures] = FrameSegmentor(im, t, imageAlpha);
+    [frmObjs frmFeatures frmLevels] = FrameSegmentor(im, t, imageAlpha);
     objs = [objs frmObjs];
     features = [features frmFeatures];
+    levels = [levels frmLevels];
 end
 
 fileName = ['.\segmentationData\objs_' num2str(tStart) '.mat'];
 if(isempty(dir('.\segmentationData'))),system('mkdir .\segmentationData');end
-save(fileName,'objs','features');
+save(fileName,'objs','features','levels');
 
 fprintf('\tDone\n');
 end

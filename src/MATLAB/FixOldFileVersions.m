@@ -25,13 +25,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls CellFeatures ConnectedDist GraphEdits Costs CellPhenotypes CellTracks
+    global CellHulls CellFeatures ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels
 
     bNeedsUpdate = 0;
     
     % Cannot fix this without resegmentation so give a warning if CellFeatures doesn't exist yet
     if ( isempty(CellFeatures) )
         msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
+    end
+    
+    % Find Segmentation levels per-frame for use in feature extraction
+    if ( isempty(SegLevels) )
+        FindSegLevels();
+        bNeedsUpdate = 1;
     end
     
     % Add imagePixels field to CellHulls structure (and resave in place)
