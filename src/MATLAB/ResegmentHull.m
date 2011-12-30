@@ -1,4 +1,4 @@
-% ResegmentHull.m - Splits hull into k pieces using kmeans, returns the 
+% ResegmentHull.m - Splits hull into k pieces using kmeans, returns the
 % k split hulls or [] if there are errors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,19 +7,19 @@
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
 %     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
-% 
+%
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     LEVer is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
-%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see
 %     <http://www.gnu.org/licenses/>.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +93,7 @@ end
 [dump,polyidx] = min(polydist,[],2);
 
 for i=1:k
-	nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
+    nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     if ( feature.brightInterior )
         nf.brightInterior = 1;
     else
@@ -104,9 +104,9 @@ for i=1:k
     
     igRat = nnz(bwig(perimPix)) / length(perimPix);
     HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-%         bwDarkInterior = bwDarkCenters(polyPix);
-%         DarkRat = nnz(bwDarkInterior) / length(polyPix);
-        DarkRat = length(newHulls(i).indexPixels) / length(polyPix);
+    %         bwDarkInterior = bwDarkCenters(polyPix);
+    %         DarkRat = nnz(bwDarkInterior) / length(polyPix);
+    DarkRat = length(newHulls(i).indexPixels) / length(polyPix);
     
     idxPix = newHulls(i).indexPixels;
     nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
@@ -119,21 +119,21 @@ for i=1:k
     nf.perimPix = perimPix;
     nf.igPix = find(bwig(perimPix));
     nf.haloPix = find(bwHalo(perimPix));
-
-        idxPix = newHulls(i).indexPixels;
-        nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
-        nf.haloRatio = HaloRat;
-        nf.igRatio = igRat;
-        nf.darkIntRatio = DarkRat;
-        nf.brightInterior = 0;
-
-        nf.polyPix = polyPix;
-        nf.perimPix = perimPix;
-        nf.igPix = find(bwig(perimPix));
-        nf.haloPix = find(bwHalo(perimPix));
-    end
+    
+    idxPix = newHulls(i).indexPixels;
+    nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
+    nf.haloRatio = HaloRat;
+    nf.igRatio = igRat;
+    nf.darkIntRatio = DarkRat;
+    nf.brightInterior = 0;
+    
+    nf.polyPix = polyPix;
+    nf.perimPix = perimPix;
+    nf.igPix = find(bwig(perimPix));
+    nf.haloPix = find(bwHalo(perimPix));
+    
     
     newFeatures = [newFeatures nf];
 end
 
-end
+
