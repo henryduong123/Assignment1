@@ -107,52 +107,45 @@ function [newHulls newFeatures] = WatershedSplitCell(cell, cellFeat, k)
 %         polypts = polypts(bLocal,:);
 %         plot(polypts(:,2),polypts(:,1), 'o', 'Color',cmap(i,:));
 
-        nf = [];
-        if ( cellFeat.brightInterior )
-            nf.darkRatio = nnz(bwDark(pix)) / length(pix);
-            nf.haloRatio = HaloRat;
-            nf.igRatio = igRat;
-            nf.darkIntRatio = DarkRat;
-            nf.brightInterior = 1;
+       	nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
 
-            nf.polyPix = polyPix;
-            nf.perimPix = perimPix;
-            nf.igPix = find(bwig(perimPix));
-            nf.haloPix = find(bwHalo(perimPix));
+        polyPix = cellFeat.polyPix(polyidx==i);
+        perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
+
+        %             [tr tc] = ind2sub(CONSTANTS.imageSize, perimPix);
+        %             loctr = tr - ylims(1);
+        %             loctc = tc - xlims(1);
+
+        %             bLocal = (loctr>0 & loctc>0);
+        %             loctr = loctr(bLocal);
+        %             loctc = loctc(bLocal);
+
+        %             plot(loctc,loctr, '.', 'Color',[0 1 0])
+
+        igRat = nnz(bwig(perimPix)) / length(perimPix);
+        HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
+
+        bwDarkInterior = bwDarkCenters(polyPix);
+        DarkRat = nnz(bwDarkInterior) / length(polyPix);
+
+        %
+        idxPix = newHulls(i).indexPixels;
+        nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
+        nf.haloRatio = HaloRat;
+        nf.igRatio = igRat;
+        nf.darkIntRatio = DarkRat;
+
+
+        nf.polyPix = polyPix;
+        nf.perimPix = perimPix;
+        nf.igPix = find(bwig(perimPix));
+        nf.haloPix = find(bwHalo(perimPix));
+
+         if ( cellFeat.brightInterior )
+             nf.brightInterior = 1;
         else
-            polyPix = cellFeat.polyPix(polyidx==i);
-            perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
-            
-%             [tr tc] = ind2sub(CONSTANTS.imageSize, perimPix);
-%             loctr = tr - ylims(1);
-%             loctc = tc - xlims(1);
-            
-%             bLocal = (loctr>0 & loctc>0);
-%             loctr = loctr(bLocal);
-%             loctc = loctc(bLocal);
-            
-%             plot(loctc,loctr, '.', 'Color',[0 1 0])
-
-            igRat = nnz(bwig(perimPix)) / length(perimPix);
-            HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-
-            bwDarkInterior = bwDarkCenters(polyPix);
-            DarkRat = nnz(bwDarkInterior) / length(polyPix);
-
-            %
-            idxPix = newHulls(i).indexPixels;
-            nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
-            nf.haloRatio = HaloRat;
-            nf.igRatio = igRat;
-            nf.darkIntRatio = DarkRat;
             nf.brightInterior = 0;
-
-            nf.polyPix = polyPix;
-            nf.perimPix = perimPix;
-            nf.igPix = find(bwig(perimPix));
-            nf.haloPix = find(bwHalo(perimPix));
-        end
-        
+        end       
         newFeatures = [newFeatures nf];
     end
 end

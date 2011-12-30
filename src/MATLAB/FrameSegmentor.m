@@ -139,7 +139,7 @@ function [objs features] = FrameSegmentor(im, t, imageAlpha)
         no=[];
         no.t=t;
         no.pts=[c(ch),r(ch)];
-        
+        no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
         no.indPixels=pix;
         if LTails(r(1),c(1))
             TailPix = find(LTails==LTails(r(1),c(1)));
@@ -237,6 +237,7 @@ function [objs features] = FrameSegmentor(im, t, imageAlpha)
         no=[];
         no.t=t;
         no.pts=[c(ch),r(ch)];
+        no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
         no.ID=-1;
         
         no.indPixels=pix;

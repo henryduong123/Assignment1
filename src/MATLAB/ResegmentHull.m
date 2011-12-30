@@ -93,37 +93,29 @@ end
 for i=1:k
 	nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     if ( feature.brightInterior )
-        nf.darkRatio = nnz(bwDark(pix)) / length(pix);
-        nf.haloRatio = HaloRat;
-        nf.igRatio = igRat;
-        nf.darkIntRatio = DarkRat;
         nf.brightInterior = 1;
-
-        nf.polyPix = polyPix;
-        nf.perimPix = perimPix;
-        nf.igPix = find(bwig(perimPix));
-        nf.haloPix = find(bwHalo(perimPix));
     else
-        polyPix = feature.polyPix(polyidx==i);
-        perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
-        
-        igRat = nnz(bwig(perimPix)) / length(perimPix);
-        HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-        bwDarkInterior = bwDarkCenters(polyPix);
-        DarkRat = nnz(bwDarkInterior) / length(polyPix);
-
-        idxPix = newHulls(i).indexPixels;
-        nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
-        nf.haloRatio = HaloRat;
-        nf.igRatio = igRat;
-        nf.darkIntRatio = DarkRat;
         nf.brightInterior = 0;
-
-        nf.polyPix = polyPix;
-        nf.perimPix = perimPix;
-        nf.igPix = find(bwig(perimPix));
-        nf.haloPix = find(bwHalo(perimPix));
     end
+    polyPix = feature.polyPix(polyidx==i);
+    perimPix = BuildPerimPix(polyPix, CONSTANTS.imageSize);
+    
+    igRat = nnz(bwig(perimPix)) / length(perimPix);
+    HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
+    bwDarkInterior = bwDarkCenters(polyPix);
+    DarkRat = nnz(bwDarkInterior) / length(polyPix);
+    
+    idxPix = newHulls(i).indexPixels;
+    nf.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
+    nf.haloRatio = HaloRat;
+    nf.igRatio = igRat;
+    nf.darkIntRatio = DarkRat;
+    
+    
+    nf.polyPix = polyPix;
+    nf.perimPix = perimPix;
+    nf.igPix = find(bwig(perimPix));
+    nf.haloPix = find(bwHalo(perimPix));
     
     newFeatures = [newFeatures nf];
 end

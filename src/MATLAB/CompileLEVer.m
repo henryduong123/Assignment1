@@ -46,6 +46,10 @@ system('copy ..\c\MTC\Release\MTC.exe ..\..\bin\');
 mcc -m LEVer.m -d ..\..\bin\.
 mcc -m Segmentor.m
 system('copy Segmentor.exe ..\..\bin\.');
+
+mcc -m LEVER_SegAndTrackFolders.m
+system('copy LEVER_SegAndTrackFolders.exe ..\..\bin\.');
+
 if(isempty(dir('.\MTC.exe')) || isempty(dir('..\..\bin\MTC.exe')))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
 end
