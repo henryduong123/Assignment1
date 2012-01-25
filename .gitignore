@@ -47,3 +47,10 @@ src/c/*/Intermediate/
 #!bin/*.pdb
 #ignore binaries in MATLAB source
 #src/MATLAB/*.mexw32
+bin/*.*
+bin/*.exe
+src/MATLAB/capture/*.*
+src/MATLAB/filmstrip/*.*
+src/MATLAB/*.csv
+src/MATLAB/filmstrip/*/*
+src/MATLAB/*.exe
