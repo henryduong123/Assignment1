@@ -43,6 +43,8 @@ if ( any(isnan(kIdx)) )
     return;
 end
 
+connComps = cell(1,k);
+
 nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', bUserEdit);
 for i=1:k
     bIdxPix = (kIdx == i);
@@ -56,6 +58,8 @@ for i=1:k
         newHulls = [];
         return;
     end
+    
+    connComps{i} = hull.indexPixels(bIdxPix);
     
     nh.indexPixels = hull.indexPixels(bIdxPix);
     nh.imagePixels = hull.imagePixels(bIdxPix);
@@ -83,14 +87,33 @@ end
 center = [hull.centerOfMass(2) hull.centerOfMass(1)];
 [bwDark bwig bwHalo] = PartialSegDarkCenters(center, hull.time, CONSTANTS.imageAlpha);
 
-[polyr polyc] = ind2sub(CONSTANTS.imageSize, feature.polyPix);
+polyidx = AssignPolyPix(feature.polyPix, connComps, CONSTANTS.imageSize);
 
-polydist = Inf*ones(length((polyr)),k);
-for i=1:k
-    polydist(:,i) = ((polyr-centers(i,2)).^2 + (polyc-centers(i,1)).^2);
-end
+% [polyr polyc] = ind2sub(CONSTANTS.imageSize, feature.polyPix);
+% 
+% polydist = Inf*ones(length((polyr)),k);
+% for i=1:k
+%     polydist(:,i) = ((polyr-centers(i,2)).^2 + (polyc-centers(i,1)).^2);
+% end
+% 
+% [dump,polyidx] = min(polydist,[],2);
 
-[dump,polyidx] = min(polydist,[],2);
+% % Debug test draw code
+% fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(hull.time) '.TIF'];
+% if exist(fileName,'file')
+%     [img colrMap] = imread(fileName);
+% else
+%     img=zeros(CONSTANTS.imageSize);
+% end
+% im = mat2gray(img);
+% cmap = hsv(2*k);
+% figure;imagesc(im);colormap(gray);hold on;
+% for i=1:k
+%     [tstr tstc] = ind2sub(CONSTANTS.imageSize, newHulls(i).indexPixels);
+%     plot(tstc,tstr, '.', 'Color',cmap(i,:));
+%     [tstr tstc] = ind2sub(CONSTANTS.imageSize, feature.polyPix(polyidx==i));
+%     plot(tstc,tstr, 'o', 'Color',cmap(2+i,:));
+% end
 
 for i=1:k
     nf = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});

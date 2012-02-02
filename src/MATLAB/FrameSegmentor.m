@@ -165,28 +165,39 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         oldLbl = LCenters(pix(1));
         
         polyPix = LPolyPix{oldLbl};
-        [polyR polyC] = ind2sub(size(im), polyPix);
+%         [polyR polyC] = ind2sub(size(im), polyPix);
         
-        perimPix = LPerimPix{oldLbl};
-        [perimR perimC] = ind2sub(size(im), perimPix);
+%         perimPix = LPerimPix{oldLbl};
+%         [perimR perimC] = ind2sub(size(im), perimPix);
         
         oldPix = find(LCenters==oldLbl);
         newLbls = unique(LCells(oldPix));
         newLbls = newLbls(newLbls > 0);
-        centroid = [];
-        
-        polyDist = Inf*ones(length(polyR),length(newLbls));
-%         perimDist = Inf*ones(length(perimR),length(newLbls));
-        for j=1:length(newLbls)
-            [newR newC] = find(LCells == newLbls(j));
-            centroid = mean([newR newC],1);
-            
-            polyDist(:,j) = ((polyR - centroid(1)).^2 + (polyC - centroid(2)).^2);
-%             perimDist(:,j) = ((perimR - centroid(1)).^2 + (perimC - centroid(2)).^2);
-        end
-        
-        [mpd polyIdx] = min(polyDist,[],2);
+%         centroid = [];
+%         
+%         polyDist = Inf*ones(length(polyR),length(newLbls));
+% %         perimDist = Inf*ones(length(perimR),length(newLbls));
+%         for j=1:length(newLbls)
+%             [newR newC] = find(LCells == newLbls(j));
+%             centroid = mean([newR newC],1);
+%             
+%             polyDist(:,j) = ((polyR - centroid(1)).^2 + (polyC - centroid(2)).^2);
+% %             perimDist(:,j) = ((perimR - centroid(1)).^2 + (perimC - centroid(2)).^2);
+%         end
+%         
+%         [mpd polyIdx] = min(polyDist,[],2);
 %         [mpd perimIdx] = min(perimDist,[],2);
+
+        if ( length(newLbls) > 1 )
+            lblPix = cell(1,length(newLbls));
+            for j=1:length(newLbls)
+                lblPix{j} = find(LCells == newLbls(j));
+            end
+
+            polyIdx = AssignPolyPix(polyPix, lblPix, size(im));
+        else
+            polyIdx = ones(length(polyPix),1);
+        end
         
         curIdx = find(newLbls==idx(i));
         

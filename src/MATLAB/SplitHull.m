@@ -37,8 +37,8 @@ else
     splitFeat = CellFeatures(hullID);
 end
 
-% [newHulls newFeatures] = ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
-[newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), splitFeat, k);
+[newHulls newFeatures] = ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
+% [newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), splitFeat, k);
 
 if ( isempty(newHulls) )
     newTrackIDs = [];
