@@ -133,18 +133,7 @@ global CellTracks Figures
 bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
 
 %draw circle for node
-FontSize = 8;
-switch length(num2str(trackID))
-    case 1
-        circleSize=10;
-    case 2
-        circleSize=12;
-    case 3
-        circleSize=14;
-    otherwise
-        circleSize=16;
-        FontSize = 7;
-end
+[FontSize circleSize] = GetFontShapeSizes(length(num2str(trackID)));
 
 if ~bDrawLabels
         FontSize=6;

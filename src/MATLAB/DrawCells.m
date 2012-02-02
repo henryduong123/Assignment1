@@ -76,18 +76,8 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         
         xLabelCorner = max(CellHulls(curHullID).points(:,1));
         yLabelCorner = max(CellHulls(curHullID).points(:,2));
-        fontSize = 8;
-        switch length(num2str(curTrackID))
-            case 1
-                shapeSize=8;
-            case 2
-                shapeSize=11;
-            case 3
-                shapeSize=15;
-            otherwise
-                shapeSize=17;
-                fontSize = 7;
-        end
+        
+        [fontSize shapeSize] = GetFontShapeSizes(length(num2str(curTrackID)));
         
         %if the cell is on the current tree
         if(Figures.tree.familyID == CellTracks(curTrackID).familyID)
