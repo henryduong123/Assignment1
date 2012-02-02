@@ -25,10 +25,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function tStart = PropagateChanges(changedHulls, editedHulls)
-    global CellHulls HashedCells GraphEdits
+    global CONSTANTS CellHulls HashedCells GraphEdits
     
     tStart = min([CellHulls(editedHulls).time]);
-    tEnd = length(HashedCells)-1;
+    tEnd = min(tStart+CONSTANTS.maxPropagateFrames,length(HashedCells)-1);
     
     % Get initial changehulls to update
     trackHulls = [];

@@ -41,4 +41,5 @@ AddConstant('timeResolution',10); %in frames per min
 AddConstant('dMaxConnectComponent',40,1);
 AddConstant('dMaxCenterOfMass',40,1);
 AddConstant('minTrackScore',0.5,1);
+AddConstant('maxPropagateFrames',50,1);
 end
