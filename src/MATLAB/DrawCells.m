@@ -58,6 +58,10 @@ if xl(1)~=0 && xl(2)~=1
     xlim(xl);
     ylim(yl);
 end
+
+xl=xlim;
+yl=ylim;
+
 colormap(gray);
 hold all;
 
@@ -116,6 +120,10 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if ( any(Figures.cells.selectedHulls == curHullID) )
             drawWidth = 1.5;
             drawStyle = '--';
+        end
+        
+        if ( ~checkCOMLims(curHullID, xl, yl) )
+            continue;
         end
             
         %draw outline
@@ -183,4 +191,20 @@ plot([CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)
     'UserData',         trackID,...
     'uicontextmenu',    Figures.cells.contextMenuHandle,...
     'Tag',              'SiblingRelationship');
+end
+
+function bInLims = checkCOMLims(hullID, xlims, ylims)
+    global CellHulls Figures
+    
+    bInLims = 0;
+    
+    if ( CellHulls(hullID).centerOfMass(2) < (xlims(1)-10) || CellHulls(hullID).centerOfMass(2) > (xlims(2)+10) )
+        return;
+    end
+    
+    if ( CellHulls(hullID).centerOfMass(1) < (ylims(1)-10) || CellHulls(hullID).centerOfMass(1) > (ylims(2)+10) )
+        return;
+    end
+    
+    bInLims = 1;
 end

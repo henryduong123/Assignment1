@@ -50,27 +50,32 @@ function GlobalPatching()
     
     costMatrix = costMatrix(parentHulls,:);
     
-    while( nnz(costMatrix) > 0 )
-        [r,c,val] = find(costMatrix);
-        [dump,idx] = min(val);
+    [r,c,val] = find(costMatrix);
+    [val,srtidx] = sort(val);
+    r = r(srtidx);
+    c = c(srtidx);
+    
+    bCheck = true(1,length(val));
+    
+    for idx=1:length(val)
+        if ( ~bCheck(idx) )
+            continue;
+        end
         
         childTrack = GetTrackID(childHulls(c(idx)));
         parentTrack = GetTrackID(parentHulls(r(idx)));
         
         parentFuture = CellTracks(parentTrack).endTime - CellTracks(childTrack).startTime + 1;
         if ( parentFuture > CONSTANTS.minParentFuture )
-            costMatrix(r(idx),c(idx)) = 0;
             continue;
         end
         
         childLength = CellTracks(childTrack).endTime - CellTracks(childTrack).startTime + 1;
         if ( childLength <= parentFuture )
-            costMatrix(r(idx),c(idx)) = 0;
             continue;
         end
         
         if ( ~isempty(CellTracks(parentTrack).childrenTracks) )
-            costMatrix(r(idx),c(idx)) = 0;
             continue;
         end
         
@@ -78,7 +83,6 @@ function GlobalPatching()
         childScore = GetTrackSegScore(childTrack);
         
         if ( parentScore < CONSTANTS.minTrackScore || childScore < CONSTANTS.minTrackScore )
-            costMatrix(r(idx),c(idx)) = 0;
             continue;
         end
         
@@ -89,8 +93,7 @@ function GlobalPatching()
         ChangeLabel(CellTracks(childTrack).startTime, childTrack, parentTrack);
         RehashCellTracks(parentTrack,CellTracks(parentTrack).startTime);
         
-        costMatrix(r(idx),:) = 0;
-        costMatrix(:,c(idx)) = 0;
+        bCheck((r == r(idx)) | (c == c(idx))) = 0;
     end
 end
 

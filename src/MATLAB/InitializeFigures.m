@@ -75,6 +75,11 @@ Figures.cells.timeLabel = uicontrol(Figures.cells.handle,...
     'Position',[1 0 60 20],...
     'String',['Time: ' num2str(Figures.time)]);
 
+hPan = pan(Figures.cells.handle);
+set(hPan,'ActionPostCallback',@forceRedrawCells);
+hZoom = zoom(Figures.cells.handle);
+set(hZoom,'ActionPostCallback',@forceRedrawCells);
+
 CreateMenuBar(Figures.cells.handle);
 CreateContextMenuCells();
 
@@ -357,4 +362,8 @@ function learnFromEdits(src,evnt)
     
     History('Push');
     LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
+end
+
+function forceRedrawCells(src,evnt)
+    DrawCells();
 end
