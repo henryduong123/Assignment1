@@ -69,7 +69,7 @@ for i=1:length(families)
     end
 end
 
-GlobalPatching();
+%GlobalPatching();
 
 costMatrix = GetCostMatrix();
 
