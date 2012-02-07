@@ -9,8 +9,8 @@ function assignIdx = AssignPolyPix(polyPix, connComps, imSize)
     for i=1:length(connComps)
         [rCC{i} cCC{i}] = ind2sub(imSize, connComps{i});
         
-        xlims = clamp([min([xlims(1); cCC{i}]) max([xlims(2); cCC{i}])], 1, imSize(2));
-        ylims = clamp([min([ylims(1); rCC{i}]) max([ylims(2); rCC{i}])], 1, imSize(1));
+        xlims = Clamp([min([xlims(1); cCC{i}]) max([xlims(2); cCC{i}])], 1, imSize(2));
+        ylims = Clamp([min([ylims(1); rCC{i}]) max([ylims(2); rCC{i}])], 1, imSize(1));
     end
     
     locsz = [ylims(2)-ylims(1) xlims(2)-xlims(1)]+1;

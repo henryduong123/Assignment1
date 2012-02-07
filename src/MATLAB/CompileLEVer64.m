@@ -25,34 +25,36 @@
 
 tic
 
-vstoolroot = getenv('VS90COMNTOOLS');
+vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
-    error('Cannot compile MTC and mexMAT without Visual Studio 2008');
+    error('Cannot compile MTC and mexMAT without Visual Studio 2010');
 end
 
-if ( ~exist('..\..\bin','dir') )
-    mkdir('..\..\bin');
+if ( ~exist('..\..\bin64','dir') )
+    mkdir('..\..\bin64');
 end
 
-system(['"' fullfile(vstoolroot,'..','..','vc','bin','vcvars32.bat') '"' ]);
+system(['"' fullfile(vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat') '"' ]);
 
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\MTC.sln"']);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\mexMAT.sln"']);
 
+
 % clears out mex cache so src/mexMAT.mexw32 can be overwritten
 clear mex
-system('copy ..\c\mexMAT\Release\mexMAT.dll .\mexMAT.mexw32');
+system('copy ..\c\x64\Release\mexMAT.dll .\mexMAT.mexw64');
+system('copy ..\c\x64\Release\mexMAT.dll ..\..\bin64\mexMAT.mexw64');
 system('copy ..\c\MTC\Release\MTC.exe .\');
-system('copy ..\c\MTC\Release\MTC.exe ..\..\bin\');
+system('copy ..\c\MTC\Release\MTC.exe ..\..\bin64\');
 
 mcc -m LEVer.m -d ..\..\bin\.
 mcc -m Segmentor.m
-system('copy Segmentor.exe ..\..\bin\.');
+system('copy Segmentor.exe ..\..\bin64\.');
 
 mcc -m LEVER_SegAndTrackFolders.m
-system('copy LEVER_SegAndTrackFolders.exe ..\..\bin\.');
+system('copy LEVER_SegAndTrackFolders.exe ..\..\bin64\.');
 
-if(isempty(dir('.\MTC.exe')) || isempty(dir('..\..\bin\MTC.exe')))
+if(isempty(dir('.\MTC.exe')) || isempty(dir('..\..\bin64\MTC.exe')))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
 end
 toc

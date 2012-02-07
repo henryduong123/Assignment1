@@ -1,8 +1,8 @@
 function [perimPix, perimr, perimc] = BuildPerimPix(polyPix, imSize)
     [r c] = ind2sub(imSize, polyPix);
     
-    xlims = clamp([min(c) max(c)], 1, imSize(2));
-    ylims = clamp([min(r) max(r)], 1, imSize(1));
+    xlims = Clamp([min(c) max(c)], 1, imSize(2));
+    ylims = Clamp([min(r) max(r)], 1, imSize(1));
     
     locr = r - ylims(1) + 1;
     locc = c - xlims(1) + 1;
@@ -24,7 +24,7 @@ function [perimPix, perimr, perimc] = BuildPerimPix(polyPix, imSize)
     perimPix = unique(sub2ind(imSize, perimr, perimc));
 end
 
-function x_clamped = clamp(x, minval, maxval)
+function x_clamped = Clamp(x, minval, maxval)
     x_clamped = max(cat(3,x,minval*ones(size(x))),[],3);
     x_clamped = min(cat(3,x_clamped,maxval*ones(size(x))),[],3);
 end
