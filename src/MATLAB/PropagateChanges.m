@@ -33,7 +33,7 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
     % Get initial changehulls to update
     trackHulls = [];
     
-    for t=tStart:tEnd
+    for t=tStart:(length(HashedCells)-1)
         tChangedHulls = intersect([HashedCells{t}.hullID],changedHulls);
         trackHulls = union(trackHulls,tChangedHulls);
         if ( isempty(trackHulls) )
@@ -64,7 +64,7 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
         followHulls = checkHulls(bFollowTracks);
         
         % Stop if none of the original split tracks are still around
-        if ( isempty(followTracks) )
+        if ( isempty(followTracks) || t == tEnd )
             ReassignTracks(t+1, costMatrix, checkHulls, nextHulls, [], 1);
             Progressbar(1);
             return;
