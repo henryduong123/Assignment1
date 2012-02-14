@@ -34,7 +34,7 @@ global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS
 
 if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 
-figure(Figures.cells.handle);
+% figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
 fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' SignificantDigits(Figures.time) '.TIF'];
@@ -43,27 +43,33 @@ if exist(fileName,'file')
 else
     img=zeros(CONSTANTS.imageSize);
 end
-    
-xl=xlim;
-yl=ylim;
+
+curAx = get(Figures.cells.handle, 'CurrentAxes');
+if ( isempty(curAx) )
+    curAx = axes('Parent',Figures.cells.handle);
+    set(Figures.cells.handle, 'CurrentAxes',curAx);
+end
+
+xl=xlim(curAx);
+yl=ylim(curAx);
 
 %adjust the image display
 
-hold off;
-im = imagesc(img);
+hold(curAx, 'off');
+im = imagesc(img, 'Parent',curAx);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
-set(gca,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
-axis off;
+set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
+axis(curAx,'off');
 if xl(1)~=0 && xl(2)~=1
-    xlim(xl);
-    ylim(yl);
+    xlim(curAx,xl);
+    ylim(curAx,yl);
 end
 
-xl=xlim;
-yl=ylim;
+xl=xlim(curAx);
+yl=ylim(curAx);
 
-colormap(gray);
-hold all;
+colormap(curAx, gray);
+hold(curAx,'all');
 
 siblingsAlreadyDrawn = [];
 
@@ -111,7 +117,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
             %if the cell is on the current tree or already drawn
             if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
-                siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curTrackID,curHullID)];
+                siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curAx, curTrackID,curHullID)];
             end
         end
         
@@ -127,7 +133,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         end
             
         %draw outline
-        plot(CellHulls(curHullID).points(:,1),...
+        plot(curAx, CellHulls(curHullID).points(:,1),...
             CellHulls(curHullID).points(:,2),...
             'Color',            edgeColor,...
             'UserData',         curTrackID,...
@@ -135,7 +141,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'LineStyle',        drawStyle,...
             'LineWidth',        drawWidth);
         %draw label
-        plot(xLabelCorner,...
+        plot(curAx, xLabelCorner,...
             yLabelCorner,...
             shape,              ...
             'MarkerFaceColor',  backgroundColor,...
@@ -146,6 +152,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         text(xLabelCorner,          ...
             yLabelCorner,           ...
             num2str(curTrackID),...
+            'Parent',               curAx,...
             'Color',                textColor,...
             'FontWeight',           fontWeight,...
             'FontSize',             fontSize,...
@@ -161,15 +168,15 @@ elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
         
         %if the cell is on the current tree or already drawn
         if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
-            siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curTrackID,curHullID)];
+            siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curAx, curTrackID,curHullID)];
         end
     end
 end
 
-Figures.cells.axesHandle = gca;
+Figures.cells.axesHandle = curAx;
 end
 
-function tracksDrawn = drawSiblingsLine(trackID,hullID)
+function tracksDrawn = drawSiblingsLine(curAx, trackID,hullID)
 global Figures CellTracks CellHulls HashedCells
 
 tracksDrawn = [];
@@ -185,7 +192,7 @@ siblingHullID = [HashedCells{Figures.time}(siblingHullID).hullID];
 
 if(isempty(siblingHullID)),return,end
 
-plot([CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)],...
+plot(curAx, [CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOfMass(2)],...
     [CellHulls(hullID).centerOfMass(1) CellHulls(siblingHullID).centerOfMass(1)],...
     'Color',            CellTracks(parentID).color.background,...
     'UserData',         trackID,...
