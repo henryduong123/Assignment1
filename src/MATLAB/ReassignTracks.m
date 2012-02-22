@@ -51,7 +51,8 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         assignHull = affectedHulls(bestOutgoing(matchedIdx(i)));
         extHull = extendHulls(matchedIdx(i));
         
-        change = assignHullToTrack(t, assignHull, extHull, bPropForward);
+%         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
+        change = AssignEdge(extHull, assignHull, bPropForward);
         changedHulls = [changedHulls change];
 	end
     
@@ -66,7 +67,8 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         assignHull = affectedHulls(c);
         extHull = extendHulls(r);
         
-        change = assignHullToTrack(t, assignHull, extHull, bPropForward);
+%         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
+        change = AssignEdge(extHull, assignHull, bPropForward);
         changedHulls = [changedHulls change];
         
         costMatrix(r,:) = Inf;
