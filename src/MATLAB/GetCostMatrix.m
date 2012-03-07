@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function costMatrix = GetCostMatrix()
-    global Costs GraphEdits
+    global Costs GraphEdits CellHulls
     
     costMatrix = Costs;
     % bRemovedEdges = (GraphEdits < 0);
@@ -45,6 +45,16 @@ function costMatrix = GetCostMatrix()
     [r,c] = find(GraphEdits < 0);
     for i=1:length(r)
         costMatrix(r(i),c(i)) = 0;
+    end
+    
+    % Remove all edges to/from deleted hulls
+    % This may end up being super slow, however it stops other graph code
+    % from always having to check for deleted hulls (in general) by making
+    % them unreachable.
+    r = find([CellHulls.deleted]);
+    for i=1:length(r)
+        costMatrix(r(i),:) = 0;
+        costMatrix(:,r(i)) = 0;
     end
     
     [r,c] = find(GraphEdits > 0);
