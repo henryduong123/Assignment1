@@ -1,5 +1,5 @@
-function connectedHulls = FindConnectedHulls(hullID)
-    connectedHulls = hullID;
+function connectedHulls = FindConnectedHulls(hullIDs)
+    connectedHulls = hullIDs;
     costMatrix = GetCostMatrix();
     
     traverseHulls = connectedHulls;

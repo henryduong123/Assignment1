@@ -172,8 +172,9 @@ function mergedL = dilateMergeRegions(k, L, bwIm)
 %     end
 
     bwMergeBound = false(size(bwIm));
-    dg = zeros(numRegions,numRegions);
-    mg = Inf*ones(numRegions,numRegions);
+    
+    mergeG = Inf*ones(numRegions,numRegions);
+    boundG = zeros(numRegions,numRegions);
 
     bDilated = false(1,numRegions);
     
@@ -192,11 +193,11 @@ function mergedL = dilateMergeRegions(k, L, bwIm)
             for j=1:length(mergeRgn)
                 bwNewMB = (bwL & (L == mergeRgn(j)));
                 bwMergeBound = bwMergeBound | bwNewMB;
-                mg(i,mergeRgn(j)) = min(mg(i,mergeRgn(j)),dist);
-                mg(mergeRgn(j),i) = mg(i,mergeRgn(j));
+                mergeG(i,mergeRgn(j)) = min(mergeG(i,mergeRgn(j)),dist);
+                mergeG(mergeRgn(j),i) = mergeG(i,mergeRgn(j));
                 
-                dg(i,mergeRgn(j)) = dg(i,mergeRgn(j)) + nnz(bwNewMB);
-                dg(mergeRgn(j),i) = dg(i,mergeRgn(j));
+                boundG(i,mergeRgn(j)) = boundG(i,mergeRgn(j)) + nnz(bwNewMB);
+                boundG(mergeRgn(j),i) = boundG(i,mergeRgn(j));
             end
             
             bwL(bwMergeBound) = 0;
@@ -210,32 +211,21 @@ function mergedL = dilateMergeRegions(k, L, bwIm)
         dist = dist + 1;
     end
     
-%     figure();imagesc(L);colormap(gray);
-%     [r c] = find(bwMergeBound);
-%     if ( ~isempty(r) )
-%         hold on;plot(c,r, '.g');hold off;
-%     end
-%     [r c] = find(bwIm);
-%     if ( ~isempty(r) )
-%         hold on;plot(c,r, 'or');hold off;
-%     end
-
-    rgnSize = zeros(1,numRegions);
-    for i=1:numRegions
-        rgnSize(i) = nnz(L==i);
+    figure();imagesc(L);colormap(gray);
+    [r c] = find(bwMergeBound);
+    if ( ~isempty(r) )
+        hold on;plot(c,r, '.g');hold off;
     end
-    maxRgnSize = max(rgnSize);
-    for i=1:numRegions
-        szScale = min([rgnSize(i)*ones(1,numRegions);rgnSize],[],1) ./ maxRgnSize;
-%         dg(i,:) = dg(i,:) ./ szScale;
-        dg(i,:) = (0.1 * dg(i,:))+  1 ./ szScale;
+    [r c] = find(bwIm);
+    if ( ~isempty(r) )
+        hold on;plot(c,r, 'or');hold off;
     end
 
-    dg(dg==0) = 1;
-%     mg = mg;
-    
-    mergeDist = mg ./ dg;
     while ( numRegions > k )
+        rgnScaleG = calcRegionScaling(L, numRegions);
+        costScale = rgnScaleG + boundG;
+        mergeDist = mergeG ./ costScale;
+        
         [minDist minIdx] = min(mergeDist(:));
         if ( isinf(minDist) )
             break;
@@ -248,22 +238,23 @@ function mergedL = dilateMergeRegions(k, L, bwIm)
         
         L(mergeRg) = rg1;
         
-        mergeDist(rg1,rg2) = Inf;
-        mergeDist(rg2,rg1) = Inf;
-        
         for i=1:numRegions
             if ( i==rg1 )
                 continue;
             end
             
-            if ( mergeDist(rg1,i) > mergeDist(rg2,i) )
-                mergeDist(rg1,i) = mergeDist(rg2,i);
-                mergeDist(i,rg1) = mergeDist(rg1,i);
-            end
-            
-            mergeDist(i,rg2) = Inf;
-            mergeDist(rg2,i) = Inf;
+            boundG(rg1,i) = boundG(rg1,i) + boundG(rg2,i);
+            mergeG(rg1,i) = min(mergeG(rg1,i),mergeG(rg2,i));
         end
+        
+        boundG(:,rg1) = boundG(rg1,:)';
+        mergeG(:,rg1) = mergeG(rg1,:)';
+        
+        boundG(rg2,:) = 0;
+        boundG(:,rg2) = 0;
+        
+        mergeG(rg2,:) = Inf;
+        mergeG(:,rg2) = Inf;
         
         numRegions = nnz(unique(L(:))>0);
     end
@@ -275,6 +266,20 @@ function mergedL = dilateMergeRegions(k, L, bwIm)
     mergedL = cleanupComponents(L);
 %     figure();imagesc(L);
 %     figure();imagesc(mergedL);
+end
+
+function rgnScaleG = calcRegionScaling(L, numRegions)
+    rgnScaleG = zeros(numRegions,numRegions);
+    
+    rgnSize = zeros(1,numRegions);
+    for i=1:numRegions
+        rgnSize(i) = nnz(L==i);
+    end
+    maxRgnSize = max(rgnSize);
+    for i=1:numRegions
+        szScale = min([rgnSize(i)*ones(1,numRegions);rgnSize],[],1) / maxRgnSize;
+        rgnScaleG(i,:) = 1 ./ szScale;
+    end
 end
 
 function cleanL = cleanupComponents(L)
