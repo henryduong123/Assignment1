@@ -45,7 +45,7 @@ function LinkTreesForward(rootTracks)
                         lookupStart(checkExtHulls(i)) = length(extLookup);
                     end
                     
-                    trackCost = calcTrackCost(extHulls(j),nextLeaves(l));
+                    trackCost = calcTrackCost(extHulls(j),nextLeaves(l), maxFrameExt);
                     
                     nex = struct('extendEdge',{[checkExtHulls(i) nextLeaves(l)]}, ...
                                  'extCost',{pathCost(extIdx(k))}, ...
@@ -105,7 +105,7 @@ function LinkTreesForward(rootTracks)
     toc;
 end
 
-function cost = calcTrackCost(startHull, endHull)
+function cost = calcTrackCost(startHull, endHull, maxFrameExt)
     global CellHulls CellTracks
     
     costMatrix = GetCostMatrix();
@@ -127,7 +127,9 @@ function cost = calcTrackCost(startHull, endHull)
             end
         end
         if ( ~(costMatrix(nzHull,backHull)) )
-            error(['cost(' nzHull ',' backHull ') is infinite']);
+            % Try to find shortest graph-path to here
+            [pathExt pathCost] = dijkstraSearch(nzHull, costMatrix, @(x,y,z)(y==backHull), maxFrameExt);
+%             error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite']);
         end
         cost = cost + costMatrix(nzHull,backHull);
         
