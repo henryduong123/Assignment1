@@ -1,6 +1,9 @@
 function ExternalRetrack()
     global CONSTANTS CellHulls HashedCells CellFeatures ConnectedDist
     
+    bKeep = (~[CellHulls.deleted]);
+    CellHulls = CellHulls(bKeep);
+    
     segtimes = [CellHulls.time];
     
     [srtseg srtidx] = sort(segtimes);

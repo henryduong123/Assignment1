@@ -213,7 +213,8 @@ function bGoodExt = checkExtension(startHull, endHull, path)
     
     parentID = CellTracks(trackID).parentTrack;
     if ( ~isempty(parentID) )
-        [costMatrix bPathHulls bNextHulls] = GetCostSubmatrix(path(end-1), 1:length(CellHulls));
+        nzParent = CellTracks(parentID).hulls(find(CellTracks(parentID).hulls,1,'last'));
+        [costMatrix bPathHulls bNextHulls] = GetCostSubmatrix(nzParent, 1:length(CellHulls));
         nxtHulls = find(bNextHulls);
         [dump minidx] = min(costMatrix);
         if ( nxtHulls(minidx) == endHull )
