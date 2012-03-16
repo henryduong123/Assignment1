@@ -75,7 +75,7 @@ CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hull
 %loop through the Hulls
 parfor i=1:length(objHulls)
     cellHulls(i).time            =  objHulls(i).t;
-    cellHulls(i).points          =  objHulls(i).pts;
+    cellHulls(i).points          =  objHulls(i).points;
     cellHulls(i).centerOfMass    =  objHulls(i).COM;
     cellHulls(i).indexPixels     =  objHulls(i).indPixels;
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;

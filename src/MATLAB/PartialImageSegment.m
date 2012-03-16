@@ -49,9 +49,38 @@ function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha)
     
     [objs features] = FrameSegmentor(subImg, 1, alpha);
     
+    [objs features] = fixupFromSubimage(coordMin, img, subImg, objs, features);
+    
     bInHull = CHullContainsPoint(centerPt, objs);
     
     hull = objs(find(bInHull,1));
     feature = features(find(bInHull,1));
 end
 
+function [newObjs newFeatures] = fixupFromSubimage(coordMin, img, subImg, objs, features)
+    newObjs = objs;
+    newFeatures = features;
+    
+    xoffset = coordMin(1)-1;
+    yoffset = coordMin(2)-1;
+    
+    globSz = size(img);
+    locSz = size(subImg);
+    
+    for i=1:length(objs)
+        newObjs(i).points = objs(i).points + ones(size(objs(i).points,1),1)*[xoffset yoffset];
+        newObjs(i).indPixels = makeGlobalPix(objs(i).indPixels, globSz, locSz, xoffset, yoffset);
+        newObjs(i).indTailPixels = makeGlobalPix(objs(i).indTailPixels, globSz, locSz, xoffset, yoffset);
+        newObjs(i).imPixels = img(newObjs(i).indPixels);
+        
+        newFeatures(i).polyPix = makeGlobalPix(features(i).polyPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).perimPix = makeGlobalPix(features(i).perimPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).igPix = makeGlobalPix(features(i).igPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).haloPix = makeGlobalPix(features(i).haloPix, globSz, locSz, xoffset, yoffset);
+    end
+end
+
+function globidx = makeGlobalPix(locidx, globSz, locSz, xoffset, yoffset)
+    [locr locc] = ind2sub(locSz, locidx);
+    globidx = sub2ind(globSz, locr+yoffset, locc+xoffset);
+end

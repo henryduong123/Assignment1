@@ -69,7 +69,7 @@ function UpdateTrackingCosts(t, trackHulls, nextHulls)
             if ( dir > 0 )
                 Costs(fromHulls(i),toHulls(j)) = costMatrix(i,j);
             else
-                Costs(toHulls(j),fromHulls(i)) = costMatrix(j,i);
+                Costs(toHulls(j),fromHulls(i)) = costMatrix(i,j);
             end
         end
     end

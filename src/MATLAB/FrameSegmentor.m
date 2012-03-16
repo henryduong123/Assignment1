@@ -141,7 +141,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         
         no=[];
         no.t=t;
-        no.pts=[c(ch),r(ch)];
+        %no.pts=[c(ch),r(ch)];
         no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
         no.indPixels=pix;
         if LTails(r(1),c(1))
@@ -250,7 +250,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         if ~isempty(find(bwCellFG &bwPoly, 1)),continue,end
         no=[];
         no.t=t;
-        no.pts=[c(ch),r(ch)];
+        %no.pts=[c(ch),r(ch)];
         no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
         no.ID=-1;
         

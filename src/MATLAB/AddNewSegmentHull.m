@@ -48,15 +48,16 @@ function newTrackID = AddNewSegmentHull(clickPt)
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
-        newHull.imagePixels = img(newHull.indexPixels);
+        newHull.imagePixels = img(newHull.indPixels);
         
         newFeature.polyPix = newHull.indexPixels;
     else
         newHull.time = Figures.time;
         newHull.points = newObj.points;
-        newHull.centerOfMass = newObj.centerOfMass;
-        newHull.indexPixels = newObj.indexPixels;
-        newHull.imagePixels = newObj.imagePixels;
+        [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
+        newHull.centerOfMass = mean([r c]);
+        newHull.indexPixels = newObj.indPixels;
+        newHull.imagePixels = newObj.imPixels;
         
         newFeature = newFeat;
     end
@@ -82,7 +83,7 @@ function newobj = makeNonOverlapping(obj, t, clickPt)
     newobj = [];
     
     ccidxs = vertcat(CellHulls([HashedCells{t}.hullID]).indexPixels);
-    pix = obj.indexPixels;
+    pix = obj.indPixels;
     
     bPickPix = ~ismember(pix, ccidxs);
     
@@ -111,11 +112,11 @@ function newobj = makeNonOverlapping(obj, t, clickPt)
         if ( inpolygon(clickPt(1), clickPt(2), c(ch), r(ch)) )
             bCCPix = ismember(pix, CC.PixelIdxList{i});
             
-            newobj.indexPixels = CC.PixelIdxList{i};
-            newobj.imagePixels = obj.imagePixels(bCCPix);
+            newobj.indPixels = CC.PixelIdxList{i};
+            newobj.imPixels = obj.imPixels(bCCPix);
             
             newobj.points = [c(ch) r(ch)];
-            newobj.centerOfMass = mean([r c]);
+%             newobj.COM = mean([r c]);
             
             break;
         end
