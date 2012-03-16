@@ -184,16 +184,16 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 	if ( LocalCost == dbltype::infinity() )
 			return dbltype::infinity();
 
-	int nDestiny2,nDestiny3;
-	
-	if (srcFrameIdx>0 && frame.size()>srcFrameIdx+2)	
-	{
+	//int nDestiny2,nDestiny3;
+	//
+	//if (srcFrameIdx>0 && frame.size()>srcFrameIdx+2)	
+	//{
 
-		srcGIdx = GetGlobalIdx(frame[srcFrameIdx], index[srcFrameIdx]);
-		nDestiny2=GetDestinyNode(srcGIdx,2,frame[srcFrameIdx+1]);
-		if (nDestiny2==index[srcFrameIdx+1]) 
-			LocalCost*=0.5;
-	}
+	//	srcGIdx = GetGlobalIdx(frame[srcFrameIdx], index[srcFrameIdx]);
+	//	nDestiny2=GetDestinyNode(srcGIdx,2,frame[srcFrameIdx+1]);
+	//	if (nDestiny2==index[srcFrameIdx+1]) 
+	//		LocalCost*=0.5;
+	//}
 
 	dlocnX=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].X);
 	dlocnY=double(rgDetect[frame[srcFrameIdx]][index[srcFrameIdx]].Y);

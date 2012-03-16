@@ -148,7 +148,7 @@ int FindMinCostIdx(std::vector<CSourcePath*>& edges)
 
 	return minidx;
 }
-int gdestGIdx;
+
 int main(int argc, char* argv[])
 {
 	system("echo %TIME% > ttt.txt");
