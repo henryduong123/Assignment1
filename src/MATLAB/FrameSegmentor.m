@@ -266,16 +266,17 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         no.Eccentricity=stats(idx(i)).Eccentricity;
         no.imPixels=im(pix);
         
+        nf = [];
+        nf.darkRatio = 0;
         nf.haloRatio = 0;
         nf.igRatio = 0;
         nf.darkIntRatio = 0;
-        nf.darkRatio = 0;
         nf.brightInterior = 1;
         
         nf.polyPix = find(bwPoly);
         nf.perimPix = [];
         nf.igPix = [];
-        nf.igPix = [];
+        nf.haloPix = [];
         
         objs=[objs no];
         features = [features nf];

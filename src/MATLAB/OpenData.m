@@ -88,38 +88,48 @@ oldCONSTANTS = CONSTANTS;
 
 %find the first image
 imageFilter = [settings.imagePath '*.TIF'];
-while (filterIndexImage==0)
-    fprintf('\nSelect first .TIF image...\n\n');
+
+sigDigits = 0;
+fileName = [];
+tryidx = 0;
+while ( (sigDigits == 0) || ~exist(fileName,'file') )
+    if ( tryidx > 0 )
+        fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
+    else
+        fprintf('\nSelect first .TIF image...\n\n');
+    end
+
     [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
     if (filterIndexImage==0)
         CONSTANTS = oldCONSTANTS;
         return
     end
-end
 
-index = strfind(settings.imageFile,'_t');
-if (~isempty(index) && filterIndexImage~=0)
+    [sigDigits imageDataset] = GetImageSigDigits(settings.imageFile);
+
     CONSTANTS.rootImageFolder = settings.imagePath;
-    imageDataset = settings.imageFile(1:(index(length(index))-1));
+
     CONSTANTS.imageDatasetName = imageDataset;
     CONSTANTS.datasetName = imageDataset;
-    index2 = strfind(settings.imageFile,'.');
-    CONSTANTS.imageSignificantDigits = index2 - index - 2;
-    fileName=[CONSTANTS.rootImageFolder imageDataset '_t' SignificantDigits(1) '.TIF'];
+    CONSTANTS.imageSignificantDigits = sigDigits;
+    fileName = [CONSTANTS.rootImageFolder imageDataset '_t' SignificantDigits(1) '.TIF'];
+
+    tryidx = tryidx + 1;
 end
 
-while (isempty(index) || ~exist(fileName,'file'))
-    fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
-    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
-    if(filterIndexImage==0)
-        CONSTANTS = oldCONSTANTS;
-        return
-    end
-    index = strfind(imageFile,'t');
-    CONSTANTS.rootImageFolder = [settings.imagePath '\'];
-    imageDataset = imageFile(1:(index(length(index))-2));
-    fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' SignificantDigits(t) '.TIF'];
-end
+% while ( isempty(index) || ~exist(fileName,'file') )
+%     fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
+%     
+%     [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
+%     if(filterIndexImage==0)
+%         CONSTANTS = oldCONSTANTS;
+%         return
+%     end
+%     index = strfind(imageFile,'t');
+%     CONSTANTS.rootImageFolder = [settings.imagePath '\'];
+%     imageDataset = imageFile(1:(index(length(index))-2));
+%     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' SignificantDigits(t) '.TIF'];
+% end
 
 answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
 switch answer
@@ -127,7 +137,7 @@ switch answer
         save('LEVerSettings.mat','settings');
         InitializeConstants();
         UpdateFileVersionString(versionString);
-        opened = SegAndTrack();
+        errOpen = SegAndTrack();
     case 'Existing'
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
@@ -193,12 +203,17 @@ switch answer
         
         LogAction(['Opened file ' settings.matFile]);
         
-        opened = 1;
+        errOpen = 0;
     otherwise
         return
 end
 
-if(~opened),return,end
+opened = 1;
+
+if(errOpen)
+    opened = 0;
+    return
+end
 
 bUpdated = FixOldFileVersions(versionString);
 if ( bUpdated )

@@ -24,18 +24,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function digits = SignificantDigits(num)
+function digits = SignificantDigits(num, strSize)
+    global CONSTANTS
 
-global CONSTANTS
-digits = '';
-switch CONSTANTS.imageSignificantDigits
-        case 3
-            digits = num2str(num,'%03d');
-        case 4
-            digits = num2str(num,'%04d');
-        case 5
-            digits = num2str(num,'%05d');
-        case 6
-            digits = num2str(num,'%06d');
-end
+    if ( ~exist('strSize','var') )
+        strSize = CONSTANTS.imageSignificantDigits;
+    end
+
+    formatstr = sprintf('%%0%dd',strSize);
+    digits = num2str(num, formatstr);
 end

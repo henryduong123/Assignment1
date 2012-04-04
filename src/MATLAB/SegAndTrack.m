@@ -24,112 +24,44 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function status = SegAndTrack()
-global CONSTANTS SegLevels
+function errStatus = SegAndTrack()
+    global CONSTANTS
 
-status = 0;
-
-if (exist('LEVerSettings.mat','file')~=0)
-        load('LEVerSettings.mat');
-else
-    settings.matFilePath = '.\';
-end
-
-[settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-    [CONSTANTS.imageDatasetName '_LEVer.mat']);
-
-if(~FilterIndex),return,end
-
-status = 1;
-
-save('LEVerSettings.mat','settings');
-
-%% Segmentation
-tic
-
-fileList = dir([CONSTANTS.rootImageFolder CONSTANTS.imageDatasetName '*.tif']);
-numberOfImages = length(fileList);
-
-cellSegments = [];
-cellFeat = [];
-cellSegLevels = [];
-numProcessors = getenv('Number_of_processors');
-numProcessors = str2double(numProcessors);
-if(isempty(numProcessors) || isnan(numProcessors) || numProcessors<4),numProcessors = 4;end
-
-fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
-
-if(~isempty(dir('.\segmentationData')))
-    system('rmdir /S /Q .\segmentationData');
-end
-
-for i=1:numProcessors
-    system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-        num2str(numberOfImages) ' "' CONSTANTS.rootImageFolder(1:end-1) '" "' CONSTANTS.datasetName '" ' ...
-        num2str(CONSTANTS.imageAlpha) ' ' num2str(CONSTANTS.imageSignificantDigits) ' && exit']);
-    %use line below instead of the 3 lines above for non-parallel or to debug
-%     Segmentor(i,numProcessors,numberOfImages,CONSTANTS.rootImageFolder(1:end-1),CONSTANTS.datasetName,CONSTANTS.imageAlpha,CONSTANTS.imageSignificantDigits);
-end
-
-for i=1:numProcessors
-    fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
-    fileDescriptor = dir(fileName);
-    while(isempty(fileDescriptor))
-        pause(3)
-        fileDescriptor = dir(fileName);
+    % Modified 
+    errStatus = 1;
+    
+    if (exist('LEVerSettings.mat','file')~=0)
+            load('LEVerSettings.mat');
+    else
+        settings.matFilePath = '.\';
     end
-end
 
-leveltimes = [];
-for i=1:numProcessors
-    fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
-    load(fileName);
-    cellSegments = [cellSegments objs];
-    cellFeat = [cellFeat features];
-    cellSegLevels = [cellSegLevels levels];
-    leveltimes = [leveltimes i:numProcessors:numberOfImages];
-    pause(1)
-end
+    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
+        [CONSTANTS.imageDatasetName '_LEVer.mat']);
 
-segtimes = [cellSegments.t];
-[srtseg srtidx] = sort(segtimes);
-cellSegments = cellSegments(srtidx);
-cellFeat = cellFeat(srtidx);
+    if(~FilterIndex)
+        return;
+    end
 
-[srtlevels srtidx] = sort(leveltimes);
-cellSegLevels = cellSegLevels(srtidx);
-
-fprintf('Please wait...');
-
-cellSegments = GetDarkConnectedHulls(cellSegments);
-save ( ['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.mat'],'cellSegments');
-WriteSegData(cellSegments,CONSTANTS.datasetName);
-
-fprintf(1,'\nDone\n');
-
-fnameIn=['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.txt'];
-fnameOut=['.\segmentationData\Tracked_' CONSTANTS.datasetName '.txt'];
-tSeg=toc;
-
-%% Tracking
-tic
-fprintf(1,'Tracking...');
-system(['.\MTC.exe "' fnameIn '" "' fnameOut '" > out.txt']);
-fprintf('Done\n');
-tTrack=toc;
-
-%% Inport into LEVer's data sturcture
-[objHulls gConnect HashedHulls] = ReadTrackData(cellSegments,CONSTANTS.datasetName);
-
-fprintf('Finalizing Data...');
-ConvertTrackingData(objHulls,gConnect,cellFeat);
-fprintf('Done\n');
-
-SegLevels = cellSegLevels;
-
-InitializeFigures();
-
-SaveData(1);
-
-LogAction('Segmentation time - Tracking time',tSeg,tTrack);
+    % 
+    save('LEVerSettings.mat','settings');
+    
+    numProcessors = getenv('Number_of_processors');
+    numProcessors = str2double(numProcessors);
+    if(isempty(numProcessors) || isnan(numProcessors) || numProcessors < 4)
+        numProcessors = 4;
+    end
+    
+    
+    [errStatus tSeg tTrack] = SegAndTrackDataset(CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.imageDatasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+    
+    if ( errStatus > 0 )
+        return;
+    end
+    
+    SaveData(1);
+    
+    InitializeFigures();
+    
+    LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end
