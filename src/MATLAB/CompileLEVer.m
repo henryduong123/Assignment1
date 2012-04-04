@@ -25,34 +25,49 @@
 
 tic
 
-vstoolroot = getenv('VS90COMNTOOLS');
+vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
-    error('Cannot compile MTC and mexMAT without Visual Studio 2008');
+    error('Cannot compile MTC and mexMAT without Visual Studio 2010');
 end
 
-if ( ~exist('..\..\bin','dir') )
-    mkdir('..\..\bin');
+comparch = computer('arch');
+if ( strcmpi(comparch,'win64') )
+    buildbits = '64';
+    buildenv = fullfile(vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat');
+    buildplatform = 'x64';
+    bindir = '..\..\bin64';
+elseif ( strcmpi(comparch,'win32') )
+    buildbits = '32';
+    buildenv = fullfile(vstoolroot,'..','..','vc','bin','vcvars32.bat');
+    buildplatform = 'win32';
+    bindir = '..\..\bin';
+else
+    error('Only windows 32/64-bit builds are currently supported');
 end
 
-system(['"' fullfile(vstoolroot,'..','..','vc','bin','vcvars32.bat') '"' ]);
+if ( ~exist(bindir,'dir') )
+    mkdir(bindir);
+end
 
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\MTC.sln"']);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build Release "..\c\mexMAT.sln"']);
+system(['"' buildenv '"' ]);
+
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\MTC.sln"']);
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexMAT.sln"']);
 
 % clears out mex cache so src/mexMAT.mexw32 can be overwritten
 clear mex
-system('copy ..\c\mexMAT\Release\mexMAT.dll .\mexMAT.mexw32');
-system('copy ..\c\MTC\Release\MTC.exe .\');
-system('copy ..\c\MTC\Release\MTC.exe ..\..\bin\');
+system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
+system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
+system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
 
-mcc -m LEVer.m -d ..\..\bin\.
+mcc -m LEVer.m
 mcc -m Segmentor.m
-system('copy Segmentor.exe ..\..\bin\.');
-
 mcc -m LEVER_SegAndTrackFolders.m
-system('copy LEVER_SegAndTrackFolders.exe ..\..\bin\.');
+system(['copy LEVer.exe ' fullfile(bindir,'.')]);
+system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
+system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);
 
-if(isempty(dir('.\MTC.exe')) || isempty(dir('..\..\bin\MTC.exe')))
+if(isempty(dir('.\MTC.exe')) || isempty(dir(fullfile(bindir,'MTC.exe'))))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
 end
 toc
