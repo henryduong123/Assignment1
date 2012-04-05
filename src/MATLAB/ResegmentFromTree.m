@@ -318,12 +318,19 @@ function bAssign = assignBack(costMatrix, extendHulls, affectedHulls, bPropForwa
 end
 
 function [wantHulls wantCosts] = getBestNextHulls(hulls, dir)
-    global CellHulls
+    global CellHulls HashedCells
     
     wantHulls = zeros(1,length(hulls));
     wantCosts = Inf*ones(1,length(hulls));
     
     if ( dir > 0 )
+        t = hulls(1).time;
+        if ( t >= length(HashedCells) )
+            return;
+        end
+        
+        checkHulls = [HashedCells{t+dir}.hullID];
+        
         checkHulls = hulls;
         nextHulls = 1:length(CellHulls);
         
@@ -334,7 +341,12 @@ function [wantHulls wantCosts] = getBestNextHulls(hulls, dir)
         wantHulls(bFrom) = toHulls(bestOutIdx);
         wantCosts(bFrom) = minOut;
     else
-        checkHulls = 1:length(CellHulls);
+        t = hulls(1).time;
+        if ( t <= 1 )
+            return;
+        end
+        
+        checkHulls = [HashedCells{t+dir}.hullID];
         nextHulls = hulls;
         
         [costMatrix,bFrom,bToHulls] = GetCostSubmatrix(checkHulls,nextHulls);
