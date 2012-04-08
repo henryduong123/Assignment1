@@ -16,6 +16,9 @@ segmentationData/
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
+*.opensdf
+*.sdf
+*.ipch
 *.obj
 *.pdb
 *.user
