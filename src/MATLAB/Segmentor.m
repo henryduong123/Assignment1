@@ -34,7 +34,7 @@ objs=[];
 features = [];
 levels = struct('haloLevel',{}, 'igLevel',{});
 
-% try
+try
     if(isempty(dir('.\segmentationData')))
         system('mkdir .\segmentationData');
     end
@@ -64,15 +64,15 @@ levels = struct('haloLevel',{}, 'igLevel',{});
         levels = [levels frmLevels];
     end
     
-% catch excp
-%     cltime = clock();
-%     errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
-%     fid = fopen(errFilename, 'w');
-%     fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame %d\n',cltime(4),cltime(5),cltime(6), t);
-%     printExcp(fid, excp);
-%     fclose(fid);
-%     return;
-% end
+catch excp
+    cltime = clock();
+    errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
+    fid = fopen(errFilename, 'w');
+    fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame %d\n',cltime(4),cltime(5),cltime(6), t);
+    printExcp(fid, excp);
+    fclose(fid);
+    return;
+end
 
 fileName = ['.\segmentationData\objs_' num2str(tStart) '.mat'];
 save(fileName,'objs','features','levels');

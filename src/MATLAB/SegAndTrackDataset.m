@@ -2,6 +2,8 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     global SegLevels
 
     status = 1;
+    tSeg = 0;
+    tTrack = 0;
 
     %% Segmentation
     tic
@@ -43,11 +45,30 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
             efd = dir(errFile);
         end
         
-        bSegFileExists = ~isempty(fileDescriptor);
+        bSegFileExists(i) = ~isempty(fileDescriptor);
     end
     
     if ( ~all(bSegFileExists) )
         status = 1;
+        tSeg = toc;
+        
+        % Collect segmentation error logs into one place
+        errlog = fopen([datasetName '_error.log'], 'w');
+        for i=1:length(bSegFileExists)
+            if ( bSegFileExists )
+                continue;
+            end
+            fprintf(errlog, '----------------------------------\n');
+            objerr = fopen(fullfile('.','segmentationData',['err_' num2str(i) '.log']));
+            logline = fgetl(objerr);
+            while ( ischar(logline) )
+                fprintf(errlog, '%s\n', logline);
+                logline = fgetl(objerr);
+            end
+            fclose(objerr);
+        end
+        fclose(errlog);
+        
         return;
     end
 
@@ -67,6 +88,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         end
     catch e
         status = 1;
+        tSeg = toc;
         return;
     end
 

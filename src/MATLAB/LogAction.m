@@ -32,7 +32,17 @@ function LogAction(action,oldValue,newValue,callstack)
 global Figures CONSTANTS Log
 time = clock;%[year month day hour minute seconds]
 
-load('LEVerSettings.mat');
+if (exist('LEVerSettings.mat','file')~=0)
+	load('LEVerSettings.mat');
+    logPath = settings.matFilePath;
+    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+elseif ( isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile) )
+    logPath = fileparts(CONSTANTS.matFullFile);
+    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+else
+    logPath = '.\';
+    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+end
 
 [x usr] = system('whoami');
 ind = strfind(usr, '\');
@@ -67,7 +77,7 @@ else
     row = [row '\n'];
 end
 
-if (~exist([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'file'))
+if (~exist(logFile,'file'))
     %add headers
     row = ['Date,Time,User,,Action,Frame,Old Value,New Value,\n' row];
     if(~isempty(Log))
@@ -85,14 +95,14 @@ Log(logEntry).action = action;
 Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;
 
-file = fopen([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'a');
+file = fopen(logFile,'a');
 while(file<2)
     answer = questdlg('Please close the log.','Log Opened','Use new log name','Try Again','Try Again');
     switch answer
         case 'Use new log name'
-            file = fopen([settings.matFilePath CONSTANTS.datasetName '_log2.csv'],'a');
+            file = fopen(fullfile(logPath,[CONSTANTS.datasetName '_log2.csv']),'a');
         case 'Try Again'
-            file = fopen([settings.matFilePath CONSTANTS.datasetName '_log.csv'],'a');
+            file = fopen(logFile,'a');
     end
 end
 
