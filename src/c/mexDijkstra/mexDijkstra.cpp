@@ -32,6 +32,11 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
+// Couple of convenience macros for command handling
+//#define DEFINE_COMMAND(cmdname) void mexCmd##cmdname(int nrhs, mxArray* prhs, int nlhs, const mxArray* plhs)
+#define IS_COMMAND(value,cmdname) (strcmpi((value),(#cmdname)) == 0)
+#define CALL_COMMAND(cmdname) {mexCmd_##cmdname(nlhs, plhs, nrhs, prhs);}
+
 // Globals
 CSparseWrapper* gCostGraph = NULL;
 
@@ -87,9 +92,33 @@ int findEndHull(mwIndex trackID)
 	return 0;
 }
 
-bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, bool bCAcceptFunc)
+bool callMatlabAcceptFunc(const mxArray* matFuncHandle, mwIndex startVert, mwIndex endVert)
 {
-	if ( bCAcceptFunc )
+	int nlhs = 1;
+	int nrhs = 3;
+
+	mxArray* plhs[1] = {NULL};
+	mxArray* prhs[3] = {NULL, NULL, NULL};
+
+	prhs[0] = ((mxArray*) matFuncHandle);
+	prhs[1] = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
+	prhs[2] = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
+
+	((double*)mxGetData(prhs[1]))[0] = startVert;
+	((double*)mxGetData(prhs[2]))[0] = endVert;
+
+	mexCallMATLAB(nlhs, plhs, nrhs, prhs, "feval");
+
+	int fnResult = ((int) mxGetScalar(plhs[0]));
+	if ( fnResult == 0 )
+		return false;
+
+	return true;
+}
+
+bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, const mxArray* matFuncHandle)
+{
+	if ( !matFuncHandle )
 	{
 		int hullTime = ((int) mxGetScalar(mxGetField(gCellHulls, MATLAB_IDX(endVert), "time")));
 		int startVertTime = ((int) mxGetScalar(mxGetField(gCellHulls, MATLAB_IDX(startVert), "time")));
@@ -126,7 +155,7 @@ bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, bool 
 		return false;
 	}
 	else
-		return false;
+		return callMatlabAcceptFunc(matFuncHandle, startVert, endVert);
 
 	return false;
 }
@@ -211,7 +240,7 @@ void buildOutputPaths(mxArray* cellPaths, mxArray* arrayCost)
 }
 
 // Functions
-int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, bool bCAcceptFunc)
+int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle)
 {
 	gAcceptedPaths.clear();
 	for ( mwSize i=0; i < numVerts; ++i )
@@ -230,7 +259,7 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, bool bCAcce
 	int curVert = startVert;
 	while ( curVert > 0 )
 	{
-		if ( checkAcceptPath(startVert, curVert, maxExtent, bCAcceptFunc) )
+		if ( checkAcceptPath(startVert, curVert, maxExtent, matFuncHandle) )
 		{
 			gAcceptedPaths.push_back(curVert);
 			curVert = popNextVert(costQueue, maxExtent);
@@ -267,133 +296,204 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, bool bCAcce
 	return gAcceptedPaths.size();
 }
 
+
+void mexCmd_initGraph(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs > 0 )
+		mexErrMsgTxt("initGraph: Output values unsupported.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || !mxIsSparse(prhs[1]) )
+		mexErrMsgTxt("initGraph: Expected sparse matrix graph as second parameter.");
+
+	if ( gCostGraph )
+	{
+		delete gCostGraph;
+		gCostGraph = NULL;
+
+		gbTraversed.clear();
+		gPathCosts.clear();
+		gPathLengths.clear();
+		gPathBack.clear();
+	}
+
+	gCostGraph = new CSparseWrapper(prhs[1]);
+
+	gbTraversed.resize(gCostGraph->getNumVerts());
+	gPathCosts.resize(gCostGraph->getNumVerts());
+	gPathLengths.resize(gCostGraph->getNumVerts());
+	gPathBack.resize(gCostGraph->getNumVerts());
+}
+
+void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 2 )
+		mexErrMsgTxt("checkExtension: Expect 2 outputs [paths costs] from dijkstra extensions search.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("checkExtension: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
+		mexErrMsgTxt("checkExtension: Expected scalar vertex index as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
+		mexErrMsgTxt("checkExtension: Expected scalar max extent as third parameter.");
+
+	//
+	gCellHulls = mexGetVariablePtr("global", "CellHulls");
+	gCellTracks = mexGetVariablePtr("global", "CellTracks");
+	gCellFamilies = mexGetVariablePtr("global", "CellFamilies");
+	gHashHulls = mexGetVariablePtr("global", "HashedCells");
+
+	//
+	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
+	mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
+
+	//
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL);
+
+	plhs[0] = mxCreateCellMatrix(1, numPaths);
+	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
+
+	if ( numPaths > 0 )
+		buildOutputPaths(plhs[0], plhs[1]);
+}
+
+void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 2 )
+		mexErrMsgTxt("matlabExtend: Expect 2 outputs [paths costs] from dijkstra extensions search.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("matlabExtend: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
+		mexErrMsgTxt("matlabExtend: Expected scalar vertex index as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
+		mexErrMsgTxt("matlabExtend: Expected scalar max extent as third parameter.");
+
+	if ( nrhs < 4 || !mxIsClass(prhs[3], "function_handle") )
+		mexErrMsgTxt("matlabExtend: Expected function handle as fourth parameter.");
+
+	//
+	gCellHulls = mexGetVariablePtr("global", "CellHulls");
+	gCellTracks = mexGetVariablePtr("global", "CellTracks");
+	gCellFamilies = mexGetVariablePtr("global", "CellFamilies");
+	gHashHulls = mexGetVariablePtr("global", "HashedCells");
+
+	//
+	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
+	mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
+
+	const mxArray* acceptFuncHandle = prhs[3];
+
+	//
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle);
+
+	plhs[0] = mxCreateCellMatrix(1, numPaths);
+	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
+
+	if ( numPaths > 0 )
+		buildOutputPaths(plhs[0], plhs[1]);
+}
+
+void mexCmd_debugEdgesOut(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 2 )
+		mexErrMsgTxt("debugEdgesOut: Expect 2 outputs [outverts outcosts].");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("debugEdgesOut: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
+		mexErrMsgTxt("debugEdgesOut: Expected scalar vertex index as second parameter.");
+
+	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
+
+	int numEdges = gCostGraph->getOutEdgeLength(startVert);
+
+	plhs[0] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
+	plhs[1] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
+
+	double* edgeData = (double*) mxGetData(plhs[0]);
+	double* costData = (double*) mxGetData(plhs[1]);
+
+	CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getOutEdgeIter(startVert);
+	for ( int i=0; i < numEdges; ++i, ++edgeIter )
+	{
+		edgeData[i] = edgeIter->first;
+		costData[i] = edgeIter->second;
+	}
+}
+
+void mexCmd_debugTestFunc(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs > 0 )
+		mexErrMsgTxt("debugTestFunc: Output values unsupported.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "function_handle") )
+		mexErrMsgTxt("debugTestFunc: Expected function handle as first parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
+		mexErrMsgTxt("debugTestFunc: Expected scalar start vertex index as second parameter.");
+
+	if ( nrhs < 4 || !mxIsClass(prhs[3], "double") || mxGetNumberOfElements(prhs[3]) != 1 )
+		mexErrMsgTxt("debugTestFunc: Expected scalar end vertex index as third parameter.");
+
+	const mxArray* acceptFuncHandle = prhs[1];
+	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[2]));
+	mwIndex endVert = ((mwSize) mxGetScalar(prhs[3]));
+
+	mxArray* nprhs[1] = {(mxArray*) acceptFuncHandle};
+
+	bool result = callMatlabAcceptFunc(acceptFuncHandle, startVert, endVert);
+
+	if ( result == true )
+		mexPrintf("\tFunction evaluated to true for (%d,%d)\n", startVert, endVert);
+	else
+		mexPrintf("\tFunction evaluated to false for (%d,%d)\n", startVert, endVert);
+}
+
+
 // Main entry point
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nrhs < 1 )
-		mexErrMsgTxt("Function requires at least one input argument.");
-
-	//mexPrintf("\n");
-	//for ( int i=0; i < nrhs; ++i )
-	//{
-	//	const char* className = mxGetClassName(prhs[i]);
-	//	mexPrintf("prhs[%d] -> %s\n", i, className);
-	//}
+		mexErrMsgTxt("Function requires a command string as first argument.");
 
 	if ( !mxIsClass(prhs[0], "char") )
-		mexErrMsgTxt("Parameter 1 must be a string.");
+		mexErrMsgTxt("Parameter 1 must be a command string.");
 
 	char* commandStr = mxArrayToString(prhs[0]);
 
-	if ( strcmpi(commandStr, "initGraph") == 0 )
+	if ( IS_COMMAND(commandStr, initGraph) )
 	{
-		if ( nlhs > 0 )
-			mexErrMsgTxt("Output unsupported in graph initialization command.");
-
-		if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || !mxIsSparse(prhs[1]) )
-			mexErrMsgTxt("Expected sparse matrix graph as second parameter.");
-
-		if ( gCostGraph )
-		{
-			delete gCostGraph;
-			gCostGraph = NULL;
-
-			gbTraversed.clear();
-			gPathCosts.clear();
-			gPathLengths.clear();
-			gPathBack.clear();
-		}
-
-		gCostGraph = new CSparseWrapper(prhs[1]);
-
-		gbTraversed.resize(gCostGraph->getNumVerts());
-		gPathCosts.resize(gCostGraph->getNumVerts());
-		gPathLengths.resize(gCostGraph->getNumVerts());
-		gPathBack.resize(gCostGraph->getNumVerts());
+		CALL_COMMAND(initGraph);
 	}
-	else if ( strcmpi(commandStr, "checkExtension") == 0 )
+	else if ( IS_COMMAND(commandStr, checkExtension) )
 	{
-		if ( nlhs != 2 )
-			mexErrMsgTxt("Expect 2 outputs [paths costs] from dijkstra extensions search.");
-
-		if ( !gCostGraph )
-			mexErrMsgTxt("Cost graph must first be initialized. Run \"initGraph\" command.");
-
-		if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
-			mexErrMsgTxt("Expected scalar vertex index as second parameter.");
-
-		if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
-			mexErrMsgTxt("Expected scalar max extent as third parameter.");
-
-		gCellHulls = mexGetVariablePtr("global", "CellHulls");
-		gCellTracks = mexGetVariablePtr("global", "CellTracks");
-		gCellFamilies = mexGetVariablePtr("global", "CellFamilies");
-		gHashHulls = mexGetVariablePtr("global", "HashedCells");
-
-		mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
-		mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
-
-		int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), true);
-
-		plhs[0] = mxCreateCellMatrix(1, numPaths);
-		plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
-
-		if ( numPaths > 0 )
-			buildOutputPaths(plhs[0], plhs[1]);
+		CALL_COMMAND(checkExtension);
 	}
-	else if ( strcmpi(commandStr, "extendMatlab") == 0 )
+	else if ( IS_COMMAND(commandStr, matlabExtend) )
 	{
-		if ( nlhs != 2 )
-			mexErrMsgTxt("Expect 2 outputs [paths costs] from dijkstra extensions search.");
-
-		if ( !gCostGraph )
-			mexErrMsgTxt("Cost graph must first be initialized. Run \"initGraph\" command.");
-
-		if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
-			mexErrMsgTxt("Expected scalar vertex index as second parameter.");
-
-		if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
-			mexErrMsgTxt("Expected scalar max extent as third parameter.");
-
-		if ( nrhs < 4 || !mxIsClass(prhs[3], "function_handle") )
-			mexErrMsgTxt("Expected function handle as fourth parameter.");
-
-		mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
-		mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
-
-
-		dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), false);
+		CALL_COMMAND(matlabExtend);
 	}
-	else if ( strcmpi(commandStr, "edgesOut") == 0 )
+
+	else if ( IS_COMMAND(commandStr, debugEdgesOut) )
 	{
-		if ( nlhs != 2 )
-			mexErrMsgTxt("Expect 2 outputs [outverts outcosts].");
-
-		if ( !gCostGraph )
-			mexErrMsgTxt("Cost graph must first be initialized. Run \"initGraph\" command.");
-
-		if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
-			mexErrMsgTxt("Expected scalar vertex index as second parameter.");
-
-		mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
-
-		int numEdges = gCostGraph->getOutEdgeLength(startVert);
-
-		plhs[0] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
-		plhs[1] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
-
-		double* edgeData = (double*) mxGetData(plhs[0]);
-		double* costData = (double*) mxGetData(plhs[1]);
-
-		CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getOutEdgeIter(startVert);
-		for ( int i=0; i < numEdges; ++i, ++edgeIter )
-		{
-			edgeData[i] = edgeIter->first;
-			costData[i] = edgeIter->second;
-		}
+		CALL_COMMAND(debugEdgesOut);
 	}
-	else
-		mexErrMsgTxt("Invalid Command String.");
+	else if ( IS_COMMAND(commandStr, debugTestFunc) )
+	{
+		CALL_COMMAND(debugTestFunc);
+	}
+
+
+	mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
+	mexPrintf("Supported Commands:\n");
+	mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
+	mexPrintf("\t checkExtension(startVert, maxLength) - Find suitable extensions out to maxLength from startVert.\n");
+	mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc) - Find suitable extensions using matlab acceptFunc as acceptance criterion.\n");
 
 	mxFree(commandStr);
 
