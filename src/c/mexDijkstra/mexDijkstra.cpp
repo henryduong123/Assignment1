@@ -397,6 +397,62 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 		buildOutputPaths(plhs[0], plhs[1]);
 }
 
+void mexCmd_edgeCost(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 1 )
+		mexErrMsgTxt("edgeCost: Expect 1 outputs outcost.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("edgeCost: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
+		mexErrMsgTxt("edgeCost: Expected scalar start vertex index as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
+		mexErrMsgTxt("edgeCost: Expected scalar end vertex index as third parameter.");
+
+	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
+	mwIndex endVert = ((mwIndex) mxGetScalar(prhs[2]));
+
+	plhs[0] = mxCreateNumericMatrix(1,1, mxDOUBLE_CLASS, mxREAL);
+	double* costData = (double*) mxGetData(plhs[0]);
+	
+	double edgeCost = gCostGraph->findEdge(startVert, endVert);
+	if ( edgeCost == CSparseWrapper::noEdge )
+		(*costData) = 0.0;
+	else
+		(*costData) = edgeCost;
+}
+
+void mexCmd_debugEdgesIn(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 2 )
+		mexErrMsgTxt("debugEdgesIn: Expect 2 outputs [outverts outcosts].");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("debugEdgesIn: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") || mxGetNumberOfElements(prhs[1]) != 1 )
+		mexErrMsgTxt("debugEdgesIn: Expected scalar vertex index as second parameter.");
+
+	mwIndex nextVert = ((mwIndex) mxGetScalar(prhs[1]));
+
+	int numEdges = gCostGraph->getInEdgeLength(nextVert);
+
+	plhs[0] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
+	plhs[1] = mxCreateNumericMatrix(1, numEdges, mxDOUBLE_CLASS, mxREAL);
+
+	double* edgeData = (double*) mxGetData(plhs[0]);
+	double* costData = (double*) mxGetData(plhs[1]);
+
+	CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getInEdgeIter(nextVert);
+	for ( int i=0; i < numEdges; ++i, ++edgeIter )
+	{
+		edgeData[i] = edgeIter->first;
+		costData[i] = edgeIter->second;
+	}
+}
+
 void mexCmd_debugEdgesOut(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nlhs != 2 )
@@ -478,22 +534,32 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		CALL_COMMAND(matlabExtend);
 	}
+	else if ( IS_COMMAND(commandStr, edgeCost) )
+	{
+		CALL_COMMAND(edgeCost);
+	}
 
 	else if ( IS_COMMAND(commandStr, debugEdgesOut) )
 	{
 		CALL_COMMAND(debugEdgesOut);
 	}
+	else if ( IS_COMMAND(commandStr, debugEdgesIn) )
+	{
+		CALL_COMMAND(debugEdgesIn);
+	}
 	else if ( IS_COMMAND(commandStr, debugTestFunc) )
 	{
 		CALL_COMMAND(debugTestFunc);
 	}
-
-
-	mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
-	mexPrintf("Supported Commands:\n");
-	mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
-	mexPrintf("\t checkExtension(startVert, maxLength) - Find suitable extensions out to maxLength from startVert.\n");
-	mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc) - Find suitable extensions using matlab acceptFunc as acceptance criterion.\n");
+	else
+	{
+		mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
+		mexPrintf("Supported Commands:\n");
+		mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
+		mexPrintf("\t checkExtension(startVert, maxLength) - Find suitable extensions out to maxLength from startVert.\n");
+		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc) - Find suitable extensions using matlab acceptFunc as acceptance criterion.\n");
+		mexPrintf("\t edgeCost(startVert, nextVert) - Return cost for given edge (0.0) if no edge exists.\n");
+	}
 
 	mxFree(commandStr);
 

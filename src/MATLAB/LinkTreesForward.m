@@ -1,20 +1,27 @@
-function LinkTreesForward(rootTracks)
+function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     global CellHulls HashedCells Costs
 
+    assignedExtensions = 0;
+    foundExtensions = 0;
+    
+    findTime = 0;
+    extTime = 0;
+    
     leafHulls = getLeafHulls(rootTracks);
     tStart = CellHulls(leafHulls(1)).time;
     tEnd = length(HashedCells);
     
-    maxFrameExt = 7;
+    maxFrameExt = 10;
     
-    lookupStart = sparse([],[],[], 1,size(Costs,1), round(0.01*size(Costs,1)));
-    lookupBack = sparse([],[],[], 1,size(Costs,1), round(0.01*size(Costs,1)));
-    extLookup = {};
-    extensions = struct('extendEdge',{}, 'extCost',{}, 'extPath',{}, 'trackCost',{}, 'trackHull',{});
+	extGraph = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
+    extEnds = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
     
     costMatrix = GetCostMatrix();
     
-    tic;
+    % Initialize mex routine with current cost-graph
+    mexDijkstra('initGraph', costMatrix);
+    
+    chkFindTime = tic();
     Progressbar(0);
     i = 1;
     checkExtHulls = leafHulls;
@@ -24,7 +31,8 @@ function LinkTreesForward(rootTracks)
             continue;
         end
         
-        [pathExt pathCost] = dijkstraSearch(checkExtHulls(i), costMatrix, @checkExtension, maxFrameExt);
+        [pathExt pathCost] = mexDijkstra('checkExtension', checkExtHulls(i), maxFrameExt);
+        % [pathExt pathCost] = dijkstraSearch(checkExtHulls(i), costMatrix, @checkExtension, maxFrameExt);
         
         endHulls = zeros(1,length(pathExt));
         for j=1:length(pathExt)
@@ -40,24 +48,12 @@ function LinkTreesForward(rootTracks)
             extIdx = find(endHulls == extHulls(j));
             for k=1:length(extIdx)
                 for l = 1:length(nextLeaves)
-                    if ( ~lookupStart(checkExtHulls(i)) )
-                        extLookup = [extLookup {[]}];
-                        lookupStart(checkExtHulls(i)) = length(extLookup);
-                    end
-                    
-                    trackCost = calcTrackCost(extHulls(j),nextLeaves(l), maxFrameExt);
-                    
-                    nex = struct('extendEdge',{[checkExtHulls(i) nextLeaves(l)]}, ...
-                                 'extCost',{pathCost(extIdx(k))}, ...
-                                 'extPath',{pathExt{extIdx(k)}}, ...
-                                 'trackCost',{trackCost}, ...
-                                 'trackHull',{extHulls(j)});
-                    
-                    extensions = [extensions nex];
+                    trackCost = calcTrackCost(costMatrix, extHulls(j),nextLeaves(l), maxFrameExt);
                     
                     
-                    hashIdx = lookupStart(checkExtHulls(i));
-                    extLookup{hashIdx} = [extLookup{hashIdx} length(extensions)];
+                    extendCost = trackCost + pathCost(extIdx(k));
+                    extGraph(checkExtHulls(i),nextLeaves(l)) = extendCost;
+                    extEnds(checkExtHulls(i),nextLeaves(l)) = pathExt{extIdx(k)}(end);
                 end
             end
             
@@ -69,20 +65,23 @@ function LinkTreesForward(rootTracks)
         i = i + 1;
     end
     
-    extGraph = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
-    extMap = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
-    for i=1:length(extensions)
-        extGraph(extensions(i).extendEdge(1),extensions(i).extendEdge(2)) = extensions(i).extCost + extensions(i).trackCost;
-        extMap(extensions(i).extendEdge(1),extensions(i).extendEdge(2)) = i;
-    end
+    findTime = toc(chkFindTime);
+    
+    chkExtendTime = tic();
+    
+    foundExtensions = nnz(extGraph);
+    assignedExtensions = 0;
     
     leafTimes = [CellHulls(leafHulls).time];
     [dump srtidx] = sort(leafTimes);
     
+    mexDijkstra('initGraph', extGraph);
+    
     leafHulls = leafHulls(srtidx);
     for i=1:length(leafHulls)
         % Only check best-to-end for now
-        [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
+%         [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
+        [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
         if ( isempty(endcosts) )
             continue;
         end
@@ -91,24 +90,24 @@ function LinkTreesForward(rootTracks)
         for j=1:(length(endpaths{minidx})-1)
             startHull = endpaths{minidx}(j);
             finalHull = endpaths{minidx}(j+1);
-            linkupHull = extensions(extMap(startHull,finalHull)).extPath(end);
+            linkupHull = extEnds(startHull,finalHull);
             
             AssignEdge(linkupHull, startHull, 1);
             extGraph(:,finalHull) = 0;
         end
+        
+        assignedExtensions = assignedExtensions + length(endpaths{minidx}) - 1;
         
         Progressbar(0.5 + ((i/length(leafHulls))/2));
     end
     
     Progressbar(1);
 
-    toc;
+    extTime = toc(chkExtendTime);
 end
 
-function cost = calcTrackCost(startHull, endHull, maxFrameExt)
+function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt)
     global CellHulls CellTracks
-    
-    costMatrix = GetCostMatrix();
     
     cost = 0;
     backHull = endHull;
@@ -126,18 +125,23 @@ function cost = calcTrackCost(startHull, endHull, maxFrameExt)
                 error('startHull is not in same family');
             end
         end
-        if ( ~(costMatrix(nzHull,backHull)) )
+%         nextCost = costMatrix(nzHull,backHull);
+        nextCost = mexDijkstra('edgeCost', nzHull, backHull);
+        if ( ~(nextCost) )
             % Try to find shortest graph-path to here
-            [pathExt pathCost] = dijkstraSearch(nzHull, costMatrix, @(x,y,z)(y==backHull), maxFrameExt);
-%             error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite']);
+            [pathExt nextCost] = mexDijkstra('matlabExtend', nzHull, maxFrameExt, @(x,y)(y==backHull));
+%             [pathExt nextCost] = dijkstraSearch(nzHull, costMatrix, @(x,y)(y==backHull), maxFrameExt);
+            if ( isempty(nextCost) )
+                error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite within ' num2str(maxFrameExt) ' frames.']);
+            end
         end
-        cost = cost + costMatrix(nzHull,backHull);
+        cost = cost + nextCost;
         
         backHull = nzHull;
     end
 end
 
-function bEnd = checkFullExt(startHull, endHull, path)
+function bEnd = checkFullExt(startHull, endHull)
     global CellHulls CellTracks HashedCells
     bEnd = false;
     
@@ -200,7 +204,7 @@ function childTracks = getSubtreeTracks(rootTracks)
     end
 end
 
-function bGoodExt = checkExtension(startHull, endHull, path)
+function bGoodExt = checkExtension(startHull, endHull)
     global CellTracks CellHulls
     
     bGoodExt = false;
@@ -273,7 +277,7 @@ function [paths pathCosts] = dijkstraSearch(startHull, costGraph, acceptFunc, ma
             end
 
             % Is the next traversal a terminal node?
-            if ( acceptFunc(startHull, trvList(1,3),[bestPaths{trvList(1,2)} trvList(1,3)]) )
+            if ( acceptFunc(startHull, trvList(1,3)) )
                 termHulls = union(termHulls,trvList(1,3));
                 trvList = trvList(2:end,:);
                 continue;

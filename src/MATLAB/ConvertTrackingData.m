@@ -133,30 +133,6 @@ end
 %create the family trees
 ProcessNewborns(1:length(CellFamilies), length(HashedCells));
 
-% % Try to Push/reseg
-% pushCount = 5;
-% for i=1:pushCount
-% 	LinkTreesForward([HashedCells{1}.trackID]);
-% end
-
-% goodTrees = [];
-% for i=1:length(HashedCells{1})
-%     trackID = HashedCells{1}(i).trackID;
-%     familyID = CellTracks(trackID).familyID;
-%     endTime = CellFamilies(familyID).endTime;
-%     if ( endTime < length(HashedCells) )
-%         continue;
-%     end
-%     
-%     goodTracks = [goodTrees trackID];
-% end
-% ResegmentFromTree(goodTracks);
-% ExternalRetrack();
-% 
-% for i=1:pushCount
-% 	LinkTreesForward([HashedCells{1}.trackID]);
-% end
-
 end
 
 function hullList = addToTrack(hull,hullList,objHulls)
