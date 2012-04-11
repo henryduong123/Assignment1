@@ -53,7 +53,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         tSeg = toc;
         
         % Collect segmentation error logs into one place
-        errlog = fopen([datasetName '_error.log'], 'w');
+        errlog = fopen([datasetName '_seg_error.log'], 'w');
         for i=1:length(bSegFileExists)
             if ( bSegFileExists )
                 continue;

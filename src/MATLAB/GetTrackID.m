@@ -35,7 +35,7 @@ for i=1:length(hullIDs)
     else
         hullTime = CellHulls(hullIDs(i)).time;
         hashedCellIndex = [HashedCells{hullTime}.hullID] == hullIDs(i);
-        if(isempty(hashedCellIndex)),continue,end
+        if(~any(hashedCellIndex)),continue,end
         trackIDs = [trackIDs HashedCells{hullTime}(hashedCellIndex).trackID];
     end
 end
