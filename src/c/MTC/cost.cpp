@@ -223,6 +223,8 @@ double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx
 		OcclusionCost*=2;
 	TotalCost*=OcclusionCost;
 
+	if ( TotalCost < costEpsilon )
+		TotalCost = costEpsilon;
 
 	return TotalCost;
 }
