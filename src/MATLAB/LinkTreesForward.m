@@ -80,8 +80,8 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     leafHulls = leafHulls(srtidx);
     for i=1:length(leafHulls)
         % Only check best-to-end for now
-%         [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
-        [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
+        [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
+%         [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
         if ( isempty(endcosts) )
             continue;
         end

@@ -133,6 +133,8 @@ end
 %create the family trees
 ProcessNewborns(1:length(CellFamilies), length(HashedCells));
 
+LinkFirstFrameTrees();
+
 end
 
 function hullList = addToTrack(hull,hullList,objHulls)

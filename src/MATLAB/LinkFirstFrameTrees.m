@@ -8,6 +8,7 @@ function LinkFirstFrameTrees()
     	[assignExt findTime extTime] = LinkTreesForward([HashedCells{1}.trackID]);
         LogAction(['Tree inference step ' num2str(i)],[assignExt findTime extTime],[]);
         totalTime = totalTime + findTime + extTime;
+        
         if ( assignExt == 0 )
             break;
         end
