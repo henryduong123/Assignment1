@@ -341,7 +341,7 @@ function [wantHulls wantCosts] = getBestNextHulls(hulls, dir)
         wantHulls(bFrom) = toHulls(bestOutIdx);
         wantCosts(bFrom) = minOut;
     else
-        t = hulls(1).time;
+        t = CellHulls(hulls(1)).time;
         if ( t <= 1 )
             return;
         end
