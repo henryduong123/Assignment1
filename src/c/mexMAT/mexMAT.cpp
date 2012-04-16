@@ -52,7 +52,8 @@ int gConstraintFrames;
 
 const double gVMax = 40.0;
 const double gCCMax = 20.0;
-//const double gAMax;
+
+const double gCostEpsilon = 1e-3;
 
 //
 

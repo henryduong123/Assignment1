@@ -196,5 +196,8 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 
 	//TODO: Occlusion cost
 
+	if ( totalCost < gCostEpsilon )
+		totalCost = gCostEpsilon;
+
 	return totalCost;
 }

@@ -57,4 +57,5 @@ extern int gConstraintFrames;
 
 extern const double gVMax;
 extern const double gCCMax;
-extern const double gAMax;
+
+extern const double gCostEpsilon;
