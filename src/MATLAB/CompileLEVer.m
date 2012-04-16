@@ -53,19 +53,23 @@ system(['"' buildenv '"' ]);
 
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\MTC.sln"']);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexMAT.sln"']);
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexDijkstra.sln"']);
 
-% clears out mex cache so src/mexMAT.mexw32 can be overwritten
+% clears out mex cache so src/*.mexw(32/64) can be overwritten
 clear mex
 system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
+system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDijkstra.mexw' buildbits]);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
 
 mcc -m LEVer.m
 mcc -m Segmentor.m
 mcc -m LEVER_SegAndTrackFolders.m
+mcc -m LinkTreeFolders.m
 system(['copy LEVer.exe ' fullfile(bindir,'.')]);
 system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
 system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);
+system(['copy LinkTreeFolders.exe ' fullfile(bindir,'.')]);
 
 if(isempty(dir('.\MTC.exe')) || isempty(dir(fullfile(bindir,'MTC.exe'))))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');

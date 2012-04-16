@@ -122,6 +122,15 @@ redoMenu = uimenu(...
     'Enable',           'off',...
     'Accelerator',      'y');
 
+uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Tree-Inference',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @treeInference,...
+    'Separator',        'on',...
+    'Enable',           'on',...
+    'Accelerator',      'i');
+
 labelsMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Show Labels',...
@@ -315,4 +324,27 @@ if(0>=answer || isempty(CellTracks(answer).hulls))
 end
 DrawTree(CellTracks(answer).familyID);
 DrawCells();
+end
+
+function treeInference(src, evt)
+    global Figures CellFamilies CellTracks
+    
+    currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
+    
+    try
+        [iters totalTime] = LinkFirstFrameTrees();
+    catch err
+        try
+            ErrorHandeling(['Tree Inference Error -- ' err.message],err.stack);
+            return;
+        catch err2
+            fprintf('%s',err2.message);
+            return;
+        end
+    end
+    
+    RunGarbageCollect(currentHull);
+    
+    History('Push');
+    LogAction('Completed Tree Inference', [iters totalTime],[]);
 end

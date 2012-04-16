@@ -133,7 +133,7 @@ end
 %create the family trees
 ProcessNewborns(1:length(CellFamilies), length(HashedCells));
 
-LinkFirstFrameTrees();
+% LinkResegRetrack()
 
 end
 
