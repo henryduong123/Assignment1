@@ -33,6 +33,10 @@ public:
 
 	double findEdge(mwIndex startVert, mwIndex nextVert);
 
+	void removeAllOutEdges(mwIndex startVert);
+	void removeAllInEdges(mwIndex endVert);
+	void removeEdge(mwIndex startVert, mwIndex endVert);
+
 private:
 	mwSize numVerts;
 	mwSize numEdges;

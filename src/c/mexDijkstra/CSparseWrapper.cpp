@@ -63,3 +63,43 @@ double CSparseWrapper::findEdge(mwIndex startVert, mwIndex nextVert)
 
 	return (outEdges[MATLAB_IDX(startVert)][nextVert]);
 }
+
+void CSparseWrapper::removeAllOutEdges(mwIndex startVert)
+{
+	int numOutEdges = getOutEdgeLength(startVert);
+	tEdgeIterator outIter = getOutEdgeIter(startVert);
+
+	for ( int i=0; i < numOutEdges; ++i,++outIter )
+	{
+		mwIndex nextVert = outIter->first;
+		inEdges[MATLAB_IDX(nextVert)].erase(startVert);
+	}
+
+	outEdges[MATLAB_IDX(startVert)].clear();
+
+	numEdges -= numOutEdges;
+}
+
+void CSparseWrapper::removeAllInEdges(mwIndex endVert)
+{
+	int numInEdges = getInEdgeLength(endVert);
+	tEdgeIterator inIter = getInEdgeIter(endVert);
+
+	for ( int i=0; i < numInEdges; ++i,++inIter )
+	{
+		mwIndex startVert = inIter->first;
+		outEdges[MATLAB_IDX(startVert)].erase(endVert);
+	}
+
+	inEdges[MATLAB_IDX(endVert)].clear();
+
+	numEdges -= numInEdges;
+}
+
+void CSparseWrapper::removeEdge(mwIndex startVert, mwIndex endVert)
+{
+	outEdges[MATLAB_IDX(startVert)].erase(endVert);
+	inEdges[MATLAB_IDX(endVert)].erase(startVert);
+
+	--numEdges;
+}

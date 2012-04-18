@@ -259,7 +259,7 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArr
 	int curVert = startVert;
 	while ( curVert > 0 )
 	{
-		if ( checkAcceptPath(startVert, curVert, maxExtent, matFuncHandle) )
+		if ( (curVert != startVert) && checkAcceptPath(startVert, curVert, maxExtent, matFuncHandle) )
 		{
 			gAcceptedPaths.push_back(curVert);
 			curVert = popNextVert(costQueue, maxExtent);
@@ -397,6 +397,56 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 		buildOutputPaths(plhs[0], plhs[1]);
 }
 
+void mexCmd_removeEdges(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 0 )
+		mexErrMsgTxt("removeEdges: Output values unsupported.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("removeEdges: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double"))
+		mexErrMsgTxt("removeEdges: Expected start vertex list as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double"))
+		mexErrMsgTxt("removeEdges: Expected end vertex list as third parameter.");
+
+	mwSize startListSize = mxGetNumberOfElements(prhs[1]);
+	mwSize endListSize = mxGetNumberOfElements(prhs[2]);
+
+	if ( startListSize == 0 && endListSize == 0 )
+		return;
+
+	if ( startListSize == 0 )
+	{
+		double* endVertData = (double*) mxGetData(prhs[2]);
+		for ( int i=0; i < endListSize; ++i )
+			gCostGraph->removeAllInEdges((mwIndex) endVertData[C_IDX(i)]);
+
+		return;
+	}
+
+	if ( endListSize == 0 )
+	{
+		double* startVertData = (double*) mxGetData(prhs[1]);
+		for ( int i=0; i < startListSize; ++i )
+			gCostGraph->removeAllOutEdges((mwIndex) startVertData[C_IDX(i)]);
+
+		return;
+	}
+
+	if ( startListSize != endListSize )
+		mexErrMsgTxt("removeEdges: Start and End vertex lists must be same size (or empty).");
+
+	double* startVertData = (double*) mxGetData(prhs[1]);
+	double* endVertData = (double*) mxGetData(prhs[2]);
+
+	for ( int i=0; i < startListSize; ++i )
+		gCostGraph->removeEdge((mwIndex) startVertData[C_IDX(i)], (mwIndex) endVertData[C_IDX(i)]);
+
+
+}
+
 void mexCmd_edgeCost(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nlhs != 1 )
@@ -482,6 +532,82 @@ void mexCmd_debugEdgesOut(int nlhs, mxArray* plhs[], int nrhs, const mxArray* pr
 	}
 }
 
+void mexCmd_debugAllEdges(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs != 2 )
+		mexErrMsgTxt("debugAllEdges: Expect 2 outputs.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("debugAllEdges: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	plhs[0] = mxCreateNumericMatrix(gCostGraph->getNumEdges(), 3, mxDOUBLE_CLASS, mxREAL);
+	plhs[1] = mxCreateNumericMatrix(gCostGraph->getNumEdges(), 3, mxDOUBLE_CLASS, mxREAL);
+
+	char errMsg[1024];
+
+	mwSize numTotalEdges = gCostGraph->getNumEdges();
+	double* outEdgeData = (double*) mxGetData(plhs[0]);
+
+	int visitedEdges = 0;
+	for ( int i=0; i < gCostGraph->getNumVerts(); ++i )
+	{
+		int startVert = i+1;
+		int numOutEdges = gCostGraph->getOutEdgeLength(startVert);
+		CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getOutEdgeIter(startVert);
+
+		for ( int j=0; j < numOutEdges; ++j, ++edgeIter )
+		{
+			outEdgeData[visitedEdges] = startVert;
+			outEdgeData[numTotalEdges + visitedEdges] = edgeIter->first;
+			outEdgeData[2*numTotalEdges + visitedEdges] = edgeIter->second;
+
+			++visitedEdges;
+			//if ( visitedEdges > numTotalEdges )
+			//{
+			//	sprintf(errMsg, "Expected %d out edges, visited %d", numTotalEdges, visitedEdges);
+			//	mexErrMsgTxt(errMsg);
+			//}
+		}
+	}
+
+	if ( visitedEdges != numTotalEdges )
+	{
+		sprintf(errMsg, "Expected %d out edges, visited %d", numTotalEdges, visitedEdges);
+		mexErrMsgTxt(errMsg);
+	}
+
+
+	double* inEdgeData = (double*) mxGetData(plhs[1]);
+
+	visitedEdges = 0;
+	for ( int i=0; i < gCostGraph->getNumVerts(); ++i )
+	{
+		int nextVert = i+1;
+		int numOutEdges = gCostGraph->getInEdgeLength(nextVert);
+		CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getInEdgeIter(nextVert);
+
+		for ( int j=0; j < numOutEdges; ++j, ++edgeIter )
+		{
+			inEdgeData[visitedEdges] = edgeIter->first;
+			inEdgeData[numTotalEdges + visitedEdges] = nextVert;
+			inEdgeData[2*numTotalEdges + visitedEdges] = edgeIter->second;
+
+			++visitedEdges;
+			//if ( visitedEdges > numTotalEdges )
+			//{
+			//	sprintf(errMsg, "Expected %d in edges, visited %d", numTotalEdges, visitedEdges);
+			//	mexErrMsgTxt(errMsg);
+			//}
+		}
+	}
+
+	if ( visitedEdges != numTotalEdges )
+	{
+		sprintf(errMsg, "Expected %d in edges, visited %d", numTotalEdges, visitedEdges);
+		mexErrMsgTxt(errMsg);
+	}
+}
+
 void mexCmd_debugTestFunc(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nlhs > 0 )
@@ -534,11 +660,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		CALL_COMMAND(matlabExtend);
 	}
+	else if ( IS_COMMAND(commandStr, removeEdges) )
+	{
+		CALL_COMMAND(removeEdges);
+	}
 	else if ( IS_COMMAND(commandStr, edgeCost) )
 	{
 		CALL_COMMAND(edgeCost);
 	}
 
+	else if ( IS_COMMAND(commandStr, debugAllEdges) )
+	{
+		CALL_COMMAND(debugAllEdges);
+	}
 	else if ( IS_COMMAND(commandStr, debugEdgesOut) )
 	{
 		CALL_COMMAND(debugEdgesOut);
@@ -558,6 +692,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
 		mexPrintf("\t checkExtension(startVert, maxLength) - Find suitable extensions out to maxLength from startVert.\n");
 		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc) - Find suitable extensions using matlab acceptFunc as acceptance criterion.\n");
+		mexPrintf("\t removeEdges(startVertList, endVertList) - Remove all edges in list.\n");
 		mexPrintf("\t edgeCost(startVert, nextVert) - Return cost for given edge (0.0) if no edge exists.\n");
 	}
 
