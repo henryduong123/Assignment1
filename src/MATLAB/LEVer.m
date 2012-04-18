@@ -37,7 +37,7 @@ if(~isempty(Figures))
     end
 end
 
-versionString = '6.1 Adult';
+versionString = '6.2 Adult';
 
 if(OpenData(versionString))
     InitializeFigures();
