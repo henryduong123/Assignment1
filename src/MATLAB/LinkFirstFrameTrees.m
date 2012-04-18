@@ -8,7 +8,7 @@ function [iterations totalTime] = LinkFirstFrameTrees()
     maxPushCount = 10;
     for i=1:maxPushCount
     	[assignExt findTime extTime] = LinkTreesForward([HashedCells{1}.trackID]);
-        LogAction(['Tree inference step ' num2str(i)],[assignExt findTime extTime],[]);
+%         LogAction(['Tree inference step ' num2str(i)],[assignExt findTime extTime],[]);
         totalTime = totalTime + findTime + extTime;
         
         iterations = i;

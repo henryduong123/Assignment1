@@ -133,7 +133,43 @@ end
 %create the family trees
 ProcessNewborns(1:length(CellFamilies), length(HashedCells));
 
-% LinkResegRetrack()
+try
+    backupCellFamilies = CellFamilies;
+    backupCellTracks = CellTracks;
+    backupHashedCells = HashedCells;
+    backupCellHulls = CellHulls;
+    backupCellFeatures = CellFeatures;
+    backupCosts = Costs;
+    backupGraphEdits = GraphEdits;
+    backupConnectedDist = ConnectedDist;
+    backupCellPhenotypes = CellPhenotypes;
+    
+    [iters totalTime] = LinkFirstFrameTrees();
+    LogAction('Completed Tree Inference', [iters totalTime],[]);
+    
+    backupCellFamilies = CellFamilies;
+    backupCellTracks = CellTracks;
+    backupHashedCells = HashedCells;
+    backupCellHulls = CellHulls;
+    backupCellFeatures = CellFeatures;
+    backupCosts = Costs;
+    backupGraphEdits = GraphEdits;
+    backupConnectedDist = ConnectedDist;
+    backupCellPhenotypes = CellPhenotypes;
+    
+    ResegRetrackLink();
+    
+catch excp
+    CellFamilies = backupCellFamilies;
+    CellTracks = backupCellTracks;
+    HashedCells = backupHashedCells;
+    CellHulls = backupCellHulls;
+    CellFeatures = backupCellFeatures;
+    Costs = backupCosts;
+    GraphEdits = backupGraphEdits;
+    ConnectedDist = backupConnectedDist;
+    CellPhenotypes = backupCellPhenotypes;
+end
 
 end
 
