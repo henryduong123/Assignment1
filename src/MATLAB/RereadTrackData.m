@@ -1,4 +1,4 @@
-function [objTracks gConnect hashedHulls] = RereadTrackData(DatasetName)
+function [objTracks gConnect hashedHulls] = RereadTrackData(DatasetDir, DatasetName)
 global CellHulls
 
 th=max([CellHulls.time]);
@@ -12,7 +12,7 @@ for i=1:length(CellHulls)
     hashedHulls{CellHulls(i).time} = [hashedHulls{CellHulls(i).time} i];
 end
 
-fname=['.\segmentationData\Tracked_' DatasetName '.txt'];
+fname = fullfile(DatasetDir,['Tracked_' DatasetName '.txt']);
 fid=fopen(fname,'r');
 bDone=0;
 TrackList=[];

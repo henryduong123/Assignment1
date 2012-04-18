@@ -1,4 +1,4 @@
-function RewriteSegData(DatasetName)
+function RewriteSegData(DatasetDir, DatasetName)
 global CONSTANTS CellHulls ConnectedDist
 
 % fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' SignificantDigits(1) '.TIF'];
@@ -16,7 +16,7 @@ for n=1:length(CellHulls)
     hashedHulls{CellHulls(n).time}=[hashedHulls{CellHulls(n).time};n];
 end
 
-fname=['.\segmentationData\SegObjs_' DatasetName '.txt'];
+fname = fullfile(DatasetDir, ['SegObjs_' DatasetName '.txt']);
 fid=fopen(fname,'wt');
 fprintf(fid,'%d %d\n',th,length(CellHulls) );
 for i=1:length(hashedHulls)

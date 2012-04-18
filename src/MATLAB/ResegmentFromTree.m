@@ -56,6 +56,9 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             prevHulls = [prevHulls childHulls(minidx)];
         end
         
+        if ( isempty(prevHulls) )
+            continue;
+        end
         
         [bestNextHulls bestCosts] = getBestNextHulls(prevHulls, dir);
         
@@ -70,11 +73,9 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             end
             
             if ( dir > 0 )
-                distIdx = find(ConnectedDist{prevHulls(i)}(:,1) == bestNextHulls(i),1,'first');
-                dist = ConnectedDist{prevHulls(i)}(distIdx,2);
+                dist = GetConnectedDistance(prevHulls(i),bestNextHulls(i));
             else
-                distIdx = find(ConnectedDist{bestNextHulls(i)}(:,1) == prevHulls(i),1,'first');
-                dist = ConnectedDist{bestNextHulls(i)}(distIdx,2);
+                dist = GetConnectedDistance(bestNextHulls(i),prevHulls(i));
             end
             
             if ( dist >= 1.0 )
@@ -116,7 +117,7 @@ function ResegmentFromTree(rootTracks,preserveTracks)
         for i=1:length(splitHulls)
 %             for j=1:length(maxSplit(i))
                 j = maxSplit(i);
-                if ( j <= 0 )
+                if ( (splitHulls(i) == 0) || (j <= 0) )
                     continue;
                 end
                 newSplit = trySplitSegmentation(splitHulls(i),j);
@@ -275,6 +276,9 @@ function updateTracking(prevHulls, newHulls, dir)
     if ( ((t+dir) > 1) && ((t+dir) < length(HashedCells)) )
         nextHulls = [HashedCells{t+2*dir}.hullID];
 %         if ( dir > 0 )
+        if ( isempty(nextHulls) || isempty(affectedHulls) )
+            return;
+        end
             UpdateTrackingCosts(t+dir, affectedHulls, nextHulls);
 %         else
 %             UpdateTrackingCosts(t+dir, nextHulls, affectedHulls);

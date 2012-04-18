@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function dist = GetConnectedDistance(hull, nextHull)
-    global CellHulls, ConnectedDist
+    global CellHulls ConnectedDist
     
     dist = Inf;
     
@@ -33,6 +33,10 @@ function dist = GetConnectedDistance(hull, nextHull)
     if ( CellHulls(hull).time > CellHulls(nextHull).time )
         firstHull = nextHull;
         secondHull = hull;
+    end
+    
+    if ( isempty(ConnectedDist{firstHull}) )
+        return;
     end
     
     ccIdx = find(ConnectedDist{firstHull}(:,1) == secondHull);

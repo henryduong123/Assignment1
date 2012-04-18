@@ -30,7 +30,12 @@ function ExternalRetrack()
     ConnectedDist = [];
     BuildConnectedDistance(1:length(CellHulls), 0, 1);
     
-    RewriteSegData(CONSTANTS.datasetName);
+    if ( ~exist('segmentationData','dir') )
+        mkdir('segmentationData');
+        pause(1);
+    end
+    
+    RewriteSegData('segmentationData', CONSTANTS.datasetName);
     
     fnameIn=['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.txt'];
     fnameOut=['.\segmentationData\Tracked_' CONSTANTS.datasetName '.txt'];
@@ -40,7 +45,7 @@ function ExternalRetrack()
     fprintf('Done\n');
     tTrack=toc;
     
-    [objTracks gConnect oldHashedHulls] = RereadTrackData(CONSTANTS.datasetName);
+    [objTracks gConnect oldHashedHulls] = RereadTrackData('segmentationData', CONSTANTS.datasetName);
     
     fprintf('Finalizing Data...');
     RebuildTrackingData(objTracks, gConnect);
