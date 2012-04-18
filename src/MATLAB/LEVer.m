@@ -25,7 +25,7 @@
 
 function LEVer()
 
-global Figures
+global Figures softwareVersion
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
@@ -37,9 +37,9 @@ if(~isempty(Figures))
     end
 end
 
-versionString = '6.2 Adult';
+softwareVersion = '6.2 Adult';
 
-if(OpenData(versionString))
+if(OpenData())
     InitializeFigures();
     History('Init');
 elseif(~isempty(Figures))

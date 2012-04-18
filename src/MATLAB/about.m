@@ -64,9 +64,9 @@ else
     im=255*ones(339,608);
 end
 imagesc(im)    
-global CONSTANTS
-if exist('CONSTANTS')
-    set(handles.text1,'string',{['LEVER : ' CONSTANTS.version] ; [] ; ['(c) 2012']  });
+global softwareVersion
+if ( ~isempty(softwareVersion) )
+    set(handles.text1,'string',{['LEVER : ' softwareVersion] ; [] ; ['(c) 2012']  });
 else
     set(handles.text1,'string',{['LEVER : (version unknown)' ] ; [] ; ['(c) 2012']  });
 end    

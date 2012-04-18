@@ -80,26 +80,8 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     leafHulls = leafHulls(srtidx);
     for i=1:length(leafHulls)
         % Only check best-to-end for now
-        [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
-        [chkendpaths chkendcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
-        
-        if ( length(endcosts) ~= length(chkendcosts)  )
-            error('mexDijkstra verification check failed: cost lengths unequal');
-        end
-        
-        [tstcosts tstsrt] = sort(endcosts);
-        tstpaths = endpaths(tstsrt);
-        [chkendcosts tstsrt] = sort(chkendcosts);
-        chkendpaths = chkendpaths(tstsrt);
-        
-        for k=1:length(tstcosts)
-            if ( tstcosts(k) ~= chkendcosts(k) )
-                error('mexDijkstra verification check failed: costs unequal');
-            end
-            if ( any(tstpaths{k} ~= chkendpaths{k}) )
-                error('mexDijkstra verification check failed: extension paths unequal');
-            end
-        end
+%         [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
+        [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
         
         if ( isempty(endcosts) )
             continue;
@@ -112,21 +94,21 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
             linkupHull = extEnds(startHull,finalHull);
             
             AssignEdge(linkupHull, startHull, 1);
-            extGraph(:,finalHull) = 0;
-            extGraph(startHull,:) = 0;
+%             extGraph(:,finalHull) = 0;
+%             extGraph(startHull,:) = 0;
             
             mexDijkstra('removeEdges', [], finalHull);
             mexDijkstra('removeEdges', startHull, []);
             
             [rmstart,rmend] = find(extEnds == linkupHull);
             mexDijkstra('removeEdges', rmstart, rmend);
-            for k=1:length(rmstart)
-                if ( rmstart(k) == startHull || rmend(k) == finalHull )
-                    continue;
-                end
-                
-                extGraph(rmstart(k),rmend(k)) = 0;
-            end
+%             for k=1:length(rmstart)
+%                 if ( rmstart(k) == startHull || rmend(k) == finalHull )
+%                     continue;
+%                 end
+%                 
+%                 extGraph(rmstart(k),rmend(k)) = 0;
+%             end
         end
         
         assignedExtensions = assignedExtensions + length(endpaths{minidx}) - 1;

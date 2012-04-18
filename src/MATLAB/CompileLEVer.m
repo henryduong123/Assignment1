@@ -62,10 +62,13 @@ system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDi
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
 
-mcc -m LEVer.m
-mcc -m Segmentor.m
-mcc -m LEVER_SegAndTrackFolders.m
-mcc -m LinkTreeFolders.m
+mcrfile = mcrinstaller();
+system(['copy "' mcrfile '" "' bindir '\"']);
+
+mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
+mcc -R -startmsg -m Segmentor.m
+mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
+mcc -R -startmsg -m LinkTreeFolders.m
 system(['copy LEVer.exe ' fullfile(bindir,'.')]);
 system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
 system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);

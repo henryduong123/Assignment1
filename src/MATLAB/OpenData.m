@@ -26,12 +26,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function opened = OpenData(versionString)
+function opened = OpenData()
 
-global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits SegLevels
+global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits SegLevels softwareVersion
 
 if(isempty(Figures))
-    fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', versionString);
+    fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
 end
 
 if(exist('ColorScheme.mat','file'))
@@ -136,7 +136,7 @@ switch answer
     case 'Segment & Track'
         save('LEVerSettings.mat','settings');
         InitializeConstants();
-        UpdateFileVersionString(versionString);
+        UpdateFileVersionString(softwareVersion);
         errOpen = SegAndTrack();
     case 'Existing'
         while(~goodLoad)
@@ -215,9 +215,9 @@ if(errOpen)
     return
 end
 
-bUpdated = FixOldFileVersions(versionString);
+bUpdated = FixOldFileVersions(softwareVersion);
 if ( bUpdated )
-    UpdateFileVersionString(versionString);
+    UpdateFileVersionString(softwareVersion);
     if( exist('objHulls','var') && strcmpi(answer,'Existing') )
         SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
     else

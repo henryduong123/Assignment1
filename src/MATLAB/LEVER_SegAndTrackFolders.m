@@ -7,14 +7,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
 function LEVER_SegAndTrackFolders(outputDir)
-global CONSTANTS;
+global CONSTANTS softwareVersion;
 
 CONSTANTS=[];
 
-versionString = '6.1 Adult';
+softwareVersion = '6.1 Adult';
 
 InitializeConstants();
-UpdateFileVersionString(versionString);
+UpdateFileVersionString(softwareVersion);
 
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if(~directory_name),return,end

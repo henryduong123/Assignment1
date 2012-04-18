@@ -57,6 +57,9 @@ set(overAxes,...
     'XTick',    [],...
     'Box',      'off');
 % ylabel('Time (Frames)');
+
+% title(overAxes, CONSTANTS.datasetName, 'Position',[0 0 1], 'HorizontalAlignment','left', 'Interpreter','none');
+
 hold on
 
 [xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
