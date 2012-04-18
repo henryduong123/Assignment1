@@ -1,6 +1,6 @@
 function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
     global SegLevels
-
+    
     status = 1;
     tSeg = 0;
     tTrack = 0;
@@ -77,6 +77,8 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         for i=1:numProcessors
             fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
             
+            tst = whos('-file', fileName);
+            
             load(fileName);
             
             cellSegments = [cellSegments objs];
@@ -86,7 +88,14 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
             
             pause(1)
         end
-    catch e
+    catch excp
+        
+        cltime = clock();
+        errlog = fopen([datasetName '_seg_error.log'], 'w');
+        fprintf(errlog, '%02d:%02d:%02.1f - Problem loading segmentation\n',cltime(4),cltime(5),cltime(6));
+        PrintException(errlog, excp);
+        fclose(errlog);
+        
         status = 1;
         tSeg = toc;
         return;
@@ -127,7 +136,14 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     fprintf('Finalizing Data...');
     try
         ConvertTrackingData(objHulls,gConnect,cellFeat);
-    catch e
+    catch excp
+        
+        cltime = clock();
+        errlog = fopen([datasetName '_seg_error.log'], 'w');
+        fprintf(errlog, '%02d:%02d:%02.1f - Problem building LEVER structures\n',cltime(4),cltime(5),cltime(6));
+        PrintException(errlog, excp);
+        fclose(errlog);
+        
         status = 1;
         return;
     end
