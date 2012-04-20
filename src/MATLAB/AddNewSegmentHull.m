@@ -48,7 +48,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
-        newHull.imagePixels = img(newHull.indPixels);
+        newHull.imagePixels = img(newHull.indexPixels);
         
         newFeature.polyPix = newHull.indexPixels;
     else

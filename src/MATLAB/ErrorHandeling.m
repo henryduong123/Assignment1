@@ -41,6 +41,7 @@ set(Figures.cells.handle,'Pointer','watch');
 
 try
     History('Top');
+    outputDebutgErrorFile();
     TestDataIntegrity(1);
     msgbox('Database corrected. Your last action was undone, please try again. If change errors again, save the data file and then send it and the log to the code distributor.',...
         'Database Correct','help','modal');
@@ -60,4 +61,11 @@ close(msgboxHandle);
 %let the user know that the drawing is done
 set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
+end
+
+function outputDebutgErrorFile()
+    global CONSTANTS Log
+    
+    errfile = [CONSTANTS.datasetName '_DBGERR_' num2str(length(Log)) '.mat'];
+    SaveLEVerState(errfile);
 end
