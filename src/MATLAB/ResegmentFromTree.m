@@ -14,12 +14,18 @@ function ResegmentFromTree(rootTracks,preserveTracks)
     % DON'T change dir to +1, will not work without significant code modification
     dir = -1;
     
-    startTime = min([CellTracks(checkTracks).startTime]);
-    endTime = max([CellTracks(checkTracks).endTime]);
+    if ( dir > 0 )
+        startTime = min([CellTracks(checkTracks).startTime]);
+        endTime = max([CellTracks(checkTracks).endTime]);
+    else
+        startTime = max([CellTracks(checkTracks).startTime]);
+        endTime = min([CellTracks(checkTracks).endTime]);
+    end
     
     invalidCheckTracks = [];
     
-    for t=endTime:dir:startTime
+    Progressbar(0);
+    for t=startTime:dir:endTime
         % Find tracks which are missing hulls in current frame
         checkTracks = setdiff(checkTracks, invalidCheckTracks);
         cloneTracks = setdiff(cloneTracks, invalidCheckTracks);
@@ -51,6 +57,11 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             end
             
             childHulls = getHulls(t+1,CellTracks(startTracks(i)).childrenTracks);
+            
+            if ( isempty(childHulls) )
+                continue;
+            end
+            
             [dump bestCosts] = getBestNextHulls(childHulls, dir);
             [dump minidx] = min(bestCosts);
             prevHulls = [prevHulls childHulls(minidx)];
@@ -134,7 +145,10 @@ function ResegmentFromTree(rootTracks,preserveTracks)
         
         bInvalidCheckTracks = cellfun(@(x)(isempty(x)),{CellTracks(checkTracks).startTime});
         invalidCheckTracks = checkTracks(bInvalidCheckTracks);
+        
+        Progressbar(abs(t-startTime)/abs(endTime-startTime));
     end
+    Progressbar(1);
 end
 
 function newHullID = tryAddSegmentation(prevHull)
