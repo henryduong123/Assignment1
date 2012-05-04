@@ -196,7 +196,13 @@ function leafHulls = getLeafHulls(rootTracks)
                 continue;
             end
             
-            leafHulls = union(leafHulls, GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j)));
+            endHull = GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
+            if ( endHull == 0 )
+                RehashCellTracks(subtreeTracks(j));
+                endHull = GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
+            end
+            
+            leafHulls = union(leafHulls, endHull);
         end
     end
     
