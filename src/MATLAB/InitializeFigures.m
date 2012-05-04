@@ -286,7 +286,7 @@ elseif(time > length(HashedCells))
 else
     Figures.time = time;
 end
-DrawCells();
+% DrawCells();
 UpdateTimeIndicatorLine();
 end
 

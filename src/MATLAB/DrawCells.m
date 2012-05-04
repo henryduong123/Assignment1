@@ -173,6 +173,8 @@ elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
     end
 end
 
+drawnow();
+
 Figures.cells.axesHandle = curAx;
 end
 
