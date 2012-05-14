@@ -69,7 +69,7 @@ elseif(object.YData(1)==object.YData(2))
         num2str(CellTracks(object.UserData).childrenTracks(2)),'Cancel','Cancel');
 else
     %clicked on a vertical line
-    msgbox('Please Click on the Node or the Vertical Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
+    msgbox('Please Click on a Cell Label or the Horizontal Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
     return
 end
 
