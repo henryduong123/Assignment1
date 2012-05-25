@@ -37,7 +37,9 @@ end
 
 % k-means clustering of (x,y) coordinates of cell interior
 [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
-[kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+gmoptions = statset('Display','off', 'MaxIter',200);
+obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
+kIdx = cluster(obj, [c,r]);
 
 if ( any(isnan(kIdx)) )
     return;
