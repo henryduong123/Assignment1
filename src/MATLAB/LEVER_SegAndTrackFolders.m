@@ -6,7 +6,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
-function LEVER_SegAndTrackFolders(outputDir)
+function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
 global CONSTANTS softwareVersion;
 
 CONSTANTS=[];
@@ -27,6 +27,13 @@ numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors < 4)
     numProcessors = 4;
+end
+
+if ( exist('maxProcessors','var') )
+    if ( ischar(maxProcessors) )
+        maxProcessors = round(max(str2double(maxProcessors), 1));
+    end
+    numProcessors = min(maxProcessors, numProcessors);
 end
 
 dlist=dir(directory_name);
