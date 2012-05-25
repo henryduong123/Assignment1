@@ -1,5 +1,7 @@
-% function AddHullToTrack(hullID,trackID,previousHullID)
-%  The hullID will be added to the track
+% function droppedTracks = AddHullToTrack(hullID,trackID,previousHullID)
+% Remove hulls from their current track prior to adding them to a new track
+%  The hullID will be added to the track and if the added hull conficts
+%  with a mitosis event, the tracks dropped from the tree will be returned.
 %
 %  If trackID is given, previousHullID is not used.  Safe to
 %  send [] for either trackID or previousHullID.
@@ -30,55 +32,52 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function AddHullToTrack(hullID,trackID,previousHullID)
+function droppedTracks = AddHullToTrack(hullID,trackID,previousHullID)
+global HashedCells CellTracks CellHulls
 
-global HashedCells CellTracks CellFamilies CellHulls
+droppedTracks = [];
 
 if ( ~isscalar(hullID) || (hullID <= 0) || (hullID > length(CellHulls)) )
-    error('AddHullToTrack - hullID argument must be a valid scalar cell ID');
+    error('AddHullToTrack - hullID argument must be a valid scalar cell ID\n hullID:%d, trackID:%d, previousHullID:%d',...
+        hullID,trackID,previousHullID);
 end
 
+%% This is when the track is not known and is used in converting legacy data struct
 if(isempty(trackID))
     %find the track to add this hull to
     previousTime = CellHulls(previousHullID).time;
     index = find([HashedCells{previousTime}(:).hullID]==previousHullID);
     if(isempty(index))
-        error('Previous CellHull -- %d not found!',previousHullID);
+        error('Previous CellHull -- %d not found!\n hullID:%d, trackID:%d, previousHullID:%d',...
+        previousHullID,hullID,trackID,previousHullID);
     end
     %add the hullID to track
-    curTrackID = HashedCells{previousTime}(index).trackID;
-else
-    curTrackID = trackID;
+    trackID = HashedCells{previousTime}(index).trackID;
 end
 
+%% Does this add conflict with a mitosis event?
 time = CellHulls(hullID).time;
-hash = time - CellTracks(curTrackID).startTime + 1;
-if(0 >= hash)
-    RehashCellTracks(curTrackID, time);
-    CellTracks(curTrackID).startTime = time;
-    hash = time - CellTracks(curTrackID).startTime + 1;
-    if(CellFamilies(CellTracks(curTrackID).familyID).startTime > time)
-        CellFamilies(CellTracks(curTrackID).familyID).startTime = time;
-        %TODO: Check if any sibling and change mitosis
-        %TODO: Check if this changes the root of the family
-    end
-end
-CellTracks(curTrackID).hulls(hash) = hullID;
 
-if(CellTracks(curTrackID).endTime < time)
-    CellTracks(curTrackID).endTime = time;
-    if(CellFamilies(CellTracks(curTrackID).familyID).endTime < time)
-        CellFamilies(CellTracks(curTrackID).familyID).endTime = time;
-    end
-    %TODO: Check if any sibling where this might contradict
-elseif(CellTracks(curTrackID).startTime > time)
-    CellTracks(curTrackID).startTime = time;
-    if(CellFamilies(CellTracks(curTrackID).familyID).startTime > time)
-        CellFamilies(CellTracks(curTrackID).familyID).startTime = time;
+% Is this hull being added to the head of the track and does it have a
+% parent?
+if(time<CellTracks(trackID).startTime && ~isempty(CellTracks(trackID).parentTrack))
+    %Remove this track from the family
+    droppedTracks = [droppedTracks RemoveFromTree(trackID)];
+end
+
+%Is this hull being added to the tail of the track and does it have
+%children?
+if(time>CellTracks(trackID).endTime && ~isempty(CellTracks(trackID).childrenTracks))
+    %Drop the children
+    for i=1:length(CellTracks(trackID).childrenTracks)
+        droppedTracks = [droppedTracks RemoveFromTree(CellTracks(trackID).childrenTracks(i))];
     end
 end
 
-%add the trackID back to HashedHulls
-AddHashedCell(time,hullID,curTrackID);
+%% Add hull
+CellTracks(trackID).hulls = [CellTracks(trackID).hulls hullID];
 
+%% Update
+RehashCellTracks(trackID);
+AddHashedCell(time,hullID,trackID);
 end

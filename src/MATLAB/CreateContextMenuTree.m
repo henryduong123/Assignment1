@@ -60,99 +60,22 @@ if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
         msgbox('No Mitosis to Remove','Unable to Remove Mitosis','error');
         return
     end
-    choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
-        num2str(CellTracks(object.UserData).siblingTrack),'Cancel','Cancel');
+    choice = object.UserData;
 elseif(object.YData(1)==object.YData(2))
     %clicked on a horizontal line
     choice = questdlg('Which Side to Keep?','Merge With Parent',...
         num2str(CellTracks(object.UserData).childrenTracks(1)),...
         num2str(CellTracks(object.UserData).childrenTracks(2)),'Cancel','Cancel');
+    
+    if(strcmpi(choice,'Cancel')), return, end
+    choice = str2double(choice);
 else
     %clicked on a vertical line
     msgbox('Please Click on the Node or the Vertical Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
     return
 end
 
-switch choice
-    case 'Cancel'
-        return
-    case num2str(object.UserData)
-        remove = CellTracks(object.UserData).siblingTrack;
-        try
-            GraphEditRemoveMitosis(CellTracks(object.UserData).siblingTrack);
-            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
-                CellTracks(object.UserData).siblingTrack,'yes');
-            History('Push');
-        catch errorMessage
-            try
-                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime) ' '...
-                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    case num2str(CellTracks(object.UserData).siblingTrack)
-        remove = object.UserData;
-        try
-            GraphEditRemoveMitosis(object.UserData);
-            newTree = RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
-            History('Push');
-        catch errorMessage
-            try
-                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(object.UserData).startTime) ' '...
-                    num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    case num2str(CellTracks(object.UserData).childrenTracks(1))
-        remove = CellTracks(object.UserData).childrenTracks(2);
-        try
-            GraphEditRemoveMitosis(CellTracks(object.UserData).childrenTracks(2));
-            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime,...
-                CellTracks(object.UserData).childrenTracks(2),'yes');
-            History('Push');
-        catch errorMessage
-            try
-                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(2)).startTime) ' '...
-                    num2str(CellTracks(object.UserData).childrenTracks(2)) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    case num2str(CellTracks(object.UserData).childrenTracks(2))
-        remove = CellTracks(object.UserData).childrenTracks(1);
-        try
-            GraphEditRemoveMitosis(CellTracks(object.UserData).childrenTracks(1));
-            newTree = RemoveFromTree(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime,...
-                CellTracks(object.UserData).childrenTracks(1),'yes');
-            History('Push');
-        catch errorMessage
-            try
-                ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).childrenTracks(1)).startTime) ' '...
-                    num2str(CellTracks(object.UserData).childrenTracks(1)) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    otherwise
-        return
-end
-
-LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
-
-ProcessNewborns(1:length(CellFamilies),length(HashedCells));
-
-DrawTree(Figures.tree.familyID);
-DrawCells();
+ContextRemoveFromTree(choice);
 end
 
 function addMitosis(src,evnt)

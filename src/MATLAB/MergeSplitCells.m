@@ -145,7 +145,7 @@ function nextMergeCells = getNextMergeCells(t, mergeCells)
     global CellTracks
     
     nextMergeCells = [];
-    trackIDs = GetTrackID(mergeCells, t);
+    trackIDs = GetTrackID(mergeCells);
     for i=1:length(trackIDs)
         hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
         if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )

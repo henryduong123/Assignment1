@@ -456,7 +456,7 @@ global Figures
 [hullID trackID] = GetClosestCell(0);
 if(isempty(trackID)),return,end
 
-ContextRemoveFromTree(Figures.time,trackID);
+ContextRemoveFromTree(trackID,Figures.time);
 end
 
 function properties(src,evnt)

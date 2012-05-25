@@ -1,11 +1,10 @@
-% newFamily = RemoveFromTree(time,trackID,dealWithSibling)
+% droppedTracks = RemoveFromTree(trackID,time)
+% time is optional
 % This will remove the track and any of its children from its current family
 % and create a new family rooted at the given track
-% If you want the current track's sibling to be combined with its parent,
-% pass combineSiblingWithParent='yes' otherwise 'no'
-%
-% ***IF YOU PASS 'NO', YOU MUST DEAL WITH ANY SIBLING YOURSELF!!! OTHERWISE
-% THERE WILL BE ISSUES WITH THE DATA****
+% Any siblings of the given track will also be dropped.
+% droppedTracks will be the list of tracks that were dropped from the
+% family (they will be the roots of their subtrees)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -30,68 +29,73 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newFamilyID = RemoveFromTree(time,trackID,combineSiblingWithParent)
+function droppedTracks = RemoveFromTree(trackID,time)
+global CellFamilies CellTracks
 
-global CellFamilies CellTracks CellHulls
+if (~exist('time','var'))
+    time = CellTracks(trackID).startTime;
+end
+
+droppedTracks = [];
+
+if (time<CellTracks(trackID).startTime || time>CellTracks(trackID).endTime)
+    return;
+end
 
 hash = time - CellTracks(trackID).startTime + 1;
 
-newFamilyID = [];
-% Make sure we're splitting the track on a non-zero hull
+%Make sure we're splitting the track on a non-zero hull
 nzidx = find(CellTracks(trackID).hulls(hash:end) > 0, 1);
 if ( isempty(nzidx) )
-    % Track has no hulls from hash onward
-    return;
+    error('Tried to RemoveFromTree with a track where there were no hulls after given time.\n Time=%d, trackID=%d\n',time,trackID);
 end
-hash = hash + nzidx - 1;
-time = time + nzidx - 1;
+
+nzidx = nzidx + hash -1;
 
 oldFamilyID = CellTracks(trackID).familyID;
-newFamilyID = NewCellFamily(CellTracks(trackID).hulls(hash),time);
-newTrackID = CellFamilies(newFamilyID).rootTrackID;
-CellTracks(trackID).hulls(hash) = 0;
 
-for i=1:length(CellTracks(trackID).hulls(hash:end))-1
-    if(CellTracks(trackID).hulls(hash+i)~=0)
-        AddHullToTrack(CellTracks(trackID).hulls(hash+i),newTrackID,[]);
+if (time == CellTracks(trackID).startTime)
+    %% whole track is being removed
+    if (~isempty(CellTracks(trackID).parentTrack))
+        % remove children from parent
+        CellTracks(CellTracks(trackID).parentTrack).childrenTracks = [];
+        CellTracks(trackID).parentTrack = [];
+        % remove sibling connection
+        CellTracks(CellTracks(trackID).siblingTrack).parentTrack = [];
+        CellTracks(CellTracks(trackID).siblingTrack).siblingTrack = [];
+        droppedTracks = CellTracks(trackID).siblingTrack;
+        CellTracks(trackID).siblingTrack = [];
+        droppedTracks = [droppedTracks trackID];
     end
-    CellTracks(trackID).hulls(hash+i) = 0;
-end
-
-for i=1:length(CellTracks(trackID).childrenTracks)
-    ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,CellTracks(trackID).childrenTracks(i));
-    CellTracks(CellTracks(trackID).childrenTracks(i)).parentTrack = newTrackID;
-end
-
-if(~isempty(find(CellFamilies(oldFamilyID).tracks==newTrackID, 1)))
-    CellFamilies(newFamilyID).tracks(end+1) = newTrackID;
-end
-CellTracks(newTrackID).familyID = newFamilyID;
-CellTracks(newTrackID).childrenTracks = CellTracks(trackID).childrenTracks;
-for i=1:length(CellTracks(newTrackID).childrenTracks)
-    CellTracks(CellTracks(newTrackID).childrenTracks(i)).parentTrack = newTrackID;
-end
-CellTracks(trackID).childrenTracks = [];
-
-%clean up old track
-if(isempty(find([CellTracks(trackID).hulls]~=0, 1)))
-    if(~isempty(CellTracks(trackID).siblingTrack)&& strcmp(combineSiblingWithParent,'yes'))
-        CombineTrackWithParent(CellTracks(trackID).siblingTrack);
+else    
+    %% Create a new family with the first hull
+    newFamilyID = NewCellFamily(CellTracks(trackID).hulls(nzidx),time);
+    CellTracks(trackID).hulls(nzidx) = 0;
+    newTrackID = CellFamilies(newFamilyID).rootTrackID;
+    droppedTracks = newTrackID;
+    
+    %move the hulls from the old track to the new
+    for i=nzidx+1:length(CellTracks(trackID).hulls)
+        AddHullToTrack(CellTracks(trackID).hulls(i),newTrackID,[]);
+        CellTracks(trackID).hulls(i) = 0;
     end
-    RemoveTrackFromFamily(trackID);
-    if(~isempty(CellTracks(trackID).parentTrack))
-        index = CellTracks(CellTracks(trackID).parentTrack).childrenTracks==trackID;
-        CellTracks(CellTracks(trackID).parentTrack).childrenTracks(index) = [];
+    
+    %move the children of the old track to the new
+    if (~isempty(CellTracks(trackID).childrenTracks))
+        CellTracks(newTrackID).childrenTracks = CellTracks(trackID).childrenTracks;
+        
+        for i=1:length(CellTracks(newTrackID).childrenTracks)
+            CellTracks(CellTracks(newTrackID).childrenTracks(i)).parentTrack = newTrackID;
+        end
+        
+        CellTracks(trackID).childrenTracks = [];
     end
-    ClearTrack(trackID);
-else
-    index = find([CellTracks(trackID).hulls]~=0, 1,'last');
-    CellTracks(trackID).endTime = CellHulls(CellTracks(trackID).hulls(index)).time;
+    
+    RehashCellTracks(trackID);
 end
 
-if ( ~isempty(CellFamilies(oldFamilyID).tracks) )
-    CellFamilies(oldFamilyID).startTime = min([CellTracks(CellFamilies(oldFamilyID).tracks).startTime]);
-    CellFamilies(oldFamilyID).endTime = max([CellTracks(CellFamilies(oldFamilyID).tracks).endTime]);
+for i=1:length(droppedTracks)
+    newFam = CreateEmptyFamily();
+    ChangeTrackAndChildrensFamily(oldFamilyID,newFam,droppedTracks(i));
 end
-
 end

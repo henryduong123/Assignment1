@@ -1,18 +1,8 @@
-%ChangLabel(time,oldTrackID,newTrackID)
-%This will attempt to change the trackID from a given time until the end of
-%the track.  However, the trackID will only be changed up to the point that
-%the newTrackID does not exist.  If when moving hulls from the oldTrack to
-%the newTrack, there is a hull already in the newTrack for a given frame,
-%this function will return without moving any more hulls.
-%
-%If the whole oldTrack ends up moving over to the newTrack, and the
-%oldTrack has a sibling, the oldTrack's sibling will be merged into the
-%parent.
-%
-%Anytime that the oldTrack can be fully moved from the given time all the
-%way to the endTime of the track, the oldTrack's subtree will move with it.
-%The only time that the subtree would not move with the change would be as
-%stated above.
+% droppedTracks = ChangeLabel(time,currentTrack,desiredTrack)
+% if time==[] then the whole track will be renamed to the desiredTrack
+% ChangeLabel will change the currentTrack to the desiredTrack's label.
+% The list of tracks that have been removed from the tree due to this label
+% change will be returned.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -37,153 +27,80 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ChangeLabel(time,oldTrackID,newTrackID)
-
-global CellTracks CellHulls SegmentationEdits
-
-bothHaveChildren = 0;%flag to deal with conflicting children
-%flags to deal with position of tracks relitive to one another
-oldBeforeNew = CellTracks(newTrackID).startTime > CellTracks(oldTrackID).endTime;
-newBeforeOld = CellTracks(oldTrackID).startTime > CellTracks(newTrackID).endTime;
-oldEmptied = 0;%flag to check to see if all the Hulls were moved from the oldTrack
-
-%march through the hulls removing them from the oldTrack and adding them to
-%the newTrack
-oldTrackHashedTime = time - CellTracks(oldTrackID).startTime + 1;
-newTrackHashedTime = time - CellTracks(newTrackID).startTime + 1;
-hulls = CellTracks(oldTrackID).hulls(oldTrackHashedTime:end);
-lastOldHull = hulls(end);
-
-%if they both have children keep record of who's should be kept
-if(~isempty(CellTracks(oldTrackID).childrenTracks) && ~isempty(CellTracks(newTrackID).childrenTracks))
-    bothHaveChildren = 1;
-end
-
-for i=1:length(hulls)
-    if(newTrackHashedTime+i-1<0 || (newTrackHashedTime+i-1<=length(CellTracks(newTrackID).hulls) &&...
-            CellTracks(newTrackID).hulls(newTrackHashedTime+i-1)~=0)),break,end;
-    if(hulls(i)~=0)
-        AddHullToTrack(hulls(i),newTrackID,[]);
-    end
-    CellTracks(oldTrackID).hulls(oldTrackHashedTime+i-1) = 0;
-end
-
-firstHull = find(CellTracks(oldTrackID).hulls,1);
-if(isempty(firstHull))
-    oldEmptied = 1;
-else
-    firstHull = CellTracks(oldTrackID).hulls(firstHull);
-    RehashCellTracks(oldTrackID,CellHulls(firstHull).time);
-end
-
-if(oldEmptied)
-    if(oldBeforeNew)
-        %deal with any children
-        if(~isempty(CellTracks(oldTrackID).childrenTracks))
-            RemoveChildren(oldTrackID);
-        end
-        if(~isempty(CellTracks(newTrackID).siblingTrack) && ...
-                isempty(find(CellTracks(oldTrackID).childrenTracks==CellTracks(newTrackID).siblingTrack, 1)))
-            CombineTrackWithParent(CellTracks(newTrackID).siblingTrack);
-        end
-        CellTracks(newTrackID).parentTrack = CellTracks(oldTrackID).parentTrack;
-        index = CellTracks(CellTracks(newTrackID).parentTrack).childrenTracks==oldTrackID;
-        CellTracks(CellTracks(newTrackID).parentTrack).childrenTracks(index) = newTrackID;
-        CellTracks(newTrackID).siblingTrack = CellTracks(oldTrackID).siblingTrack;
-        CellTracks(newTrackID).familyID = CellTracks(oldTrackID).familyID;
-    elseif(newBeforeOld)
-        %deal with any children
-        if(bothHaveChildren)
-            index = CellTracks(newTrackID).childrenTracks==oldTrackID;
-            if(~isempty(find(index, 1)))
-                RemoveFromTree(CellTracks(CellTracks(newTrackID).childrenTracks(~index)).startTime,...
-                    CellTracks(newTrackID).childrenTracks(~index),'no');
-                CellTracks(newTrackID).childrenTracks = [];
-                CellTracks(oldTrackID).siblingTrack = [];
-            else
-                RemoveChildren(newTrackID);
-            end
-            moveChildren(oldTrackID,newTrackID);
-        elseif(~isempty(CellTracks(newTrackID).childrenTracks))
-            index = CellTracks(newTrackID).childrenTracks==oldTrackID;
-            if(~isempty(find(index, 1)))
-                RemoveFromTree(CellTracks(CellTracks(newTrackID).childrenTracks(~index)).startTime,...
-                    CellTracks(newTrackID).childrenTracks(~index),'no');
-                CellTracks(newTrackID).childrenTracks = [];
-                CellTracks(oldTrackID).siblingTrack = [];
-            else
-                RemoveChildren(newTrackID);
-            end
-        elseif(~isempty(CellTracks(oldTrackID).childrenTracks))
-            moveChildren(oldTrackID,newTrackID);
-        end
-        if(~isempty(CellTracks(oldTrackID).siblingTrack) && ...
-                isempty(find(CellTracks(newTrackID).childrenTracks==CellTracks(oldTrackID).siblingTrack, 1)))
-            CombineTrackWithParent(CellTracks(oldTrackID).siblingTrack);
-        end
-    else
-        if(~isempty(CellTracks(oldTrackID).childrenTracks))
-            RemoveChildren(oldTrackID);
-        end
-        if(~isempty(CellTracks(oldTrackID).siblingTrack))
-            CombineTrackWithParent(CellTracks(oldTrackID).siblingTrack);
-        end
-    end
-    
-    %clean up other fields
-    RemoveTrackFromFamily(oldTrackID);
-    ClearTrack(oldTrackID);
-else %the old track still exists in some fasion
-    if(isempty(find(CellTracks(oldTrackID).hulls==lastOldHull, 1)) &&...
-            ~isempty(CellTracks(oldTrackID).childrenTracks))
-        %the last hull from the old track has been moved over and had
-        %children
-        if(CellHulls(lastOldHull).time<CellTracks(newTrackID).endTime)
-            RemoveChildren(oldTrackID);
-        elseif(CellHulls(lastOldHull).time>=CellTracks(newTrackID).endTime)
-            if(~isempty(CellTracks(newTrackID).childrenTracks))
-                RemoveChildren(newTrackID);
-            end
-            moveChildren(oldTrackID,newTrackID);
-        end
-    elseif(~isempty(CellTracks(newTrackID).childrenTracks) && ...
-            (((isempty(find(CellTracks(oldTrackID).hulls==lastOldHull, 1)) &&...
-            CellHulls(lastOldHull).time>CellTracks(newTrackID).endTime)) || ...
-            any([CellTracks(CellTracks(newTrackID).childrenTracks).startTime]<CellTracks(newTrackID).endTime)))
-        RemoveChildren(newTrackID);
-    end
-end
-
-%check to see if either of the tracks are dead
-familyIDs = [];
-if(~isempty(GetTimeOfDeath(oldTrackID)))
-    familyIDs = StraightenTrack(oldTrackID);
-end
-if(~isempty(GetTimeOfDeath(newTrackID)))
-    familyIDs = [familyIDs StraightenTrack(newTrackID)];
-end
-if(~isempty(familyIDs))
-    ProcessNewborns(familyIDs, SegmentationEdits.maxEditedFrame);
-end
-end
-
-function moveChildren(oldTrackID,newTrackID)
+function droppedTracks = ChangeLabel(time,currentTrack,desiredTrack)
 global CellTracks
-if(isempty(CellTracks(oldTrackID).childrenTracks))
-    %no children
-elseif(isempty(CellTracks(newTrackID).childrenTracks))
-    CellTracks(newTrackID).childrenTracks = CellTracks(oldTrackID).childrenTracks;
-    for i=1:length(CellTracks(newTrackID).childrenTracks)
-        CellTracks(CellTracks(newTrackID).childrenTracks(i)).parentTrack = newTrackID;
+
+droppedTracks = [];
+currentParent = [];
+
+if(isempty(time))
+    time = CellTracks(currentTrack).startTime;
+end
+
+if (time>CellTracks(desiredTrack).startTime)
+    %% The desiredTrack is before the currentTrack
+    % Remove any future track on the desiredTrack
+    if (time<CellTracks(desiredTrack).endTime)
+        droppedTracks = [droppedTracks RemoveFromTree(desiredTrack,time)];
     end
-    
-    if(CellTracks(oldTrackID).familyID ~= CellTracks(newTrackID).familyID)
-        for i=1:length(CellTracks(oldTrackID).childrenTracks)
-            ChangeTrackAndChildrensFamily(CellTracks(oldTrackID).familyID,CellTracks(newTrackID).familyID,CellTracks(oldTrackID).childrenTracks(i));
-        end
-    end
-    CellTracks(oldTrackID).childrenTracks = [];
+    %Gather the hulls to move and leave the rest on the currentTrack
+    startHash = time-CellTracks(currentTrack).startTime+1;
+    endHash = length(CellTracks(currentTrack).hulls);
+    hulls = CellTracks(currentTrack).hulls(startHash:endHash);
 else
-    error('Children conflict');
+    %% The currentTrack is before the desiredTrack
+    % Remove any future track on the currentTrack
+    currentParent = CellTracks(currentTrack).parentTrack;
+    droppedTracks = [droppedTracks RemoveFromTree(currentTrack,time)];
+    hulls = CellTracks(currentTrack).hulls;
+end
+
+%% Move the hulls from the currentTrack to the desiredTrack
+for i=1:length(hulls)
+    droppedTracks = [droppedTracks RemoveHullFromTrack(hulls(i))];
+    droppedTracks = [droppedTracks AddHullToTrack(hulls(i),desiredTrack)];
+end
+
+%% Clean up
+% Clear out any empty tracks from the list
+droppedTracks = droppedTracks(arrayfun(@(x)(~isempty(x.hulls)),CellTracks(droppedTracks)));
+
+% Reconnect any orphaned children that match up exactly
+droppedTracks = setdiff(droppedTracks,ReconnectParentWithChildren(desiredTrack,droppedTracks));
+droppedTracks = setdiff(droppedTracks,ReconnectParentWithChildren(currentParent,droppedTracks));
+
+end
+
+% reconnectedTracks = ReconnectParentWithChildren(parentTrack,childrenTracks)
+% This will not make this connection if the parent already has children or
+% there are no children that start on parent.endTime +1
+% Returns the list of children attached to the parent
+function reconnectedTracks = ReconnectParentWithChildren(parentTrack,childrenTracks)
+global CellTracks
+
+reconnectedTracks = [];
+
+if(isempty(parentTrack)), return, end
+
+for i=1:length(childrenTracks)
+    if (CellTracks(parentTrack).endTime==CellTracks(childrenTracks(i)).startTime-1)
+        reconnectedTracks = [reconnectedTracks childrenTracks(i)];
+    end
+end
+
+if (isempty(reconnectedTracks)), return, end
+
+if(length(reconnectedTracks)~=2)
+    error('More then two children trying to get reconnected!');
+end
+
+CellTracks(reconnectedTracks(1)).siblingTrack = reconnectedTracks(2);
+CellTracks(reconnectedTracks(2)).siblingTrack = reconnectedTracks(1);
+    
+for i=1:length(reconnectedTracks)
+    CellTracks(reconnectedTracks(i)).parentTrack = parentTrack;
+    CellTracks(parentTrack).childrenTracks = [CellTracks(parentTrack).childrenTracks reconnectedTracks(i)];
+    ChangeTrackAndChildrensFamily(CellTracks(reconnectedTracks(i)).familyID,...
+        CellTracks(parentTrack).familyID,reconnectedTracks(i));
 end
 end

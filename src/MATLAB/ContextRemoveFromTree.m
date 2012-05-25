@@ -24,15 +24,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ContextRemoveFromTree(time,trackID)
+function ContextRemoveFromTree(trackID,time)
+global CellTracks CellFamilies
 
-global CellTracks
-
-oldFamilyID = CellTracks(trackID).familyID;
+if (~exist('time','var'))
+    time = CellTracks(trackID).startTime;
+end
+oldParent = CellTracks(trackID).parentTrack; 
+sibling = CellTracks(trackID).siblingTrack;
 
 try
     GraphEditRemoveEdge(time, trackID, trackID);
-    newFamilyID = RemoveFromTree(time, trackID,'yes');
+    droppedTracks = RemoveFromTree(trackID, time);
+    index = find(droppedTracks==sibling, 1);
+    if(~isempty(index))
+        droppedTracks = ChangeLabel([],sibling,oldParent);
+    end
     History('Push');
 catch errorMessage
     try
@@ -43,8 +50,10 @@ catch errorMessage
         return
     end
 end
-LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],oldFamilyID,newFamilyID);
+LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],oldParent,trackID);
 
-DrawTree(oldFamilyID);
+ProcessNewborns(1:length(CellFamilies));
+
+DrawTree(CellTracks(oldParent).familyID);
 DrawCells();
 end

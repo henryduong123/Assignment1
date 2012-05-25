@@ -1,14 +1,10 @@
-% RehashedCellTracks(trackID,newStartTime) will rearange the hulls in the
-% given track so that the newTime will hash correctly.
-% The hulls are hashed so that the index into the cell array is time of hull
-% subtract start time of track.  eg hash = time of hull -
-% CellTracks(i).startTime
-%
-% If newStartTime == oldStartTime, only the endTime will change.  Good for
-% removing all of the 0's at the end of the hulls list for a given track.
-%
-% ***WARNING*** if oldStartTime < newStartTime and there are hulls within
-% [oldStartTime newStartTime) THEY WILL BE REMOVED FROM THE TRACK!!!
+% RehashedCellTracks(trackID) 
+% will rearange the hulls in the given track so that it will hash correctly.
+% It will also zero pad the hulls list appropriately. The hulls are hashed 
+% so that the index into the cell array is time of hull subtract start time
+% of track.  
+% eg hash = time of hull - CellTracks(i).startTime
+% CellTracks.endTime and Family.start/end will be updated too, if nessasary
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -33,33 +29,32 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function RehashCellTracks(trackID, newStartTime)
+function RehashCellTracks(trackID)
+global CellTracks CellHulls CellFamilies
 
-global CellTracks CellHulls
-
-if ( ~exist('newStartTime','var') )
-    nzidx = find(CellTracks(trackID).hulls,1,'first');
-    newStartTime = CellHulls(CellTracks(trackID).hulls(nzidx)).time;
+hulls = CellTracks(trackID).hulls(CellTracks(trackID).hulls > 0);
+if (~isempty(hulls))
+    [times sortedIndcies] = sort([CellHulls(hulls).time]);
+    
+    %Update the times from the sorting
+    CellTracks(trackID).startTime = times(1);
+    CellTracks(trackID).endTime = times(end);
+    
+    %Clear out the old list to the size that the zero padded list should be
+    CellTracks(trackID).hulls = zeros(1,times(end)-times(1)+1);
+    
+    %Add the hulls back into the list in the approprite location
+    hashedTimes = times - times(1) + 1; %get hashed times of the hull list
+    CellTracks(trackID).hulls(hashedTimes) = hulls(sortedIndcies); %place the hulls in sorted order into thier hashed locations
+else
+    %Clear out hulls and times
+    CellTracks(trackID).startTime = [];
+    CellTracks(trackID).endTime = [];
+    CellTracks(trackID).hulls = [];
 end
 
-%clean out empty history first
-indexOfLastHull = find(CellTracks(trackID).hulls,1,'last');
-if(indexOfLastHull~=length(CellTracks(trackID).hulls))
-    CellTracks(trackID).hulls = CellTracks(trackID).hulls(1:indexOfLastHull);
-    CellTracks(trackID).endTime = CellHulls(CellTracks(trackID).hulls(end)).time;
-end
-
-oldhulls = CellTracks(trackID).hulls;
-
-dif = CellTracks(trackID).startTime - newStartTime;
-
-CellTracks(trackID).hulls = zeros(1,length(oldhulls)+dif);
-
-oldStartIdx = max(-dif,0)+1;
-oldEndIdx = length(oldhulls);
-newStartIdx = max(dif,0)+1;
-newEndIdx = newStartIdx + oldEndIdx - oldStartIdx;
-
-CellTracks(trackID).hulls(newStartIdx:newEndIdx) = oldhulls(oldStartIdx:oldEndIdx);
-CellTracks(trackID).startTime = newStartTime;
+%Update the family times
+times = [CellTracks(CellFamilies(CellTracks(trackID).familyID).tracks).endTime];
+CellFamilies(CellTracks(trackID).familyID).endTime = max(times);
+CellFamilies(CellTracks(trackID).familyID).startTime = min(times);
 end

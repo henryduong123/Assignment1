@@ -23,7 +23,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function trackIDs = GetTrackID(hullIDs,time)
+function trackIDs = GetTrackID(hullIDs)
 
 global CellHulls HashedCells
 

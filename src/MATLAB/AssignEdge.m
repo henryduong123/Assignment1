@@ -106,24 +106,7 @@ function swapTracking(hullA, hullB)
     CellTracks(trackB).hulls(hashTime) = hullA;
 end
 
-function exchangeTrackLabels(t, oldTrack, track)
-    global CellTracks CellFamilies
-    
-    RehashCellTracks(track, CellTracks(track).startTime);
-    RehashCellTracks(oldTrack, CellTracks(oldTrack).startTime);
-    
-    if ( CellTracks(track).endTime >= t )
-        RemoveFromTree(t, track, 'no');
-    end
-    
-    if ( CellTracks(oldTrack).startTime < t )
-        newFamID = RemoveFromTree(t, oldTrack, 'yes');
-        % newFamID = RemoveFromTree(t, oldTrack, 'no');
-        % removeIfEmptyTrack(oldTrack);
-        
-        oldTrack = CellFamilies(newFamID).rootTrackID;
-    end
-    
+function exchangeTrackLabels(t, oldTrack, track)    
     ChangeLabel(t, oldTrack, track);
 end
 
