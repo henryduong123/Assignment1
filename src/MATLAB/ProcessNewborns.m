@@ -177,6 +177,12 @@ if ( rootHull > 0 )
     end
 end
 
+
+consisencyErrs = mexIntegrityCheck();
+if ( ~isempty(consisencyErrs) )
+    msgbox('ERROR: Data corruption detected! Run integrity check for further details.', 'Data Consistency Error', 'error', 'modal');
+end
+
 end
 
 function hullID = getTrackHull(trackID,t)
