@@ -74,7 +74,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         extendHulls = checkHulls(bExtendHulls);
         affectedHulls = nextHulls(bAffectedHulls);
         
-        Tracker.ReassignTracks(t+1, costMatrix, extendHulls, affectedHulls, [], 1);
+        Tracker.ReassignTracks(t+1, costMatrix, extendHulls, affectedHulls, []);
     end
     
     SegmentationEdits.newHulls = [];

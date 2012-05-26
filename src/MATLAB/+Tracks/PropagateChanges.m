@@ -65,7 +65,7 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
         
         % Stop if none of the original split tracks are still around
         if ( isempty(followTracks) || t == tEnd )
-            Tracker.ReassignTracks(t+1, costMatrix, checkHulls, nextHulls, [], 1);
+            Tracker.ReassignTracks(t+1, costMatrix, checkHulls, nextHulls, []);
             UI.Progressbar(1);
             return;
         end

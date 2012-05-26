@@ -24,13 +24,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, changedHulls, bPropForward)
+function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, changedHulls)
     if ( ~exist('changedHulls','var') )
         changedHulls = [];
-    end
-    
-    if ( ~exist('bPropForward','var') )
-        bPropForward = 0;
     end
     
     if ( isempty(extendHulls) || isempty(affectedHulls) )
@@ -52,7 +48,7 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         extHull = extendHulls(matchedIdx(i));
         
 %         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
-        change = Tracker.AssignEdge(extHull, assignHull, bPropForward);
+        change = Tracker.AssignEdge(extHull, assignHull);
         changedHulls = [changedHulls change];
 	end
     
@@ -68,7 +64,7 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
         extHull = extendHulls(r);
         
 %         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
-        change = Tracker.AssignEdge(extHull, assignHull, bPropForward);
+        change = Tracker.AssignEdge(extHull, assignHull);
         changedHulls = [changedHulls change];
         
         costMatrix(r,:) = Inf;
@@ -78,134 +74,4 @@ function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls
     end
     
     changedHulls = unique(changedHulls);
-end
-
-function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
-    global HashedCells
-    
-    % Get track to which we will assign hull from extHulls
-    track = Hulls.GetTrackID(extHull);
-    
-    oldHull = [];
-    changedHulls = [];
-    
-	% Get old hull - track assignments
-    oldHull = getOldHull(t, track);
-    oldTrack = HashedCells{t}([HashedCells{t}.hullID] == hull).trackID;
-
-    % Hull - track assignment is unchanged
-    if ( oldHull == hull )
-        return;
-    end
-
-    if ( bUseChangeLabel )
-        exchangeTrackLabels(t, oldTrack, track);
-        return;
-    end
-    
-    if ( ~isempty(oldHull) )
-        % Swap track assignments
-        swapTracking(t, oldHull, hull, track, oldTrack);
-        changedHulls = [oldHull hull];
-    else
-        % Add hull to track
-        %TODO Fix func call
-        [bDump,splitTrack] = Tracks.RemoveHullFromTrack(hull, oldTrack, 1);
-        
-        % Some RemoveHullFromTracke cases cause track to be changed
-        track = Hulls.GetTrackID(extHull);
-        oldHull = getOldHull(t, track);
-        if ( ~isempty(oldHull) )
-            if ( isempty(splitTrack) )
-                error('Non-empty old cell ID without track split, cannot repair change');
-            end
-            
-            reassignAndSwap(t, hull, splitTrack, oldHull, track);
-            changedHulls = [oldHull hull];
-        else
-            Tracks.ExtendTrackWithHull(track, hull);
-            changedHulls = hull;
-        end
-    end
-end
-
-% Special case: a split-track due to hull removal has caused us to want to
-% assign hull to a track which now exists in this frame (oldHull), we first
-% assign hull to splitTrack, then swap tracking in this frame.
-function reassignAndSwap(t, hull, splitTrack, oldHull, track)
-    Tracks.ExtendTrackWithHull(splitTrack, hull);
-    swapTracking(t, oldHull, hull, track, splitTrack);
-end
-
-function oldHull = getOldHull(t, track)
-    global HashedCells
-    
-    oldHull = [];
-    
-    oldHullIdx = find([HashedCells{t}.trackID] == track,1,'first');
-    if ( isempty(oldHullIdx) )
-        return;
-    end
-    
-    oldHull = HashedCells{t}(oldHullIdx).hullID;
-end
-
-% Currently hullA has trackA, hullB has trackB
-% swap so that hullA gets trackB and hullB gets trackA
-function swapTracking(t, hullA, hullB, trackA, trackB)
-    global HashedCells CellTracks
-    
-    hashAIdx = ([HashedCells{t}.hullID] == hullA);
-    hashBIdx = ([HashedCells{t}.hullID] == hullB);
-    
-    % Swap track IDs
-    HashedCells{t}(hashAIdx).trackID = trackB;
-    HashedCells{t}(hashBIdx).trackID = trackA;
-    
-    % Swap hulls in tracks
-    hashTime = t - CellTracks(trackA).startTime + 1;
-    CellTracks(trackA).hulls(hashTime) = hullB;
-    
-    hashTime = t - CellTracks(trackB).startTime + 1;
-    CellTracks(trackB).hulls(hashTime) = hullA;
-end
-
-function exchangeTrackLabels(t, oldTrack, track)
-    global CellTracks CellFamilies
-    
-    Tracks.RehashCellTracks(track, CellTracks(track).startTime);
-    Tracks.RehashCellTracks(oldTrack, CellTracks(oldTrack).startTime);
-    
-    if ( CellTracks(track).endTime >= t )
-        %TODO fix func call
-        Families.RemoveFromTreePrune(t, track, 'no');
-    end
-    
-    if ( CellTracks(oldTrack).startTime < t )
-        %TODO fix func call
-        newFamID = Families.RemoveFromTreePrune(t, oldTrack, 'no');
-        removeIfEmptyTrack(oldTrack);
-        
-        oldTrack = CellFamilies(newFamID).rootTrackID;
-    end
-    
-    Tracks.ChangeTrackID(t, oldTrack, track);%TODO fix func call
-end
-
-function removeIfEmptyTrack(track)
-    global CellTracks
-    
-    Tracks.RehashCellTracks(track);
-    if ( ~isempty(CellTracks(track).hulls) )
-        return;
-    end
-    
-    childTracks = CellTracks(track).childrenTracks;
-    for i=1:length(childTracks)
-       %TODO fix func call
-       Families.RemoveFromTreePrune(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
-    end
-
-    Families.RemoveTrackFromFamily(track);
-    Tracks.ClearTrack(track);
 end

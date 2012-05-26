@@ -283,7 +283,7 @@ function updateTracking(prevHulls, newHulls, dir)
     if ( dir > 0 )
         % Not sure how to do this for now
     else
-        assignBack(costMatrix, extendHulls, affectedHulls, 0);
+        assignBack(costMatrix, extendHulls, affectedHulls);
     end
     
     % Update Tracking to next frame?
@@ -306,7 +306,7 @@ function updateTracking(prevHulls, newHulls, dir)
     end
 end
 
-function bAssign = assignBack(costMatrix, extendHulls, affectedHulls, bPropForward)
+function bAssign = assignBack(costMatrix, extendHulls, affectedHulls)
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
     [minOutCosts,bestOutgoing] = min(costMatrix,[],2);
     
@@ -330,7 +330,7 @@ function bAssign = assignBack(costMatrix, extendHulls, affectedHulls, bPropForwa
         nxtAssignHull = affectedHulls(bestOutgoing(matchedIdx(i)));
         fromHull = extendHulls(matchedIdx(i));
         
-        Tracker.AssignEdge(fromHull, nxtAssignHull, bPropForward);
+        Tracker.AssignEdge(fromHull, nxtAssignHull);
         bAssign(matchedIdx(i), bestOutgoing(matchedIdx(i))) = 1;
     end
 end
