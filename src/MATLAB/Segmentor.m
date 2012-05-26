@@ -77,5 +77,8 @@ end
 fileName = ['.\segmentationData\objs_' num2str(tStart) '.mat'];
 save(fileName,'objs','features','levels');
 
+fSempahore = fopen(['.\segmentationData\done_' num2str(tStart) '.txt'], 'w');
+fclose(fSempahore);
+
 fprintf('\tDone\n');
 end

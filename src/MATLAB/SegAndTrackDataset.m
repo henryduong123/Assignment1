@@ -37,12 +37,15 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     for i=1:numProcessors
         errFile = ['.\segmentationData\err_' num2str(i) '.log'];
         fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
+        semFile = ['.\segmentationData\done_' num2str(i) '.txt'];
+        semDesc = dir(semFile);
         fileDescriptor = dir(fileName);
         efd = dir(errFile);
-        while(isempty(fileDescriptor) && isempty(efd))
+        while((isempty(fileDescriptor) || isempty(semDesc)) && isempty(efd))
             pause(3)
             fileDescriptor = dir(fileName);
             efd = dir(errFile);
+            semDesc = dir(semFile);
         end
         
         bSegFileExists(i) = ~isempty(fileDescriptor);
@@ -84,7 +87,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
             cellSegments = [cellSegments objs];
             cellFeat = [cellFeat features];
             cellSegLevels = [cellSegLevels levels];
-            leveltimes = [leveltimes i:numProcessors:numberOfImages];
+            leveltimes = [leveltimes unique([objs.t])];
             
             pause(1)
         end
