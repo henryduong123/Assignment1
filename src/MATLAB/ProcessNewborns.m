@@ -64,8 +64,7 @@ for i=1:length(families)
             continue;
         end
         
-        StraightenTrack(trackID);
-        RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+        RemoveFromTree(trackID, CellTracks(trackID).startTime);
     end
 end
 

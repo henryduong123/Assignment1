@@ -26,7 +26,7 @@
 
 function newTrackIDs = SplitHull(hullID, k)
 
-global CellHulls CellFeatures CellFamilies HashedCells GraphEdits
+global CellHulls CellFeatures HashedCells GraphEdits
 
 oldCOM = CellHulls(hullID).centerOfMass;
 oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
@@ -66,15 +66,16 @@ GraphEdits(:,hullID) = 0;
 % Other hulls are just added off the clone
 newFamilyIDs = [];
 for i=2:length(newHulls)
-    CellHulls(end+1) = newHulls(i);
+    newID = length(CellHulls) +1;
+    CellHulls(newID) = newHulls(i);
     
     % Set features if valid
     if ( ~isempty(CellFeatures) )
-        CellFeatures(end+1) = newFeatures(i);
+        CellFeatures(newID) = newFeatures(i);
     end
     
-    newFamilyIDs = [newFamilyIDs NewCellFamily(length(CellHulls), newHulls(i).time)];
-    newHullIDs = [newHullIDs length(CellHulls)];
+    newFamilyIDs = [newFamilyIDs NewCellFamily(newID, newHulls(i).time)];
+    newHullIDs = [newHullIDs newID];
 end
 
 newTrackIDs = TrackSplitHulls(newHullIDs, oldTracks, oldCOM);

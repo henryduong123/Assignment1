@@ -4,6 +4,7 @@
 %This DOES NOT make the parent child relationship, it is just updates the
 %CellFamilies data structure.
 
+% Change Log: ECW 5/31/12
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -28,26 +29,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
-
-global CellFamilies CellTracks
-
 %get the full list of tracks to be updateded
 traverseTree(newFamilyID,trackID);
 
-if(isempty(CellFamilies(oldFamilyID).tracks))
-    CellFamilies(oldFamilyID).rootTrackID = [];
-    CellFamilies(oldFamilyID).startTime = [];
-    CellFamilies(oldFamilyID).endTime = [];
-else
-    minimum = min([CellTracks(CellFamilies(oldFamilyID).tracks).startTime]);
-    CellFamilies(oldFamilyID).startTime = minimum;
-    CellFamilies(oldFamilyID).endTime = max([CellTracks(CellFamilies(oldFamilyID).tracks).endTime]);
-end
-
-[minimum index] = min([CellTracks(CellFamilies(newFamilyID).tracks).startTime]);
-CellFamilies(newFamilyID).startTime = minimum;
-CellFamilies(newFamilyID).endTime = max([CellTracks(CellFamilies(newFamilyID).tracks).endTime]);
-CellFamilies(newFamilyID).rootTrackID = CellFamilies(newFamilyID).tracks(index);
+UpdateFamilyTimes(oldFamilyID);
+UpdateFamilyTimes(newFamilyID);
 end
 
 function traverseTree(newFamilyID,trackID)

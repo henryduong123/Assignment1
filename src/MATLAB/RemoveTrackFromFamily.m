@@ -39,9 +39,7 @@ index = CellFamilies(familyID).tracks==trackID;
 CellFamilies(familyID).tracks(index) = [];
 
 %update times
-[minimum index] = min([CellTracks(CellFamilies(familyID).tracks).startTime]);
-CellFamilies(familyID).startTime = minimum;
-CellFamilies(familyID).endTime = max([CellTracks(CellFamilies(familyID).tracks).endTime]);
+UpdateFamilyTimes(familyID);
 
 %set new root
 if(CellFamilies(familyID).rootTrackID == trackID)

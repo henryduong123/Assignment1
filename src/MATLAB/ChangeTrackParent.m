@@ -34,6 +34,7 @@ global CellTracks CellFamilies
 
 %see if the child exists before time
 if(time > CellTracks(childTrackID).startTime)
+    % TODO RemoveFromTree call
     newFamilyID = RemoveFromTree(time,childTrackID,'yes');
     childTrackID = CellFamilies(newFamilyID).rootTrackID;
 end

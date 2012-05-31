@@ -30,7 +30,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function RehashCellTracks(trackID)
-global CellTracks CellHulls CellFamilies
+global CellTracks CellHulls
 
 hulls = CellTracks(trackID).hulls(CellTracks(trackID).hulls > 0);
 if (~isempty(hulls))
@@ -54,7 +54,5 @@ else
 end
 
 %Update the family times
-times = [CellTracks(CellFamilies(CellTracks(trackID).familyID).tracks).endTime];
-CellFamilies(CellTracks(trackID).familyID).endTime = max(times);
-CellFamilies(CellTracks(trackID).familyID).startTime = min(times);
+UpdateFamilyTimes(CellTracks(trackID).familyID);
 end
