@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% InitializeConstants.m - Initialize and add constant values to the global
+% CONSTANTS structure.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function InitializeConstants()
+%Set all constants here
 
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
-end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+Load.AddConstant('imageAlpha',1.5);
+Load.AddConstant('maxPixelDistance',40,1);
+Load.AddConstant('maxCenterOfMassDistance',40,1);
+Load.AddConstant('minParentCandidateTimeFrame',5, 1);
+Load.AddConstant('minParentHistoryTimeFrame',5, 1);
+Load.AddConstant('minParentFuture',5, 1);
+Load.AddConstant('minFamilyTimeFrame',25, 1);
+Load.AddConstant('maxFrameDifference',1, 1);
+Load.AddConstant('historySize',50, 1);
+Load.AddConstant('clickMargin',500, 1);
+Load.AddConstant('timeResolution',10); %in frames per min
+Load.AddConstant('dMaxConnectComponent',40,1);
+Load.AddConstant('dMaxCenterOfMass',40,1);
+Load.AddConstant('minTrackScore',0.5,1);
+Load.AddConstant('maxPropagateFrames',50,1);
 end

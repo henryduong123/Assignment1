@@ -1,4 +1,8 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% RemoveTrackFromFamily(trackID) only removes the track from the tracks
+% list currently assosiated in the CellFamily entery and updated the other
+% CellFamily fields.
+% This is not intended to change the structure, just to keep the data
+% correct
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +27,25 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function RemoveTrackFromFamily(trackID)
 
-global Figures softwareVersion
+global CellFamilies CellTracks
+familyID = CellTracks(trackID).familyID;
+if(isempty(familyID)),return,end
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+index = CellFamilies(familyID).tracks==trackID;
+
+%remove track
+CellFamilies(familyID).tracks(index) = [];
+
+%update times
+Families.UpdateFamilyTimes(familyID);
+
+%set new root
+if(CellFamilies(familyID).rootTrackID == trackID)
+    CellFamilies(familyID).rootTrackID = CellFamilies(familyID).tracks(index);
 end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+if(isempty(index))
+    CellFamilies(familyID).tracks = [];
 end
-
 end

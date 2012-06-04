@@ -1,5 +1,3 @@
-% LEVer.m - This is the main program function for the LEVer application.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -23,29 +21,37 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function PropagateBackward(time)
+    global HashedCells CellTracks CellPhenotypes
 
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+    phenoTracks = [];
+    if ( ~isempty(CellPhenotypes.hullPhenoSet) )
+        phenoTracks = unique(Tracks.GetTrackID(CellPhenotypes.hullPhenoSet(1,:)));
     end
-end
 
-softwareVersion = '6.2 Adult';
+    hullList = [];
+    for i=1:length(phenoTracks)
+        if ( Tracks.GetTrackPhenotype(phenoTracks(i)) == 1 )
+            markedIdx = Tracks.GetTimeOfDeath(phenoTracks(i)) - CellTracks(phenoTracks(i)).startTime + 1;
+            markedHull = CellTracks(phenoTracks(i)).hulls(markedIdx);
+            if ( markedHull == 0 )
+                continue;
+            end
+        else
+            markedIdx = find(CellTracks(phenoTracks(i)).hulls, 1, 'last');
+            if ( isempty(markedIdx) )
+                continue;
+            end
+            markedHull = CellTracks(phenoTracks(i)).hulls(markedIdx);
+        end
 
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
+        hullList = [hullList markedHull];
+    end
 
+    curCells = [HashedCells{time}.hullID];
+    if ( isempty(curCells) )
+        return;
+    end
+
+    Track.TrackBackPhenotype(hullList, curCells);
 end

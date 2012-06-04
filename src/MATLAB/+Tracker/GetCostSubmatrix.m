@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% GetCostSubmatrix.m - Get submatrix from sparse cost matrix at the given
+% from and to hullIDs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,29 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
-
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+function [costMatrix bFromAffected bToAffected] = GetCostSubmatrix(fromHulls, toHulls)
+    inCostMatrix = Tracker.GetCostMatrix();
+    
+    % Get costMatrix representing costs from fromHulls to toHulls
+    %[r c] = ndgrid(fromHulls, toHulls);
+    %costIdx = sub2ind(size(inCostMatrix), r, c);
+    %costMatrix = full(inCostMatrix(costIdx));
+    
+    % Vectorized implementation of this code is commented out above
+    % because we cannot use more than 46K square elements in a matrix in
+    % 32-bit matlab.
+    costMatrix = zeros(length(fromHulls),length(toHulls));
+    for i=1:length(fromHulls)
+        for j=1:length(toHulls)
+            costMatrix(i,j) = inCostMatrix(fromHulls(i),toHulls(j));
+        end
     end
-end
 
-softwareVersion = '6.2 Adult';
+    bToAffected = any(costMatrix,1);
+    costMatrix = costMatrix(:,bToAffected);
+    
+    bFromAffected = any(costMatrix,2);
+    costMatrix = full(costMatrix(bFromAffected,:));
 
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+    costMatrix(costMatrix == 0) = Inf;
 end

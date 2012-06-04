@@ -1,4 +1,6 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% RemoveChildren(trackID) removes the children of the given track and moves
+% them to thier own trees.  Those new trees are attempted to be added to
+% other trees. eg ProcessNewborns
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +25,15 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function RemoveChildren(trackID)
 
-global Figures softwareVersion
+global CellTracks
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+familyIDs = [];
+while ~isempty(CellTracks(trackID).childrenTracks)
+    %TODO fix func call
+    familyIDs = [familyIDs Families.RemoveFromTree(CellTracks(CellTracks(trackID).childrenTracks(1)).startTime,CellTracks(trackID).childrenTracks(1),'no')];
 end
 
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+CellTracks(trackID).childrenTracks = [];
 end

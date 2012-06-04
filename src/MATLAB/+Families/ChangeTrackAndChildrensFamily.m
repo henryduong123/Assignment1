@@ -1,5 +1,10 @@
-% LEVer.m - This is the main program function for the LEVer application.
+%ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
+%This will remove the tree rooted at the given trackID from the given
+%oldFamily and put them in the newFamily
+%This DOES NOT make the parent child relationship, it is just updates the
+%CellFamilies data structure.
 
+% Change Log: ECW 5/31/12
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -23,29 +28,25 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
+%get the full list of tracks to be updateded
+traverseTree(newFamilyID,trackID);
 
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+Families.UpdateFamilyTimes(oldFamilyID);
+Families.UpdateFamilyTimes(newFamilyID);
 end
 
-softwareVersion = '6.2 Adult';
+function traverseTree(newFamilyID,trackID)
+%recursive helper function to traverse tree and gather track IDs
+%will add the tracks to the new family along the way
+global CellFamilies CellTracks
 
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+Families.RemoveTrackFromFamily(trackID);
+%add track
+CellFamilies(newFamilyID).tracks = [CellFamilies(newFamilyID).tracks trackID];
+CellTracks(trackID).familyID = newFamilyID;
+   
+for i=1:length(CellTracks(trackID).childrenTracks)
+    traverseTree(newFamilyID, CellTracks(trackID).childrenTracks(i));
 end
-
 end

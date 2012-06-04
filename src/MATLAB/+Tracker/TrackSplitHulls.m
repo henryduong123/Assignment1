@@ -1,4 +1,4 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% TrackSplitHulls.m - Retrack user split or added hulls.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +23,30 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
-
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+function trackIDs = TrackSplitHulls(newHulls, forceTracks, COM)
+    global CellHulls HashedCells
+    
+    trackIDs = Tracks.GetTrackID(newHulls);
+    t = CellHulls(newHulls(1)).time;
+    
+    % Add new hulls to edited segmentations lists
+    Segmentation.AddSegmentationEdit(newHulls, newHulls);
+    
+    [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughSplit(t, newHulls, COM);
+    
+    if ( isempty(costMatrix) )
+        return;
     end
-end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+    
+    changedHulls = Tracker.ReassignTracks(t, costMatrix, extendHulls, affectedHulls, newHulls);
+    
+    if ( t+1 <= length(HashedCells) )
+        nextHulls = [HashedCells{t+1}.hullID];
+        Tracker.UpdateTrackingCosts(t, changedHulls, nextHulls);
+    end
+    
+    % All changed hulls get added (this may include track changes)
+    Segmentation.AddSegmentationEdit([],changedHulls);
+    
+    trackIDs = [HashedCells{t}(ismember([HashedCells{t}.hullID],newHulls)).trackID];
 end

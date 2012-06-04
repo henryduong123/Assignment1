@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% NewCellFamily.m - Create a empty Family that will contain one track that
+% contains only one hull
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,29 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function curFamilyID = NewCellFamily(cellHullID,t)
 
-global Figures softwareVersion
+global CellFamilies
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
-end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+if(isempty(CellFamilies))
+    trackID = Families.NewCellTrack(1,cellHullID,t);
+    CellFamilies = struct(...
+        'rootTrackID',   {trackID},...
+        'tracks',       {trackID},...
+        'startTime',    {t},...
+        'endTime',      {t});
+    
+    curFamilyID = 1;
+else
+    %get next family ID
+    curFamilyID = length(CellFamilies) + 1;
+    trackID = Families.NewCellTrack(curFamilyID,cellHullID,t);
+    
+    %setup defaults for family tree
+    CellFamilies(curFamilyID).rootTrackID = trackID;
+    CellFamilies(curFamilyID).tracks = trackID;
+    CellFamilies(curFamilyID).startTime = t;
+    CellFamilies(curFamilyID).endTime = t;
 end
 
 end

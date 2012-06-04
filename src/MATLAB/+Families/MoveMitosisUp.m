@@ -1,4 +1,6 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% MoveMitosisUp(time,siblingTrackID) will move the Mitosis event up the
+% tree.  This function takes the hulls from the parent between the old
+% mitosis time and the given time and attaches them to the given track.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +25,18 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function MoveMitosisUp(time,siblingTrackID)
 
-global Figures softwareVersion
+global CellTracks
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+%remove hulls from parent
+hash = time - CellTracks(CellTracks(siblingTrackID).parentTrack).startTime + 1;
+hulls = CellTracks(CellTracks(siblingTrackID).parentTrack).hulls(hash:end);
+CellTracks(CellTracks(siblingTrackID).parentTrack).hulls(hash:end) = 0;
+Tracks.RehashCellTracks(CellTracks(siblingTrackID).parentTrack,CellTracks(CellTracks(siblingTrackID).parentTrack).startTime);
+
+%add hulls to sibling
+for i=1:length(hulls)
+    Tracks.AddHullToTrack(hulls(i),siblingTrackID,[]);
 end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
 end

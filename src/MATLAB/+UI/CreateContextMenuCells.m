@@ -1,0 +1,576 @@
+% CreateContextMenuCells.m - creates the context menu for the figure that
+% displays the image data and the subsequent function calls
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function CreateContextMenuCells()
+
+global Figures CellPhenotypes CellTracks
+
+if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
+    CellPhenotypes.descriptions={'died'};
+    CellPhenotypes.contextMenuID=[];
+    CellPhenotypes.hullPhenoSet = zeros(2,0);
+end
+
+figure(Figures.cells.handle);
+Figures.cells.contextMenuHandle = uicontextmenu;
+
+Figures.cells.removeMenu = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove Mitosis',...
+    'CallBack',     @removeMitosis,...
+    'Visible',      'off');
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Add Mitosis',...
+    'CallBack',     @addMitosis);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Change Label',...
+    'CallBack',     @changeLabel,...
+    'Separator',    'on');
+
+addHull = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Change Number of Cells',...
+    'Separator',    'on');
+
+uimenu(addHull,...
+    'Label',        'Number of Cells');
+
+uimenu(addHull,...
+    'Label',        '1',...
+    'CallBack',     @addHull1);
+
+uimenu(addHull,...
+    'Label',        '2',...
+    'CallBack',     @addHull2);
+
+uimenu(addHull,...
+    'Label',        '3',...
+    'CallBack',     @addHull3);
+
+uimenu(addHull,...
+    'Label',        '4',...
+    'CallBack',     @addHull4);
+
+uimenu(addHull,...
+    'Label',        'Other',...
+    'Separator',    'on',...
+    'CallBack',     @addHullOther);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove Cell (this frame)',...
+    'CallBack',     @removeHull);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Delete Track',...
+    'CallBack',     @removeTrackPrevious);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove From Tree',...
+    'CallBack',     @removeFromTree);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Properties',...
+    'CallBack',     @properties,...
+    'Separator',    'on');
+
+PhenoMenu = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Phenotype',...
+    'Separator',    'on',...
+    'CallBack',     @phenoPopulate);
+
+uimenu(PhenoMenu,...
+    'Label',        'Create new phenotype...',...
+    'CallBack',     @phenotypes);
+
+for i=1:length(CellPhenotypes.descriptions)
+    CellPhenotypes.contextMenuID(i)=uimenu(PhenoMenu,...
+        'Label',        CellPhenotypes.descriptions{i},...
+        'CallBack',     @phenotypes);
+end
+
+
+end
+
+%% Callback functions
+
+function removeMitosis(src,evnt)
+global CellTracks Figures
+object = get(gco);
+
+if(~strcmp(object.Tag,'SiblingRelationship'))
+    msgbox('Please click on a Relationship line to remove','Not on line','warn');
+    return
+end
+
+choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
+    num2str(CellTracks(object.UserData).siblingTrack),'Cancel','Cancel');
+switch choice
+    case num2str(object.UserData)
+        remove = CellTracks(object.UserData).siblingTrack;
+        try
+            Families.GraphEditRemoveMitosis(CellTracks(object.UserData).siblingTrack);
+            %TODO fix func call
+            newTree = Families.RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
+                CellTracks(object.UserData).siblingTrack,'yes');
+            UI.History('Push');
+        catch errorMessage
+            try
+                Error.ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
+                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
+                return
+            catch errorMessage2
+                fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+    case num2str(CellTracks(object.UserData).siblingTrack)
+        remove = object.UserData;
+        try
+            Families.GraphEditRemoveMitosis(object.UserData);
+            %TODO fix func call
+            newTree = Families.RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
+            UI.History('Push');
+        catch errorMessage
+            try
+                Error.ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' '...
+                    num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
+                return
+            catch errorMessage2
+                fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+    otherwise
+        return
+end
+Error.LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
+UI.DrawTree(Figures.tree.familyID);
+UI.DrawCells();
+end
+
+function addMitosis(src,evnt)
+global CellTracks Figures HashedCells
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+answer = inputdlg({['Enter new sister of cell' num2str(trackID)]},...
+    'Add Mitosis',1,{''});
+
+if(isempty(answer)),return,end
+
+siblingTrack = str2double(answer(1));
+time = Figures.time;
+
+if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
+    msgbox([answer(1) ' is not a valid cell'],'Not a valid cell','error');
+    return
+end
+if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
+    msgbox([answer(1) ' is not a valid sister cell'],'Not a valid sister cell','error');
+    return
+end
+if(CellTracks(trackID).startTime>time)
+    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
+    return
+end
+if(~isempty(Tracks.GetTimeOfDeath(siblingTrack)) && Tracks.GetTimeOfDeath(siblingTrack)<=time)
+    msgbox(['Cannot attach a cell to cell ' num2str(siblingTrack) ' beacuse it is dead at this time'],'Dead Cell','help');
+    return
+end
+if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=time)
+    msgbox(['Cannot attach a cell to cell ' num2str(trackID) ' beacuse it is dead at this time'],'Dead Cell','help');
+    return
+end
+
+if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<time)
+    try
+        Families.GraphEditAddMitosis(time, siblingTrack, trackID);
+        Tracks.ChangeTrackParent(siblingTrack,time,trackID);
+        UI.History('Push');
+    catch errorMessage
+        try
+            Error.ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(siblingTrack).familyID;
+elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime<time)
+    try
+        Families.GraphEditAddMitosis(time, trackID, siblingTrack);
+        Tracks.ChangeTrackParent(trackID,time,siblingTrack);
+        UI.History('Push');
+    catch errorMessage
+        try
+            Error.ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(trackID).familyID;
+elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==time)
+    valid = 0;
+    while(~valid)
+        answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
+        if(isempty(answer)),return,end
+        parentTrack = str2double(answer(1));
+        
+        if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
+                (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
+            choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
+                'Not a valid parent','Enter a different parent','Cancel','Cancel');
+            switch choice
+                case 'Cancel'
+                    return
+            end
+        else
+            valid = 1;
+        end
+    end
+    
+    if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
+        try
+            Tracks.SwapTrackLabels(time,trackID,parentTrack);
+            UI.History('Push');
+        catch errorMessage
+            try
+                Error.ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
+                return
+            catch errorMessage2
+                fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+        Error.LogAction('Swapped Labels',trackID,parentTrack);
+    else
+        try
+            Tracks.ChangeLabel(time,trackID,parentTrack); %TODO fix function call
+        catch errorMessage
+            try
+                Error.ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
+                return
+            catch errorMessage2
+                fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+    end
+    
+    try
+        Families.GraphEditAddMitosis(time, parentTrack, siblingTrack);
+        Tracks.ChangeTrackParent(parentTrack,time,siblingTrack);
+    catch errorMessage
+        try
+            Error.ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(parentTrack).familyID;
+else
+    mitosisTracks = [trackID siblingTrack];
+    bCheckParents = (~arrayfun(@(x)(isempty(CellTracks(x).parentTrack)), mitosisTracks));
+    [dump,idxLongest] = sort([CellTracks(mitosisTracks).startTime]);
+    
+    if ( nnz(bCheckParents) == 1 )
+        mitosisTracks = [mitosisTracks(bCheckParents) mitosisTracks(~bCheckParents)];
+    else
+        mitosisTracks = mitosisTracks(idxLongest);
+    end
+    
+    try
+        Families.GraphEditAddMitosis(time, mitosisTracks(1), mitosisTracks(2));
+        Tracks.ChangeTrackParent(mitosisTracks(1),time,mitosisTracks(2));
+        UI.History('Push');
+    catch errorMessage
+        try
+            Error.ErrorHandeling(['ChangeTrackParent(' num2str(mitosisTracks(1)) ' ' num2str(time) ' ' num2str(mitosisTracks(2)) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    Figures.tree.familyID = CellTracks(mitosisTracks(1)).familyID;
+end
+
+Error.LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
+
+UI.DrawTree(Figures.tree.familyID);
+UI.DrawCells();
+end
+
+function changeLabel(src,evnt)
+global Figures
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+UI.ContextChangeLabel(Figures.time,trackID);
+end
+
+function changeParent(src,evnt)
+global Figures
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+UI.ContextChangeParent(trackID,Figures.time);
+end
+
+function addHull1(src,evnt)
+Segmentation.AddHull(1);
+end
+
+function addHull2(src,evnt)
+Segmentation.AddHull(2);
+end
+
+function addHull3(src,evnt)
+Segmentation.AddHull(3);
+end
+
+function addHull4(src,evnt)
+Segmentation.AddHull(4);
+end
+
+function addHullOther(src,evnt)
+num = inputdlg('Enter Number of Cells Present','Add Hulls',1,{'1'});
+if(isempty(num)),return,end;
+num = str2double(num(1));
+Segmentation.AddHull(num);
+end
+
+function removeHull(src,evnt)
+global Figures CellFamilies
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+try
+    Hulls.RemoveHull(hullID);
+    UI.History('Push');
+catch errorMessage
+    try
+        Error.ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+        return
+    catch errorMessage2
+        fprintf('%s',errorMessage2.message);
+        return
+    end
+end
+
+Error.LogAction(['Removed hull from track ' num2str(trackID)],hullID);
+
+%if the whole family disapears with this change, pick a diffrent family to
+%display
+if(isempty(CellFamilies(Figures.tree.familyID).tracks))
+    for i=1:length(CellFamilies)
+        if(~isempty(CellFamilies(i).tracks))
+            Figures.tree.familyID = i;
+            break
+        end
+    end
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
+    msgbox(['By removing this cell, the complete tree is no more. Displaying clone rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
+    return
+end
+
+UI.DrawTree(Figures.tree.familyID);
+UI.DrawCells();
+end
+
+function removeTrackPrevious(src,evnt)
+    global Figures CellFamilies
+
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
+    
+    try
+        hullIDs = Tracks.RemoveTrackPrevious(trackID, hullID);
+        if ( isempty(hullIDs) )
+            return;
+        end
+        
+        UI.History('Push');
+    catch errorMessage
+        try
+            Error.ErrorHandeling(['RemoveTrackPrevious(' num2str(trackID) ', ' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+            return
+        catch errorMessage2
+            fprintf('%s',errorMessage2.message);
+            return
+        end
+    end
+    Error.LogAction(['Removed hulls from start of track ' num2str(trackID) ' to frame ' num2str(Figures.time)],hullIDs);
+    
+    %if the whole family disapears with this change, pick a diffrent family to
+    %display
+    if(isempty(CellFamilies(Figures.tree.familyID).tracks))
+        for i=1:length(CellFamilies)
+            if(~isempty(CellFamilies(i).tracks))
+                Figures.tree.familyID = i;
+                break
+            end
+        end
+        UI.DrawTree(Figures.tree.familyID);
+        UI.DrawCells();
+        return
+    end
+
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
+end
+
+function removeFromTree(src,evnt)
+global Figures
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+UI.ContextRemoveFromTree(trackID,Figures.time);
+end
+
+function properties(src,evnt)
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+
+UI.ContextProperties(hullID,trackID);
+end
+
+% added 4 19 2011 ac
+function phenotypes(src,evnt)
+
+global Figures CellPhenotypes CellTracks SegmentationEdits
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+% which did they click
+for i=1:length(CellPhenotypes.contextMenuID)
+    if src == CellPhenotypes.contextMenuID(i)
+        break;
+    end
+end
+
+if src~=CellPhenotypes.contextMenuID(i)
+    % add new one
+    NewPhenotype=inputdlg('Enter description for new phenotype','Cell Phenotypes');
+    if isempty(NewPhenotype)
+        return
+    end
+    
+    PhenoMenu = get(CellPhenotypes.contextMenuID(1),'parent');
+    i=length(CellPhenotypes.descriptions)+1;
+    CellPhenotypes.contextMenuID(i)=uimenu(PhenoMenu,...
+        'Label',        NewPhenotype{1},...
+        'CallBack',     @phenotypes);  
+    CellPhenotypes.descriptions(i)=NewPhenotype;  
+
+    
+end
+bActive = strcmp(get(CellPhenotypes.contextMenuID(i),'checked'),'on');
+
+if 1==i
+    
+	
+    if ( bActive )
+        % turn off death...
+        try
+            Tracks.SetPhenotype(hullID, i, bActive);
+            Families.ProcessNewborns(FindFamiliesAfter(trackID), SegmentationEdits.maxEditedFrame);
+        catch errorMessage
+            try
+                Error.ErrorHandeling(['ProcessNewborns(' num2str(trackID) ', ' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
+                return
+            catch errorMessage2
+                fprintf('%s',errorMessage2.message);
+                return
+            end
+        end
+        Error.LogAction(['Removed death for ' num2str(trackID)],[],[]);
+    else
+        % turn on death
+        if(~isempty(CellTracks(trackID).childrenTracks))
+            try
+                NewTrackID=Tracks.StraightenTrack(trackID);
+                Tracks.SetPhenotype(hullID, i, bActive);
+                Families.ProcessNewborns(NewTrackID, SegmentationEdits.maxEditedFrame);
+            catch errorMessage
+                try
+                    Error.ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
+                    return
+                catch errorMessage2
+                    fprintf('%s',errorMessage2.message);
+                    return
+                end
+            end
+        else
+            Tracks.SetPhenotype(hullID, i, bActive);
+        end
+        Error.LogAction(['Marked time of death for ' num2str(trackID)]);
+    end
+    UI.History('Push');
+    
+    UI.DrawCells();
+    UI.DrawTree(Figures.tree.familyID);
+    return
+end
+
+Tracks.SetPhenotype(hullID, i, bActive);
+UI.History('Push');
+UI.DrawCells();
+UI.DrawTree(Figures.tree.familyID);
+    
+end
+
+% Whenever we right-click on a cell this puts a check mark next to active
+% phenotype, if any.
+function phenoPopulate(src,evnt)
+global CellPhenotypes CellTracks
+
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+    
+for i=1:length(CellPhenotypes.contextMenuID)        
+    set(CellPhenotypes.contextMenuID(i),'checked','off');    
+end
+
+trackPheno = Tracks.GetTrackPhenotype(trackID);
+
+if ( trackPheno == 0 )
+    return
+end
+    
+set(CellPhenotypes.contextMenuID(trackPheno),'checked','on');
+end
+%% Helper functions

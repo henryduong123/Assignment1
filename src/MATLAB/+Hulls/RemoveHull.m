@@ -1,4 +1,6 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
+% hull will have a flag set that means that it does not exist anywhere and
+% should not be drawn on the cells figure
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +25,32 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function RemoveHull(hullID, bDontUpdateTree)
 
-global Figures softwareVersion
+global HashedCells CellHulls CellTracks CellFamilies SegmentationEdits
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+if ( ~exist('bDontUpdateTree','var') )
+    bDontUpdateTree = 0;
 end
 
-softwareVersion = '6.2 Adult';
+trackID = Tracks.GetTrackID(hullID);
 
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+if(isempty(trackID)),return,end
+
+bNeedsUpdate = RemoveHullFromTrack(hullID, trackID);
+
+%remove hull from HashedCells
+time = CellHulls(hullID).time;
+index = [HashedCells{time}.hullID]==hullID;
+HashedCells{time}(index) = [];
+
+CellHulls(hullID).deleted = 1;
+
+Segmentation.RemoveSegmentationEdit(hullID, time);
+
+if ( ~bDontUpdateTree && bNeedsUpdate )
+    %TODO fix func call
+    Families.RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
+    Families.ProcessNewborns(1:length(CellFamilies),SegmentationEdits.maxEditedFrame);
 end
-
 end

@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% GetNextColor.m - Takes the global Colors list and selects the next in the
+% list and returns it
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,27 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function color = GetNextColor()
+global Colors
+persistent index
 
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+%init index
+if(isempty(index))
+    index=1;
 end
 
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+if isempty(Colors)
+    Colors  = Load.CreateColors();
 end
 
+color.background = Colors(index,1:3);
+color.text = Colors(index,4:6);
+color.backgroundDark = Colors(index,7:9);
+
+%increment index or roll over
+if(index >= length(Colors))
+    index = 1;
+else
+    index = index + 1;
+end
 end

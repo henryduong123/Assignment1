@@ -1,4 +1,6 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% FindMergedCell.m - Gets original (partial) segmentation from cells which
+% were split and a list of the split cells which intersect the original
+% segmentation component.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +25,26 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function [newObj mergeHulls] = FindMergedCell(t, centerPt)
+    global CONSTANTS CellHulls HashedCells
 
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(t) '.TIF'];
+    [img colorMap] = imread(fileName);
+    img = mat2gray(img);
+    
+    mergeHulls = [];
+    newObj = Segmentation.PartialImageSegment(img, centerPt, 200, CONSTANTS.imageAlpha);
+    
+    if ( isempty(newObj) )
+        return;
     end
-end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+    
+    chkHulls = [HashedCells{t}.hullID];
+    
+    bMergeHull = false(length(chkHulls));
+    for i=1:length(chkHulls)
+        bMergeHull(i) = any(ismember(newObj.indexPixels,CellHulls(chkHulls(i)).indexPixels));
+    end
+    
+    mergeHulls = chkHulls(bMergeHull);
 end

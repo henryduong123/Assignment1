@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% AddSegmentationEdit.m - Make note of a user segmentation edit for later
+% learn from edit operations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,25 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
-
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+function AddSegmentationEdit(addNewHulls, addChangedHulls)
+    global SegmentationEdits HashedCells
+    
+    if ( isempty(SegmentationEdits) )
+        SegmentationEdits.newHulls = [];
+        SegmentationEdits.changedHulls = [];
+        SegmentationEdits.maxEditedFrame = length(HashedCells);
     end
+    
+    SegmentationEdits.newHulls = unique([SegmentationEdits.newHulls addNewHulls]);
+    SegmentationEdits.changedHulls = unique([SegmentationEdits.changedHulls addChangedHulls]);
+    SegmentationEdits.maxEditedFrame = max([SegmentationEdits.maxEditedFrame getFrameTimes(addNewHulls)]);
+    SegmentationEdits.editTime = max([SegmentationEdits.editTime getFrameTimes(addNewHulls)]);
+    
+    UI.UpdateSegmentationEditsMenu();
 end
 
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+function times = getFrameTimes(hulls)
+    global CellHulls
+    
+    times =[CellHulls(hulls).time];
 end

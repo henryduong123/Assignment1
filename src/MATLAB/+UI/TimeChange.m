@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% TimeChange.m - Takes the given time and changes the figures to that time
+% or the closest time within [1 length(HashedCells)]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function TimeChange(time)
 
-global Figures softwareVersion
+global Figures HashedCells
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
+if(time > length(HashedCells))
+    Figures.time = length(HashedCells);
+elseif (time < 1)
+    Figures.time = 1;
+else
+    Figures.time = time;
 end
 
-softwareVersion = '6.2 Adult';
+UI.ClearCellSelection();
 
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+UI.UpdateTimeIndicatorLine();
+UI.DrawCells();
 end

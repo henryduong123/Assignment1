@@ -1,4 +1,5 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% ContextProperties.m - context menu callback function, get cell track
+% properties.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,29 +24,21 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function ContextProperties(hullID,trackID)
 
-global Figures softwareVersion
+global CellTracks Figures
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    UI.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
-end
+%collect all the data that will be passed to the properties UI
+vars.hullID = hullID;
+vars.trackID = trackID;
+vars.familyID = CellTracks(vars.trackID).familyID;
+vars.startTime = CellTracks(vars.trackID).startTime;
+vars.endTime = CellTracks(vars.trackID).endTime;
+vars.parentTrack = CellTracks(vars.trackID).parentTrack;
+vars.siblingTrack = CellTracks(vars.trackID).siblingTrack;
+vars.childrenTracks = CellTracks(vars.trackID).childrenTracks;
+vars.timeOfDeath = Tracks.GetTimeOfDeath(vars.trackID);
+vars.time = Figures.time;
 
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    UI.History('Init');
-elseif(~isempty(Figures))
-    UI.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+UI.Properties(vars);
 end
