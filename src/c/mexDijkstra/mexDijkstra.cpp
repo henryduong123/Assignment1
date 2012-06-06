@@ -240,7 +240,7 @@ void buildOutputPaths(mxArray* cellPaths, mxArray* arrayCost)
 }
 
 // Functions
-int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle)
+int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle, int dir = 1)
 {
 	gAcceptedPaths.clear();
 	for ( mwSize i=0; i < numVerts; ++i )
@@ -268,8 +268,19 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArr
 
 		double curCost = gPathCosts[MATLAB_IDX(curVert)];
 
-		int numOutEdges = gCostGraph->getOutEdgeLength(curVert);
-		CSparseWrapper::tEdgeIterator edgeIter = gCostGraph->getOutEdgeIter(curVert);
+		int numOutEdges;
+		CSparseWrapper::tEdgeIterator edgeIter;
+		if ( dir >= 0 )
+		{
+			numOutEdges	= gCostGraph->getOutEdgeLength(curVert);
+			edgeIter = gCostGraph->getOutEdgeIter(curVert);
+		}
+		else
+		{
+			numOutEdges	= gCostGraph->getInEdgeLength(curVert);
+			edgeIter = gCostGraph->getInEdgeIter(curVert);
+		}
+
 		for (int i=0; i < numOutEdges; ++edgeIter, ++i)
 		{
 			mwIndex nextVert = (edgeIter->first);
@@ -338,6 +349,13 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != 1 )
 		mexErrMsgTxt("checkExtension: Expected scalar max extent as third parameter.");
 
+	int dir = 1;
+	if ( nrhs == 4 && !mxIsClass(prhs[3], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar direction fourth parameter.");
+
+	if ( nrhs == 4 )
+		dir = ((int) mxGetScalar(prhs[3]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -349,7 +367,7 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL, dir);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
@@ -375,6 +393,13 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	if ( nrhs < 4 || !mxIsClass(prhs[3], "function_handle") )
 		mexErrMsgTxt("matlabExtend: Expected function handle as fourth parameter.");
 
+	int dir = 1;
+	if ( nrhs == 5 && !mxIsClass(prhs[4], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar direction fifth parameter.");
+
+	if ( nrhs == 5 )
+		dir = ((int) mxGetScalar(prhs[4]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -388,7 +413,7 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	const mxArray* acceptFuncHandle = prhs[3];
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle, dir);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
@@ -690,8 +715,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
 		mexPrintf("Supported Commands:\n");
 		mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
-		mexPrintf("\t checkExtension(startVert, maxLength) - Find suitable extensions out to maxLength from startVert.\n");
-		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc) - Find suitable extensions using matlab acceptFunc as acceptance criterion.\n");
+		mexPrintf("\t checkExtension(startVert, maxLength, direction = 1) - Find suitable extensions out to maxLength from startVert. Optionally search backwards (direction < 0).\n");
+		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc, direction = 1) - Find suitable extensions using matlab acceptFunc(startIdx,endIdx) as acceptance criterion. Optionally search backwards (direction < 0).\n");
 		mexPrintf("\t removeEdges(startVertList, endVertList) - Remove all edges in list.\n");
 		mexPrintf("\t edgeCost(startVert, nextVert) - Return cost for given edge (0.0) if no edge exists.\n");
 	}
