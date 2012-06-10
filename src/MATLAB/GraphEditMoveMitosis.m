@@ -50,28 +50,16 @@ function GraphEditMoveMitosis(time, trackID)
     GraphEdits(newParentHull,siblingHull) = 1;
 end
 
-function hull = getNearestPrevHull(time, trackID)
-    global CellTracks
-    
-    hull = 0;
-    
-    hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(1:hash),1,'last');
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
-    end
+function hull = getNearestNextHull(time, trackID)
+    hull = getNearestHull(time, trackID, true);
 end
 
-function hull = getNearestNextHull(time, trackID)
+function hull = getNearestPrevHull(time, trackID)
+    hull = getNearestHull(time, trackID, false);
+end
+
+%true for first, false for last
+function hull = getNearestHull(time, trackID, firstp)
 	global CellTracks
     
     hull = 0;
@@ -83,7 +71,11 @@ function hull = getNearestNextHull(time, trackID)
     
     hull = CellTracks(trackID).hulls(hash);
     if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(hash:end),1,'first');
+        if(firstp)
+            hidx = find(CellTracks(trackID).hulls(hash:end),1,'first');
+        else
+            hidx = find(CellTracks(trackID).hulls(1:hash),1,'last');
+        end
         if ( isempty(hidx) )
             return;
         end

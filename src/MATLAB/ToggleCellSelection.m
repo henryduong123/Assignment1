@@ -1,4 +1,4 @@
-% ToggleCellSelection.m - Toggle whether cellID is in the currently
+% ToggleCellSelection.m - Toggle whether hullID is in the currently
 % selected cell set.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,14 +24,14 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ToggleCellSelection(cellID)
+function ToggleCellSelection(hullID)
     global Figures
     
-    bAlreadySelected = (Figures.cells.selectedHulls == cellID);
+    bAlreadySelected = (Figures.cells.selectedHulls == hullID);
     if ( any(bAlreadySelected) )
         Figures.cells.selectedHulls = Figures.cells.selectedHulls(~bAlreadySelected);
     else
-        Figures.cells.selectedHulls = [Figures.cells.selectedHulls cellID];
+        Figures.cells.selectedHulls = [Figures.cells.selectedHulls hullID];
     end
     
     DrawCells();
