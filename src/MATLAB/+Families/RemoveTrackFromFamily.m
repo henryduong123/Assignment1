@@ -4,6 +4,8 @@
 % This is not intended to change the structure, just to keep the data
 % correct
 
+% ChangeLog
+% EW 6/6/12 rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -34,18 +36,13 @@ familyID = CellTracks(trackID).familyID;
 if(isempty(familyID)),return,end
 
 index = CellFamilies(familyID).tracks==trackID;
+if(isempty(index))
+    error('Track %d thinks it is in family %d, but is not',trackID,familiyID);
+end
 
 %remove track
 CellFamilies(familyID).tracks(index) = [];
 
 %update times
 Families.UpdateFamilyTimes(familyID);
-
-%set new root
-if(CellFamilies(familyID).rootTrackID == trackID)
-    CellFamilies(familyID).rootTrackID = CellFamilies(familyID).tracks(index);
-end
-if(isempty(index))
-    CellFamilies(familyID).tracks = [];
-end
 end

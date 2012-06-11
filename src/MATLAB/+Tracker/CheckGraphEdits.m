@@ -25,7 +25,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [trackHulls,nextHulls] = Tracker.CheckGraphEdits(dir, fromHulls, toHulls)
+function [trackHulls,nextHulls] = CheckGraphEdits(dir, fromHulls, toHulls)
     global GraphEdits CellHulls
     
     nextHulls = toHulls;

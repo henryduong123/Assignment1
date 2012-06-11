@@ -1,4 +1,5 @@
-% FindHull.m - This function will find the closest hull to the given point
+% hullID = FindHull(curPoint) 
+% This function will find the closest hull to the given point
 % and return the hullID if it is within CONSTANTS.clickMargin
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

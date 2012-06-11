@@ -44,7 +44,7 @@ else
 end
 if (FilterIndex~=0)
     CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
-    UI.SaveLEVerState(CONSTANTS.matFullFile);
+    Helper.SaveLEVerState(CONSTANTS.matFullFile);
 else
     return
 end

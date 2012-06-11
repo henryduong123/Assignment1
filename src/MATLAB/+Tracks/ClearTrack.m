@@ -24,7 +24,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ClearTrack(trackID)
-    global CellTracks
+    global CellTracks CellFamilies
+    
+    CellFamilies(CellTracks(trackID).familyID).tracks = setdiff(CellFamilies(CellTracks(trackID).familyID).tracks,trackID);
+    Families.UpdateFamilyTimes(CellTracks(trackID).familyID);
+    
     
     % Get all field names dynamically and clear them
     strFieldNames = fieldnames(CellTracks);

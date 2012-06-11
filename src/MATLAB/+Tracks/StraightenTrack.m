@@ -1,7 +1,10 @@
-% StraightenTrack(trackID) will drop all right children while traversing
+% droppedTracks = StraightenTrack(trackID)
+% will drop all right children while traversing
 % left.  Usefull for cells that should not have mitosis events such as dead
 % cells.
 
+% ChangeLog
+% EW 6/6/12
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -25,16 +28,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function familyIDs = StraightenTrack(trackID)
-
+function droppedTracks = StraightenTrack(trackID)
 global CellTracks
-familyIDs = [];
-if(~isempty(CellTracks(trackID).childrenTracks))
-    familyIDs = StraightenTrack(CellTracks(trackID).childrenTracks(1));
-    for i=2:length(CellTracks(trackID).childrenTracks)
-        %TODO fix func call
-        familyIDs = [familyIDs Families.RemoveFromTree(CellTracks(CellTracks(trackID).childrenTracks(i)).startTime,...
-            CellTracks(trackID).childrenTracks(i),'yes')];
-    end
+
+droppedTracks = [];
+
+while (length(CellTracks(trackID).children)>=2)
+    droppedTracks = [droppedTracks Families.RemoveMitosis(CellTracks(trackID).children(2))];
 end
 end

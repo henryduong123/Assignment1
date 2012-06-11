@@ -1,7 +1,7 @@
 function [bwDark bwig bwHalo xlims ylims] = PartialSegDarkCenters(centerPt, t, imageAlpha)
     global CONSTANTS SegLevels
     
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(t) '.TIF'];
+    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
     if exist(fileName,'file')
         [img colrMap] = imread(fileName);
     else

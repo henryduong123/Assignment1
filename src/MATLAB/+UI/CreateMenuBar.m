@@ -28,8 +28,6 @@ function CreateMenuBar(handle)
 
 global Figures
 
-
-
 fileMenu = uimenu(...
     'Parent',           handle,...
     'Label',            'File',...
@@ -245,11 +243,11 @@ end
 end
 
 function undo(src,evnt)
-UI.History('Pop');
+Editor.History('Pop');
 end
 
 function redo(src,evnt)
-UI.History('Redo');
+Editor.History('Redo');
 end
 
 function toggleLabels(src,evnt)
@@ -335,7 +333,7 @@ function treeInference(src, evt)
         [iters totalTime] = Families.LinkFirstFrameTrees();
     catch err
         try
-            Error.ErrorHandeling(['Tree Inference Error -- ' err.message],err.stack);
+            Error.ErrorHandling(['Tree Inference Error -- ' err.message],err.stack);
             return;
         catch err2
             fprintf('%s',err2.message);
@@ -345,6 +343,6 @@ function treeInference(src, evt)
     
     Helper.RunGarbageCollect(currentHull);
     
-    UI.History('Push');
+    Editor.History('Push');
     Error.LogAction('Completed Tree Inference', [iters totalTime],[]);
 end

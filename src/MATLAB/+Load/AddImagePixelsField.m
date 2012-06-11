@@ -43,7 +43,7 @@ function AddImagePixelsField()
     for t=1:length(HashedCells)
         progress = progress+1;
         UI.Progressbar(progress/iterations);
-        imgfname = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(t) '.TIF'];
+        imgfname = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
         [curimg map]=imread(imgfname);
         curimg=mat2gray(curimg);
 

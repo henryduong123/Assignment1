@@ -10,13 +10,13 @@ function changedHulls = AssignEdge(trackHull, assignHull, bUseChangeLabel)
     changedHulls = [];
     
      % Get track to which we will assign hull from trackHull
-    track = Tracks.GetTrackID(trackHull);
+    track = Hulls.GetTrackID(trackHull);
     
     assignTime = CellHulls(assignHull).time;
     trackTime = CellHulls(trackHull).time;
     
     oldTrackHull = getHull(assignTime, track);
-    oldAssignTrack = Tracks.GetTrackID(assignHull);
+    oldAssignTrack = Hulls.GetTrackID(assignHull);
     
     dir = sign(assignTime - trackTime);
     
@@ -44,7 +44,7 @@ function changedHulls = AssignEdge(trackHull, assignHull, bUseChangeLabel)
         [bDump,splitTrack] = Tracks.RemoveHullFromTrack(assignHull, oldAssignTrack, 1);
         
         % Some RemoveHullFromTrack cases cause track to be changed
-        track = Tracks.GetTrackID(trackHull);
+        track = Hulls.GetTrackID(trackHull);
         oldTrackHull = getHull(assignTime, track);
         if ( ~isempty(oldTrackHull) )
             if ( isempty(splitTrack) )
@@ -89,8 +89,8 @@ function swapTracking(hullA, hullB)
         error('Attempt to swap tracking information for hulls in different frames!');
     end
     
-    trackA = Tracks.GetTrackID(hullA);
-    trackB = Tracks.GetTrackID(hullB);
+    trackA = Hulls.GetTrackID(hullA);
+    trackB = Hulls.GetTrackID(hullB);
     
     hashAIdx = ([HashedCells{t}.hullID] == hullA);
     hashBIdx = ([HashedCells{t}.hullID] == hullB);
@@ -108,7 +108,7 @@ function swapTracking(hullA, hullB)
 end
 
 function exchangeTrackLabels(t, oldTrack, track)
-    Tracks.ChangeLabel(t, oldTrack, track); %TODO fix call
+    Tracks.ChangeTrackID(t, oldTrack, track); %TODO fix call
 end
 
 function removeIfEmptyTrack(track)

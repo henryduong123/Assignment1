@@ -37,7 +37,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 % figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
-fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(Figures.time) '.TIF'];
+fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
 if exist(fileName,'file')
     [img colrMap] = imread(fileName);
 else

@@ -31,7 +31,7 @@ global CONSTANTS
 
 th=max([objsSegment.t]);
 
-fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.SignificantDigits(1) '.TIF'];
+fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF'];
 [im map]=imread(fname);
 HashedHulls=cell(th,1);
 
@@ -112,7 +112,7 @@ end
 
     function bwHalo=GetHalo(t)
         
-        fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.SignificantDigits(t) '.TIF'];
+        fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
         [im map]=imread(fname);
         im=mat2gray(im);
         

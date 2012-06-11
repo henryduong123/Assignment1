@@ -84,7 +84,7 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
     global HashedCells
     
     % Get track to which we will assign hull from extHulls
-    track = Tracks.GetTrackID(extHull);
+    track = Hulls.GetTrackID(extHull);
     
     oldHull = [];
     changedHulls = [];
@@ -113,7 +113,7 @@ function changedHulls = assignHullToTrack(t, hull, extHull, bUseChangeLabel)
         [bDump,splitTrack] = Tracks.RemoveHullFromTrack(hull, oldTrack, 1);
         
         % Some RemoveHullFromTracke cases cause track to be changed
-        track = Tracks.GetTrackID(extHull);
+        track = Hulls.GetTrackID(extHull);
         oldHull = getOldHull(t, track);
         if ( ~isempty(oldHull) )
             if ( isempty(splitTrack) )
@@ -189,7 +189,7 @@ function exchangeTrackLabels(t, oldTrack, track)
         oldTrack = CellFamilies(newFamID).rootTrackID;
     end
     
-    Tracks.ChangeLabel(t, oldTrack, track);%TODO fix func call
+    Tracks.ChangeTrackID(t, oldTrack, track);%TODO fix func call
 end
 
 function removeIfEmptyTrack(track)

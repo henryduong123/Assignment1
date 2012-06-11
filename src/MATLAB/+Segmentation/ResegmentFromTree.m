@@ -155,7 +155,7 @@ function newHullID = tryAddSegmentation(prevHull)
     global CONSTANTS CellHulls CellFeatures HashedCells Figures
 
     newHullID = [];
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(Figures.time) '.TIF'];
+    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
     [img colrMap] = imread(fileName);
     img = mat2gray(img);
     
@@ -387,7 +387,7 @@ function [hulls bHasHull] = getHulls(t, tracks)
     end
     
     for i=1:length(tracks)
-        hullID = Hulls.GetHullID(t,tracks(i));
+        hullID = Tracks.GetHullID(t,tracks(i));
         if ( hullID == 0 )
             continue;
         end

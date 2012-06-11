@@ -9,6 +9,8 @@
 %  previousHullID exists in that track.  Also, it has been
 %  removed from any previous track assosiation.
 
+% UpdateLog:
+% EW 6/8/12 rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -33,7 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function droppedTracks = AddHullToTrack(hullID,trackID,previousHullID)
-global HashedCells CellTracks CellHulls
+global HashedCells CellTracks CellHulls CellFamilies
 
 droppedTracks = [];
 
@@ -58,22 +60,32 @@ end
 %% Does this add conflict with a mitosis event?
 time = CellHulls(hullID).time;
 
-% Is this hull being added to the head of the track and does it have a
-% parent?
-if(time<CellTracks(trackID).startTime && ~isempty(CellTracks(trackID).parentTrack))
-    %Remove this track from the family
-    %TODO fix func call
-    droppedTracks = [droppedTracks Families.RemoveFromTree(trackID)];
-end
-
-%Is this hull being added to the tail of the track and does it have
-%children?
-if(time>CellTracks(trackID).endTime && ~isempty(CellTracks(trackID).childrenTracks))
-    %Drop the children
-    for i=1:length(CellTracks(trackID).childrenTracks)
-        %TODO fix func call
-        droppedTracks = [droppedTracks RFamilies.emoveFromTree(CellTracks(trackID).childrenTracks(i))];
+if (~isempty(CellTracks(trackID).hulls))
+    % Is this hull being added to the head of the track and does it have a
+    % parent?
+    if(time<CellTracks(trackID).startTime && ~isempty(CellTracks(trackID).parentTrack))
+        %Remove this track from the family
+        droppedTracks = [droppedTracks Families.RemoveFromTree(trackID)];
     end
+    
+    %Is this hull being added to the tail of the track and does it have
+    %children?
+    if(time>CellTracks(trackID).endTime && ~isempty(CellTracks(trackID).childrenTracks))
+        %Drop the children
+        for i=1:length(CellTracks(trackID).childrenTracks)
+            droppedTracks = [droppedTracks Families.RemoveFromTree(CellTracks(trackID).childrenTracks(i))];
+        end
+    end
+else
+    curFamilyID = length(CellFamilies) + 1;
+    
+    %setup defaults for family tree
+    CellFamilies(curFamilyID).rootTrackID = trackID;
+    CellFamilies(curFamilyID).tracks = trackID;
+    CellFamilies(curFamilyID).startTime = time;
+    CellFamilies(curFamilyID).endTime = time;
+    CellTracks(trackID).familyID = curFamilyID;
+    CellTracks(trackID).color = UI.GetNextColor();
 end
 
 %% Add hull

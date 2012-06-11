@@ -71,12 +71,12 @@ for i=2:length(newHulls)
     
     % Set features if valid
     if ( ~isempty(CellFeatures) )
-        CellFeatures(newID) = newFeatures(i);
+        CellFeatures(end+1) = newFeatures(i);
     end
     
     newFamilyIDs = [newFamilyIDs Families.NewCellFamily(newID, newHulls(i).time)];
     newHullIDs = [newHullIDs newID];
 end
 
-newTrackIDs = Tracker.TrackSplitHulls(newHullIDs, oldTracks, oldCOM);
+newTrackIDs = Tracker.TrackAddedHulls(newHullIDs, oldTracks, oldCOM);
 end

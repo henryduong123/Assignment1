@@ -72,7 +72,7 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
     % instead
     if ( ~Load.CheckFileVersionString('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
         fprintf('\nConverting Phenotype information...\n');
-        Tracks.UpdatePhenotypeInfo();
+        Load.UpdatePhenotypeInfo();
         fprintf('Finished\n');
         bNeedsUpdate = 1;
     end

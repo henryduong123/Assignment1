@@ -34,14 +34,14 @@ function RebuildTrackingData(objTracks, gConnect)
     UI.Progressbar(1);
     
     try
-        Helper.TestDataIntegrity(1);
+        errors = mexIntegrityCheck();
     catch errormsg
         fprintf('\n%s\n',errormsg.message);
         UI.ProgressBar(1);
     end
 
     %create the family trees
-    Families.ProcessNewborns(1:length(CellFamilies), length(HashedCells));
+    Families.ProcessNewborns();
 end
 
 function hullList = addToTrack(hullID, hullList, objTracks)

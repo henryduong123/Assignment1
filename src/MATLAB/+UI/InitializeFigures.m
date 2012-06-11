@@ -198,7 +198,7 @@ if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
     end
     
     if ( ~Figures.cells.selecting )
-        ClearCellSelection();
+        UI.ClearCellSelection();
     end
     
     if(Figures.cells.currentHullID == -1)
@@ -226,27 +226,27 @@ if(Figures.cells.currentHullID == -1)
 end
 
 currentHullID = Hulls.FindHull(get(gca,'CurrentPoint'));
-previousTrackID = Tracks.GetTrackID(Figures.cells.currentHullID);
+previousTrackID = Hulls.GetTrackID(Figures.cells.currentHullID);
 
 if(currentHullID~=Figures.cells.currentHullID)
     try
-        Tracker.GraphEditSetEdge(Figures.time,Tracks.GetTrackID(currentHullID),previousTrackID);
-        Tracker.GraphEditSetEdge(Figures.time,previousTrackID,Tracks.GetTrackID(currentHullID));
-        Tracks.SwapTrackLabels(Figures.time,Tracks.GetTrackID(currentHullID),previousTrackID);
-        UI.History('Push')
+        Tracker.GraphEditSetEdge(Figures.time,Hulls.GetTrackID(currentHullID),previousTrackID);
+        Tracker.GraphEditSetEdge(Figures.time,previousTrackID,Hulls.GetTrackID(currentHullID));
+        Tracks.SwapLabels(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
+        Editor.History('Push')
     catch errorMessage
         try
-            Error.ErrorHandeling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Tracks.GetTrackID(currentHullID))...
+            Error.ErrorHandling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Hulls.GetTrackID(currentHullID))...
                 ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
-            fprintf('%s',errorMessage2.message);
+            fprintf('%s\n',errorMessage2.message);
             return
         end
     end
     
-    Families.ProcessNewborns(1:length(CellFamilies),length(HashedCells));
-    previousTrackID = Tracks.GetTrackID(currentHullID);
+    Families.ProcessNewborns();
+    previousTrackID = Hulls.GetTrackID(currentHullID);
     
 elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
     %no change and the current tree contains the cell clicked on
@@ -311,10 +311,10 @@ function tryMergeSelectedCells()
             msgbox(['Unable to merge [' num2str(Figures.cells.selectedHulls) '] in this frame'],'Unable to Merge','help','modal');
             return;
         end
-        UI.History('Push');
+        Editor.History('Push');
     catch err
         try
-            Error.ErrorHandeling(['Merging Selected Cells -- ' err.message], err.stack);
+            Error.ErrorHandling(['Merging Selected Cells -- ' err.message], err.stack);
             return;
         catch err2
             fprintf('%s',err2.message);
@@ -334,7 +334,7 @@ end
 function learnFromEdits(src,evnt)
     global CellFamilies CellTracks HashedCells SegmentationEdits Figures
     
-    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls)) && isempty(SegmentationEdits.editTime)) )
+    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))))
         return;
     end
     
@@ -342,10 +342,10 @@ function learnFromEdits(src,evnt)
     
     try
         Tracks.PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-        Families.ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
+        Families.ProcessNewborns();
     catch err
         try
-            Error.ErrorHandeling(['Propagating segmentation changes -- ' err.message],err.stack);
+            Error.ErrorHandling(['Propagating segmentation changes -- ' err.message],err.stack);
             return;
         catch err2
             fprintf('%s',err2.message);
@@ -355,8 +355,6 @@ function learnFromEdits(src,evnt)
     
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
-    SegmentationEdits.maxEditedFrame = length(HashedCells);
-    SegmentationEdits.editTime = [];
     
     UI.UpdateSegmentationEditsMenu();
     
@@ -365,7 +363,7 @@ function learnFromEdits(src,evnt)
     
     Helper.RunGarbageCollect(currentHull);
     
-    UI.History('Push');
+    Editor.History('Push');
     Error.LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
 end
 

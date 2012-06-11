@@ -23,8 +23,3 @@ function [perimPix, perimr, perimc] = BuildPerimPix(polyPix, imSize)
     
     perimPix = unique(sub2ind(imSize, perimr, perimc));
 end
-
-function x_clamped = Clamp(x, minval, maxval)
-    x_clamped = max(cat(3,x,minval*ones(size(x))),[],3);
-    x_clamped = min(cat(3,x_clamped,maxval*ones(size(x))),[],3);
-end

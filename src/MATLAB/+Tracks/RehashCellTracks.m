@@ -6,6 +6,8 @@
 % eg hash = time of hull - CellTracks(i).startTime
 % CellTracks.endTime and Family.start/end will be updated too, if nessasary
 
+% ChangeLog
+% EW 6/6/12  rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -34,17 +36,21 @@ global CellTracks CellHulls
 
 hulls = CellTracks(trackID).hulls(CellTracks(trackID).hulls > 0);
 if (~isempty(hulls))
-    [times sortedIndcies] = sort([CellHulls(hulls).time]);
+    [uniqueTimes sortedIndcies] = unique([CellHulls(hulls).time]);
+    if (length(uniqueTimes)~=length([CellHulls(hulls).time]))
+        hullsString = sprintf('%d, ',CellTracks(trackID).hulls);
+        error('More than one hull on a frame on track %d\nHulls: %s',trackID,hullsString);
+    end
     
     %Update the times from the sorting
-    CellTracks(trackID).startTime = times(1);
-    CellTracks(trackID).endTime = times(end);
+    CellTracks(trackID).startTime = uniqueTimes(1);
+    CellTracks(trackID).endTime = uniqueTimes(end);
     
     %Clear out the old list to the size that the zero padded list should be
-    CellTracks(trackID).hulls = zeros(1,times(end)-times(1)+1);
+    CellTracks(trackID).hulls = zeros(1,uniqueTimes(end)-uniqueTimes(1)+1);
     
     %Add the hulls back into the list in the approprite location
-    hashedTimes = times - times(1) + 1; %get hashed times of the hull list
+    hashedTimes = uniqueTimes - uniqueTimes(1) + 1; %get hashed times of the hull list
     CellTracks(trackID).hulls(hashedTimes) = hulls(sortedIndcies); %place the hulls in sorted order into thier hashed locations
 else
     %Clear out hulls and times

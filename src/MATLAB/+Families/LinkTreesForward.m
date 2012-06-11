@@ -40,7 +40,7 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
         end
         
         extHulls = unique(endHulls);
-        extTracks = Tracks.GetTrackID(extHulls);
+        extTracks = Hulls.GetTrackID(extHulls);
         
         for j=1:length(extHulls)
             nextLeaves = getLeafHulls(extTracks(j));
@@ -127,7 +127,7 @@ function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt)
     cost = 0;
     backHull = endHull;
     while ( backHull ~= startHull )
-        trackID = Tracks.GetTrackID(backHull);
+        trackID = Hulls.GetTrackID(backHull);
         curHash = CellHulls(backHull).time - CellTracks(trackID).startTime + 1;
         nzHullIdx = find(CellTracks(trackID).hulls(1:(curHash-1)),1,'last');
         nzHull = CellTracks(trackID).hulls(nzHullIdx);
@@ -196,10 +196,10 @@ function leafHulls = getLeafHulls(rootTracks)
                 continue;
             end
             
-            endHull = Hulls.GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
+            endHull = Tracks.GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
             if ( endHull == 0 )
                 Tracks.RehashCellTracks(subtreeTracks(j));
-                endHull = Hulls.GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
+                endHull = Tracks.GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
             end
             
             leafHulls = union(leafHulls, endHull);
@@ -230,7 +230,7 @@ function bGoodExt = checkExtension(startHull, endHull)
     
     bGoodExt = false;
     
-    trackID = Tracks.GetTrackID(endHull);
+    trackID = Hulls.GetTrackID(endHull);
     bGoodTime = (CellTracks(trackID).startTime == CellHulls(endHull).time);
     if ( ~bGoodTime )
         return;

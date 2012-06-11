@@ -7,7 +7,7 @@ function RunGarbageCollect(currentHull)
         Helper.SweepDeleted();
     catch err
         try
-            Error.ErrorHandeling(['Garbage Collection -- ' err.message], err.stack);
+            Error.ErrorHandling(['Garbage Collection -- ' err.message], err.stack);
             return;
         catch err2
             fprintf('%s',err2.message);
@@ -15,7 +15,7 @@ function RunGarbageCollect(currentHull)
         end
     end
     
-    currentTrackID = Tracks.GetTrackID(currentHull);
+    currentTrackID = Hulls.GetTrackID(currentHull);
     currentFamilyID = CellTracks(currentTrackID).familyID;
     
     Figures.tree.familyID = currentFamilyID;

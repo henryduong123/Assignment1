@@ -30,13 +30,10 @@ function AddSegmentationEdit(addNewHulls, addChangedHulls)
     if ( isempty(SegmentationEdits) )
         SegmentationEdits.newHulls = [];
         SegmentationEdits.changedHulls = [];
-        SegmentationEdits.maxEditedFrame = length(HashedCells);
     end
     
     SegmentationEdits.newHulls = unique([SegmentationEdits.newHulls addNewHulls]);
     SegmentationEdits.changedHulls = unique([SegmentationEdits.changedHulls addChangedHulls]);
-    SegmentationEdits.maxEditedFrame = max([SegmentationEdits.maxEditedFrame getFrameTimes(addNewHulls)]);
-    SegmentationEdits.editTime = max([SegmentationEdits.editTime getFrameTimes(addNewHulls)]);
     
     UI.UpdateSegmentationEditsMenu();
 end

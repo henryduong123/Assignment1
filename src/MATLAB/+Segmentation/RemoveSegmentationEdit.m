@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function RemoveSegmentationEdit(rmHull, editTime)
+function RemoveSegmentationEdit(rmHull)
     global SegmentationEdits
     
     if ( ~isempty(SegmentationEdits) )    
@@ -34,12 +34,6 @@ function RemoveSegmentationEdit(rmHull, editTime)
     else
         SegmentationEdits.newHulls = [];
         SegmentationEdits.changedHulls = [];
-    end
-    
-    SegmentationEdits.maxEditedFrame = max(SegmentationEdits.maxEditedFrame, getFrameTimes(rmHull));
-    
-    if ( exist('editTime','var') )
-        SegmentationEdits.editTime = editTime;
     end
     
     UI.UpdateSegmentationEditsMenu();

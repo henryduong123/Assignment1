@@ -51,8 +51,10 @@ uimenu(Figures.tree.contextMenuHandle,...
 end
 
 %% Callback functions
+% ChangeLog:
+% MW Long ago
 function removeMitosis(src,evnt)
-global CellTracks HashedCells CellFamilies Figures
+global CellTracks 
 object = get(gco);
 if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
     %clicked on a node
@@ -75,11 +77,12 @@ else
     return
 end
 
-UI.ContextRemoveFromTree(choice);
+Editor.ContextRemoveFromTree(choice);
 end
 
+% ChangeLog:
+% EW 6/8/12 rewrite
 function addMitosis(src,evnt)
-global CellTracks HashedCells CellFamilies
 trackID = get(gco,'UserData');
 time = get(gca,'CurrentPoint');
 time = round(time(1,2));
@@ -92,59 +95,17 @@ if(isempty(answer)),return,end
 time = str2double(answer(1));
 siblingTrack = str2double(answer(2));
 
-if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
-    msgbox([answer(2) ' is not a valid cell'],'Not a valid cell','error');
-    return
-end
-if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
-    return
-end
-
-oldParent = CellTracks(siblingTrack).parentTrack;
-
-try
-    Families.GraphEditAddMitosis(time, trackID, siblingTrack);
-    Tracks.ChangeTrackParent(trackID,time,siblingTrack);
-    UI.History('Push');
-catch errorMessage
-    try
-        Error.ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' '...
-            num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
-        return
-    catch errorMessage2
-        fprintf('%s',errorMessage2.message);
-        return
-    end
-end
-Error.LogAction(['Changed parent of ' num2str(siblingTrack)],oldParent,trackID);
-
-Families.ProcessNewborns(1:length(CellFamilies),length(HashedCells));
-
-UI.DrawTree(CellTracks(trackID).familyID);
-UI.DrawCells();
+Editor.ContextAddMitosis(trackID,siblingTrack,time);
 end
 
 function changeLabel(src,evnt)
 global CellTracks
 trackID = get(gco,'UserData');
-UI.ContextChangeLabel(CellTracks(trackID).startTime,trackID);
-end
-
-function changeParent(src,evnt)
-global CellTracks
-trackID = get(gco,'UserData');
-UI.ContextChangeParent(trackID,CellTracks(trackID).startTime);
-end
-
-function removeFromTree(src,evnt)
-global CellTracks
-trackID = get(gco,'UserData');
-UI.ContextRemoveFromTree(CellTracks(trackID).startTime,trackID);
+Editor.ContextChangeLabel(CellTracks(trackID).startTime,trackID);
 end
 
 function properties(src,evnt)
 global CellTracks
 trackID = get(gco,'UserData');
-UI.ContextProperties(CellTracks(trackID).hulls(1),trackID);
+Editor.ContextProperties(CellTracks(trackID).hulls(1),trackID);
 end

@@ -27,7 +27,7 @@
 function newTrackID = AddNewSegmentHull(clickPt)
     global CONSTANTS CellHulls CellFeatures HashedCells Figures
 
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(Figures.time) '.TIF'];
+    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
     [img colrMap] = imread(fileName);
     img = mat2gray(img);
     
@@ -72,7 +72,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
     
     newFamilyIDs = Families.NewCellFamily(newHullID, newHull.time);
     
-    newTrackID = Tracker.TrackSplitHulls(newHullID, oldTracks, newHull.centerOfMass);
+    newTrackID = Tracker.TrackAddedHulls(newHullID, oldTracks, newHull.centerOfMass);
 end
 
 %TODO: Maybe handle convex hull intersection instead of interior points as

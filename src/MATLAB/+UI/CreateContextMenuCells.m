@@ -110,69 +110,19 @@ for i=1:length(CellPhenotypes.descriptions)
         'Label',        CellPhenotypes.descriptions{i},...
         'CallBack',     @phenotypes);
 end
-
-
 end
 
 %% Callback functions
 
 function removeMitosis(src,evnt)
-global CellTracks Figures
-object = get(gco);
+%%%not used
 
-if(~strcmp(object.Tag,'SiblingRelationship'))
-    msgbox('Please click on a Relationship line to remove','Not on line','warn');
-    return
 end
 
-choice = questdlg('Which Side to Keep?','Merge With Parent',object.UserData,...
-    num2str(CellTracks(object.UserData).siblingTrack),'Cancel','Cancel');
-switch choice
-    case num2str(object.UserData)
-        remove = CellTracks(object.UserData).siblingTrack;
-        try
-            Families.GraphEditRemoveMitosis(CellTracks(object.UserData).siblingTrack);
-            %TODO fix func call
-            newTree = Families.RemoveFromTree(CellTracks(CellTracks(object.UserData).siblingTrack).startTime,...
-                CellTracks(object.UserData).siblingTrack,'yes');
-            UI.History('Push');
-        catch errorMessage
-            try
-                Error.ErrorHandeling(['RemoveFromTree(' num2str(CellTracks(CellTracks(object.UserData).siblingTrack).startTime)...
-                    num2str(CellTracks(object.UserData).siblingTrack) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    case num2str(CellTracks(object.UserData).siblingTrack)
-        remove = object.UserData;
-        try
-            Families.GraphEditRemoveMitosis(object.UserData);
-            %TODO fix func call
-            newTree = Families.RemoveFromTree(CellTracks(object.UserData).startTime,object.UserData,'yes');
-            UI.History('Push');
-        catch errorMessage
-            try
-                Error.ErrorHandeling(['RemoveFromTree(CellTracks(' num2str(CellTracks(object.UserData).startTime) ' '...
-                    num2str(object.UserData) ' yes) -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    otherwise
-        return
-end
-Error.LogAction(['Removed ' num2str(remove) ' from tree'],Figures.tree.familyID,newTree);
-UI.DrawTree(Figures.tree.familyID);
-UI.DrawCells();
-end
-
+% ChangeLog:
+% EW 6/8/12 rewritten
 function addMitosis(src,evnt)
-global CellTracks Figures HashedCells
+global Figures
 
 [hullID trackID] = UI.GetClosestCell(0);
 if(isempty(trackID)),return,end
@@ -185,149 +135,7 @@ if(isempty(answer)),return,end
 siblingTrack = str2double(answer(1));
 time = Figures.time;
 
-if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
-    msgbox([answer(1) ' is not a valid cell'],'Not a valid cell','error');
-    return
-end
-if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
-    msgbox([answer(1) ' is not a valid sister cell'],'Not a valid sister cell','error');
-    return
-end
-if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' exists after ' answer(1)],'Not a valid daughter cell','error');
-    return
-end
-if(~isempty(Tracks.GetTimeOfDeath(siblingTrack)) && Tracks.GetTimeOfDeath(siblingTrack)<=time)
-    msgbox(['Cannot attach a cell to cell ' num2str(siblingTrack) ' beacuse it is dead at this time'],'Dead Cell','help');
-    return
-end
-if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=time)
-    msgbox(['Cannot attach a cell to cell ' num2str(trackID) ' beacuse it is dead at this time'],'Dead Cell','help');
-    return
-end
-
-if(CellTracks(trackID).startTime==time && CellTracks(siblingTrack).startTime<time)
-    try
-        Families.GraphEditAddMitosis(time, siblingTrack, trackID);
-        Tracks.ChangeTrackParent(siblingTrack,time,trackID);
-        UI.History('Push');
-    catch errorMessage
-        try
-            Error.ErrorHandeling(['ChangeTrackParent(' num2str(siblingTrack) ' ' num2str(time) ' ' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
-    end
-    Figures.tree.familyID = CellTracks(siblingTrack).familyID;
-elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime<time)
-    try
-        Families.GraphEditAddMitosis(time, trackID, siblingTrack);
-        Tracks.ChangeTrackParent(trackID,time,siblingTrack);
-        UI.History('Push');
-    catch errorMessage
-        try
-            Error.ErrorHandeling(['ChangeTrackParent(' num2str(trackID) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
-    end
-    Figures.tree.familyID = CellTracks(trackID).familyID;
-elseif(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==time)
-    valid = 0;
-    while(~valid)
-        answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
-        if(isempty(answer)),return,end
-        parentTrack = str2double(answer(1));
-        
-        if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
-                (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
-            choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
-                'Not a valid parent','Enter a different parent','Cancel','Cancel');
-            switch choice
-                case 'Cancel'
-                    return
-            end
-        else
-            valid = 1;
-        end
-    end
-    
-    if(~isempty(find([HashedCells{time}.trackID]==parentTrack,1)))
-        try
-            Tracks.SwapTrackLabels(time,trackID,parentTrack);
-            UI.History('Push');
-        catch errorMessage
-            try
-                Error.ErrorHandeling(['SwapTrackLabels(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-        Error.LogAction('Swapped Labels',trackID,parentTrack);
-    else
-        try
-            Tracks.ChangeLabel(time,trackID,parentTrack); %TODO fix function call
-        catch errorMessage
-            try
-                Error.ErrorHandeling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(parentTrack) ') -- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
-        end
-    end
-    
-    try
-        Families.GraphEditAddMitosis(time, parentTrack, siblingTrack);
-        Tracks.ChangeTrackParent(parentTrack,time,siblingTrack);
-    catch errorMessage
-        try
-            Error.ErrorHandeling(['ChangeTrackParent(' num2str(parentTrack) ' ' num2str(time) ' ' num2str(siblingTrack) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
-    end
-    Figures.tree.familyID = CellTracks(parentTrack).familyID;
-else
-    mitosisTracks = [trackID siblingTrack];
-    bCheckParents = (~arrayfun(@(x)(isempty(CellTracks(x).parentTrack)), mitosisTracks));
-    [dump,idxLongest] = sort([CellTracks(mitosisTracks).startTime]);
-    
-    if ( nnz(bCheckParents) == 1 )
-        mitosisTracks = [mitosisTracks(bCheckParents) mitosisTracks(~bCheckParents)];
-    else
-        mitosisTracks = mitosisTracks(idxLongest);
-    end
-    
-    try
-        Families.GraphEditAddMitosis(time, mitosisTracks(1), mitosisTracks(2));
-        Tracks.ChangeTrackParent(mitosisTracks(1),time,mitosisTracks(2));
-        UI.History('Push');
-    catch errorMessage
-        try
-            Error.ErrorHandeling(['ChangeTrackParent(' num2str(mitosisTracks(1)) ' ' num2str(time) ' ' num2str(mitosisTracks(2)) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
-    end
-    Figures.tree.familyID = CellTracks(mitosisTracks(1)).familyID;
-end
-
-Error.LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
-
-UI.DrawTree(Figures.tree.familyID);
-UI.DrawCells();
+Editor.ContextAddMitosis(trackID,siblingTrack,time);
 end
 
 function changeLabel(src,evnt)
@@ -336,15 +144,7 @@ global Figures
 [hullID trackID] = UI.GetClosestCell(0);
 if(isempty(trackID)),return,end
 
-UI.ContextChangeLabel(Figures.time,trackID);
-end
-
-function changeParent(src,evnt)
-global Figures
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
-
-UI.ContextChangeParent(trackID,Figures.time);
+Editor.ContextChangeLabel(Figures.time,trackID);
 end
 
 function addHull1(src,evnt)
@@ -378,10 +178,10 @@ if(isempty(trackID)),return,end
 
 try
     Hulls.RemoveHull(hullID);
-    UI.History('Push');
+    Editor.History('Push');
 catch errorMessage
     try
-        Error.ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+        Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
         return
     catch errorMessage2
         fprintf('%s',errorMessage2.message);
@@ -417,15 +217,12 @@ function removeTrackPrevious(src,evnt)
     if(isempty(trackID)),return,end
     
     try
-        hullIDs = Tracks.RemoveTrackPrevious(trackID, hullID);
-        if ( isempty(hullIDs) )
-            return;
-        end
+        Tracks.RemoveTrackHulls(trackID);
         
-        UI.History('Push');
+        Editor.History('Push');
     catch errorMessage
         try
-            Error.ErrorHandeling(['RemoveTrackPrevious(' num2str(trackID) ', ' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+            Error.ErrorHandling(['RemoveTrackHulls(' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2.message);
@@ -458,14 +255,14 @@ global Figures
 [hullID trackID] = UI.GetClosestCell(0);
 if(isempty(trackID)),return,end
 
-UI.ContextRemoveFromTree(trackID,Figures.time);
+Editor.ContextRemoveFromTree(trackID,Figures.time);
 end
 
 function properties(src,evnt)
 [hullID trackID] = UI.GetClosestCell(0);
 if(isempty(trackID)),return,end
 
-UI.ContextProperties(hullID,trackID);
+Editor.ContextProperties(hullID,trackID);
 end
 
 % added 4 19 2011 ac
@@ -507,10 +304,10 @@ if 1==i
         % turn off death...
         try
             Tracks.SetPhenotype(hullID, i, bActive);
-            Families.ProcessNewborns(FindFamiliesAfter(trackID), SegmentationEdits.maxEditedFrame);
+            Families.ProcessNewborns(Families.FindFamiliesAfter(trackID));
         catch errorMessage
             try
-                Error.ErrorHandeling(['ProcessNewborns(' num2str(trackID) ', ' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
+                Error.ErrorHandling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
                 return
             catch errorMessage2
                 fprintf('%s',errorMessage2.message);
@@ -522,12 +319,12 @@ if 1==i
         % turn on death
         if(~isempty(CellTracks(trackID).childrenTracks))
             try
-                NewTrackID=Tracks.StraightenTrack(trackID);
+                Tracks.StraightenTrack(trackID);
                 Tracks.SetPhenotype(hullID, i, bActive);
-                Families.ProcessNewborns(NewTrackID, SegmentationEdits.maxEditedFrame);
+                Families.ProcessNewborns();
             catch errorMessage
                 try
-                    Error.ErrorHandeling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ',' num2str(SegmentationEdits.maxEditedFrame) ')-- ' errorMessage.message],errorMessage.stack);
+                    Error.ErrorHandling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
                     return
                 catch errorMessage2
                     fprintf('%s',errorMessage2.message);
@@ -539,7 +336,7 @@ if 1==i
         end
         Error.LogAction(['Marked time of death for ' num2str(trackID)]);
     end
-    UI.History('Push');
+    Editor.History('Push');
     
     UI.DrawCells();
     UI.DrawTree(Figures.tree.familyID);
@@ -547,7 +344,7 @@ if 1==i
 end
 
 Tracks.SetPhenotype(hullID, i, bActive);
-UI.History('Push');
+Editor.History('Push');
 UI.DrawCells();
 UI.DrawTree(Figures.tree.familyID);
     
@@ -573,4 +370,3 @@ end
     
 set(CellPhenotypes.contextMenuID(trackPheno),'checked','on');
 end
-%% Helper functions

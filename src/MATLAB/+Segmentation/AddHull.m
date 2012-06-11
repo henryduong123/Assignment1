@@ -35,7 +35,7 @@ end
 [hullID trackID] = UI.GetClosestCell(1);
 clickPt = get(gca,'CurrentPoint');
 
-if ( ~Hulls.CHullContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
+if ( ~Hulls.CheckHullsContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
     trackID = [];
 end
 
@@ -48,10 +48,10 @@ if(~isempty(trackID))
                 msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
                 return
             end
-            UI.History('Push');
+            Editor.History('Push');
         catch errorMessage
             try
-                Error.ErrorHandeling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
+                Error.ErrorHandling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
                 return
             catch errorMessage2
                  fprintf('%s',errorMessage2.message);
@@ -65,10 +65,10 @@ elseif ( num<2 )
     % point-hull at least
     try
         newTrack = Segmentation.AddNewSegmentHull(clickPt(1,1:2));
-        UI.History('Push');
+        Editor.History('Push');
     catch errorMessage
         try
-            Error.ErrorHandeling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
+            Error.ErrorHandling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2.message);

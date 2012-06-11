@@ -6,6 +6,8 @@
 % droppedTracks will be the list of tracks that were dropped from the
 % family (they will be the roots of their subtrees)
 
+% ChangeLog
+% EW 6/6/12 rewriten
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -76,7 +78,7 @@ else
     
     %move the hulls from the old track to the new
     for i=nzidx+1:length(CellTracks(trackID).hulls)
-        Tracks.AddHullToTrack(CellTracks(trackID).hulls(i),newTrackID,[]);
+        droppedTracks = [droppedTracks Tracks.AddHullToTrack(CellTracks(trackID).hulls(i),newTrackID,[])];
         CellTracks(trackID).hulls(i) = 0;
     end
     
@@ -96,6 +98,6 @@ end
 
 for i=1:length(droppedTracks)
     newFam = Families.CreateEmptyFamily();
-    Families.ChangeTrackAndChildrensFamily(oldFamilyID,newFam,droppedTracks(i));
+    Families.ChangeTrackAndChildrensFamily(newFam,droppedTracks(i));
 end
 end

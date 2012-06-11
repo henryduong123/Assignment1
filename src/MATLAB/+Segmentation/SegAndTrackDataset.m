@@ -138,7 +138,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
 
     fprintf('Finalizing Data...');
     try
-        Load.ConvertTrackingData(objHulls,gConnect,cellFeat);
+        Tracker.ConvertTrackingData(objHulls,gConnect,cellFeat);
     catch excp
         
         cltime = clock();

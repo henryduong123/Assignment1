@@ -1,4 +1,5 @@
-% TrackThroughMerge.m - Retrack and update costs for cells due to a user
+% [costMatrix extendHulls affectedHulls] = TrackThroughMerge(t, mergeHull)
+% Retrack and update costs for cells due to a user
 % or propagated merge.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

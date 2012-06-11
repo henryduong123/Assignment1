@@ -77,8 +77,6 @@ end
 % Clear edits when new data set is opened
 SegmentationEdits.newHulls = [];
 SegmentationEdits.changedHulls = [];
-SegmentationEdits.maxEditedFrame = length(HashedCells);
-SegmentationEdits.editTime = [];
 
 CellFeatures = [];
 GraphEdits = [];
@@ -105,14 +103,14 @@ while ( (sigDigits == 0) || ~exist(fileName,'file') )
         return
     end
 
-    [sigDigits imageDataset] = Load.GetImageSigDigits(settings.imageFile);
+    [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
 
     CONSTANTS.rootImageFolder = settings.imagePath;
 
     CONSTANTS.imageDatasetName = imageDataset;
     CONSTANTS.datasetName = imageDataset;
     CONSTANTS.imageSignificantDigits = sigDigits;
-    fileName = [CONSTANTS.rootImageFolder imageDataset '_t' Helper.SignificantDigits(1) '.TIF'];
+    fileName = [CONSTANTS.rootImageFolder imageDataset '_t' Helper.GetDigitString(1) '.TIF'];
 
     tryidx = tryidx + 1;
 end
@@ -174,15 +172,15 @@ switch answer
             
             if(exist('objHulls','var'))
                 fprintf('Converting File...');
-                Load.ConvertTrackingData(objHulls,gConnect);
+                Tracker.ConvertTrackingData(objHulls,gConnect);
                 fprintf('\nFile Converted.\n');
                 CONSTANTS.datasetName = strtok(settings.matFile,' ');
-                UI.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
+                Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
                 fprintf('New file saved as:\n%s_LEVer.mat',CONSTANTS.datasetName);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
                 try
-                    Helper.TestDataIntegrity(1);
+                    errors = mexIntegrityCheck();
                 catch errorMessage
                     warndlg('There were database inconsistencies.  LEVer might not behave properly!');
                     UI.Progressbar(1);
@@ -219,9 +217,9 @@ bUpdated = Load.FixOldFileVersions(softwareVersion);
 if ( bUpdated )
     Load.UpdateFileVersionString(softwareVersion);
     if( exist('objHulls','var') && strcmpi(answer,'Existing') )
-        UI.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
+        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
     else
-        UI.SaveLEVerState([settings.matFilePath settings.matFile]);
+        Helper.SaveLEVerState([settings.matFilePath settings.matFile]);
     end
 end
 

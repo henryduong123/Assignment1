@@ -27,7 +27,7 @@
 function UpdateSegmentationEditsMenu(src,evnt)
     global SegmentationEdits Figures
     
-    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls)) && isempty(SegmentationEdits.editTime)) )
+    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))) )
         set(Figures.cells.learnButton, 'Visible', 'off');
     else
         pos = get(Figures.cells.handle,'Position');

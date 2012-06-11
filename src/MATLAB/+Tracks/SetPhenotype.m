@@ -41,13 +41,13 @@ function SetPhenotype(hullID, phenotype, bActive)
     
     CellPhenotypes.hullPhenoSet = [newHulls; newPheno(newIdx)];
     
-    Error.LogAction(['Activated phenotype ' CellPhenotypes.descriptions{phenotype} ' for track ' num2str(Tracks.GetTrackID(hullID))]);
+    Error.LogAction(['Activated phenotype ' CellPhenotypes.descriptions{phenotype} ' for track ' num2str(Hulls.GetTrackID(hullID))]);
 end
 
 function unsetTrackPhenotype(hullID)
     global CellPhenotypes
 
-    trackID = Tracks.GetTrackID(hullID);
+    trackID = Hulls.GetTrackID(hullID);
     [oldPhen resetHulls] = Tracks.GetAllTrackPhenotypes(trackID);
     
     unsetPhenotype(resetHulls);
@@ -69,7 +69,7 @@ function unsetPhenotype(hullIDs)
     CellPhenotypes.hullPhenoSet = [newHulls; newPheno];
     
     if ( ~isempty(rmPhen) && all(rmPhen > 0) )
-        Error.LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{rmPhen(end)} ' for track ' num2str(Tracks.GetTrackID(hullIDs(end)))]);
+        Error.LogAction(['Deactivated phenotype ' CellPhenotypes.descriptions{rmPhen(end)} ' for track ' num2str(Hulls.GetTrackID(hullIDs(end)))]);
     end
 end
 

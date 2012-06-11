@@ -47,11 +47,11 @@ function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha)
     % Build the subimage to be segmented
     subImg = img(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
     
-    [objs features] = FrameSegmentor(subImg, 1, alpha);
+    [objs features] = Segmentation.FrameSegmentor(subImg, 1, alpha);
     
     [objs features] = fixupFromSubimage(coordMin, img, subImg, objs, features);
     
-    bInHull = Hulls.CHullContainsPoint(centerPt, objs);
+    bInHull = Hulls.CheckHullsContainsPoint(centerPt, objs);
     
     hull = objs(find(bInHull,1));
     feature = features(find(bInHull,1));

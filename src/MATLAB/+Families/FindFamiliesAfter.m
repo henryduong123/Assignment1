@@ -1,4 +1,5 @@
-% FindFamiliesAfter.m - Find the set of families which start after the beginning of this track
+% families = FindFamiliesAfter(trackID)
+% Find the set of families which start after the beginning of this track
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

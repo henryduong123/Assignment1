@@ -1,6 +1,8 @@
 % NewCellFamily.m - Create a empty Family that will contain one track that
 % contains only one hull
 
+% ChangeLog
+% EW 6/6/12 t is no longer a requirement
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -26,10 +28,14 @@
 
 function curFamilyID = NewCellFamily(cellHullID,t)
 
-global CellFamilies
+global CellFamilies CellHulls
+
+if (~exist('t','var'))
+    t = CellHulls(cellHullID).time;
+end
 
 if(isempty(CellFamilies))
-    trackID = Families.NewCellTrack(1,cellHullID,t);
+    trackID = Tracks.NewCellTrack(1,cellHullID,t);
     CellFamilies = struct(...
         'rootTrackID',   {trackID},...
         'tracks',       {trackID},...
@@ -40,7 +46,7 @@ if(isempty(CellFamilies))
 else
     %get next family ID
     curFamilyID = length(CellFamilies) + 1;
-    trackID = Families.NewCellTrack(curFamilyID,cellHullID,t);
+    trackID = Tracks.NewCellTrack(curFamilyID,cellHullID,t);
     
     %setup defaults for family tree
     CellFamilies(curFamilyID).rootTrackID = trackID;

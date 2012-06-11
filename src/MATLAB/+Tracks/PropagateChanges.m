@@ -52,12 +52,12 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
 
         [costMatrix bOutTracked bInTracked] = Tracker.GetCostSubmatrix(checkHulls, nextHulls);
         checkHulls = checkHulls(bOutTracked);
-        checkTracks = Tracks.GetTrackID(checkHulls);
+        checkTracks = Hulls.GetTrackID(checkHulls);
         nextHulls = nextHulls(bInTracked);
         
         % Figure out which hulls are assigned to tracks we allow to split
         bPastEdit = (t >= [CellHulls(editedHulls).time]);
-        followTracks = Tracks.GetTrackID(editedHulls(bPastEdit));
+        followTracks = Hulls.GetTrackID(editedHulls(bPastEdit));
         
         bFollowTracks = ismember(checkTracks, followTracks);
         followTracks = checkTracks(bFollowTracks);
@@ -232,7 +232,7 @@ function revertSplit(t, hull, newHulls, oldHull, oldFeat)
     rmHulls = setdiff(newHulls,hull);
     
     bRmHashIdx = ismember([HashedCells{t}.hullID], rmHulls);
-    rmTrackIDs = Tracks.GetTrackID(rmHulls);
+    rmTrackIDs = Hulls.GetTrackID(rmHulls);
     rmFamilyIDs = [CellTracks(rmTrackIDs).familyID];
     
     leaveHulls = setdiff(1:length(CellHulls),rmHulls);
@@ -280,7 +280,7 @@ function bFullLength = checkTrackLengths(hulls, minlength)
     
     for i=1:length(hulls)
         t = CellHulls(hulls(i)).time;
-        trackID = Tracks.GetTrackID(hulls(i));
+        trackID = Hulls.GetTrackID(hulls(i));
         
         hasht = t - CellTracks(trackID).startTime + 1;
         if ( hasht < minlength )

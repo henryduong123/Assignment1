@@ -1,7 +1,10 @@
-% RemoveHull(hullID) will LOGICALLY remove the hull.  Which means that the
+% droppedTracks = RemoveHull(hullID)
+% will LOGICALLY remove the hull.  Which means that the
 % hull will have a flag set that means that it does not exist anywhere and
 % should not be drawn on the cells figure
 
+% ChangeLog
+% EW 6/6/12 rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -25,32 +28,14 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function RemoveHull(hullID, bDontUpdateTree)
+function droppedTracks = RemoveHull(hullID)
+droppedTracks = [];
 
-global HashedCells CellHulls CellTracks CellFamilies SegmentationEdits
-
-if ( ~exist('bDontUpdateTree','var') )
-    bDontUpdateTree = 0;
-end
-
-trackID = Tracks.GetTrackID(hullID);
+trackID = Hulls.GetTrackID(hullID);
 
 if(isempty(trackID)),return,end
 
-bNeedsUpdate = RemoveHullFromTrack(hullID, trackID);
+droppedTracks = RemoveHullFromTrack(hullID, trackID);
 
-%remove hull from HashedCells
-time = CellHulls(hullID).time;
-index = [HashedCells{time}.hullID]==hullID;
-HashedCells{time}(index) = [];
-
-CellHulls(hullID).deleted = 1;
-
-Segmentation.RemoveSegmentationEdit(hullID, time);
-
-if ( ~bDontUpdateTree && bNeedsUpdate )
-    %TODO fix func call
-    Families.RemoveFromTree(CellTracks(trackID).startTime, trackID, 'yes');
-    Families.ProcessNewborns(1:length(CellFamilies),SegmentationEdits.maxEditedFrame);
-end
+Hulls.ClearHull(hullID);
 end

@@ -15,7 +15,7 @@ function UnitTestMexDijkstra(costGraph, numIters)
         mexDijkstra('removeEdges', rcm(rndidx),ccm(rndidx));
         UI.Progressbar((i/numIters) / 3);
     end
-    Tracker.CheckMEXSynch(testCostGraph);
+    Dev.CheckMEXSynch(testCostGraph);
     
     % Test out edge removal
     mexDijkstra('initGraph', costGraph);
@@ -34,7 +34,7 @@ function UnitTestMexDijkstra(costGraph, numIters)
         mexDijkstra('removeEdges', rcm(rndidx),[]);
         UI.Progressbar((i/numIters) / 3 + 1/3);
     end
-    Tracker.CheckMEXSynch(testCostGraph);
+    Dev.CheckMEXSynch(testCostGraph);
     
     % Test in edge removal
     mexDijkstra('initGraph', costGraph);
@@ -49,6 +49,6 @@ function UnitTestMexDijkstra(costGraph, numIters)
         mexDijkstra('removeEdges', [],ccm(rndidx));
         UI.Progressbar((i/numIters) / 3 + 2/3);
     end
-    Tracker.CheckMEXSynch(testCostGraph);
+    Dev.CheckMEXSynch(testCostGraph);
     UI.Progressbar(1);
 end

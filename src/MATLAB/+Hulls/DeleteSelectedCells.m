@@ -30,10 +30,10 @@ function DeleteSelectedCells()
         for i=1:length(Figures.cells.selectedHulls)
             Hulls.RemoveHull(Figures.cells.selectedHulls(i));
         end
-        UI.History('Push');
+        Editor.History('Push');
     catch errorMessage
         try
-            Error.ErrorHandeling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+            Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2.message);

@@ -49,7 +49,7 @@ function bGoodExt = checkExtension(startHull, endHull, path)
     
     bGoodExt = false;
     
-    trackID = Tracks.GetTrackID(endHull);
+    trackID = Hulls.GetTrackID(endHull);
     bGoodTime = (CellTracks(trackID).startTime == CellHulls(endHull).time);
     if ( ~bGoodTime )
         return;

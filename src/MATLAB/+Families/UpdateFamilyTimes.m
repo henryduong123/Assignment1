@@ -1,3 +1,6 @@
+
+% UpdateLog:
+% EW 6/6/12 Created
 function UpdateFamilyTimes( familyID )
 global CellFamilies CellTracks
 
@@ -14,5 +17,5 @@ times = [CellTracks(tracks).endTime];
 CellFamilies(familyID).endTime = max(times);
 times = [CellTracks(tracks).startTime];
 [CellFamilies(familyID).startTime index] = min(times);
-CellFamilies(familyID).rootTrack = tracks(index);
+CellFamilies(familyID).rootTrackID = tracks(index);
 end

@@ -42,7 +42,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     deleteCells = setdiff(deleteCells,replaceCell);
     
     for i=1:length(deleteCells)
-        Hulls.RemoveHull(deleteCells(i), 1);
+        Hulls.RemoveHull(deleteCells(i));
     end
     
     CellHulls(replaceCell).points = mergeObj.points;
@@ -79,11 +79,9 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     
     SegmentationEdits.newHulls = [];
     SegmentationEdits.changedHulls = [];
-    SegmentationEdits.maxEditedFrame = length(HashedCells);
-    SegmentationEdits.editTime = [];
     
     UI.UpdateSegmentationEditsMenu();
-    Families.ProcessNewborns(1:length(CellFamilies), SegmentationEdits.maxEditedFrame);
+    Families.ProcessNewborns();
 end
 
 function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
@@ -145,7 +143,7 @@ function nextMergeCells = getNextMergeCells(t, mergeCells)
     global CellTracks
     
     nextMergeCells = [];
-    trackIDs = Tracks.GetTrackID(mergeCells);
+    trackIDs = Hulls.GetTrackID(mergeCells);
     for i=1:length(trackIDs)
         hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
         if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
@@ -160,7 +158,13 @@ function propHulls = getPropagationCells(t, mergeCells)
     global CellTracks
     
     propHulls = cell(length(mergeCells),1);
-    trackIDs = Tracks.GetTrackID(mergeCells, t);
+    trackIDs = [];
+    for i=1:length(mergeCells)
+        trackIDs = [trackIDs Hulls.GetTrackID(mergeCells(i))];
+    end
+    if (length(trackIDs)~=length(mergeCells))
+        error('trackID doesn"t exist');
+    end
     for i=1:length(trackIDs)
         hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
         if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
@@ -214,7 +218,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     end
     
     for i=1:length(deleteCells)
-        Hulls.RemoveHull(deleteCells(i), 1);
+        Hulls.RemoveHull(deleteCells(i));
     end
     
     Tracker.TrackThroughMerge(t, replaceIdx);

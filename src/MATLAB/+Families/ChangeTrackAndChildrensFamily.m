@@ -1,10 +1,11 @@
-%ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
+%ChangeTrackAndChildrensFamily(newFamilyID,trackID)
 %This will remove the tree rooted at the given trackID from the given
 %oldFamily and put them in the newFamily
 %This DOES NOT make the parent child relationship, it is just updates the
 %CellFamilies data structure.
 
-% Change Log: ECW 5/31/12
+% Change Log
+% ECW 6/6/12 rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -28,11 +29,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ChangeTrackAndChildrensFamily(oldFamilyID,newFamilyID,trackID)
+function ChangeTrackAndChildrensFamily(newFamilyID,trackID)
 %get the full list of tracks to be updateded
 traverseTree(newFamilyID,trackID);
 
-Families.UpdateFamilyTimes(oldFamilyID);
 Families.UpdateFamilyTimes(newFamilyID);
 end
 

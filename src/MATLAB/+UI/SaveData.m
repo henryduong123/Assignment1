@@ -40,12 +40,12 @@ if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
 end
 
 if isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile)
-    UI.SaveLEVerState([CONSTANTS.matFullFile]);
+    Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 else
     if(orginal)
-        UI.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
+        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
     else
-        UI.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
     end
 end
 

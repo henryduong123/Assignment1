@@ -1,4 +1,4 @@
-% ProcessNewborns.m - 
+% ProcessNewborns(families) 
 % This takes all the families with start times > 1 and attempts to attach
 % that families' tracks to other families that start before said family
 
@@ -25,16 +25,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ProcessNewborns(families, tFinal)
+function ProcessNewborns(families)
 
-global CellFamilies CellTracks CellHulls HashedCells CONSTANTS GraphEdits Figures
+global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits Figures
 
 if ( ~exist('families','var') )
     families = 1:length(CellFamilies);
-end
-
-if ( ~exist('tFinal','var') )
-    tFinal = length(HashedCells);
 end
 
 tStart = 2;
@@ -48,7 +44,7 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
     end
 end
 
-% Remove any newly created parasite tracks from tree
+%Remove any newly created parasite tracks from tree
 for i=1:length(families)
     familyID = families(i);
     for j=1:length(CellFamilies(familyID).tracks)
@@ -64,11 +60,13 @@ for i=1:length(families)
             continue;
         end
         
-        Families.RemoveFromTree(trackID, CellTracks(trackID).startTime);%TODO fix func call
+        if (~isempty(CellTracks(trackID).childrenTracks))
+            Families.RemoveFromTree(CellTracks(trackID).childrenTracks(1));
+        end
+
+        Families.RemoveMitosis(trackID);
     end
 end
-
-%GlobalPatching();
 
 costMatrix = Tracker.GetCostMatrix();
 
@@ -109,7 +107,7 @@ for i=1:size
     %Massage the costs a bit
     for j=1:length(parentHullCandidates)
         %Get the length of time that the parentCandidate exists
-        parentTrackID = Tracks.GetTrackID(parentHullCandidates(j));
+        parentTrackID = Hulls.GetTrackID(parentHullCandidates(j));
         if(isempty(parentTrackID)),continue,end
         parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
         
@@ -149,11 +147,11 @@ for i=1:size
     
     parentHullID = parentHullCandidates(index);
     %Make the connections
-    parentTrackID = Tracks.GetTrackID(parentHullID);
+    parentTrackID = Hulls.GetTrackID(parentHullID);
     
     if(isempty(parentTrackID))
         try
-            Error.ErrorHandeling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
+            Error.ErrorHandling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
             return
         catch errorMessage2
             fprintf('%s',errorMessage2);
@@ -165,12 +163,12 @@ for i=1:size
     connectTime = CellHulls(parentHullID).time+1;
     if( CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime)...
         || (GraphEdits(parentHullID,childHullID) > 0 && nnz(GraphEdits(parentHullID,:)) > 1) )
-        Tracks.ChangeTrackParent(parentTrackID,connectTime,childTrackID);
+        Families.AddMitosis(childTrackID,parentTrackID,connectTime);
     end
 end
 
 if ( rootHull > 0 )
-    trackID = Tracks.GetTrackID(rootHull);
+    trackID = Hulls.GetTrackID(rootHull);
     if ( ~isempty(trackID) )
         Figures.tree.familyID = CellTracks(trackID).familyID;
     end

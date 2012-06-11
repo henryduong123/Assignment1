@@ -70,11 +70,11 @@ system(['copy "' mcrfile '" "' bindir '\"']);
 mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
 mcc -R -startmsg -m Segmentor.m
 mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
-mcc -R -startmsg -m Families.LinkTreeFolders.m
+mcc -R -startmsg -m LinkTreeFolders.m
 system(['copy LEVer.exe ' fullfile(bindir,'.')]);
 system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
 system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);
-system(['copy +Families\LinkTreeFolders.exe ' fullfile(bindir,'.')]);
+system(['copy LinkTreeFolders.exe ' fullfile(bindir,'.')]);
 
 if(isempty(dir('.\MTC.exe')) || isempty(dir(fullfile(bindir,'MTC.exe'))))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
