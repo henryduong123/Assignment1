@@ -53,8 +53,8 @@ for i=1:length(families)
             continue;
         end
         
-        parentHullID = getTrackHull(CellTracks(trackID).parentTrack, CellTracks(trackID).startTime-1);
-        childHullID = getTrackHull(trackID, CellTracks(trackID).startTime);
+        parentHullID = Tracks.GetHullID(CellTracks(trackID).startTime-1, CellTracks(trackID).parentTrack);
+        childHullID = Tracks.GetHullID(CellTracks(trackID).startTime, trackID);
         
         if ( isempty(parentHullID) || GraphEdits(parentHullID,childHullID) > 0 )
             continue;
@@ -182,16 +182,4 @@ end
 
 end
 
-function hullID = getTrackHull(trackID,t)
-    global CellTracks
-    
-    hullID = [];
-    
-    hash = CellTracks(trackID).startTime - t + 1;
-    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    hullID = CellTracks(trackID).hulls(hash);
-end
 

@@ -58,6 +58,8 @@ yl=ylim(curAx);
 hold(curAx, 'off');
 im = imagesc(img, 'Parent',curAx);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
+set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
+
 set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 axis(curAx,'off');
 if xl(1)~=0 && xl(2)~=1
@@ -79,10 +81,20 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
 end
 
 %draw labels if turned on
+Figures.cells.labelHandles = [];
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
     for i=1:length(HashedCells{Figures.time})
+           
         curHullID = HashedCells{Figures.time}(i).hullID;
         curTrackID = HashedCells{Figures.time}(i).trackID;
+        
+        %if dragging a mitosis, only show the siblings: Draws faster
+        %and makes it easier to follow what is changing
+        if(Figures.tree.movingMitosis)
+            if(Figures.tree.movingMitosis ~= curTrackID)
+                continue;
+            end
+        end
         
         xLabelCorner = max(CellHulls(curHullID).points(:,1));
         yLabelCorner = max(CellHulls(curHullID).points(:,2));
@@ -138,18 +150,24 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'Color',            edgeColor,...
             'UserData',         curTrackID,...
             'uicontextmenu',    Figures.cells.contextMenuHandle,...
+            'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
             'LineStyle',        drawStyle,...
             'LineWidth',        drawWidth);
+        
+%         [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
+%         plot(c,r, '.r');
         %draw label
-        plot(curAx, xLabelCorner,...
+     if(isempty(Figures.tree.movingMitosis)) %don't draw labels if dragging a mitosis
+       labelHandle = plot(curAx, xLabelCorner,...
             yLabelCorner,...
             shape,              ...
             'MarkerFaceColor',  backgroundColor,...
             'MarkerEdgeColor',  edgeColor,...
             'MarkerSize',       shapeSize,...
             'UserData',         curTrackID,...
+            'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
             'uicontextmenu',    Figures.cells.contextMenuHandle);
-        text(xLabelCorner,          ...
+       labelTextHandle = text(xLabelCorner,          ...
             yLabelCorner,           ...
             num2str(curTrackID),...
             'Parent',               curAx,...
@@ -158,7 +176,9 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'FontSize',             fontSize,...
             'HorizontalAlignment',  'center',...
             'UserData',             curTrackID,...
+            'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
             'uicontextmenu',        Figures.cells.contextMenuHandle);
+     end
     end
 elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
     %just draw sibling lines
@@ -173,9 +193,16 @@ elseif(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
     end
 end
 
-drawnow();
 
 Figures.cells.axesHandle = curAx;
+if(~isempty(Figures.cells.PostDrawHookOnce))
+    for i=1:length(Figures.cells.PostDrawHookOnce)
+        hook = Figures.cells.PostDrawHookOnce{i};
+        hook(curAx);
+    end       
+    Figures.cells.PostDrawHookOnce = {};
+end
+drawnow();
 end
 
 function tracksDrawn = drawSiblingsLine(curAx, trackID,hullID)

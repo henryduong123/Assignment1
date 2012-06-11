@@ -44,7 +44,8 @@ Figures.cells.handle = figure();
 Figures.tree.handle = figure();
 
 Figures.cells.selectedHulls = [];
-Figures.cells.selecting = false;
+Figures.controlDown = 0; %control key is currently down? for selecting cells and fine adjustment
+Figures.cells.PostDrawHookOnce = {}; %list of functions to call post DrawCells. Cleared on every draw
 
 whitebg(Figures.cells.handle,'k');
 whitebg(Figures.tree.handle,'w');
@@ -58,8 +59,6 @@ Figures.advanceTimerHandle = timer(...
 set(Figures.cells.handle,...
     'WindowScrollWheelFcn', @figureScroll,...
     'KeyPressFcn',          @figureKeyPress,...
-    'KeyReleaseFcn',        @figureKeyRelease,...
-    'WindowButtonDownFcn',  @figureCellDown,...
     'Menu',                 'none',...
     'ToolBar',              'figure',...
     'BusyAction',           'cancel',...
@@ -69,6 +68,9 @@ set(Figures.cells.handle,...
     'Name',                 [CONSTANTS.datasetName ' Image Data'],...
     'Tag',                  'cells',...
     'ResizeFcn',            @UI.UpdateSegmentationEditsMenu);
+
+addlistener(Figures.cells.handle, 'WindowKeyRelease', @figureKeyRelease);
+    Figures.tree.movingMitosis = [];
 
 Figures.cells.timeLabel = uicontrol(Figures.cells.handle,...
     'Style','text',...
@@ -88,7 +90,6 @@ set(Figures.tree.handle,...
     'WindowButtonUpFcn',    @figureTreeUp,...
     'WindowScrollWheelFcn', @figureScroll,...
     'KeyPressFcn',          @figureKeyPress,...
-    'KeyReleaseFcn',        @figureKeyRelease,...
     'CloseRequestFcn',      @UI.CloseFigure,...
     'Menu',                 'none',...
     'ToolBar',              'figure',...
@@ -97,6 +98,13 @@ set(Figures.tree.handle,...
     'NumberTitle',          'off',...
     'Name',                 [CONSTANTS.datasetName ' Lineage'],...
     'Tag',                  'tree');
+
+    addlistener(Figures.tree.handle, 'WindowKeyRelease', @figureKeyRelease);
+    
+%WindowButtonMotionFcn callbacks cause 'CurrentPointer' to be updated
+%which is needed for dragging
+set(Figures.tree.handle, 'WindowButtonMotionFcn',@(src,evt)(src));
+Figures.tree.dragging = [];
 
 UI.CreateMenuBar(Figures.tree.handle);
 UI.CreateContextMenuTree();
@@ -164,8 +172,12 @@ elseif  strcmp(evnt.Key,'pageup')
     UI.TimeChange(time);
 elseif strcmp(evnt.Key,'space')
     UI.TogglePlay(src,evnt);
-elseif ( strcmp(evnt.Key,'control') )
-    Figures.cells.selecting = true;
+ elseif ( strcmp(evnt.Key,'control') )
+     if(~Figures.controlDown)
+         %prevent this from getting reset when moving the mouse
+        Figures.controlDown = get(Figures.tree.axesHandle,'CurrentPoint');
+        Figures.controlDown = Figures.controlDown(3);
+     end
 elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
     Hulls.DeleteSelectedCells();
 elseif ( strcmp(evnt.Key,'return') )
@@ -176,105 +188,150 @@ end
 function figureKeyRelease(src,evnt)
     global Figures
 
-    if ( (src == Figures.cells.handle) && strcmp(evnt.Key,'control') )
-        Figures.cells.selecting = false;
-    end
+        Figures.controlDown = 0;
 end
 
-function figureCellDown(src,evnt)
-global Figures
 
-currentPoint = get(gca,'CurrentPoint');
-Figures.cells.currentHullID = Hulls.FindHull(currentPoint);
 
-if ( (Figures.cells.currentHullID ~= -1) && Figures.cells.selecting )
-    UI.ToggleCellSelection(Figures.cells.currentHullID);
-    return;
-end
 
-if(strcmp(get(Figures.cells.handle,'SelectionType'),'normal'))
-    if(strcmp(Figures.advanceTimerHandle.Running,'on'))
-        UI.TogglePlay(src,evnt);
-    end
-    
-    if ( ~Figures.cells.selecting )
-        UI.ClearCellSelection();
-    end
-    
-    if(Figures.cells.currentHullID == -1)
-        return
-    end
-    set(Figures.cells.handle,'WindowButtonUpFcn',@figureCellUp);
-elseif(strcmp(get(Figures.cells.handle,'SelectionType'),'extend'))
-    if(Figures.cells.currentHullID == -1)
-        Segmentation.AddHull(1);
-    else
-        Segmentation.AddHull(2);
-    end
-end
-if(strcmp(Figures.advanceTimerHandle.Running,'on'))
-    UI.TogglePlay(src,evnt);
-end
-end
-
-function figureCellUp(src,evnt)
-global Figures CellTracks CellFamilies HashedCells
-
-set(Figures.cells.handle,'WindowButtonUpFcn','');
-if(Figures.cells.currentHullID == -1)
-    return
-end
-
-currentHullID = Hulls.FindHull(get(gca,'CurrentPoint'));
-previousTrackID = Hulls.GetTrackID(Figures.cells.currentHullID);
-
-if(currentHullID~=Figures.cells.currentHullID)
-    try
-        Tracker.GraphEditSetEdge(Figures.time,Hulls.GetTrackID(currentHullID),previousTrackID);
-        Tracker.GraphEditSetEdge(Figures.time,previousTrackID,Hulls.GetTrackID(currentHullID));
-        Tracks.SwapLabels(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
-        Editor.History('Push')
-    catch errorMessage
-        try
-            Error.ErrorHandling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Hulls.GetTrackID(currentHullID))...
-                ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s\n',errorMessage2.message);
-            return
-        end
-    end
-    
-    Families.ProcessNewborns();
-    previousTrackID = Hulls.GetTrackID(currentHullID);
-    
-elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
-    %no change and the current tree contains the cell clicked on
-    UI.ToggleCellSelection(Figures.cells.currentHullID);
-    return
-end
-
-UI.DrawTree(CellTracks(previousTrackID).familyID);
-UI.DrawCells();
-UI.ToggleCellSelection(Figures.cells.currentHullID);
-end
 
 function figureTreeDown(src,evnt)
-global Figures
-if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
-    set(Figures.tree.handle,'WindowButtonMotionFcn',@figureTreeMotion);
-    moveLine();
-end
+    global Figures indicatorMotionListener indicatorMouseUpListener;
+
+    indicatorMotionListener = addlistener(Figures.tree.handle, 'WindowMouseMotion', @figureTreeMotion);
+    indicatorMouseUpListener = addlistener(Figures.tree.handle, 'WindowMouseRelease', @indicatorMouseUp);
+    if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
+        moveLine();
+    end
 end
 
+% NLS - 6/8/12
+% this actually returns the tracks that the hulls belong to
+% I'll Hopefully refactor DrawCells to allow drawing specific hulls soon
+function likelyHulls = FindLowestCostHulls(parentTrackID, time)
+global CellTracks HashedCells CellHulls Figures
+    parentTrack = CellTracks(parentTrackID);
+
+    fromHullID = Tracks.GetHullID(parentTrack.endTime, parentTrackID);
+    potentialHulls = HashedCells{time};
+    potentialHulls = [potentialHulls.hullID];
+
+    timeDiff = time - CellHulls(fromHullID).time;
+    [paths, costs] = mexDijkstra('matlabExtend', fromHullID, abs(timeDiff)+1, @(startID,endID)((any(endID == potentialHulls))), timeDiff);
+
+    likelyHulls = [];
+    if(length(paths) > 1)
+        %if cost difference between {1} and {2} is really large, attempt to
+        %split?
+        likelyHulls = [paths{1}(end), paths{2}(end)];
+    elseif (length(paths) == 1)
+        likelyHulls = [paths{1}(end)];
+    end
+    
+    if(length(likelyHulls) == 1) %attempt to split
+        newHulls = Segmentation.ResegmentHull(CellHulls(likelyHulls(1)), [], 2, 1, 1);
+        likelyHulls = [];
+        if(isempty(newHulls)),return,end
+        hull1 = newHulls(1);
+        hull2 = newHulls(2);
+        Figures.cells.PostDrawHookOnce{end+1} = @(Ax) (plot(Ax, hull1.points(:,1), hull1.points(:,2), 'Color', [.2 .2 .2], 'LineStyle', '-', 'LineWidth', 1.5));
+        Figures.cells.PostDrawHookOnce{end+1} = @(Ax) (plot(Ax, hull2.points(:,1), hull2.points(:,2), 'Color', [.8 .8 .8], 'LineStyle', '-', 'LineWidth', 1.5));
+    end
+    
+    for i=1:length(likelyHulls)
+        likelyHulls(i) = Hulls.GetTrackID(likelyHulls(i));
+    end
+end
+
+% NLS - 6/8/2012 - Created
+function mitosisHandleDragging(mitosis)
+global Figures CellTracks;
+
+    Y = get(Figures.tree.timeIndicatorLine, 'YData');
+    Y = Y(2);
+
+    mitosisHandle = get(mitosis,'UserData');
+    %don't allow adjusting a mitosis through other mitoses
+    minY = CellTracks(mitosisHandle.trackID).startTime + 1;
+    if (Y <= minY)
+        return;
+    end
+
+    children = CellTracks(mitosisHandle.trackID).childrenTracks;
+    Figures.tree.movingMitosis = [children, FindLowestCostHulls(mitosisHandle.trackID, Y)];
+    
+    %determine how far up/down the user should be allowed to drag a mitosis
+    if(isempty(CellTracks(children(1)).childrenTracks))
+        if(isempty(CellTracks(children(2)).childrenTracks))
+            maxY = Inf;
+        else
+            maxY = CellTracks(children(1)).endTime - 1;
+        end
+    elseif(isempty(CellTracks(children(2)).childrenTracks))
+        maxY = CellTracks(children(2)).endTime - 1;
+    else           
+        maxY = min(CellTracks(children(1)).endTime,CellTracks(children(2)).endTime) - 1;
+    end
+    
+    if (Y >= maxY)
+        return;
+    end
+
+    previousMitosisTime = get(mitosisHandle.hLine, 'YData');
+    set(mitosisHandle.hLine, 'YData', [Y Y]);
+    set(mitosisHandle.diamondHandle, 'YData', Y+1);
+    
+    set(mitosisHandle.child1Handles(1), 'YData', Y+1);
+    text1 = get(mitosisHandle.child1Handles(2), 'Position');
+    text1(2) = Y+1; 
+    set(mitosisHandle.child1Handles(2), 'Position', text1);
+    
+    set(mitosisHandle.child2Handles(1), 'YData', Y+1);  
+    text2 = get(mitosisHandle.child2Handles(2), 'Position');
+    text2(2) = Y+1;
+    set(mitosisHandle.child2Handles(2), 'Position', text2);
+end
+
+function indicatorMouseUp(src,evt)
+    global indicatorMotionListener indicatorMouseUpListener Figures CellTracks;
+
+    delete(indicatorMotionListener);
+    delete(indicatorMouseUpListener);
+
+    if(~isempty(Figures.tree.dragging))
+        Y = get(Figures.tree.timeIndicatorLine, 'YData');
+        Y = Y(2);
+
+        mitosis = Figures.tree.dragging;
+        mitosisHandle = get(mitosis,'UserData');
+        children = CellTracks(mitosisHandle.trackID).childrenTracks;
+
+        Figures.tree.movingMitosis = [];
+        %TODO: actually commit tree changes
+        %GraphEditMoveMitosis(Y, children(1));
+        %History('Push');
+        %DrawTree(CellTracks(mitosisHandle.trackID).familyID);
+        Figures.tree.dragging = [];
+    end  
+end
+ 
 function figureTreeMotion(src,evnt)
-moveLine();
+global Figures
+    moveLine();
+    if(~isempty(Figures.tree.dragging))
+        mitosisHandleDragging(Figures.tree.dragging);
+    end
+    UI.DrawCells();
 end
 
 function moveLine()
 global Figures HashedCells
 time = get(Figures.tree.axesHandle,'CurrentPoint');
 time = round(time(3));
+
+if(Figures.controlDown)
+    time = round((time - Figures.controlDown)/4 + Figures.controlDown);
+end
 
 if(strcmp(Figures.advanceTimerHandle.Running,'on'))
     UI.TogglePlay([],[]);
@@ -293,7 +350,6 @@ end
 function figureTreeUp(src,evnt)
 global Figures
 if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
-    set(Figures.tree.handle,'WindowButtonMotionFcn','');
     UI.TimeChange(Figures.time);
 end
 end
@@ -330,6 +386,7 @@ function tryMergeSelectedCells()
     Error.LogAction('Merged cells',[deleteCells replaceCell],replaceCell);
     
 end
+
 
 function learnFromEdits(src,evnt)
     global CellFamilies CellTracks HashedCells SegmentationEdits Figures

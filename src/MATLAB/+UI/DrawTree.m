@@ -96,43 +96,68 @@ set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
 end
 
-function [xMin xCenter xMax phenoScratch] = traverseTree(trackID,initXmin,phenoScratch)
+function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch)
 global CellTracks
 
 if(~isempty(CellTracks(trackID).childrenTracks))
-    [child1Xmin child1Xcenter child1Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin,phenoScratch);
-    [child2Xmin child2Xcenter child2Xmax phenoScratch] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1,phenoScratch);
+    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin,phenoScratch);
+    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1,phenoScratch);
     xMin = min(child1Xmin,child2Xmin);
     xMax = max(child1Xmax,child2Xmax);
-    if(child1Xcenter < child2Xcenter)
-        drawHorizontalEdge(child1Xcenter,child2Xcenter,CellTracks(trackID).endTime+1,trackID);
-        xCenter = (child2Xcenter-child1Xcenter)/2 + child1Xcenter;
-    else
-        drawHorizontalEdge(child2Xcenter,child1Xcenter,CellTracks(trackID).endTime+1,trackID);
-        xCenter = (child1Xcenter-child2Xcenter)/2 + child2Xcenter;
-    end
-    phenoScratch = drawVerticalEdge(trackID,xCenter,phenoScratch);
+    
+    minChildCenter = min([child1Xcenter,child2Xcenter]);
+    maxChildCenter = max([child1Xcenter,child2Xcenter]);
+    
+    hLine = drawHorizontalEdge(minChildCenter,maxChildCenter,CellTracks(trackID).endTime+1,trackID);
+    xCenter = mean([child1Xcenter,child2Xcenter]);
+        
+    [phenoScratch labelHandles] = drawVerticalEdge(trackID,xCenter,phenoScratch);
+	
+    diamondHandle = plot(xCenter,CellTracks(trackID).endTime+1,'d', ...
+            'MarkerFaceColor',  [.5 .5 .5],...
+            'MarkerEdgeColor',  [0 0 0],...
+            'MarkerSize',       15,...
+            'ButtonDownFcn',    @mitosisHandleDown);
+    mitosisHandles = struct('trackID', {trackID},...
+        'hLine', {hLine},...
+        'child1Handles', {child1Handles},...
+        'child2Handles', {child2Handles},...
+        'diamondHandle', {diamondHandle});
+    
+    set(diamondHandle, 'UserData', mitosisHandles);
 else
     %This is when the edge is for a leaf node
-    phenoScratch = drawVerticalEdge(trackID,initXmin,phenoScratch);
+    [phenoScratch labelHandles] = drawVerticalEdge(trackID,initXmin,phenoScratch);
     xMin = initXmin;
     xCenter = initXmin;
     xMax = initXmin;
 end
 end
 
-function drawHorizontalEdge(xMin,xMax,y,trackID)
+% NLS - 6/8/2012 - Created
+function mitosisHandleDown(src,evt)
+global Figures mitosisMotionListener mitosisMouseUpListener CellTracks
+    mitosisHandle = get(src,'UserData');
+    children = CellTracks(mitosisHandle.trackID).childrenTracks;
+    Figures.tree.movingMitosis = children;
+    mexDijkstra('initGraph', Tracker.GetCostMatrix());
+    
+    Figures.tree.dragging = src;
+end
+
+function hLine = drawHorizontalEdge(xMin,xMax,y,trackID)
 global Figures
-plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+hLine = plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
 %Place the line behind all other elements already graphed
 h = get(gca,'child');
 h = h([2:end, 1]);
 set(gca, 'child', h);
 end
 
-function phenoScratch = drawVerticalEdge(trackID,xVal,phenoScratch)
+function [phenoScratch, labelHandles] = drawVerticalEdge(trackID,xVal,phenoScratch)
 global CellTracks Figures
 
+labelHandles = [];
 bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
 
 %draw circle for node
@@ -177,12 +202,12 @@ if ( phenotype ~= 1 )
     if ( phenotype > 1 )
         if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.2;end;
         color = phenoScratch.phenoColors(phenotype,:);
-        plot(xVal,yMin,'s',...
+        labelHandles = [labelHandles plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
             'MarkerEdgeColor',  'w',...
             'MarkerSize',       scaleMarker*circleSize,...
             'UserData',         trackID,...
-            'uicontextmenu',    Figures.tree.contextMenuHandle);
+            'uicontextmenu',    Figures.tree.contextMenuHandle)];
         phenoScratch.phenoLegendSet(phenotype)=1;
         bHasPheno = 1;
     end
@@ -193,19 +218,19 @@ if ( phenotype ~= 1 )
     end
     
     if ~(bHasPheno && ~bDrawLabels)
-        plot(xVal,yMin,'o',...
+        labelHandles = [labelHandles plot(xVal,yMin,'o',...
             'MarkerFaceColor',  FaceColor,...
             'MarkerEdgeColor',  EdgeColor,...
             'MarkerSize',       circleSize,...
             'UserData',         trackID,...
-            'uicontextmenu',    Figures.tree.contextMenuHandle);
+            'uicontextmenu',    Figures.tree.contextMenuHandle)];
     end
-    text(xVal,yMin,num2str(trackID),...
+    labelHandles = [labelHandles text(xVal,yMin,num2str(trackID),...
         'HorizontalAlignment',  'center',...
         'FontSize',             FontSize,...
         'color',                TextColor,...
         'UserData',             trackID,...
-        'uicontextmenu',        Figures.tree.contextMenuHandle);
+        'uicontextmenu',        Figures.tree.contextMenuHandle)];
     
 else
     yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
@@ -217,19 +242,20 @@ else
     
 	plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
     
-    plot(xVal,yMin,'o',...
+    labelHandles = [labelHandles plot(xVal,yMin,'o',...
         'MarkerFaceColor',  'k',...
         'MarkerEdgeColor',  'r',...
         'MarkerSize',       circleSize,...
         'UserData',         trackID,...
-        'uicontextmenu',    Figures.tree.contextMenuHandle);
-    text(xVal,yMin,num2str(trackID),...
+        'uicontextmenu',    Figures.tree.contextMenuHandle)];
+    labelHandles = [labelHandles text(xVal,yMin,num2str(trackID),...
         'HorizontalAlignment',  'center',...
         'FontSize',             FontSize,...
         'color',                'r',...
         'UserData',             trackID,...
-        'uicontextmenu',        Figures.tree.contextMenuHandle);
+        'uicontextmenu',        Figures.tree.contextMenuHandle)];
     phenoScratch.phenoLegendSet(1)=1;
 end
 end
+
 

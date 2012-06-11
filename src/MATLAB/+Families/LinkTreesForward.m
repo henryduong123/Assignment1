@@ -147,7 +147,9 @@ function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt)
             [pathExt nextCost] = mexDijkstra('matlabExtend', nzHull, maxFrameExt, @(x,y)(y==backHull));
 %             [pathExt nextCost] = dijkstraSearch(nzHull, costMatrix, @(x,y)(y==backHull), maxFrameExt);
             if ( isempty(nextCost) )
-                error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite within ' num2str(maxFrameExt) ' frames.']);
+%                 error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite within ' num2str(maxFrameExt) ' frames.']);
+                cost = Inf;
+                return;
             end
         end
         cost = cost + nextCost;
