@@ -35,6 +35,11 @@ function removedTracks = RemoveHullFromTrack(hullID)
     global CellTracks CellHulls HashedCells
     
     removedTracks = [];
+    
+    if ( hullID == 0 )
+        return;
+    end
+    
     trackID = Hulls.GetTrackID(hullID);
     
     if (isempty(trackID))
@@ -57,8 +62,9 @@ function removedTracks = RemoveHullFromTrack(hullID)
     
     %% Update    
     %update hashed cells
-    index = [HashedCells{CellHulls(hullID).time}.hullID]==hullID;
-    HashedCells{CellHulls(hullID).time}(index).trackID = [];
+    bHullIdx = [HashedCells{CellHulls(hullID).time}.hullID]==hullID;
+    % Remove Hull entry (hullID/trackID) from HashedCellss
+    HashedCells{CellHulls(hullID).time} = HashedCells{CellHulls(hullID).time}(~bHullIdx);
     
     %Remove the hull from the track
     CellTracks(trackID).hulls(CellTracks(trackID).hulls==hullID) = 0;
