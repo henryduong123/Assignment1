@@ -302,7 +302,7 @@ function updateTracking(prevHulls, newHulls, dir)
 % 
 %         extendHulls = newHulls(bOutTracked);
 %         affectedHulls = nextHulls(bInTracked);
-%         ReassignTracks(t+2, costMatrix, extendHulls, affectedHulls, [], 1);
+%         ReassignTracks(costMatrix, extendHulls, affectedHulls, [], 1);
     end
 end
 

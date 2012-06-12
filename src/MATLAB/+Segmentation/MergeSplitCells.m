@@ -62,7 +62,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         return;
     end
     
-    changedHulls = Tracker.ReassignTracks(t, costMatrix, extendHulls, affectedHulls, replaceCell);
+    changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, replaceCell);
     
     t = propagateMerge(replaceCell, changedHulls, nextMergeCells);
 
@@ -74,7 +74,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         extendHulls = checkHulls(bExtendHulls);
         affectedHulls = nextHulls(bAffectedHulls);
         
-        Tracker.ReassignTracks(t+1, costMatrix, extendHulls, affectedHulls, []);
+        Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, []);
     end
     
     SegmentationEdits.newHulls = [];
@@ -135,7 +135,7 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
         extendHulls = checkHulls(bExtendHulls);
         affectedHulls = nextHulls(bAffectedHulls);
 
-        trackHulls = Tracker.ReassignTracks(t+1, costMatrix, extendHulls, affectedHulls, mergedHull);
+        trackHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, mergedHull);
     end
 end
 

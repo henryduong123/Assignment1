@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function changedHulls = ReassignTracks(t, costMatrix, extendHulls, affectedHulls, changedHulls)
+function changedHulls = ReassignTracks(costMatrix, extendHulls, affectedHulls, changedHulls)
     if ( ~exist('changedHulls','var') )
         changedHulls = [];
     end
