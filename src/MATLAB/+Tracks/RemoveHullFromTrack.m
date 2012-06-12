@@ -44,14 +44,14 @@ function removedTracks = RemoveHullFromTrack(hullID)
     %% Hull is at the head of the track
     if (length(CellTracks(trackID).hulls) == 1 || CellTracks(trackID).startTime == CellHulls(hullID).time)
         if (~isempty(CellTracks(trackID).parentTrack))
-            removedTracks = [removedTracks Families.RemoveFromTree(trackID)];
+            removedTracks = [removedTracks Families.RemoveFromTreePrune(trackID)];
         end
     end
     
     %% Hull is at the tail of the track
     if (length(CellTracks(trackID).hulls) == 1 || CellTracks(trackID).endTime == CellHulls(hullID).time)
         if (~isempty(CellTracks(trackID).childrenTracks))
-            removedTracks = [removedTracks Families.RemoveFromTree(CellTracks(trackID).childrenTracks(1))];
+            removedTracks = [removedTracks Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(1))];
         end
     end
     

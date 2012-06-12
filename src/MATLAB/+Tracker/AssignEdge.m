@@ -122,7 +122,7 @@ function removeIfEmptyTrack(track)
     childTracks = CellTracks(track).childrenTracks;
     for i=1:length(childTracks)
         %TODO fix func call
-        Families.RemoveFromTree(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
+        Families.RemoveFromTreePrune(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
     end
 
     Families.RemoveTrackFromFamily(track);

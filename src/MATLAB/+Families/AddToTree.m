@@ -18,10 +18,10 @@ if (CellTracks(addTrack).startTime<CellTracks(ontoTrack).startTime || ...
         CellTracks(ontoTrack).endTime);
 end
 
-droppedTracks = Families.RemoveFromTree(addTrack);
+droppedTracks = Families.RemoveFromTreePrune(addTrack);
 
 %% Split the track that will be the parent
-newSibling = Families.RemoveFromTree(ontoTrack,CellTracks(addTrack).startTime);
+newSibling = Families.RemoveFromTreePrune(ontoTrack,CellTracks(addTrack).startTime);
 
 if (length(newSibling)~=1)
     list = sprintf(' %d, ',newSibling);

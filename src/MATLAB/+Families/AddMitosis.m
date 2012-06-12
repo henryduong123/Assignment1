@@ -10,7 +10,7 @@ if (~exist('time','var'))
 end
 
 if (time>CellTracks(addTrack).startTime)
-    addTrack = Families.RemoveFromTree(addTrack,time);
+    addTrack = Families.RemoveFromTreePrune(addTrack,time);
 end
 
 droppedTracks = Families.AddToTree(addTrack, ontoTrack);

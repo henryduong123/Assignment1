@@ -28,7 +28,7 @@ function droppedTracks = RemoveTrackHulls(trackID)
     
     droppedTracks = [];
     
-    Families.RemoveMitosis(trackID);
+    Families.RemoveFromTree(trackID);
     
     for i=1:length(CellTracks(trackID).hulls)
         Segmentation.RemoveSegmentationEdit(hullID);

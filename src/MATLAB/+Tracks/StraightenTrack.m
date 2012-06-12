@@ -34,6 +34,6 @@ global CellTracks
 droppedTracks = [];
 
 while (length(CellTracks(trackID).children)>=2)
-    droppedTracks = [droppedTracks Families.RemoveMitosis(CellTracks(trackID).children(2))];
+    droppedTracks = [droppedTracks Families.RemoveFromTree(CellTracks(trackID).children(2))];
 end
 end

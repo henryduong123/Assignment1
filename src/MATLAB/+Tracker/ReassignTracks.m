@@ -178,12 +178,12 @@ function exchangeTrackLabels(t, oldTrack, track)
     
     if ( CellTracks(track).endTime >= t )
         %TODO fix func call
-        Families.RemoveFromTree(t, track, 'no');
+        Families.RemoveFromTreePrune(t, track, 'no');
     end
     
     if ( CellTracks(oldTrack).startTime < t )
         %TODO fix func call
-        newFamID = Families.RemoveFromTree(t, oldTrack, 'no');
+        newFamID = Families.RemoveFromTreePrune(t, oldTrack, 'no');
         removeIfEmptyTrack(oldTrack);
         
         oldTrack = CellFamilies(newFamID).rootTrackID;
@@ -203,7 +203,7 @@ function removeIfEmptyTrack(track)
     childTracks = CellTracks(track).childrenTracks;
     for i=1:length(childTracks)
        %TODO fix func call
-       Families.RemoveFromTree(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
+       Families.RemoveFromTreePrune(CellTracks(childTracks(i)).startTime, childTracks(i), 'no');
     end
 
     Families.RemoveTrackFromFamily(track);

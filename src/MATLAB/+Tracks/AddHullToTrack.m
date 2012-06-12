@@ -65,7 +65,7 @@ if (~isempty(CellTracks(trackID).hulls))
     % parent?
     if(time<CellTracks(trackID).startTime && ~isempty(CellTracks(trackID).parentTrack))
         %Remove this track from the family
-        droppedTracks = [droppedTracks Families.RemoveFromTree(trackID)];
+        droppedTracks = [droppedTracks Families.RemoveFromTreePrune(trackID)];
     end
     
     %Is this hull being added to the tail of the track and does it have
@@ -73,7 +73,7 @@ if (~isempty(CellTracks(trackID).hulls))
     if(time>CellTracks(trackID).endTime && ~isempty(CellTracks(trackID).childrenTracks))
         %Drop the children
         for i=1:length(CellTracks(trackID).childrenTracks)
-            droppedTracks = [droppedTracks Families.RemoveFromTree(CellTracks(trackID).childrenTracks(i))];
+            droppedTracks = [droppedTracks Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(i))];
         end
     end
 else

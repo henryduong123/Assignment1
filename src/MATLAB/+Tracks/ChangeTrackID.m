@@ -47,7 +47,7 @@ if (time>=CellTracks(desiredTrack).startTime)
     %% The desiredTrack is before the currentTrack
     % Remove any future track on the desiredTrack
     if (time<CellTracks(desiredTrack).endTime)
-        droppedTracks = [droppedTracks Families.RemoveFromTree(desiredTrack,time)];
+        droppedTracks = [droppedTracks Families.RemoveFromTreePrune(desiredTrack,time)];
     end
     %Gather the hulls to move and leave the rest on the currentTrack
     startHash = time-CellTracks(currentTrack).startTime+1;
@@ -57,7 +57,7 @@ else
     %% The currentTrack is before the desiredTrack
     % Remove any future track on the currentTrack
     currentParent = CellTracks(currentTrack).parentTrack;
-    droppedTracks = [droppedTracks Families.RemoveFromTree(currentTrack,time)];
+    droppedTracks = [droppedTracks Families.RemoveFromTreePrune(currentTrack,time)];
     hulls = CellTracks(currentTrack).hulls;
 end
 

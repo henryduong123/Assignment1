@@ -37,24 +37,13 @@ end
 
 oldParent = CellTracks(trackID).parentTrack;
 
-if (CellTracks(trackID).startTime==time)
-    try
-        Tracker.GraphEditRemoveEdge(time, trackID, trackID);
-        droppedTracks = Families.RemoveMitosis(trackID);
-        Editor.History('Push');
-    catch errorMessage
-        Error.ErrorHandling(['RemoveMitosis(' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
-        return
-    end
-else
-    try
-        Tracker.GraphEditRemoveEdge(time, trackID, trackID);
-        droppedTracks = Families.RemoveFromTree(trackID, time);
-        Editor.History('Push');
-    catch errorMessage
-        Error.ErrorHandling(['RemoveFromTree(' num2str(trackID) ' ' num2str(time) ') -- ' errorMessage.message],errorMessage.stack);
-        return
-    end
+try
+    Tracker.GraphEditRemoveEdge(time, trackID, trackID);
+    droppedTracks = Families.RemoveFromTree(trackID, time);
+    Editor.History('Push');
+catch errorMessage
+    Error.ErrorHandling(['RemoveFromTreePrune(' num2str(trackID) ' ' num2str(time) ') -- ' errorMessage.message],errorMessage.stack);
+    return
 end
 
 Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],oldParent,trackID);

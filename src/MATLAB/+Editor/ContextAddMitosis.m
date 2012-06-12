@@ -35,7 +35,7 @@ end
 
 % if the sibling has history get rid of it
 if (CellTracks(siblingTrack).startTime<time)
-    siblingTrack = Families.RemoveFromTree(siblingTrack,time);
+    siblingTrack = Families.RemoveFromTreePrune(siblingTrack,time);
 end
 
 % if both tracks are starting on this frame see who the parent should be
