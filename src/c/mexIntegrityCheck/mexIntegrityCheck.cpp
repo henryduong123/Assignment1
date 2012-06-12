@@ -754,43 +754,35 @@ bool verifyStructureElements()
 	}
 
 	// Check for orphaned hulls or deleted hulls which are still referenced
+	mwSize numFrames = mxGetNumberOfElements(gHashHulls);
 	mwSize numHulls = mxGetNumberOfElements(gCellHulls);
 	for ( mwIndex i=0; i < numHulls; ++i )
 	{
-		mwIndex matHullTime = mxGetScalar(mxGetField(gCellHulls, C_IDX(i), "time"));
-		if ( MATLAB_IDX(matHullTime) >= numHulls )
-		{
-			gHullErrors.insert(tErrorPair(C_IDX(i), "Hull time is past end of HashedCells"));
+		bool bHullDeleted = (bool) mxGetScalar(mxGetField(gCellHulls, C_IDX(i), "deleted"));
+		if ( bHullDeleted )
 			continue;
-		}
 
 		int trackID = findTrackID(i+1);
-
-		bool bHullDeleted = (bool) mxGetScalar(mxGetField(gCellHulls, C_IDX(i), "deleted"));
-		if ( !bHullDeleted )
+		mwIndex matHullTime = mxGetScalar(mxGetField(gCellHulls, C_IDX(i), "time"));
+		if ( (matHullTime == 0) || (MATLAB_IDX(matHullTime) >= numFrames) )
 		{
-			if ( trackHullRefCount[i] == 1 )
-				continue;
-
-			if ( trackID < 0 )
-			{
-				gHullErrors.insert(tErrorPair(C_IDX(i), "Hull has no CellTracks ref or HashedCells ref (not deleted)"));
-				continue;
-			}
-
-			char errMsg[errBufSize];
-			sprintf(errMsg, "Hull has no CellTracks references HashedCells.trackID = %d (not deleted)", trackID);
-			gHullErrors.insert(tErrorPair(C_IDX(i), errMsg));
+			gHullErrors.insert(tErrorPair(C_IDX(i), "Hull time is invalid"));
 			continue;
 		}
 
-		if ( trackID >= 0 )
+		if ( trackHullRefCount[i] == 1 )
+			continue;
+
+		if ( trackID < 0 )
 		{
-			char errMsg[errBufSize];
-			sprintf(errMsg, "Deleted hull is still referenced: HashedCells.trackID = %d (track references=%d)", trackID, trackHullRefCount[i]);
-			gHullErrors.insert(tErrorPair(C_IDX(i), errMsg));
+			gHullErrors.insert(tErrorPair(C_IDX(i), "Hull has no CellTracks ref or HashedCells ref (not deleted)"));
 			continue;
 		}
+
+		char errMsg[errBufSize];
+		sprintf(errMsg, "Hull has no CellTracks references HashedCells.trackID = %d (not deleted)", trackID);
+		gHullErrors.insert(tErrorPair(C_IDX(i), errMsg));
+		continue;
 	}
 
 	// Reuse these for HashedCells ref count
@@ -800,8 +792,6 @@ bool verifyStructureElements()
 	for ( size_t i=0; i < trackHullRefCount.size(); ++i )
 		trackHullRefCount[i] = 0;
 
-
-	mwSize numFrames = mxGetNumberOfElements(gHashHulls);
 	for ( mwIndex i=0; i < numFrames; ++i )
 	{
 		mxArray* frameHulls = mxGetCell(gHashHulls, C_IDX(i));
@@ -812,15 +802,19 @@ bool verifyStructureElements()
 			mwIndex matHashTrack = (mwIndex) mxGetScalar(mxGetField(frameHulls, C_IDX(j), "trackID"));
 			mwIndex matHashHull = (mwIndex) mxGetScalar(mxGetField(frameHulls, C_IDX(j), "hullID"));
 
-			if ( (MATLAB_IDX(matHashHull) > numHulls) || (matHashHull == 0) )
+			if ( (matHashHull == 0) || (MATLAB_IDX(matHashHull) >= numHulls) )
 			{
-				gHashErrors.insert(tErrorPair(C_IDX(i), "HashCells contains invalid hull entry"));
+				char errMsg[errBufSize];
+				sprintf(errMsg, "HashCells contains invalid hull entry at %d", (j+1));
+				gHullErrors.insert(tErrorPair(MATLAB_IDX(matHashHull), errMsg));
 				continue;
 			}
 
-			if ( (MATLAB_IDX(matHashTrack) > numTracks) || (matHashHull == 0) )
+			if ( (matHashTrack == 0) || (MATLAB_IDX(matHashTrack) >= numTracks) )
 			{
-				gHashErrors.insert(tErrorPair(C_IDX(i), "HashCells contains invalid track entry"));
+				char errMsg[errBufSize];
+				sprintf(errMsg, "HashCells contains invalid track entry at %d", j+1);
+				gHullErrors.insert(tErrorPair(MATLAB_IDX(matHashHull), errMsg));
 				continue;
 			}
 
@@ -885,7 +879,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		//mexPrintf("ERROR: Track %d: %s\n", (errIter->first + 1), errIter->second.c_str());
 		mxArray* newType = mxCreateString("CellTracks");
-		mxArray* newIndex = mxCreateDoubleScalar((double) errIter->first);
+		mxArray* newIndex = mxCreateDoubleScalar((double) (errIter->first + 1));
 		mxArray* newMsg = mxCreateString(errIter->second.c_str());
 
 		mxSetField(plhs[0], idx, "type", newType);
@@ -898,7 +892,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		//mexPrintf("ERROR: Family %d: %s\n", (errIter->first + 1), errIter->second.c_str());
 		mxArray* newType = mxCreateString("CellFamilies");
-		mxArray* newIndex = mxCreateDoubleScalar((double) errIter->first);
+		mxArray* newIndex = mxCreateDoubleScalar((double) (errIter->first + 1));
 		mxArray* newMsg = mxCreateString(errIter->second.c_str());
 
 		mxSetField(plhs[0], idx, "type", newType);
@@ -911,7 +905,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		//mexPrintf("ERROR: Hull %d: %s\n", (errIter->first + 1), errIter->second.c_str());
 		mxArray* newType = mxCreateString("CellHulls");
-		mxArray* newIndex = mxCreateDoubleScalar((double) errIter->first);
+		mxArray* newIndex = mxCreateDoubleScalar((double) (errIter->first + 1));
 		mxArray* newMsg = mxCreateString(errIter->second.c_str());
 
 		mxSetField(plhs[0], idx, "type", newType);
@@ -924,7 +918,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		//mexPrintf("ERROR: Hash-time %d: %s\n", (errIter->first + 1), errIter->second.c_str());
 		mxArray* newType = mxCreateString("HashedCells");
-		mxArray* newIndex = mxCreateDoubleScalar((double) errIter->first);
+		mxArray* newIndex = mxCreateDoubleScalar((double) (errIter->first + 1));
 		mxArray* newMsg = mxCreateString(errIter->second.c_str());
 
 		mxSetField(plhs[0], idx, "type", newType);
