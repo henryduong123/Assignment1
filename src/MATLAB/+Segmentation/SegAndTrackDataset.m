@@ -21,17 +21,17 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
 
     fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
 
-%     if(~isempty(dir('.\segmentationData')))
-%         system('rmdir /S /Q .\segmentationData');
-%     end
-% 
-%     for i=1:numProcessors
-%         system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-%             num2str(numberOfImages) ' "' rootFolder '" "' datasetName '" ' ...
-%             num2str(imageAlpha) ' ' num2str(sigDigits) ' && exit']);
-%         %use line below instead of the 3 lines above for non-parallel or to debug
-% %         Segmentor(i,numProcessors,numberOfImages,rootFolder,datasetName,imageAlpha,sigDigits);
-%     end
+    if(~isempty(dir('.\segmentationData')))
+        system('rmdir /S /Q .\segmentationData');
+    end
+
+    for i=1:numProcessors
+        system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
+            num2str(numberOfImages) ' "' rootFolder '" "' datasetName '" ' ...
+            num2str(imageAlpha) ' ' num2str(sigDigits) ' && exit']);
+        %use line below instead of the 3 lines above for non-parallel or to debug
+%         Segmentor(i,numProcessors,numberOfImages,rootFolder,datasetName,imageAlpha,sigDigits);
+    end
 
     bSegFileExists = false(1,numProcessors);
     for i=1:numProcessors

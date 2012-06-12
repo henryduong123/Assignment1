@@ -39,9 +39,13 @@ global HashedCells CellTracks CellHulls CellFamilies
 
 droppedTracks = [];
 
-if ( ~isscalar(hullID) || (hullID <= 0) || (hullID > length(CellHulls)) )
+if ( ~isscalar(hullID) || (hullID < 0) || (hullID > length(CellHulls)) )
     error('AddHullToTrack - hullID argument must be a valid scalar cell ID\n hullID:%d, trackID:%d, previousHullID:%d',...
         hullID,trackID,previousHullID);
+end
+
+if ( hullID == 0 )
+    return;
 end
 
 %% This is when the track is not known and is used in converting legacy data struct

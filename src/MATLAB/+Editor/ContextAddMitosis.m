@@ -6,15 +6,15 @@ function ContextAddMitosis(trackID, siblingTrack, time)
 global CellTracks Figures
 
 if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
-    msgbox([answer(1) ' is not a valid cell'],'Not a valid cell','error');
+    msgbox([num2str(siblingTrack) ' is not a valid cell'],'Not a valid cell','error');
     return
 end
 if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
-    msgbox([answer(1) ' is not a valid sister cell'],'Not a valid sister cell','error');
+    msgbox([num2str(siblingTrack) ' is not a valid sister cell'],'Not a valid sister cell','error');
     return
 end
 if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' starts after ' answer(1)],'Not a valid daughter cell','error');
+    msgbox([num2str(trackID) ' starts after ' num2str(siblingTrack)],'Not a valid daughter cell','error');
     return
 end
 if(~isempty(Tracks.GetTimeOfDeath(siblingTrack)) && Tracks.GetTimeOfDeath(siblingTrack)<=time)

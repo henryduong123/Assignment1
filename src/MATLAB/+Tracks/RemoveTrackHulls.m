@@ -30,9 +30,15 @@ function droppedTracks = RemoveTrackHulls(trackID)
     
     Families.RemoveFromTree(trackID);
     
-    for i=1:length(CellTracks(trackID).hulls)
-        Segmentation.RemoveSegmentationEdit(hullID);
-        droppedTracks = [droppedTracks Hulls.RemoveHull(CellTracks(trackID).hulls{i})];
+    hulls = CellTracks(trackID).hulls;
+    
+    for i=1:length(hulls)
+        if ( hulls(i) == 0 )
+            continue;
+        end
+        
+        Segmentation.RemoveSegmentationEdit(hulls(i));
+        droppedTracks = [droppedTracks Hulls.RemoveHull(hulls(i))];
     end
     
     Families.ProcessNewborns();

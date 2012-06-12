@@ -219,7 +219,7 @@ function removeTrackPrevious(src,evnt)
         Error.ErrorHandling(['RemoveTrackHulls(' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
         return
     end
-    Error.LogAction(['Removed hulls from start of track ' num2str(trackID) ' to frame ' num2str(Figures.time)],hullIDs);
+    Error.LogAction(['Removed all hulls from track ' num2str(trackID)],[],[]);
     
     %if the whole family disapears with this change, pick a diffrent family to
     %display

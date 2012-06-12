@@ -35,7 +35,7 @@ trackID = Hulls.GetTrackID(hullID);
 
 if(isempty(trackID)),return,end
 
-droppedTracks = RemoveHullFromTrack(hullID, trackID);
+droppedTracks = Tracks.RemoveHullFromTrack(hullID);
 
 Hulls.ClearHull(hullID);
 end
