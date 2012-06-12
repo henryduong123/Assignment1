@@ -25,9 +25,11 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function curCellTrackID = NewCellTrack(familyID,cellHullID,t)
+function curCellTrackID = NewCellTrack(familyID,cellHullID)
 
-global CellTracks
+global CellTracks CellHulls
+
+time = CellHulls(cellHullID).time;
 
 curCellTrackID = 1;
 
@@ -38,8 +40,8 @@ if(isempty(CellTracks))
         'siblingTrack',     {[]},...
         'childrenTracks',   {[]},...
         'hulls',            {cellHullID},...
-        'startTime',        {t},...
-        'endTime',          {t},...
+        'startTime',        {time},...
+        'endTime',          {time},...
         'color',            {UI.GetNextColor()});
 else
     %get next celltrack ID
@@ -51,8 +53,8 @@ else
     CellTracks(curCellTrackID).siblingTrack = [];
     CellTracks(curCellTrackID).childrenTracks = [];
     CellTracks(curCellTrackID).hulls(1) = cellHullID;
-    CellTracks(curCellTrackID).startTime = t;
-    CellTracks(curCellTrackID).endTime = t;
+    CellTracks(curCellTrackID).startTime = time;
+    CellTracks(curCellTrackID).endTime = time;
     CellTracks(curCellTrackID).color = UI.GetNextColor();
 end
     

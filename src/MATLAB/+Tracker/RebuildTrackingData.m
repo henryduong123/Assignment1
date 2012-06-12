@@ -28,7 +28,7 @@ function RebuildTrackingData(objTracks, gConnect)
         reprocess = setdiff(1:length(CellHulls), hullList);
         for i=1:length(reprocess)
             UI.Progressbar(i/length(reprocess));
-            Families.NewCellFamily(reprocess(i), CellHulls(reprocess(i)).time);
+            Families.NewCellFamily(reprocess(i));
         end
     end
     UI.Progressbar(1);
@@ -51,7 +51,7 @@ function hullList = addToTrack(hullID, hullList, objTracks)
         return
     end
 
-    Families.NewCellFamily(hullID, CellHulls(hullID).time);
+    Families.NewCellFamily(hullID);
     hullList = [hullList hullID];
 
     nextHull = hullID;
@@ -66,7 +66,7 @@ function hullList = addToTrack(hullID, hullList, objTracks)
             Tracks.AddHullToTrack(nextHull,[],objTracks(nextHull).inID);
         else
             %this runs if there was an error in objTracks data structure
-            Families.NewCellFamily(hull,objTracks(hull).t);
+            Families.NewCellFamily(hull);
         end
         
         hullList = [hullList nextHull];

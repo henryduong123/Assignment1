@@ -74,7 +74,7 @@ for i=2:length(newHulls)
         CellFeatures(end+1) = newFeatures(i);
     end
     
-    newFamilyIDs = [newFamilyIDs Families.NewCellFamily(newID, newHulls(i).time)];
+    newFamilyIDs = [newFamilyIDs Families.NewCellFamily(newID)];
     newHullIDs = [newHullIDs newID];
 end
 

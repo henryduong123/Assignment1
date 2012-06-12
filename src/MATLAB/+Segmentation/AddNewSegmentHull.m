@@ -70,7 +70,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
         CellFeatures(newHullID) = newFeature;
     end
     
-    newFamilyIDs = Families.NewCellFamily(newHullID, newHull.time);
+    newFamilyIDs = Families.NewCellFamily(newHullID);
     
     newTrackID = Tracker.TrackAddedHulls(newHullID, oldTracks, newHull.centerOfMass);
 end

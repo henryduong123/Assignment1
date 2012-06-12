@@ -71,7 +71,7 @@ if (time == CellTracks(trackID).startTime)
     end
 else    
     %% Create a new family with the first hull
-    newFamilyID = Families.NewCellFamily(CellTracks(trackID).hulls(nzidx),time);
+    newFamilyID = Families.NewCellFamily(CellTracks(trackID).hulls(nzidx));
     CellTracks(trackID).hulls(nzidx) = 0;
     newTrackID = CellFamilies(newFamilyID).rootTrackID;
     droppedTracks = newTrackID;

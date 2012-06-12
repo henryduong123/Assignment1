@@ -26,33 +26,31 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function curFamilyID = NewCellFamily(cellHullID,t)
+function curFamilyID = NewCellFamily(cellHullID)
 
 global CellFamilies CellHulls
 
-if (~exist('t','var'))
-    t = CellHulls(cellHullID).time;
-end
+time = CellHulls(cellHullID).time;
 
 if(isempty(CellFamilies))
-    trackID = Tracks.NewCellTrack(1,cellHullID,t);
+    trackID = Tracks.NewCellTrack(1,cellHullID);
     CellFamilies = struct(...
         'rootTrackID',   {trackID},...
         'tracks',       {trackID},...
-        'startTime',    {t},...
-        'endTime',      {t});
+        'startTime',    {time},...
+        'endTime',      {time});
     
     curFamilyID = 1;
 else
     %get next family ID
     curFamilyID = length(CellFamilies) + 1;
-    trackID = Tracks.NewCellTrack(curFamilyID,cellHullID,t);
+    trackID = Tracks.NewCellTrack(curFamilyID,cellHullID);
     
     %setup defaults for family tree
     CellFamilies(curFamilyID).rootTrackID = trackID;
     CellFamilies(curFamilyID).tracks = trackID;
-    CellFamilies(curFamilyID).startTime = t;
-    CellFamilies(curFamilyID).endTime = t;
+    CellFamilies(curFamilyID).startTime = time;
+    CellFamilies(curFamilyID).endTime = time;
 end
 
 end

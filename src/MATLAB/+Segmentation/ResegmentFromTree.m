@@ -193,7 +193,7 @@ function newHullID = tryAddSegmentation(prevHull)
         CellFeatures(newHullID) = newFeature;
     end
     
-    newFamilyIDs = Families.NewCellFamily(newHullID, newHull.time);
+    newFamilyIDs = Families.NewCellFamily(newHullID);
 end
 
 function newHullIDs = trySplitSegmentation(hullID, k)
@@ -229,7 +229,7 @@ function newHullIDs = trySplitSegmentation(hullID, k)
     newFamilyIDs = [];
     for i=2:length(newHulls)
         CellHulls(end+1) = newHulls(i);
-        newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls), newHulls(i).time)];
+        newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls))];
         newHullIDs = [newHullIDs length(CellHulls)];
     end
     

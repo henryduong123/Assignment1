@@ -171,7 +171,7 @@ function [newHullIDs oldHull oldFeat] = splitNextFrame(hullID, k)
     newFamilyIDs = [];
     for i=2:length(newHulls)
         CellHulls(end+1) = newHulls(i);
-        newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls), newHulls(i).time)];
+        newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls))];
         newHullIDs = [newHullIDs length(CellHulls)];
     end
     

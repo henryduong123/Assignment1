@@ -118,7 +118,7 @@ if(length(hullList)~=length(CellHulls))
     for i=1:length(reprocess)
         progress = progress+1;
         UI.Progressbar(progress/iterations);
-        Families.NewCellFamily(reprocess(i),objHulls(reprocess(i)).t);
+        Families.NewCellFamily(reprocess(i));
     end
 end
 UI.Progressbar(1);%clear it out
@@ -180,7 +180,7 @@ if(any(ismember(hullList,hull)) || objHulls(hull).inID ~= 0)
     return
 end
 
-Families.NewCellFamily(hull,objHulls(hull).t);
+Families.NewCellFamily(hull);
 hullList = [hullList hull];
 
 while(objHulls(hull).outID~=0)
@@ -190,7 +190,7 @@ while(objHulls(hull).outID~=0)
         Tracks.AddHullToTrack(hull,[],objHulls(hull).inID);
     else
         %this runs if there was an error in objHulls data structure
-        Families.NewCellFamily(hull,objHulls(hull).t);
+        Families.NewCellFamily(hull);
     end
     hullList = [hullList hull];
 end
