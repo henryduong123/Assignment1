@@ -93,7 +93,7 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
             finalHull = endpaths{minidx}(j+1);
             linkupHull = extEnds(startHull,finalHull);
             
-            Tracker.AssignEdge(linkupHull, startHull);
+            Tracker.AssignEdge(startHull, linkupHull);
 %             extGraph(:,finalHull) = 0;
 %             extGraph(startHull,:) = 0;
             
