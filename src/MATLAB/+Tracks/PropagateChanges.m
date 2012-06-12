@@ -249,28 +249,13 @@ function revertSplit(t, hull, newHulls, oldHull, oldFeat)
     Tracker.BuildConnectedDistance(hull,1);
     
     CellHulls(hull) = oldHull;
+    CellHulls = CellHulls(leaveHulls);
     
     % Reset cell features if valid
     if ( ~isempty(CellFeatures) )
         CellFeatures(hull) = oldFeat;
+        CellFeatures = CellFeatures(leaveHulls);
     end
-    
-%     % Merge cells and remove split cells
-%     mergedIdxPix = vertcat(CellHulls(newHulls).indexPixels);
-%     mergedImgPix = vertcat(CellHulls(newHulls).imagePixels);
-%     
-%     [mergedIdxPix,srtIdx] = sort(mergedIdxPix);
-%     mergedImgPix = mergedImgPix(srtIdx);
-%     
-%     [r c] = ind2sub(CONSTANTS.imageSize, mergedIdxPix);
-%     chIdx = convhull(c,r);
-%     
-%     CellHulls(hull).indexPixels = mergedIdxPix;
-%     CellHulls(hull).imagePixels = mergedImgPix;
-%     CellHulls(hull).centerOfMass = mean([r c]);
-%     CellHulls(hull).points = [c(chIdx) r(chIdx)];
-%     
-%     CellHulls = CellHulls(leaveHulls);
 end
 
 function bFullLength = checkTrackLengths(hulls, minlength)
