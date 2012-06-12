@@ -180,13 +180,8 @@ try
     Hulls.RemoveHull(hullID);
     Editor.History('Push');
 catch errorMessage
-    try
-        Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
-        return
-    catch errorMessage2
-        fprintf('%s',errorMessage2.message);
-        return
-    end
+    Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+    return
 end
 
 Error.LogAction(['Removed hull from track ' num2str(trackID)],hullID);
@@ -221,13 +216,8 @@ function removeTrackPrevious(src,evnt)
         
         Editor.History('Push');
     catch errorMessage
-        try
-            Error.ErrorHandling(['RemoveTrackHulls(' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['RemoveTrackHulls(' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
+        return
     end
     Error.LogAction(['Removed hulls from start of track ' num2str(trackID) ' to frame ' num2str(Figures.time)],hullIDs);
     
@@ -306,13 +296,8 @@ if 1==i
             Tracks.SetPhenotype(hullID, i, bActive);
             Families.ProcessNewborns(Families.FindFamiliesAfter(trackID));
         catch errorMessage
-            try
-                Error.ErrorHandling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
-                return
-            catch errorMessage2
-                fprintf('%s',errorMessage2.message);
-                return
-            end
+            Error.ErrorHandling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
+            return
         end
         Error.LogAction(['Removed death for ' num2str(trackID)],[],[]);
     else
@@ -323,13 +308,8 @@ if 1==i
                 Tracks.SetPhenotype(hullID, i, bActive);
                 Families.ProcessNewborns();
             catch errorMessage
-                try
-                    Error.ErrorHandling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
-                    return
-                catch errorMessage2
-                    fprintf('%s',errorMessage2.message);
-                    return
-                end
+                Error.ErrorHandling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
+                return
             end
         else
             Tracks.SetPhenotype(hullID, i, bActive);

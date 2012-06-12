@@ -35,7 +35,7 @@ Load.AddConstant('minParentHistoryTimeFrame',5, 1);
 Load.AddConstant('minParentFuture',5, 1);
 Load.AddConstant('minFamilyTimeFrame',25, 1);
 Load.AddConstant('maxFrameDifference',1, 1);
-Load.AddConstant('historySize',50, 1);
+Load.AddConstant('historySize',10, 1);
 Load.AddConstant('clickMargin',500, 1);
 Load.AddConstant('timeResolution',10); %in frames per min
 Load.AddConstant('dMaxConnectComponent',40,1);

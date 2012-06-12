@@ -3,7 +3,7 @@
 % ChangeLog:
 % NLS 6/11/12 Created
 
-function FigureCellDown(src,evnt)
+function FigureCellDown(src,evnt, labelID)
     global Figures
 
     currentPoint = get(gca,'CurrentPoint');

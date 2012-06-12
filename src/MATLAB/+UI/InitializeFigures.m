@@ -369,13 +369,8 @@ function tryMergeSelectedCells()
         end
         Editor.History('Push');
     catch err
-        try
-            Error.ErrorHandling(['Merging Selected Cells -- ' err.message], err.stack);
-            return;
-        catch err2
-            fprintf('%s',err2.message);
-            return;
-        end
+        Error.ErrorHandling(['Merging Selected Cells -- ' err.message], err.stack);
+        return;
     end
     set(Figures.tree.handle,'Pointer','arrow');
     set(Figures.cells.handle,'Pointer','arrow');
@@ -401,13 +396,8 @@ function learnFromEdits(src,evnt)
         Tracks.PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
         Families.ProcessNewborns();
     catch err
-        try
-            Error.ErrorHandling(['Propagating segmentation changes -- ' err.message],err.stack);
-            return;
-        catch err2
-            fprintf('%s',err2.message);
-            return;
-        end
+        Error.ErrorHandling(['Propagating segmentation changes -- ' err.message],err.stack);
+        return;
     end
     
     SegmentationEdits.newHulls = [];

@@ -43,13 +43,8 @@ if (CellTracks(trackID).startTime==time)
         droppedTracks = Families.RemoveMitosis(trackID);
         Editor.History('Push');
     catch errorMessage
-        try
-            Error.ErrorHandling(['RemoveMitosis(' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['RemoveMitosis(' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
+        return
     end
 else
     try
@@ -57,13 +52,8 @@ else
         droppedTracks = Families.RemoveFromTree(trackID, time);
         Editor.History('Push');
     catch errorMessage
-        try
-            Error.ErrorHandling(['RemoveFromTree(' num2str(trackID) ' ' num2str(time) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['RemoveFromTree(' num2str(trackID) ' ' num2str(time) ') -- ' errorMessage.message],errorMessage.stack);
+        return
     end
 end
 

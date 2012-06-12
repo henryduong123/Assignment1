@@ -332,13 +332,8 @@ function treeInference(src, evt)
     try
         [iters totalTime] = Families.LinkFirstFrameTrees();
     catch err
-        try
-            Error.ErrorHandling(['Tree Inference Error -- ' err.message],err.stack);
-            return;
-        catch err2
-            fprintf('%s',err2.message);
-            return;
-        end
+        Error.ErrorHandling(['Tree Inference Error -- ' err.message],err.stack);
+        return;
     end
     
     Helper.RunGarbageCollect(currentHull);

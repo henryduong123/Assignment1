@@ -69,13 +69,8 @@ try
     droppedTracks = Families.AddMitosis(siblingTrack,trackID);
     Editor.History('Push');
 catch errorMessage
-    try
-        Error.ErrorHandling(['AddMitosis(' num2str(siblingTrack) ' ' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
-        return
-    catch errorMessage2
-        fprintf('%s',errorMessage2.message);
-        return
-    end
+    Error.ErrorHandling(['AddMitosis(' num2str(siblingTrack) ' ' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
+    return
 end
 
 Error.LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);

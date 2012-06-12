@@ -32,13 +32,8 @@ function DeleteSelectedCells()
         end
         Editor.History('Push');
     catch errorMessage
-        try
-            Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
+        return
     end
 
     Error.LogAction(['Removed selected cells [' num2str(Figures.cells.selectedHulls) ']'],Figures.cells.selectedHulls);

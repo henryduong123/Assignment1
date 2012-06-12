@@ -56,6 +56,6 @@ else
     CellTracks(curCellTrackID).color = UI.GetNextColor();
 end
     
-Hulls.AddHashedCell(t,cellHullID,curCellTrackID);
+Hulls.AddHashedCell(cellHullID,curCellTrackID);
 
 end

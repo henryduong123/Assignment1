@@ -24,14 +24,9 @@ if(currentHullID~=Figures.cells.downHullID)
         Tracks.SwapLabels(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
         Editor.History('Push')
     catch errorMessage
-        try
-            Error.ErrorHandling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Hulls.GetTrackID(currentHullID))...
-                ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s\n',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Hulls.GetTrackID(currentHullID))...
+            ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
+        return
     end
     
     Families.ProcessNewborns();

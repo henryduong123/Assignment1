@@ -93,5 +93,5 @@ CellTracks(trackID).hulls = [CellTracks(trackID).hulls hullID];
 
 %% Update
 Tracks.RehashCellTracks(trackID);
-Hulls.AddHashedCell(time,hullID,trackID);
+Hulls.AddHashedCell(hullID,trackID);
 end

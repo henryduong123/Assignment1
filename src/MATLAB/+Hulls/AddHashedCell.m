@@ -1,4 +1,5 @@
-% AddHashedCell.m - This will either add an entry to HashedHulls or update an entry based on
+% AddHashedCell(cellHullID,cellTrackID)
+% This will either add an entry to HashedHulls or update an entry based on
 % cellHullID
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,29 +25,31 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function AddHashedCell(t,cellHullID,cellTrackID)
+function AddHashedCell(cellHullID,cellTrackID)
 
-global HashedCells
+global HashedCells CellHulls
+
+time = CellHulls(cellHullID).time;
 
 if(isempty(HashedCells))
-    HashedCells{t}(1).hullID = cellHullID;
-    HashedCells{t}(1).trackID = cellTrackID;
+    HashedCells{time}(1).hullID = cellHullID;
+    HashedCells{time}(1).trackID = cellTrackID;
 else
-    if(t > length(HashedCells))
-        HashedCells{t}(1).hullID = cellHullID;
-        HashedCells{t}(1).trackID = cellTrackID;
+    if(time > length(HashedCells))
+        HashedCells{time}(1).hullID = cellHullID;
+        HashedCells{time}(1).trackID = cellTrackID;
     else
         %if the hullID exists update it, otherwise create the entry
-        if(t>length(HashedCells) || isempty(HashedCells{t}))
+        if(time>length(HashedCells) || isempty(HashedCells{time}))
             index = 1;
         else
-            index = find([HashedCells{t}(:).hullID] == cellHullID);
+            index = find([HashedCells{time}(:).hullID] == cellHullID);
             if(isempty(index))
-                index = length(HashedCells{t}) + 1;
+                index = length(HashedCells{time}) + 1;
             end
         end
-        HashedCells{t}(index).hullID = cellHullID;
-        HashedCells{t}(index).trackID = cellTrackID;
+        HashedCells{time}(index).hullID = cellHullID;
+        HashedCells{time}(index).trackID = cellTrackID;
     end
 end
 end

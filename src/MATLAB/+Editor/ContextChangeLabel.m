@@ -41,13 +41,8 @@ try
     Tracks.ChangeLabel(trackID,newTrackID,time);
     Editor.History('Push');
 catch errorMessage
-    try
-        Error.ErrorHandling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-        return
-    catch errorMessage2
-        fprintf('%s',errorMessage2.message);
-        return
-    end
+    Error.ErrorHandling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
+    return
 end
 
 Error.LogAction('ChangeLabel',trackID,newTrackID);

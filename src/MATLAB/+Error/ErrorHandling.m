@@ -39,33 +39,19 @@ Error.LogAction(errorMessage,0,0,errStack);
 set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
 
-try
-    Editor.History('Top');
-    outputDebutgErrorFile();
-    errors = mexIntegrityCheck();
-    msgbox('Database corrected. Your last action was undone, please try again. If change errors again, save the data file and then send it and the log to the code distributor.',...
-        'Database Correct','help','modal');
-catch errorMessage2
-    %let the user know that it is done
-    set(Figures.tree.handle,'Pointer','arrow');
-    set(Figures.cells.handle,'Pointer','arrow');
-    Editor.History('Top'); %reinstate the state prior to the change
-    fprintf('Orginal error:%s\nSecond error:%s\n',errorMessage,errorMessage2.message);
-    Error.LogAction(['Unable to fix database -- ' errorMessage2.message],0,0,errorMessage2.stack);
-    msgbox('Unable to fix database! Please save the data file and then send it and the log to the code distributor. Your last change did not take place!',...
-        'Database ERROR','error');
-    rethrow(errorMessage2)
+Editor.History('Top');
+Error.OutputDebugErrorFile();
+errors = mexIntegrityCheck();
+msgbox('Database corrected. Your last action was undone, please try again. If change errors again, save the data file and then send it and the log to the code distributor.',...
+    'Database Correct','help','modal');
+
+if (ishandle(msgboxHandle))
+    close(msgboxHandle);
 end
-close(msgboxHandle);
+
+UI.Progressbar(1);
 
 %let the user know that the drawing is done
 set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
-end
-
-function outputDebutgErrorFile()
-    global CONSTANTS Log
-    
-    errfile = [CONSTANTS.datasetName '_DBGERR_' num2str(length(Log)) '.mat'];
-    Helper.SaveLEVerState(errfile);
 end

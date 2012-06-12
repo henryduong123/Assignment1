@@ -44,29 +44,29 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
     end
 end
 
-%Remove any newly created parasite tracks from tree
-for i=1:length(families)
-    familyID = families(i);
-    for j=1:length(CellFamilies(familyID).tracks)
-        trackID = CellFamilies(familyID).tracks(j);
-        if ( Tracker.GetTrackSegScore(trackID) >= CONSTANTS.minTrackScore || isempty(CellTracks(trackID).parentTrack) )
-            continue;
-        end
-        
-        parentHullID = Tracks.GetHullID(CellTracks(trackID).startTime-1, CellTracks(trackID).parentTrack);
-        childHullID = Tracks.GetHullID(CellTracks(trackID).startTime, trackID);
-        
-        if ( isempty(parentHullID) || GraphEdits(parentHullID,childHullID) > 0 )
-            continue;
-        end
-        
-        if (~isempty(CellTracks(trackID).childrenTracks))
-            Families.RemoveFromTree(CellTracks(trackID).childrenTracks(1));
-        end
-
-        Families.RemoveMitosis(trackID);
-    end
-end
+% %Remove any newly created parasite tracks from tree
+% for i=1:length(families)
+%     familyID = families(i);
+%     for j=1:length(CellFamilies(familyID).tracks)
+%         trackID = CellFamilies(familyID).tracks(j);
+%         if ( Tracker.GetTrackSegScore(trackID) >= CONSTANTS.minTrackScore || isempty(CellTracks(trackID).parentTrack) )
+%             continue;
+%         end
+%         
+%         parentHullID = Tracks.GetHullID(CellTracks(trackID).startTime-1, CellTracks(trackID).parentTrack);
+%         childHullID = Tracks.GetHullID(CellTracks(trackID).startTime, trackID);
+%         
+%         if ( isempty(parentHullID) || GraphEdits(parentHullID,childHullID) > 0 )
+%             continue;
+%         end
+%         
+%         if (~isempty(CellTracks(trackID).childrenTracks))
+%             Families.RemoveFromTree(CellTracks(trackID).childrenTracks(1));
+%         end
+% 
+%         Families.RemoveMitosis(trackID);
+%     end
+% end
 
 costMatrix = Tracker.GetCostMatrix();
 
@@ -150,13 +150,8 @@ for i=1:size
     parentTrackID = Hulls.GetTrackID(parentHullID);
     
     if(isempty(parentTrackID))
-        try
-            Error.ErrorHandling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2);
-            return
-        end
+        Error.ErrorHandling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
+        return
     end
     
     % If the parent future is long enough create a mitosis

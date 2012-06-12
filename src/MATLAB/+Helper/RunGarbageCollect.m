@@ -6,13 +6,8 @@ function RunGarbageCollect(currentHull)
     try
         Helper.SweepDeleted();
     catch err
-        try
-            Error.ErrorHandling(['Garbage Collection -- ' err.message], err.stack);
-            return;
-        catch err2
-            fprintf('%s',err2.message);
-            return;
-        end
+        Error.ErrorHandling(['Garbage Collection -- ' err.message], err.stack);
+        return;
     end
     
     currentTrackID = Hulls.GetTrackID(currentHull);

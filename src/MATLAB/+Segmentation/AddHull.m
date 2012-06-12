@@ -50,13 +50,8 @@ if(~isempty(trackID))
             end
             Editor.History('Push');
         catch errorMessage
-            try
-                Error.ErrorHandling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
-                return
-            catch errorMessage2
-                 fprintf('%s',errorMessage2.message);
-                return
-            end
+            Error.ErrorHandling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
+            return
         end
         Error.LogAction('Split cell',trackID,[trackID newTracks]);
     end
@@ -67,13 +62,8 @@ elseif ( num<2 )
         newTrack = Segmentation.AddNewSegmentHull(clickPt(1,1:2));
         Editor.History('Push');
     catch errorMessage
-        try
-            Error.ErrorHandling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
-            return
-        catch errorMessage2
-            fprintf('%s',errorMessage2.message);
-            return
-        end
+        Error.ErrorHandling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
+        return
     end
     Error.LogAction('Added cell',newTrack);
 else
