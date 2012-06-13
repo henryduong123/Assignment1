@@ -71,6 +71,8 @@ set(Figures.cells.handle,...
 
 addlistener(Figures.cells.handle, 'WindowKeyRelease', @figureKeyRelease);
     Figures.tree.movingMitosis = [];
+    
+Figures.cells.showInterior = false;
 
 Figures.cells.timeLabel = uicontrol(Figures.cells.handle,...
     'Style','text',...
@@ -180,6 +182,9 @@ elseif strcmp(evnt.Key,'space')
      end
 elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
     DeleteSelectedCells();
+elseif (strcmp(evnt.Key,'f12'))
+    Figures.cells.showInterior = ~Figures.cells.showInterior;
+    DrawCells();
 elseif ( strcmp(evnt.Key,'return') )
     tryMergeSelectedCells();
 end

@@ -143,7 +143,11 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if ( ~checkCOMLims(curHullID, xl, yl) )
             continue;
         end
-            
+          
+if(Figures.cells.showInterior)        
+        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
+        plot(curAx, c, r, '.', 'Color',edgeColor);
+end
         %draw outline
         plot(curAx, CellHulls(curHullID).points(:,1),...
             CellHulls(curHullID).points(:,2),...
