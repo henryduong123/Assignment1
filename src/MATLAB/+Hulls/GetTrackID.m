@@ -34,6 +34,9 @@ for i=1:length(hullIDs)
         continue
     else
         hullTime = CellHulls(hullIDs(i)).time;
+        if (isempty(hullTime))
+            error('Trying to get the track of an empty hull %d',hullIDs(i));
+        end
         hashedCellIndex = [HashedCells{hullTime}.hullID] == hullIDs(i);
         if(~any(hashedCellIndex)),continue,end
         trackIDs = [trackIDs HashedCells{hullTime}(hashedCellIndex).trackID];

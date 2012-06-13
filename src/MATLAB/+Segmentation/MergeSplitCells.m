@@ -92,12 +92,17 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
     
     propHulls = getPropagationCells(tStart+1, nextMergeCells);
     
+    UI.Progressbar(0);
+    
     idx = 1;
     tLast = tStart;
     for t=tStart:tEnd
         tLast = t;
         
+        UI.Progressbar((t-tStart) / (tEnd-tStart));
+        
         if ( isempty(mergedHull) )
+            UI.Progressbar(1);
             return;
         end
         
@@ -116,6 +121,7 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
         [mincost,mergeIdx] = min(costMatrix(bMhIdx,:));
         
         if ( isempty(mincost) || isinf(mincost) )
+            UI.Progressbar(1);
             return;
         end
         
@@ -137,6 +143,8 @@ function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
 
         trackHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, mergedHull);
     end
+    
+    UI.Progressbar(1);
 end
 
 function nextMergeCells = getNextMergeCells(t, mergeCells)

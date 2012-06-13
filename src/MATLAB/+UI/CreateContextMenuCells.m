@@ -177,6 +177,7 @@ global Figures CellFamilies
 if(isempty(trackID)),return,end
 
 try
+    Segmentation.RemoveSegmentationEdit(hullID);
     Hulls.RemoveHull(hullID);
     Editor.History('Push');
 catch errorMessage

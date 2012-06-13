@@ -28,6 +28,7 @@ function DeleteSelectedCells()
     
     try
         for i=1:length(Figures.cells.selectedHulls)
+            Segmentation.RemoveSegmentationEdit(Figures.cells.selectedHulls(i));
             Hulls.RemoveHull(Figures.cells.selectedHulls(i));
         end
         Editor.History('Push');

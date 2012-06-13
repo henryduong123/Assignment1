@@ -196,10 +196,6 @@ function figureKeyRelease(src,evnt)
         Figures.controlDown = 0;
 end
 
-
-
-
-
 function figureTreeDown(src,evnt)
     global Figures indicatorMotionListener indicatorMouseUpListener;
 
@@ -363,12 +359,8 @@ function tryMergeSelectedCells()
     global Figures
     
     try
-        set(Figures.tree.handle,'Pointer','watch');
-        set(Figures.cells.handle,'Pointer','watch');
         [deleteCells replaceCell] = Segmentation.MergeSplitCells(Figures.cells.selectedHulls);
         if ( isempty(replaceCell) )
-            set(Figures.tree.handle,'Pointer','arrow');
-            set(Figures.cells.handle,'Pointer','arrow');
             msgbox(['Unable to merge [' num2str(Figures.cells.selectedHulls) '] in this frame'],'Unable to Merge','help','modal');
             return;
         end
@@ -377,8 +369,6 @@ function tryMergeSelectedCells()
         Error.ErrorHandling(['Merging Selected Cells -- ' err.message], err.stack);
         return;
     end
-    set(Figures.tree.handle,'Pointer','arrow');
-    set(Figures.cells.handle,'Pointer','arrow');
 
     UI.DrawCells();
     UI.DrawTree(Figures.tree.familyID);
