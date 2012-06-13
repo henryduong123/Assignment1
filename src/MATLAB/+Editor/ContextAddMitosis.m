@@ -68,6 +68,7 @@ end
 
 Error.LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
 
+Figures.tree.familyID = CellTracks(trackID).familyID;
 UI.DrawTree(Figures.tree.familyID);
 UI.DrawCells();
 end
