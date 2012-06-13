@@ -67,8 +67,8 @@ if (time == CellTracks(trackID).startTime)
         CellTracks(CellTracks(trackID).siblingTrack).siblingTrack = [];
         droppedTracks = CellTracks(trackID).siblingTrack;
         CellTracks(trackID).siblingTrack = [];
-        droppedTracks = [droppedTracks trackID];
     end
+    droppedTracks = [droppedTracks trackID];
 else    
     %% Create a new family with the first hull
     newFamilyID = Families.NewCellFamily(CellTracks(trackID).hulls(nzidx));
