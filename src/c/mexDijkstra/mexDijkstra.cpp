@@ -53,6 +53,7 @@ const mxArray* gCellHulls;
 const mxArray* gCellTracks;
 const mxArray* gCellFamilies;
 const mxArray* gHashHulls;
+const mxArray* gGraphEdits;
 
 // Helpers
 //typedef std::pair<mwIndex,mwIndex> tPriorityEdge;
@@ -133,6 +134,7 @@ bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, const
 		if ( hullTime != startTime )
 			return false;
 
+		// TODO: Do we need to deal with GraphEdit "removed edges" here?
 		// Valid if track has no parent
 		mxArray* parentTrack = mxGetField(gCellTracks, MATLAB_IDX(trackID), "parentTrack");
 		if ( mxGetNumberOfElements(parentTrack) < 1 )
@@ -148,9 +150,30 @@ bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, const
 		int childHullID = ((int) mxGetScalar(mxGetField(gCellTracks, MATLAB_IDX(childTrackID), "hulls")));
 		int parentHullID = findEndHull(parentTrackID);
 
-		// Valid if not primary tree-edge
+		// TODO: Due to the nature of GraphEdits use in GetCostMatrix this could have odd effects on inference.
+		// Valid if not primary tree-edge and not a graph-edited mitosis event
 		if ( gCostGraph->findEdge(parentHullID, childHullID) < gCostGraph->findEdge(parentHullID, endVert) )
+		{
+			mwIndex* graphEditsCIdx = mxGetJc(gGraphEdits);
+			mwIndex* graphEditsRIdx = mxGetIr(gGraphEdits);
+			double* graphEditsVal = mxGetPr(gGraphEdits);
+
+			int numChildEdits = graphEditsCIdx[MATLAB_IDX(childHullID)+1] - graphEditsCIdx[MATLAB_IDX(childHullID)];
+			if ( numChildEdits == 0 )
+				return true;
+
+			// Check for any positive values in GraphEdits incoming for this child, if there are any
+			// then reject this hull as a possible extension
+			mwIndex editStartIdx = graphEditsCIdx[MATLAB_IDX(childHullID)];
+			for ( int i=0; i < numChildEdits; ++i )
+			{
+				//TODO: Maybe check actual parent-child connection?
+				if ( (graphEditsVal[editStartIdx+i] > 0.0) )
+					return false;
+			}
+
 			return true;
+		}
 
 		return false;
 	}
@@ -361,6 +384,7 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
 	gCellFamilies = mexGetVariablePtr("global", "CellFamilies");
 	gHashHulls = mexGetVariablePtr("global", "HashedCells");
+	gGraphEdits = mexGetVariablePtr("global", "GraphEdits");
 
 	//
 	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
@@ -405,6 +429,7 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
 	gCellFamilies = mexGetVariablePtr("global", "CellFamilies");
 	gHashHulls = mexGetVariablePtr("global", "HashedCells");
+	gGraphEdits = mexGetVariablePtr("global", "GraphEdits");
 
 	//
 	mwIndex startVert = ((mwIndex) mxGetScalar(prhs[1]));
