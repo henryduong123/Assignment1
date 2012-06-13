@@ -31,7 +31,7 @@ global Figures softwareVersion
 %open
 if(~isempty(Figures))
     saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    History('Push');
+    Editor.History('Push');
     if(~saveEnabled)
         set(Figures.cells.menuHandles.saveMenu,'Enable','off');
     end
@@ -39,13 +39,13 @@ end
 
 softwareVersion = '6.2 Adult';
 
-if(OpenData())
-    InitializeFigures();
-    History('Init');
+if(Load.OpenData())
+    UI.InitializeFigures();
+    Editor.History('Init');
 elseif(~isempty(Figures))
-    History('Top');
-    DrawTree(Figures.tree.familyID);
-    DrawCells();
+    Editor.History('Top');
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
 end
 
 end

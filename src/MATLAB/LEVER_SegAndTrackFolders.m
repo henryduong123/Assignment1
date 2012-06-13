@@ -13,8 +13,8 @@ CONSTANTS=[];
 
 softwareVersion = '6.1 Adult';
 
-InitializeConstants();
-UpdateFileVersionString(softwareVersion);
+Load.InitializeConstants();
+Load.UpdateFileVersionString(softwareVersion);
 
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if(~directory_name),return,end
@@ -63,21 +63,21 @@ for dd=1:length(dlist)
     CONSTANTS.imageAlpha=1.5;
     %get image significant digits
     firstimfile = fileList(1).name;
-    CONSTANTS.imageSignificantDigits = GetImageSigDigits(firstimfile);
+    CONSTANTS.imageSignificantDigits = Helper.ParseImageName(firstimfile);
     if ( CONSTANTS.imageSignificantDigits == 0 )
         fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n',CONSTANTS.datasetName);
         continue;
     end
     
-    [errStatus tSeg tTrack] = SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
     if ( errStatus ~= 0 )
         fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n',CONSTANTS.datasetName);
         continue;
     end
     
-    SaveData(1);
+    UI.SaveData(1);
 
-    LogAction('Segmentation time - Tracking time',tSeg,tTrack);
+    Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end %dd
 
 clear global;

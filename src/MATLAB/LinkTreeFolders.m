@@ -25,25 +25,25 @@ function LinkTreeFolders(dataRootPath, pushSubdir)
         clear global;
         load(fullfile(dataRootPath,flist(i).name));
         CONSTANTS.matFullFile = fullfile(pushedPath,pushedFilename);
-        SaveLEVerState(CONSTANTS.matFullFile);
+        Helper.SaveLEVerState(CONSTANTS.matFullFile);
         
         try
-            [iters totalTime] = LinkFirstFrameTrees();
-            LogAction('Completed Tree Inference', [iters totalTime],[]);
+            [iters totalTime] = Families.LinkFirstFrameTrees();
+            Error.LogAction('Completed Tree Inference', [iters totalTime],[]);
             
-            ResegRetrackLink();
+            Segmentation.ResegRetrackLink();
         catch excp
             if ( exist(fullfile(pushedPath,pushedFilename), 'file') )
                 delete(fullfile(pushedPath,pushedFilename));
             end
             
             errlog = fopen([CONSTANTS.datasetName '_push_error.log'], 'w');
-            PrintException(errlog,excp);
+            Error.PrintException(errlog,excp);
             fclose(errlog);
             
-            Progressbar(1);
+            UI.Progressbar(1);
             continue;
         end
-        SaveLEVerState(CONSTANTS.matFullFile);
+        Helper.SaveLEVerState(CONSTANTS.matFullFile);
     end
 end

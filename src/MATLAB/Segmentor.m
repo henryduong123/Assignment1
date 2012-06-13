@@ -48,7 +48,7 @@ try
     numImages = tEnd/tStep;
 
     for t = tStart:tStep:tEnd
-        frameT = SignificantDigits(t,imageSignificantDigits);
+        frameT = Helper.GetDigitString(t,imageSignificantDigits);
         fname=fullfile(rootImageFolder, [datasetName '_t' frameT '.TIF']);
         if(isempty(dir(fname)))
             continue;
@@ -58,7 +58,7 @@ try
 
         [im map]=imread(fname);
 
-        [frmObjs frmFeatures frmLevels] = FrameSegmentor(im, t, imageAlpha);
+        [frmObjs frmFeatures frmLevels] = Segmentation.FrameSegmentor(im, t, imageAlpha);
         objs = [objs frmObjs];
         features = [features frmFeatures];
         levels = [levels frmLevels];
@@ -69,7 +69,7 @@ catch excp
     errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
     fid = fopen(errFilename, 'w');
     fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame %d\n',cltime(4),cltime(5),cltime(6), t);
-    PrintException(fid, excp);
+    Error.PrintException(fid, excp);
     fclose(fid);
     return;
 end

@@ -57,3 +57,4 @@ src/MATLAB/filmstrip/*.*
 src/MATLAB/*.csv
 src/MATLAB/filmstrip/*/*
 src/MATLAB/*.exe
+bin64/*.exe
