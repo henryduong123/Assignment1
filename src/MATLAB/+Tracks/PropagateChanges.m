@@ -36,17 +36,28 @@ function tStart = PropagateChanges(changedHulls, editedHulls)
     for t=tStart:(length(HashedCells)-1)
         tChangedHulls = intersect([HashedCells{t}.hullID],changedHulls);
         trackHulls = union(trackHulls,tChangedHulls);
+        
+        checkHulls = [HashedCells{t}.hullID];
+        nextHulls = [HashedCells{t+1}.hullID];
+        checkTracks = Hulls.GetTrackID(checkHulls);
+        
+%         % Add in any current frame hulls which are on the track which
+%         % contains edits
+%         bPastEdit = (t >= [CellHulls(editedHulls).time]);
+%         editedTracks = Hulls.GetTrackID(editedHulls(bPastEdit));
+%         trackHulls = union(trackHulls, checkHulls(ismember(checkTracks, editedTracks)));
+        
+        % Update next-frame tracking costs
+        Tracker.UpdateTrackingCosts(t, checkHulls, nextHulls);
+        
         if ( isempty(trackHulls) )
             UI.Progressbar(1);
             return;
         end
         
         UI.Progressbar((t-tStart)/(tEnd-tStart));
-        
-        checkHulls = [HashedCells{t}.hullID];
-        nextHulls = [HashedCells{t+1}.hullID];
 
-        Tracker.UpdateTrackingCosts(t, trackHulls, nextHulls);
+%         Tracker.UpdateTrackingCosts(t, trackHulls, nextHulls);
         
         [checkHulls,nextHulls] = Tracker.CheckGraphEdits(1, checkHulls, nextHulls);
 

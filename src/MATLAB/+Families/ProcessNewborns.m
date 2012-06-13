@@ -44,6 +44,8 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
     end
 end
 
+Tracker.PatchMatchedTracks();
+
 % %Remove any newly created parasite tracks from tree
 % for i=1:length(families)
 %     familyID = families(i);
