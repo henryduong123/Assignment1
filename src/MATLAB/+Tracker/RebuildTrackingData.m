@@ -1,5 +1,5 @@
 function RebuildTrackingData(objTracks, gConnect)
-    global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells
+    global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
 
     %ensure that the globals are empty
     Costs = gConnect;
@@ -8,6 +8,8 @@ function RebuildTrackingData(objTracks, gConnect)
     CellFamilies = [];
     CellTracks = [];
     HashedCells = [];
+    
+    CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
     
     hullList = [];
     for i=length(objTracks):-1:1
@@ -33,10 +35,13 @@ function RebuildTrackingData(objTracks, gConnect)
     end
     UI.Progressbar(1);
     
+    Load.InitializeCachedCosts(1);
+    
     errors = mexIntegrityCheck();
     if ( ~isempty(errors) )
         Dev.PrintIntegrityErrors(errors);
     end
+
 
     %create the family trees
     Families.ProcessNewborns();

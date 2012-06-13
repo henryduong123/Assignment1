@@ -10,7 +10,9 @@ function ExternalRetrack()
     [dump idxmap] = sort(srtidx);
     
     CellHulls = CellHulls(srtidx);
-    CellFeatures = CellFeatures(srtidx);
+    if (~isempty(CellFeatures))
+        CellFeatures = CellFeatures(srtidx);
+    end
     
 %     newConnectedDist = ConnectedDist(srtidx);
 %     for i=1:length(newConnectedDist)

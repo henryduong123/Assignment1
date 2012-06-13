@@ -25,7 +25,7 @@
 
 function LEVer()
 
-global Figures softwareVersion
+global Figures softwareVersion CONSTANTS
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
@@ -38,6 +38,7 @@ if(~isempty(Figures))
 end
 
 softwareVersion = '6.2 Adult';
+CONSTANTS.cellType = 'Hemato';
 
 if(Load.OpenData())
     UI.InitializeFigures();

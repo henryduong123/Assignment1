@@ -26,6 +26,9 @@
 
 function errStatus = SegAndTrack()
     global CONSTANTS
+    
+    tSeg = 0;
+    tTrack = 0;
 
     % Modified 
     errStatus = 1;
@@ -52,9 +55,13 @@ function errStatus = SegAndTrack()
         numProcessors = 4;
     end
     
-    
-    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.imageDatasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-    
+    if (strcmp(CONSTANTS.cellType,'Hemato'))
+        Segmentation.HematoSegmentation(1.0);
+        Tracker.ExternalRetrack();
+        errStatus = 0;
+    else
+        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.imageDatasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+    end
     if ( errStatus > 0 )
         return;
     end
