@@ -19,8 +19,8 @@ previousTrackID = Hulls.GetTrackID(Figures.cells.downHullID);
 
 if(currentHullID~=Figures.cells.downHullID)
     try
-        Tracker.GraphEditSetEdge(Figures.time,Hulls.GetTrackID(currentHullID),previousTrackID);
-        Tracker.GraphEditSetEdge(Figures.time,previousTrackID,Hulls.GetTrackID(currentHullID));
+        Tracker.GraphEditSetEdge(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
+        Tracker.GraphEditSetEdge(previousTrackID,Hulls.GetTrackID(currentHullID),Figures.time);
         Tracks.SwapLabels(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
         Editor.History('Push')
     catch errorMessage

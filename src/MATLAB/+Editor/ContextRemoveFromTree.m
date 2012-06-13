@@ -38,7 +38,7 @@ end
 oldParent = CellTracks(trackID).parentTrack;
 
 try
-    Tracker.GraphEditRemoveEdge(time, trackID, trackID);
+    Tracker.GraphEditRemoveEdge(trackID, time);
     droppedTracks = Families.RemoveFromTree(trackID, time);
     Editor.History('Push');
 catch errorMessage

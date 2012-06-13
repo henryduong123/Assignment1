@@ -1,5 +1,7 @@
-% GraphEditRemoveEdge.m - Add edges to GraphEdits structure for a user
-% removal of a tracking edge.
+% GraphEditRemoveEdge(trackID, time)
+% Add (-1) edges to GraphEdits structure for a user removal of a tracked
+% edge, places a -1 on all edges for the given tree, this avoids mitosis
+% "jumping" from one track to another on the same tree
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -24,62 +26,24 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function GraphEditRemoveEdge(time, parentTrackID, trackID)
-    global CellTracks GraphEdits
+function GraphEditRemoveEdge(trackID, time)
+    global CellTracks CellFamilies GraphEdits
     
-    parentHull = getNearestPrevHull(time-1, parentTrackID);
-    nextHull = getNearestNextHull(time, trackID);
+    nextHull = Helper.GetNearestTrackHull(trackID, time, 1);
     
-    if ( parentHull == 0 && ~isempty(CellTracks(parentTrackID).parentTrack) )
-        parentTrackID = CellTracks(parentTrackID).parentTrack;
-        parentHull = getNearestPrevHull(time-1, parentTrackID);
+    possibleFamilyParents = [];
+    familyID = CellTracks(trackID).familyID;
+    for i=1:length(CellFamilies(familyID).tracks)
+        checkTrack = CellFamilies(familyID).tracks(i);
+        possibleFamilyParents = [possibleFamilyParents Helper.GetNearestTrackHull(checkTrack, time-1, -1)];
     end
     
-    if ( parentHull == 0 || nextHull == 0 )
+    if ( nextHull == 0 )
         return;
     end
     
-    GraphEdits(parentHull,nextHull) = -1;
-end
-
-function hull = getNearestPrevHull(time, trackID)
-    global CellTracks
-    
-    hull = 0;
-    
-    hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(1:hash),1,'last');
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
-    end
-end
-
-function hull = getNearestNextHull(time, trackID)
-	global CellTracks
-    
-    hull = 0;
-    
-    hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(hash:end),1,'first');
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
+    nzParentHulls = possibleFamilyParents(possibleFamilyParents > 0);
+    for i=1:length(nzParentHulls)
+        GraphEdits(nzParentHulls(i),nextHull) = -1;
     end
 end

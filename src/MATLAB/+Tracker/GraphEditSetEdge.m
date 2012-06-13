@@ -1,4 +1,5 @@
-% GraphEditSetEdge.m - Set an edit in GraphEdits structure.
+% GraphEditSetEdge(trackID, nextTrackID, time)
+% Set an edge edit in GraphEdits structure.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,11 +24,11 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function GraphEditSetEdge(time, trackID, nextTrackID)
+function GraphEditSetEdge(trackID, nextTrackID, time)
     global GraphEdits
     
-    trackHull = getNearestPrevHull(time-1, trackID);
-    nextHull = getNearestNextHull(time, nextTrackID);
+    trackHull = Helper.GetNearestTrackHull(trackID, time-1, -1);
+    nextHull = Helper.GetNearestTrackHull(nextTrackID, time, 1);
     
     if ( trackHull == 0 || nextHull == 0 )
         return;
@@ -37,54 +38,4 @@ function GraphEditSetEdge(time, trackID, nextTrackID)
     GraphEdits(:,nextHull) = 0;
     
     GraphEdits(trackHull,nextHull) = 1;
-end
-
-function hull = getNearestPrevHull(time, trackID)
-    global CellTracks
-    
-    hull = 0;
-    
-    hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash < 1 )
-        return;
-    end
-    
-    if ( hash > length(CellTracks(trackID).hulls) )
-        hash = length(CellTracks(trackID).hulls);
-    end
-    
-    hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(1:hash),1,'last');
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
-    end
-end
-
-function hull = getNearestNextHull(time, trackID)
-	global CellTracks
-    
-    hull = 0;
-    
-    hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    if ( hash < 1 )
-        
-    end
-    
-    hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        hidx = find(CellTracks(trackID).hulls(hash:end),1,'first');
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
-    end
 end
