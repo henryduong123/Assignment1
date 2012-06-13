@@ -26,13 +26,6 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
-% the sibling should be the track with the least history
-if(time-CellTracks(trackID).startTime<time-CellTracks(siblingTrack).startTime)
-    temp = trackID;
-    trackID = siblingTrack;
-    siblingTrack = temp;
-end
-
 % if the sibling has history get rid of it
 if (CellTracks(siblingTrack).startTime<time)
     siblingTrack = Families.RemoveFromTreePrune(siblingTrack,time);

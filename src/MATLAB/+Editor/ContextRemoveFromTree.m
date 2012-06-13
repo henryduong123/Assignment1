@@ -31,10 +31,6 @@ if (~exist('time','var'))
     time = CellTracks(trackID).startTime;
 end
 
-if (isempty(CellTracks(trackID).parentTrack))
-    return;
-end
-
 oldParent = CellTracks(trackID).parentTrack;
 
 try

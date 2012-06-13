@@ -124,15 +124,15 @@ end
 function addMitosis(src,evnt)
 global Figures
 
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
+[hullID siblingTrack] = UI.GetClosestCell(0);
+if(isempty(siblingTrack)),return,end
 
-answer = inputdlg({['Enter new sister of cell' num2str(trackID)]},...
+answer = inputdlg({['Add ' num2str(siblingTrack) ' as a sibling to:']},...
     'Add Mitosis',1,{''});
 
 if(isempty(answer)),return,end
 
-siblingTrack = str2double(answer(1));
+trackID = str2double(answer(1));
 time = Figures.time;
 
 Editor.ContextAddMitosis(trackID,siblingTrack,time);

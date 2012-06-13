@@ -26,6 +26,11 @@
 function DrawTree(familyID)
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
+
+if ( isempty(familyID) )
+    Families.FindLargestTree();
+    return;
+end
    
 phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
 phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
