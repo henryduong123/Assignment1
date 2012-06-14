@@ -3,7 +3,7 @@
 
 function PrintIntegrityErrors(errs, filename)
 
-    if ( isempty(errs) == 0 )
+    if ( isempty(errs) )
         return;
     end
 
@@ -14,7 +14,7 @@ function PrintIntegrityErrors(errs, filename)
     end
     
     for i=1:length(errs)
-        fprintf('%s(%d) - %s\n', errs(i).type, errs(i).index, errs(i).message);
+        fprintf(fid, '%s(%d) - %s\n', errs(i).type, errs(i).index, errs(i).message);
     end
     
 end

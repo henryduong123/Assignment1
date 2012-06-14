@@ -65,7 +65,12 @@ for dd=1:length(dlist)
     firstimfile = fileList(1).name;
     CONSTANTS.imageSignificantDigits = Helper.ParseImageName(firstimfile);
     if ( CONSTANTS.imageSignificantDigits == 0 )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n',CONSTANTS.datasetName);
+        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n',CONSTANTS.datasetName);
+        continue;
+    end
+    
+    if ( ~strcmpi(firstimfile, [CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF']) )
+        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n',CONSTANTS.datasetName);
         continue;
     end
     
