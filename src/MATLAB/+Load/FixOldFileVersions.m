@@ -36,7 +36,7 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
     
     % Find Segmentation levels per-frame for use in feature extraction
     if ( isempty(SegLevels) )
-        FindSegLevels();
+        Load.FindSegLevels();
         bNeedsUpdate = 1;
     end
     

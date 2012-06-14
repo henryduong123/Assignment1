@@ -1,7 +1,7 @@
 function RewriteSegData(DatasetDir, DatasetName)
 global CONSTANTS CellHulls ConnectedDist
 
-% fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' SignificantDigits(1) '.TIF'];
+% fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF'];
 % [im map]=imread(fname);
 % if isempty(im)
 %     fprintf('error - unable to extract image size - tracking will fail\n');

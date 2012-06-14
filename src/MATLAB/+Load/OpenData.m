@@ -126,7 +126,7 @@ end
 %     index = strfind(imageFile,'t');
 %     CONSTANTS.rootImageFolder = [settings.imagePath '\'];
 %     imageDataset = imageFile(1:(index(length(index))-2));
-%     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' SignificantDigits(t) '.TIF'];
+%     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' Helper.GetDigitString(t) '.TIF'];
 % end
 
 answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');

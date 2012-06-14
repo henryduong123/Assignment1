@@ -111,7 +111,7 @@ polyidx = Segmentation.AssignPolyPix(feature.polyPix, connComps, CONSTANTS.image
 % [dump,polyidx] = min(polydist,[],2);
 
 % % Debug test draw code
-% fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.SignificantDigits(hull.time) '.TIF'];
+% fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(hull.time) '.TIF'];
 % if exist(fileName,'file')
 %     [img colrMap] = imread(fileName);
 % else
