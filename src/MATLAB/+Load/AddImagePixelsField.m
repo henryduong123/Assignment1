@@ -44,8 +44,7 @@ function AddImagePixelsField()
         progress = progress+1;
         UI.Progressbar(progress/iterations);
         imgfname = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
-        [curimg map]=imread(imgfname);
-        curimg=mat2gray(curimg);
+        curimg = Helper.LoadIntensityImage(imgfname);
 
         hullIdx = [HashedCells{t}.hullID];
         for i=1:length(hullIdx)

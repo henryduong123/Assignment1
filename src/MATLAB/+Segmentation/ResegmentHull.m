@@ -113,11 +113,10 @@ polyidx = Segmentation.AssignPolyPix(feature.polyPix, connComps, CONSTANTS.image
 % % Debug test draw code
 % fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(hull.time) '.TIF'];
 % if exist(fileName,'file')
-%     [img colrMap] = imread(fileName);
+%     im = Helper.LoadIntensityImage(fileName);
 % else
-%     img=zeros(CONSTANTS.imageSize);
+%     im=zeros(CONSTANTS.imageSize);
 % end
-% im = mat2gray(img);
 % cmap = hsv(2*k);
 % figure;imagesc(im);colormap(gray);hold on;
 % for i=1:k

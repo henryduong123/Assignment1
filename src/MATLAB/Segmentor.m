@@ -56,7 +56,7 @@ try
 
         fprintf('%d%%...',floor(floor(t/tStep)/numImages*100));
 
-        [im map]=imread(fname);
+        im = Helper.LoadIntensityImage(fname);
 
         [frmObjs frmFeatures frmLevels] = Segmentation.FrameSegmentor(im, t, imageAlpha);
         objs = [objs frmObjs];

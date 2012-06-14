@@ -32,11 +32,10 @@ global CONSTANTS
 th=max([objsSegment.t]);
 
 fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF'];
-[im map]=imread(fname);
+im = Helper.LoadIntensityImage(fname);
 HashedHulls=cell(th,1);
 
 for n=1:length(objsSegment)
-    objsSegment(n).imSize=size(im);
     objsSegment(n).DarkConnectedHulls=[];
     [r c]=ind2sub(objsSegment(n).imSize,objsSegment(n).indPixels);
     objsSegment(n).COM=mean([r c],1);
@@ -113,8 +112,7 @@ end
     function bwHalo=GetHalo(t)
         
         fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
-        [im map]=imread(fname);
-        im=mat2gray(im);
+        im = Helper.LoadIntensityImage(fname);
         
         
         level=CONSTANTS.imageAlpha*graythresh(im);

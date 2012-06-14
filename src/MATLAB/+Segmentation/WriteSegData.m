@@ -29,7 +29,7 @@ function WriteSegData(objsSegment,DatasetName)
 global CONSTANTS;
 
 fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF'];
-[im map]=imread(fname);
+im = Helper.LoadIntensityImage(fname);
 if isempty(im)
     fprintf('error - unable to extract image size - tracking will fail\n');
 end

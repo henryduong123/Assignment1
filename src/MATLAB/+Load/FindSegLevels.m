@@ -16,11 +16,10 @@ function FindSegLevels(bShowProgress)
         
         fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
         if exist(fileName,'file')
-            [img colrMap] = imread(fileName);
+            im = Helper.LoadIntensityImage(fileName);
         else
-            img=zeros(CONSTANTS.imageSize);
+            im = zeros(CONSTANTS.imageSize);
         end
-        im = mat2gray(img);
         
         se=strel('square',3);
         gd=imdilate(im,se);

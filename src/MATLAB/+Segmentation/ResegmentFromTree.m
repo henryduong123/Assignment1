@@ -156,8 +156,7 @@ function newHullID = tryAddSegmentation(prevHull)
 
     newHullID = [];
     fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
-    [img colrMap] = imread(fileName);
-    img = mat2gray(img);
+    img = Helper.LoadIntensityImage(fileName);
     
     clickPt = [CellHulls(prevHull).centerOfMass(2) CellHulls(prevHull).centerOfMass(1)];
     

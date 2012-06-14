@@ -37,11 +37,11 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 % figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
-fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
-if exist(fileName,'file')
-    [img colrMap] = imread(fileName);
+filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
+if exist(filename,'file')
+    img = Helper.LoadIntensityImage(filename);
 else
-    img=zeros(CONSTANTS.imageSize);
+    img = zeros(CONSTANTS.imageSize);
 end
 
 curAx = get(Figures.cells.handle, 'CurrentAxes');

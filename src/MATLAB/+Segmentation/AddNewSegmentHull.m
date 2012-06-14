@@ -27,9 +27,8 @@
 function newTrackID = AddNewSegmentHull(clickPt)
     global CONSTANTS CellHulls CellFeatures HashedCells Figures
 
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
-    [img colrMap] = imread(fileName);
-    img = mat2gray(img);
+    filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
+    img = Helper.LoadIntensityImage(filename);
     
     [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);
 

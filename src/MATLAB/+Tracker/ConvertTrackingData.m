@@ -41,7 +41,7 @@ Log = [];
 
 CellFeatures = [];
 
-CONSTANTS.imageSize = unique([objHulls(:).imSize]);
+CONSTANTS.imageSize = objHulls(1).imSize;
 
 Costs = gConnect;
 GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
