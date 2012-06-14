@@ -23,7 +23,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-tic
+totalTime = tic();
 
 vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
@@ -51,10 +51,25 @@ end
 
 system(['"' buildenv '"' ]);
 
+tic();
+fprintf('Visual Studio Compiling: %s...\n', 'MTC.exe');
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\MTC.sln"']);
+fprintf('Done (%f sec)\n', toc());
+
+tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexMAT.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexMAT.sln"']);
+fprintf('Done (%f sec)\n\n', toc());
+
+tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexDijkstra.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexDijkstra.sln"']);
+fprintf('Done (%f sec)\n\n', toc());
+
+tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexIntegrityCheck.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexIntegrityCheck.sln"']);
+fprintf('Done (%d sec)\n\n', toc());
 
 % clears out mex cache so src/*.mexw(32/64) can be overwritten
 clear mex
@@ -67,10 +82,28 @@ system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);
 
+tic();
+fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
 mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
+fprintf('Done (%f sec)\n', toc());
+
+tic();
+fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
 mcc -R -startmsg -m Segmentor.m
+fprintf('Done (%f sec)\n', toc());
+
+tic();
+fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
 mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
-mcc -R -startmsg -m LinkTreeFolders.m
+fprintf('Done (%f sec)\n', toc());
+
+% tic();
+% fprintf('\nMATLAB Compiling: %s...\n', 'LinkTreeFolders');
+% mcc -R -startmsg -m LinkTreeFolders.m
+% fprintf('Done (%d sec)\n', toc());
+
+fprintf('\n');
+
 system(['copy LEVer.exe ' fullfile(bindir,'.')]);
 system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
 system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);
@@ -79,4 +112,4 @@ system(['copy LinkTreeFolders.exe ' fullfile(bindir,'.')]);
 if(isempty(dir('.\MTC.exe')) || isempty(dir(fullfile(bindir,'MTC.exe'))))
     warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
 end
-toc
+toc(totalTime)
