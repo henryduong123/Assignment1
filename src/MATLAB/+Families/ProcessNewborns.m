@@ -156,6 +156,16 @@ for i=1:size
         return
     end
     
+    % Don't try to add mitosis for track that ends before childtrack
+    if ( CellTracks(parentTrackID).endTime < CellTracks(childTrackID).startTime )
+        continue;
+    end
+    
+    % Parent track must have a hull in the mitosis frame
+    if ( isempty(Tracks.GetHullID(CellTracks(childTrackID).startTime, parentTrackID)) )
+        continue;
+    end
+    
     % If the parent future is long enough create a mitosis
     connectTime = CellHulls(parentHullID).time+1;
     if( CONSTANTS.minParentHistoryTimeFrame < abs(CellTracks(childTrackID).startTime - CellTracks(parentTrackID).startTime)...

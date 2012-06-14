@@ -19,7 +19,7 @@ siblingID = CellTracks(removeTrackID).siblingTrack;
 droppedTracks = Families.RemoveFromTreePrune(removeTrackID,time);
 if (Helper.WasDropped(siblingID,droppedTracks) && ~isempty(parentID))
     %reconect sibling
-    droppedTracks = [droppedTracks Tracks.ChangeTrackID(siblingID,parentID)];
+    droppedTracks = [droppedTracks Tracks.ChangeLabel(siblingID,parentID)];
     droppedTracks = setdiff(droppedTracks,siblingID);
 end
 end

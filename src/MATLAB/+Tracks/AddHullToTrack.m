@@ -76,9 +76,7 @@ if (~isempty(CellTracks(trackID).hulls))
     %children?
     if(time>CellTracks(trackID).endTime && ~isempty(CellTracks(trackID).childrenTracks))
         %Drop the children
-        for i=1:length(CellTracks(trackID).childrenTracks)
-            droppedTracks = [droppedTracks Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(i))];
-        end
+        droppedTracks = [droppedTracks Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(1))];
     end
 else
     curFamilyID = length(CellFamilies) + 1;

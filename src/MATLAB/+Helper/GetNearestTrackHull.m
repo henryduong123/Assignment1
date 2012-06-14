@@ -9,7 +9,13 @@ function hull = GetNearestTrackHull(trackID, time, searchDir)
     hull = 0;
     
     hash = time - CellTracks(trackID).startTime + 1;
-    if ( hash < 1 || hash > length(CellTracks(trackID).hulls) )
+    if ( hash < 1 && (searchDir >= 0) )
+        hull = CellTracks(trackID).hulls(1);
+        return;
+    end
+    
+    if ( (hash > length(CellTracks(trackID).hulls)) && ((searchDir < 0)) )
+        hull = CellTracks(trackID).hulls(end);
         return;
     end
     
