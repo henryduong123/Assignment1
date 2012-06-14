@@ -98,6 +98,13 @@ ConnectedDist = connDist;
 CellHulls = cellHulls;
 CellFeatures = locCellFeatures;
 
+% Initialize HashedCells such that 
+tmax = max([CellHulls.time]);
+HashedCells = cell(1,tmax);
+for t=1:tmax
+    HashedCells{t} = struct('hullID',{}, 'trackID',{});
+end
+
 %walk through the tracks
 progress = 1;
 iterations = length(objHulls);

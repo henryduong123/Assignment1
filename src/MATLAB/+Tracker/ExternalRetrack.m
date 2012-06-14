@@ -23,6 +23,10 @@ function ExternalRetrack()
     
     tmax = max([CellHulls.time]);
     HashedCells = cell(1,tmax);
+    for t=1:tmax
+        HashedCells{t} = struct('hullID',{}, 'trackID',{});
+    end
+    
     for i=1:length(CellHulls)
         HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
     end

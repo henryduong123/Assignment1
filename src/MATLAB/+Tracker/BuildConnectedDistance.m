@@ -72,6 +72,10 @@ function UpdateDistances(updateCell, t, tNext)
     
     nextCells = [HashedCells{tNext}.hullID];
     
+    if ( isempty(nextCells) )
+        return;
+    end
+    
     comDistSq = sum((ones(length(nextCells),1)*CellHulls(updateCell).centerOfMass - vertcat(CellHulls(nextCells).centerOfMass)).^2, 2);
     
     nextCells = nextCells(comDistSq <= ((tDist*CONSTANTS.dMaxCenterOfMass)^2));
