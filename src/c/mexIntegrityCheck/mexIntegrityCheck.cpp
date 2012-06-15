@@ -560,6 +560,9 @@ int findTrackID(mwIndex matHullID)
 	mwIndex matHullTime = (mwIndex) mxGetScalar(mxGetField(gCellHulls, MATLAB_IDX(matHullID), "time"));
 	mxArray* frameHulls = mxGetCell(gHashHulls, MATLAB_IDX(matHullTime));
 
+	if ( frameHulls == NULL )
+		return -1;
+
 	mwSize numHulls = mxGetNumberOfElements(frameHulls);
 	for ( mwIndex i=0; i < numHulls; ++i )
 	{
@@ -795,6 +798,12 @@ bool verifyStructureElements()
 	for ( mwIndex i=0; i < numFrames; ++i )
 	{
 		mxArray* frameHulls = mxGetCell(gHashHulls, C_IDX(i));
+		if ( frameHulls == NULL )
+		{
+			gHashErrors.insert(tErrorPair(C_IDX(i), "HashCells contains empty cell (non-structured)"));
+			continue;
+		}
+
 		mwSize numEntries = mxGetNumberOfElements(frameHulls);
 
 		for ( mwIndex j=0; j < numEntries; ++j )

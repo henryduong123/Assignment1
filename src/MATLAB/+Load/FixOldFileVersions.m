@@ -25,13 +25,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls CellFeatures ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels
+    global CellHulls CellFeatures HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels
 
     bNeedsUpdate = 0;
     
     % Cannot fix this without resegmentation so give a warning if CellFeatures doesn't exist yet
     if ( isempty(CellFeatures) )
         msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
+    end
+    
+    emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
+    if ( ~isempty(emptyHash) )
+        for i=1:length(emptyHash)
+            HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
+        end
     end
     
     % Find Segmentation levels per-frame for use in feature extraction
