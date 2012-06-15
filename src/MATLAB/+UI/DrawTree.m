@@ -27,7 +27,7 @@ function DrawTree(familyID)
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
 
-if ( isempty(familyID) )
+if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
     return;
 end

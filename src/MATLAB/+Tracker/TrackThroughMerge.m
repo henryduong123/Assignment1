@@ -42,6 +42,10 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughMerge(t, mergeHull
     curHulls = [HashedCells{t}.hullID];
     lastHulls = [HashedCells{t-1}.hullID];
     
+    if ( isempty(lastHulls) || isempty(curHulls) )
+        return;
+    end
+    
     distSq = sum((vertcat(CellHulls(lastHulls).centerOfMass) - ones(length(lastHulls),1)*CellHulls(mergeHull).centerOfMass).^2, 2);
     
     bTrackHull = distSq < ((2*CONSTANTS.dMaxCenterOfMass)^2);

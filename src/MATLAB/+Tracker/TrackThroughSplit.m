@@ -48,6 +48,10 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls,
     curHulls = [HashedCells{t}.hullID];
     lastHulls = [HashedCells{t-1}.hullID];
     
+    if ( isempty(lastHulls) || isempty(curHulls) )
+        return;
+    end
+    
     distSq = sum((vertcat(CellHulls(lastHulls).centerOfMass) - ones(length(lastHulls),1)*COM).^2, 2);
     
     bTrackHull = distSq < ((2*CONSTANTS.dMaxCenterOfMass)^2);
