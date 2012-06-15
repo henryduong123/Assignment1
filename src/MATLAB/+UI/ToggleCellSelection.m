@@ -33,6 +33,4 @@ function ToggleCellSelection(hullID)
     else
         Figures.cells.selectedHulls = [Figures.cells.selectedHulls hullID];
     end
-    
-    UI.DrawCells();
 end

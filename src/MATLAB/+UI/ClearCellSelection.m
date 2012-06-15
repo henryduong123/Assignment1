@@ -27,6 +27,4 @@ function ClearCellSelection()
     global Figures
     
     Figures.cells.selectedHulls = [];
-    
-    UI.DrawCells();
 end

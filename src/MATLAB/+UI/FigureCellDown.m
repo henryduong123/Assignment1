@@ -14,9 +14,9 @@ function FigureCellDown(src,evnt, labelID)
     end
 
     selectionType = get(Figures.cells.handle,'SelectionType');
-    %if ( (Figures.cells.downHullID ~= -1) && strcmp(selectionType, 'alt') )
     if ( (Figures.cells.downHullID ~= -1) && Figures.controlDown )
         UI.ToggleCellSelection(Figures.cells.downHullID);
+        UI.DrawCells();
         return;
     end
 
@@ -30,8 +30,12 @@ function FigureCellDown(src,evnt, labelID)
         end
 
         if(Figures.cells.downHullID == -1)
+            UI.DrawCells();
             return
         end
+        
+        UI.ToggleCellSelection(Figures.cells.downHullID);
+        
         set(Figures.cells.handle,'WindowButtonUpFcn',@(src,evt) UI.FigureCellUp(src,evt));
     elseif(strcmp(selectionType,'extend'))
         if(Figures.cells.downHullID == -1)

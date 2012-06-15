@@ -32,13 +32,12 @@ if(currentHullID~=Figures.cells.downHullID)
     Families.ProcessNewborns();
     previousTrackID = Hulls.GetTrackID(currentHullID);
     
-elseif(CellTracks(previousTrackID).familyID==Figures.tree.familyID)
+    UI.DrawTree(CellTracks(previousTrackID).familyID);
+elseif(CellTracks(previousTrackID).familyID~=Figures.tree.familyID)
     %no change and the current tree contains the cell clicked on
-    UI.ToggleCellSelection(Figures.cells.downHullID);
-    return
+    UI.DrawTree(CellTracks(previousTrackID).familyID);
 end
 
-UI.DrawTree(CellTracks(previousTrackID).familyID);
+
 UI.DrawCells();
-UI.ToggleCellSelection(Figures.cells.downHullID);
 end
