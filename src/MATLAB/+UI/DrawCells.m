@@ -132,7 +132,9 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         end
         
         %draw connection to sibling 
-        if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on'))
+        if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on') ||...
+            CellTracks(curTrackID).startTime == Figures.time)
+            %draw if the hull was part of a mitosis on this frame
             %if the cell is on the current tree or already drawn
             if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
                 siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curAx, curTrackID,curHullID)];
