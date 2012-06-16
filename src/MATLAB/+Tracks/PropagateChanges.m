@@ -169,28 +169,14 @@ function [newHullIDs oldHull oldFeat] = splitNextFrame(hullID, k)
     end
 
     [newHulls newFeats] = Segmentation.ResegmentHull(CellHulls(hullID), oldFeat, k);
-	%[newHulls newFeats] = WatershedSplitCell(CellHulls(hullID), oldFeat, k);
     if ( isempty(newHulls) )
         return;
     end
 
+    setHullIDs = zeros(1,length(newHulls));
+    setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
-    CellHulls(hullID) = newHulls(1);
-    newHullIDs = hullID;
-
-    % Other hulls are just added off the clone
-    newFamilyIDs = [];
-    for i=2:length(newHulls)
-        CellHulls(end+1) = newHulls(i);
-        newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls))];
-        newHullIDs = [newHullIDs length(CellHulls)];
-    end
-    
-    if ( ~isempty(CellFeatures) )
-        for i=1:length(newHullIDs)
-            CellFeatures(newHullIDs(i)) = newFeats(i);
-        end
-    end
+    Hulls.SetHullEntries(setHullIDs, newHulls, newFeats);
 end
 
 function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHulls, splitHulls)
@@ -238,7 +224,7 @@ function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHull
 end
 
 function revertSplit(t, hull, newHulls, oldHull, oldFeat)
-    global CONSTANTS CellHulls CellFeatures HashedCells CellTracks CellFamilies Costs GraphEdits ConnectedDist
+    global CellHulls CellFeatures HashedCells CellTracks CellFamilies Costs GraphEdits CachedCostMatrix ConnectedDist
     
     rmHulls = setdiff(newHulls,hull);
     
@@ -250,14 +236,19 @@ function revertSplit(t, hull, newHulls, oldHull, oldFeat)
     
     % Note: can only do these simple removals because nothing has yet been
     % updated to reference the new cell structure.
+    
+    % Remove Hull/Track/Family entries
     HashedCells{t} = HashedCells{t}(~bRmHashIdx);
     CellTracks = CellTracks(setdiff(1:length(CellTracks),rmTrackIDs));
     CellFamilies = CellFamilies(setdiff(1:length(CellFamilies),rmFamilyIDs));
+    
+    % Revert tracking/edge edit info
     Costs = Costs(leaveHulls,leaveHulls);
     GraphEdits = GraphEdits(leaveHulls,leaveHulls);
-    ConnectedDist = ConnectedDist(leaveHulls);
+    CachedCostMatrix = CachedCostMatrix(leaveHulls,leaveHulls);
     
-    Tracker.BuildConnectedDistance(hull,1);
+    % Revert cc-distance info
+    ConnectedDist = ConnectedDist(leaveHulls);
     
     CellHulls(hull) = oldHull;
     CellHulls = CellHulls(leaveHulls);
@@ -267,6 +258,8 @@ function revertSplit(t, hull, newHulls, oldHull, oldFeat)
         CellFeatures(hull) = oldFeat;
         CellFeatures = CellFeatures(leaveHulls);
     end
+    
+    Tracker.BuildConnectedDistance(hull,1);
 end
 
 function bFullLength = checkTrackLengths(hulls, minlength)

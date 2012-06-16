@@ -57,6 +57,8 @@ function [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(mergeCells)
         
         mergeObj.points = [c(ch) r(ch)];
         mergeObj.centerOfMass = mean([r c]);
+        mergeObj.deleted = 0;
+        mergeObj.userEdited = 0;
         
         % Calculate merged cell features
         if ( isempty(CellFeatures) )
@@ -149,3 +151,4 @@ function ccM = calcConnDistM(cells)
         end
     end
 end
+

@@ -1,4 +1,5 @@
-% SplitHull.m - Attempt to split hull corresponding to hullId into k pieces
+% newTrackIDs = SplitHull(hullID, k)
+% Attempt to split hull corresponding to hullId into k pieces
 % and update associated data structures if successful.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,58 +26,35 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackIDs = SplitHull(hullID, k)
+    global CellHulls CellFeatures
 
-global CellHulls CellFeatures HashedCells GraphEdits
+    oldCOM = CellHulls(hullID).centerOfMass;
 
-oldCOM = CellHulls(hullID).centerOfMass;
-oldTracks = [HashedCells{CellHulls(hullID).time}.trackID];
+    if ( isempty(CellFeatures) )
+        splitFeat = [];
+    else
+        splitFeat = CellFeatures(hullID);
+    end
 
-if ( isempty(CellFeatures) )
-    splitFeat = [];
-else
-    splitFeat = CellFeatures(hullID);
-end
+    [newHulls newFeatures] = Segmentation.ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
 
-[newHulls newFeatures] = Segmentation.ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
-% [newHulls newFeatures] = WatershedSplitCell(CellHulls(hullID), splitFeat, k);
-
-if ( isempty(newHulls) )
-    newTrackIDs = [];
-    return;
-end
-
-for i=1:length(newHulls)
-    newHulls(i).userEdited = 1;
-end
-
-% Just arbitrarily assign clone's hull for now
-CellHulls(hullID) = newHulls(1);
-
-% Set features if valid
-if ( ~isempty(CellFeatures) )
-    CellFeatures(hullID) = newFeatures(1);
-end
-
-newHullIDs = hullID;
-
-% Drop old graphedits on a manual split
-GraphEdits(hullID,:) = 0;
-GraphEdits(:,hullID) = 0;
-
-% Other hulls are just added off the clone
-newFamilyIDs = [];
-for i=2:length(newHulls)
-    newID = length(CellHulls) +1;
-    CellHulls(newID) = newHulls(i);
-    
-    % Set features if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(end+1) = newFeatures(i);
+    if ( isempty(newHulls) )
+        newTrackIDs = [];
+        return;
     end
     
-    newFamilyIDs = [newFamilyIDs Families.NewCellFamily(newID)];
-    newHullIDs = [newHullIDs newID];
-end
+    % Mark split hull pieces as user-edited.
+    for i=1:length(newHulls)
+        newHulls(i).userEdited = 1;
+    end
 
-newTrackIDs = Tracker.TrackAddedHulls(newHullIDs, oldTracks, oldCOM);
+    % Drop old graphedits on a manual split
+    Tracker.GraphEditsResetHulls(hullID);
+
+    setHullIDs = zeros(1,length(newHulls));
+    setHullIDs(1) = hullID;
+    % Just arbitrarily assign clone's hull for now
+    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls, newFeatures);
+
+    newTrackIDs = Tracker.TrackAddedHulls(newHullIDs, oldCOM);
 end

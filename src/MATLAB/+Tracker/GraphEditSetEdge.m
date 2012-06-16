@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function GraphEditSetEdge(trackID, nextTrackID, time)
-    global GraphEdits
+    global GraphEdits CachedCostMatrix
     
     trackHull = Helper.GetNearestTrackHull(trackID, time-1, -1);
     nextHull = Helper.GetNearestTrackHull(nextTrackID, time, 1);
@@ -38,4 +38,11 @@ function GraphEditSetEdge(trackID, nextTrackID, time)
     GraphEdits(:,nextHull) = 0;
     
     GraphEdits(trackHull,nextHull) = 1;
+    
+    % Update cached cost matrix
+    CachedCostMatrix(trackHull,:) = 0;
+    CachedCostMatrix(:,nextHull) = 0;
+    
+    CachedCostMatrix(trackHull,nextHull) = eps;
 end
+

@@ -27,7 +27,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function GraphEditRemoveEdge(trackID, time)
-    global CellTracks CellFamilies GraphEdits
+    global CellTracks CellFamilies GraphEdits CachedCostMatrix
     
     nextHull = Helper.GetNearestTrackHull(trackID, time, 1);
     
@@ -45,5 +45,11 @@ function GraphEditRemoveEdge(trackID, time)
     nzParentHulls = possibleFamilyParents(possibleFamilyParents > 0);
     for i=1:length(nzParentHulls)
         GraphEdits(nzParentHulls(i),nextHull) = -1;
+        
+        % Update cached cost matrix
+        CachedCostMatrix(nzParentHulls(i),nextHull) = 0;
     end
+    
+    Tracker.UpdateCachedCosts(nzParentHulls, nextHull);
 end
+

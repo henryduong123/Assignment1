@@ -36,10 +36,8 @@ function [costMatrix bFromAffected bToAffected] = GetCostSubmatrix(fromHulls, to
     % because we cannot use more than 46K square elements in a matrix in
     % 32-bit matlab.
     costMatrix = zeros(length(fromHulls),length(toHulls));
-    for i=1:length(fromHulls)
-        for j=1:length(toHulls)
-            costMatrix(i,j) = inCostMatrix(fromHulls(i),toHulls(j));
-        end
+    for j=1:length(toHulls)
+        costMatrix(:,j) = inCostMatrix(fromHulls, toHulls(j));
     end
 
     bToAffected = any(costMatrix,1);

@@ -38,7 +38,7 @@
 
 function History(action)
 
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls CellFeatures Costs GraphEdits ConnectedDist CellPhenotypes SegmentationEdits
+global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls CellFeatures Costs GraphEdits CachedCostMatrix ConnectedDist CellPhenotypes SegmentationEdits
 
 persistent hist;            %stack
 persistent current;         %points to the last state saved on the stack
@@ -232,6 +232,7 @@ end
         hist(index).CellFeatures = CellFeatures;
         hist(index).Costs = Costs;
         hist(index).GraphEdits = GraphEdits;
+        hist(index).CachedCostMatrix = CachedCostMatrix;
         hist(index).ConnectedDist = ConnectedDist;
         hist(index).Figures.tree.familyID = Figures.tree.familyID;
         hist(index).CellPhenotypes = CellPhenotypes;
@@ -246,6 +247,7 @@ end
         CellFeatures = hist(index).CellFeatures;
         Costs = hist(index).Costs;
         GraphEdits = hist(index).GraphEdits;
+        CachedCostMatrix = hist(index).CachedCostMatrix;
         ConnectedDist = hist(index).ConnectedDist;
         Figures.tree.familyID = hist(index).Figures.tree.familyID;
         CellPhenotypes = hist(index).CellPhenotypes;

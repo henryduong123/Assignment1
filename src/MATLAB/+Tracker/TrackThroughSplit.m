@@ -25,21 +25,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [costMatrix extendHulls affectedHulls] = TrackThroughSplit(t, newHulls, COM)
-    global CONSTANTS CellHulls HashedCells Costs GraphEdits
+    global CONSTANTS CellHulls HashedCells
     
     costMatrix = [];
     extendHulls = [];
     affectedHulls = [];
-    
-    % Update incoming and outgoing connected-component distance for new hulls
-    Tracker.BuildConnectedDistance(newHulls, 1);
-    
-    % Add zero costs to cost matrix if necessary
-    addCosts = max(max(newHulls)-size(Costs,1),0);
-    if (  addCosts > 0 )
-        Costs = [Costs zeros(size(Costs,1),addCosts); zeros(addCosts,size(Costs,1)+addCosts)];
-        GraphEdits = [GraphEdits zeros(size(GraphEdits,1),addCosts); zeros(addCosts,size(GraphEdits,1)+addCosts)];
-    end
     
     if ( t <= 1 )
         return;

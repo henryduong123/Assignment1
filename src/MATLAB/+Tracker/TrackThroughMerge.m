@@ -32,9 +32,6 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughMerge(t, mergeHull
     extendHulls = [];
     affectedHulls = [];
     
-    % Update incoming and outgoing connected-component distance for new hulls
-    Tracker.BuildConnectedDistance(mergeHull, 1);
-    
     if ( t <= 1 )
         return;
     end
@@ -61,3 +58,4 @@ function [costMatrix extendHulls affectedHulls] = TrackThroughMerge(t, mergeHull
     extendHulls = trackHulls(bOutTracked);
     affectedHulls = curHulls(bInTracked);
 end
+

@@ -41,20 +41,11 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     replaceCell = min(deleteCells);
     deleteCells = setdiff(deleteCells,replaceCell);
     
+    mergeObj.userEdited = 0;
+    Hulls.SetHullEntries(replaceCell, mergeObj, mergeFeat);
+    
     for i=1:length(deleteCells)
         Hulls.RemoveHull(deleteCells(i));
-    end
-    
-    CellHulls(replaceCell).points = mergeObj.points;
-    CellHulls(replaceCell).indexPixels = mergeObj.indexPixels;
-    CellHulls(replaceCell).imagePixels = mergeObj.imagePixels;
-    CellHulls(replaceCell).centerOfMass = mergeObj.centerOfMass;
-    CellHulls(replaceCell).deleted = 0;
-    CellHulls(replaceCell).userEdited = 1;
-    
-    % Set features if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(replaceCell) = mergeFeat;
     end
     
     [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughMerge(t, replaceCell);
@@ -214,16 +205,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     replaceIdx = min(nextMergeHulls);
     deleteCells = setdiff(nextMergeHulls, replaceIdx);
     
-    CellHulls(replaceIdx).indexPixels = mergeObj.indexPixels;
-    CellHulls(replaceIdx).imagePixels = mergeObj.imagePixels;
-    CellHulls(replaceIdx).points = mergeObj.points;
-    CellHulls(replaceIdx).centerOfMass = mergeObj.centerOfMass;
-    CellHulls(replaceIdx).deleted = 0;
-    
-    % Set features if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(replaceIdx) = mergeFeat;
-    end
+    Hulls.SetHullEntries(replaceIdx, mergeObj, mergeFeat);
     
     for i=1:length(deleteCells)
         Hulls.RemoveHull(deleteCells(i));

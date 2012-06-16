@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackID = AddNewSegmentHull(clickPt)
-    global CONSTANTS CellHulls CellFeatures HashedCells Figures
+    global CONSTANTS Figures
 
     filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
     img = Helper.LoadIntensityImage(filename);
@@ -34,8 +34,6 @@ function newTrackID = AddNewSegmentHull(clickPt)
 
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
     newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
-    
-    oldTracks = [HashedCells{Figures.time}.trackID];
     
     if ( ~isempty(newObj) )
         newObj = makeNonOverlapping(newObj, Figures.time, clickPt);
@@ -60,18 +58,10 @@ function newTrackID = AddNewSegmentHull(clickPt)
         
         newFeature = newFeat;
     end
-
-    newHullID = length(CellHulls)+1;
-    CellHulls(newHullID) = newHull;
     
-    % Set feature if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(newHullID) = newFeature;
-    end
+    newHullID = Hulls.SetHullEntries(0, newHull, newFeature);
     
-    newFamilyIDs = Families.NewCellFamily(newHullID);
-    
-    newTrackID = Tracker.TrackAddedHulls(newHullID, oldTracks, newHull.centerOfMass);
+    newTrackID = Tracker.TrackAddedHulls(newHullID, newHull.centerOfMass);
 end
 
 %TODO: Maybe handle convex hull intersection instead of interior points as

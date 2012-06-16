@@ -1,4 +1,4 @@
-% ProcessNewborns(families) 
+% ProcessNewborns(families)
 % This takes all the families with start times > 1 and attempts to attach
 % that families' tracks to other families that start before said family
 

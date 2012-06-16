@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function GraphEditAddMitosis(trackID, siblingTrackID, time)
-    global CellTracks GraphEdits Costs
+    global CellTracks GraphEdits Costs CachedCostMatrix
     
     parentHash = time - CellTracks(trackID).startTime;
     siblingHash = time - CellTracks(siblingTrackID).startTime + 1;
@@ -67,4 +67,12 @@ function GraphEditAddMitosis(trackID, siblingTrackID, time)
         GraphEdits(parentHull,childHull) = 2;
         GraphEdits(parentHull,siblingHull) = 1;
     end
+    
+    % Also update cached cost matrix
+    CachedCostMatrix(parentHull,:) = 0;
+    CachedCostMatrix(:,childHull) = 0;
+    CachedCostMatrix(:,siblingHull) = 0;
+    
+    CachedCostMatrix(parentHull,childHull) = eps * GraphEdits(parentHull,childHull);
+    CachedCostMatrix(parentHull,siblingHull) = eps * GraphEdits(parentHull,siblingHull);
 end

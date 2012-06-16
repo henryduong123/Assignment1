@@ -1,5 +1,5 @@
-% trackIDs = TrackAddedHulls(newHulls, forceTracks, COM)
-% track user split or added hulls.
+% trackIDs = TrackAddedHulls(newHulls, COM)
+% Track user split or added hulls.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function trackIDs = TrackAddedHulls(newHulls, forceTracks, COM)
+function trackIDs = TrackAddedHulls(newHulls, COM)
     global CellHulls HashedCells
     
     trackIDs = Hulls.GetTrackID(newHulls);
