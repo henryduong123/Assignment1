@@ -1,8 +1,12 @@
 % InitializeCachedCosts()
 % Initialize CachedCostMatrix from current Costs and GraphEdits
 
-function InitializeCachedCosts()
+function InitializeCachedCosts(bForceInitialize)
     global Costs GraphEdits CellHulls CachedCostMatrix
+    
+    if ( ~bForceInitialize && (size(CachedCosts,1) == size(Costs,1)) )
+        return;
+    end
     
     CachedCostMatrix = Costs;
     % bRemovedEdges = (GraphEdits < 0);

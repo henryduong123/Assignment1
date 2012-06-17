@@ -223,7 +223,8 @@ if ( bUpdated )
     end
 end
 
-Load.InitializeCachedCosts();
+% Initialized cached costs here if necessary (placed after fix old file versions for compatibility)
+Load.InitializeCachedCosts(0);
 
 if (~strcmp(imageDataset,CONSTANTS.datasetName))
     warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');

@@ -135,6 +135,9 @@ catch errormsg
     UI.ProgressBar(1);
 end
 
+% Build initial CachedCostMatrix for new data
+Load.InitializeCachedCosts(1);
+
 %create the family trees
 Families.ProcessNewborns();
 

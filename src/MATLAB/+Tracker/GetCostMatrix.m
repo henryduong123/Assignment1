@@ -27,5 +27,7 @@
 function costMatrix = GetCostMatrix()
     global CachedCostMatrix
     
+    % Load.InitializeCachedCosts(0);
+    
     costMatrix = CachedCostMatrix;
 end
