@@ -1,5 +1,5 @@
 function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
-    global SegLevels
+    global SegLevels CONSTANTS
     
     status = 1;
     tSeg = 0;
@@ -24,13 +24,26 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     if(~isempty(dir('.\segmentationData')))
         system('rmdir /S /Q .\segmentationData');
     end
-
+    
+    % Set CONSTANTS.imageSize as soon as possible
+    firstImg = fullfile(rootFolder, [datasetName '_t' Helper.GetDigitString(1,sigDigits) '.TIF']);
+    chkIm = Helper.LoadIntensityImage(firstImg);
+    CONSTANTS.imageSize = size(chkIm);
+    
+    if ( ndims(CONSTANTS.imageSize) ~= 2 )
+        cltime = clock();
+        errlog = fopen([datasetName '_seg_error.log'], 'w');
+        fprintf(errlog, '%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
+        fclose(errlog);
+        return;
+    end
+    
     for i=1:numProcessors
         system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
             num2str(numberOfImages) ' "' rootFolder '" "' datasetName '" ' ...
             num2str(imageAlpha) ' ' num2str(sigDigits) ' && exit']);
         %use line below instead of the 3 lines above for non-parallel or to debug
-%         Segmentor(i,numProcessors,numberOfImages,rootFolder,datasetName,imageAlpha,sigDigits);
+        % Segmentor(i,numProcessors,numberOfImages,rootFolder,datasetName,imageAlpha,sigDigits);
     end
 
     bSegFileExists = false(1,numProcessors);
@@ -132,7 +145,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     tTrack=toc;
 
     %% Inport into LEVer's data sturcture
-    [objHulls gConnect HashedHulls] = Tracker.ReadTrackData(cellSegments,datasetName);
+    [objHulls gConnect HashedHulls] = Tracker.ReadTrackData(CONSTANTS.imageSize, cellSegments, datasetName);
     
     SegLevels = cellSegLevels;
 

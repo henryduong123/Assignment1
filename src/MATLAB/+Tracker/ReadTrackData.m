@@ -23,7 +23,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objHulls gConnect HashedHulls]=ReadTrackData(objHulls,DatasetName)
+function [objHulls gConnect HashedHulls]=ReadTrackData(imageSize, objHulls,DatasetName)
 th=max([objHulls.t]);
 HashedHulls=cell(th,1);
 
@@ -79,7 +79,7 @@ for i=1:max([objHulls.Label])
 end
 nLabel=max([objHulls.Label])+1;
 for n=1:length(objHulls)
-    [r c]=ind2sub(objHulls(n).imSize,objHulls(n).indPixels);
+    [r c]=ind2sub(imageSize,objHulls(n).indPixels);
     objHulls(n).COM=mean([r c],1);    
     if objHulls(n).Label>0,continue,end
     objHulls(n).Label= nLabel;

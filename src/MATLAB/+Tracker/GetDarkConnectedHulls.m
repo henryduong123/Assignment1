@@ -37,7 +37,7 @@ HashedHulls=cell(th,1);
 
 for n=1:length(objsSegment)
     objsSegment(n).DarkConnectedHulls=[];
-    [r c]=ind2sub(objsSegment(n).imSize,objsSegment(n).indPixels);
+    [r c]=ind2sub(CONSTANTS.imageSize, objsSegment(n).indPixels);
     objsSegment(n).COM=mean([r c],1);
     HashedHulls{objsSegment(n).t}=[HashedHulls{objsSegment(n).t};n];
 end
@@ -82,8 +82,8 @@ end
                         p1=jpix;
                         p2=ipix;
                     end
-                    [r1 c1]=ind2sub(objsSegment(hi).imSize,p1);
-                    [r2 c2]=ind2sub(objsSegment(hj).imSize,p2);
+                    [r1 c1]=ind2sub(CONSTANTS.imageSize, p1);
+                    [r2 c2]=ind2sub(CONSTANTS.imageSize, p2);
                     dCCmin=Inf;
                     for k=1:length(r1)
                         dd=( (r2-r1(k)).^2+(c2-c1(k)).^2);
