@@ -80,6 +80,10 @@ function PatchMatchedTracks()
         childTrack = Hulls.GetTrackID(checkHulls(i));
         parentTrack = Hulls.GetTrackID(bestInHull);
         
+        if(~isempty(Tracks.GetTimeOfDeath(parentTrack)))
+            continue;
+        end
+        
 %         % Check if either child or parent looks like a segmentation error
 %         parentScore = GetTrackSegScore(parentTrack);
 %         childScore = GetTrackSegScore(childTrack);

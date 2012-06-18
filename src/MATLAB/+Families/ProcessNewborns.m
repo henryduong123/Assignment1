@@ -27,7 +27,7 @@
 
 function ProcessNewborns(families)
 
-global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits Figures
+global CellFamilies CellTracks CellHulls CONSTANTS GraphEdits Figures CellPhenotypes
 
 if ( ~exist('families','var') )
     families = 1:length(CellFamilies);
@@ -45,6 +45,13 @@ if ( isfield(Figures, 'tree') &&  Figures.tree.familyID>0 ...
 end
 
 Tracker.PatchMatchedTracks();
+
+% Remove "children" of dead cells.
+deadHulls = CellPhenotypes.hullPhenoSet(1,(CellPhenotypes.hullPhenoSet(2,:) == 1));
+deadTracks = unique(Hulls.GetTrackID(deadHulls));
+for i=1:length(deadTracks)
+    Tracks.StraightenTrack(deadTracks);
+end
 
 % %Remove any newly created parasite tracks from tree
 % for i=1:length(families)
@@ -71,6 +78,18 @@ Tracker.PatchMatchedTracks();
 % end
 
 costMatrix = Tracker.GetCostMatrix();
+
+% Get all edited tracks/times to avoid adding mitosis events before max
+% track edit time.
+[rEdit cEdit] = find(GraphEdits);
+editedHulls = union(rEdit,cEdit);
+editTimes = [CellHulls(editedHulls).time];
+
+[srtTimes srtIdx] = sort(editTimes);
+editedTracks = Hulls.GetTrackID(editedHulls);
+
+[editedTracks uniqueIdx] = unique(editedTracks(srtIdx), 'last');
+editTimes = srtTimes(uniqueIdx);
 
 size = length(families);
 for i=1:size
@@ -113,6 +132,8 @@ for i=1:size
         if(isempty(parentTrackID)),continue,end
         parentTrackTimeFrame = CellTracks(parentTrackID).endTime - CellTracks(parentTrackID).startTime;
         
+        editedIdx = find(editedTracks == parentTrackID);
+        
         parentScore = Tracker.GetTrackSegScore(parentTrackID);
 
         %Change the cost of the candidates
@@ -125,6 +146,8 @@ for i=1:size
         elseif(~isempty(Tracks.GetTimeOfDeath(parentTrackID)))
             parentCosts(j) = Inf;
         elseif ( parentScore < CONSTANTS.minTrackScore )
+            parentCosts(j) = Inf;
+        elseif ( ~isempty(editedIdx) && (editTimes(editedIdx) >= CellHulls(childHullID).time) )
             parentCosts(j) = Inf;
         else
             siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;

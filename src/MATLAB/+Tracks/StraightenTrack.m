@@ -33,7 +33,7 @@ global CellTracks
 
 droppedTracks = [];
 
-while (length(CellTracks(trackID).children)>=2)
-    droppedTracks = [droppedTracks Families.RemoveFromTree(CellTracks(trackID).children(2))];
+while ( length(CellTracks(trackID).childrenTracks) >= 2 )
+    droppedTracks = [droppedTracks Families.RemoveFromTree(CellTracks(trackID).childrenTracks(2))];
 end
 end
