@@ -4,7 +4,7 @@
 function InitializeCachedCosts(bForceInitialize)
     global Costs GraphEdits CellHulls CachedCostMatrix
     
-    if ( ~bForceInitialize && (size(CachedCosts,1) == size(Costs,1)) )
+    if ( ~bForceInitialize && (size(CachedCostMatrix,1) == size(Costs,1)) )
         return;
     end
     
