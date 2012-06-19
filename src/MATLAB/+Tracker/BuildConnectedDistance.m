@@ -44,6 +44,10 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
             UI.Progressbar((i-1)/length(updateCells));
         end
         
+        if ( CellHulls(updateCells(i)).deleted )
+            continue;
+        end
+        
         ConnectedDist{updateCells(i)} = [];
         t = CellHulls(updateCells(i)).time;
         
