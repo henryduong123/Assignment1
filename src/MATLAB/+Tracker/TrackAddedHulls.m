@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function trackIDs = TrackAddedHulls(newHulls, COM)
-    global CellHulls HashedCells
+    global CellHulls HashedCells GraphEdits
     
     trackIDs = Hulls.GetTrackID(newHulls);
     t = CellHulls(newHulls(1)).time;
@@ -34,6 +34,15 @@ function trackIDs = TrackAddedHulls(newHulls, COM)
     Segmentation.AddSegmentationEdit(newHulls, newHulls);
     
     [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughSplit(t, newHulls, COM);
+    
+    % Ignore graph-edits to avoid reassigning them, this is necessary
+    % because ProcessNewborns will not be run immediately after this call.
+    bKeepFrom = ~any(GraphEdits(extendHulls,:) > 0,2);
+    bKeepTo = ~any(GraphEdits(:,affectedHulls) > 0,1);
+    
+    extendHulls = extendHulls(bKeepFrom);
+    affectedHulls = affectedHulls(bKeepTo);
+    costMatrix = costMatrix(bKeepFrom,bKeepTo);
     
     if ( isempty(costMatrix) )
         return;
