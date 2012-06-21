@@ -40,7 +40,7 @@ const mxArray* gHashHulls;
 const mxArray* gCellPhenotypes;
 
 typedef std::pair<mwIndex, std::string> tErrorPair;
-typedef std::map<mwIndex, std::string> tErrorList;
+typedef std::multimap<mwIndex, std::string> tErrorList;
 
 tErrorList gFamilyErrors;
 tErrorList gTrackErrors;
@@ -268,6 +268,9 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 	bool bCorrectEndTime = false;
 	mwSize numTracks = mxGetNumberOfElements(tracks);
 	double* trackData = mxGetPr(tracks);
+
+	bool bError = false;
+
 	for ( mwSize i=0; i < numTracks; ++i )
 	{
 		mwIndex matTrackID = (mwIndex) trackData[i];
@@ -294,7 +297,8 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Track ID %d in family is empty", matTrackID);
 			gFamilyErrors.insert(tErrorPair(C_IDX(familyID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		mwIndex matTrackFamilyID = (mwIndex) mxGetScalar(trackFamily);
@@ -303,7 +307,8 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Track ID %d in family has family ID larger than CellFamilies", matTrackID);
 			gFamilyErrors.insert(tErrorPair(C_IDX(familyID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		if ( MATLAB_IDX(matTrackFamilyID) != C_IDX(familyID) )
@@ -311,7 +316,8 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Track ID %d in family has family ID of %d, should be %d", matTrackID, matTrackFamilyID, (familyID+1));
 			gFamilyErrors.insert(tErrorPair(C_IDX(familyID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		mwIndex trackEndTime = mxGetScalar(mxGetField(gCellTracks, MATLAB_IDX(matTrackID), "endTime"));
@@ -352,7 +358,7 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 		return false;
 	}
 
-	return true;
+	return (!bError);
 }
 
 bool checkParentChildReferences(mwIndex trackID)
@@ -586,6 +592,8 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 
 	mwSize numHulls = mxGetNumberOfElements(trackHulls);
 	double* hullData = mxGetPr(trackHulls);
+
+	bool bError = false;
 	for ( mwIndex i=0; i < numHulls; ++i )
 	{
 		mwIndex matHullID = (mwIndex) hullData[i];
@@ -595,7 +603,8 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 		if ( MATLAB_IDX(matHullID) >= mxGetNumberOfElements(gCellHulls) )
 		{
 			gTrackErrors.insert(tErrorPair(C_IDX(trackID), "Track hull list contains hull ID larger than CellHulls"));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		++hullRefCount[MATLAB_IDX(matHullID)];
@@ -613,7 +622,8 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Track hull list references deleted hull %d", matHullID);
 			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		mwIndex hullTime = (mwIndex) mxGetScalar(mxGetField(gCellHulls, MATLAB_IDX(matHullID), "time"));
@@ -625,13 +635,23 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 			return false;
 		}
 
+		if ( hullTime != chkTime )
+		{
+			char errMsg[errBufSize];
+			sprintf(errMsg, "Hull %d on track has time %d, should be %d based on track startTime", matHullID, hullTime, chkTime);
+			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
+			bError = true;
+			continue;
+		}
+
 		int hullTrackID = findTrackID(matHullID);
 		if ( hullTrackID == -1 )
 		{
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Hull %d on track is not in hashed hulls list", matHullID);
 			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		if ( MATLAB_IDX(hullTrackID) != C_IDX(trackID) )
@@ -639,15 +659,8 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Hull %d on track has track ID %d", matHullID, hullTrackID);
 			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
-			return false;
-		}
-
-		if ( hullTime != chkTime )
-		{
-			char errMsg[errBufSize];
-			sprintf(errMsg, "Hull %d on track has time %d, should be %d based on track startTime", matHullID, hullTime, chkTime);
-			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 
 		if ( hullTime < trackStartTime || hullTime > trackEndTime )
@@ -655,11 +668,12 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 			char errMsg[errBufSize];
 			sprintf(errMsg, "Hull %d on track has time %d, which is outside of track start/end time", matHullID, hullTime);
 			gTrackErrors.insert(tErrorPair(C_IDX(trackID), errMsg));
-			return false;
+			bError = true;
+			continue;
 		}
 	}
 
-	return true;
+	return (!bError);
 }
 
 bool verifyStructureElements()
