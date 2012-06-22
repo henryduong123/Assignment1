@@ -40,7 +40,7 @@ function UpdatePhenotypeInfo()
     end
     
     oldCellPheno = CellPhenotypes;
-    CellPhenotypes = struct('descriptions', {oldCellPheno.descriptions}, 'contextMenuID', {oldCellPheno.contextMenuID}, 'hullPhenoSet', cell(size(oldCellPheno)));
+    CellPhenotypes = struct('descriptions', {oldCellPheno.descriptions}, 'contextMenuID', {[]}, 'hullPhenoSet', cell(size(oldCellPheno)));
     
     for i=1:length(phenoTracks)
         phenotype = CellTracks(phenoTracks(i)).phenotype;

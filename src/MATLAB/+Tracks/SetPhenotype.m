@@ -1,4 +1,6 @@
-% SetPhenotype.m - Set the phenotype at the specified hullID.
+% SetPhenotype(hullID, phenotype, bActive)
+% Set the phenotype at the specified hullID. In the process clears other
+% phenotypes set for this hull's track.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

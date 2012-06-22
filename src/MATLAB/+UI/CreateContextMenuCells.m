@@ -26,13 +26,7 @@
 
 function CreateContextMenuCells()
 
-global Figures CellPhenotypes CellTracks
-
-if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
-    CellPhenotypes.descriptions={'died'};
-    CellPhenotypes.contextMenuID=[];
-    CellPhenotypes.hullPhenoSet = zeros(2,0);
-end
+global Figures
 
 figure(Figures.cells.handle);
 Figures.cells.contextMenuHandle = uicontextmenu;
@@ -96,20 +90,7 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @properties,...
     'Separator',    'on');
 
-PhenoMenu = uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Phenotype',...
-    'Separator',    'on',...
-    'CallBack',     @phenoPopulate);
-
-uimenu(PhenoMenu,...
-    'Label',        'Create new phenotype...',...
-    'CallBack',     @phenotypes);
-
-for i=1:length(CellPhenotypes.descriptions)
-    CellPhenotypes.contextMenuID(i)=uimenu(PhenoMenu,...
-        'Label',        CellPhenotypes.descriptions{i},...
-        'CallBack',     @phenotypes);
-end
+UI.CreatePhenotypeMenu();
 end
 
 %% Callback functions
@@ -254,100 +235,4 @@ function properties(src,evnt)
 if(isempty(trackID)),return,end
 
 Editor.ContextProperties(hullID,trackID);
-end
-
-% added 4 19 2011 ac
-function phenotypes(src,evnt)
-
-global Figures CellPhenotypes CellTracks SegmentationEdits
-
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
-% which did they click
-for i=1:length(CellPhenotypes.contextMenuID)
-    if src == CellPhenotypes.contextMenuID(i)
-        break;
-    end
-end
-
-if src~=CellPhenotypes.contextMenuID(i)
-    % add new one
-    NewPhenotype=inputdlg('Enter description for new phenotype','Cell Phenotypes');
-    if isempty(NewPhenotype)
-        return
-    end
-    
-    PhenoMenu = get(CellPhenotypes.contextMenuID(1),'parent');
-    i=length(CellPhenotypes.descriptions)+1;
-    CellPhenotypes.contextMenuID(i)=uimenu(PhenoMenu,...
-        'Label',        NewPhenotype{1},...
-        'CallBack',     @phenotypes);  
-    CellPhenotypes.descriptions(i)=NewPhenotype;  
-
-    
-end
-bActive = strcmp(get(CellPhenotypes.contextMenuID(i),'checked'),'on');
-
-if 1==i
-    
-	
-    if ( bActive )
-        % turn off death...
-        try
-            Tracks.SetPhenotype(hullID, i, bActive);
-            Families.ProcessNewborns(Families.FindFamiliesAfter(trackID));
-        catch errorMessage
-            Error.ErrorHandling(['ProcessNewborns(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
-            return
-        end
-        Error.LogAction(['Removed death for ' num2str(trackID)],[],[]);
-    else
-        % turn on death
-        if(~isempty(CellTracks(trackID).childrenTracks))
-            try
-                Tracks.StraightenTrack(trackID);
-                Tracks.SetPhenotype(hullID, i, bActive);
-                Families.ProcessNewborns();
-            catch errorMessage
-                Error.ErrorHandling(['ProcessNewborns(StraightenTrack(' num2str(trackID) ')-- ' errorMessage.message],errorMessage.stack);
-                return
-            end
-        else
-            Tracks.SetPhenotype(hullID, i, bActive);
-        end
-        Error.LogAction(['Marked time of death for ' num2str(trackID)]);
-    end
-    Editor.History('Push');
-    
-    UI.DrawCells();
-    UI.DrawTree(Figures.tree.familyID);
-    return
-end
-
-Tracks.SetPhenotype(hullID, i, bActive);
-Editor.History('Push');
-UI.DrawCells();
-UI.DrawTree(Figures.tree.familyID);
-    
-end
-
-% Whenever we right-click on a cell this puts a check mark next to active
-% phenotype, if any.
-function phenoPopulate(src,evnt)
-global CellPhenotypes CellTracks
-
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
-    
-for i=1:length(CellPhenotypes.contextMenuID)        
-    set(CellPhenotypes.contextMenuID(i),'checked','off');    
-end
-
-trackPheno = Tracks.GetTrackPhenotype(trackID);
-
-if ( trackPheno == 0 )
-    return
-end
-    
-set(CellPhenotypes.contextMenuID(trackPheno),'checked','on');
 end

@@ -32,8 +32,8 @@ if ( ~exist('familyID','var') || isempty(familyID) )
     return;
 end
    
-phenoScratch.phenoColors = hsv(length(CellPhenotypes.contextMenuID));
-phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.contextMenuID),1);
+phenoScratch.phenoColors = hsv(length(CellPhenotypes.descriptions));
+phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.descriptions),1);
 
 if(~isfield(CONSTANTS,'timeResolution'))
     CONSTANTS.timeResolution = 10;

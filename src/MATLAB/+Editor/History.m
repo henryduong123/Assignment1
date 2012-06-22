@@ -109,6 +109,8 @@ switch action
             %Update displays
             UI.DrawTree(Figures.tree.familyID);
             UI.DrawCells();
+            UI.UpdateSegmentationEditsMenu();
+            UI.UpdatePhenotypeMenu();
             setMenus();
             Error.LogAction('Undo');
         end
@@ -130,11 +132,15 @@ switch action
             %Update displays
             UI.DrawTree(Figures.tree.familyID);
             UI.DrawCells();
+            UI.UpdateSegmentationEditsMenu();
+            UI.UpdatePhenotypeMenu();
             setMenus();
             Error.LogAction('Redo');
         end
     case 'Top'
          GetHistElement(current);
+         UI.UpdateSegmentationEditsMenu();
+        UI.UpdatePhenotypeMenu();
     case 'Init'
         current = 1;
         bottom = 1;
@@ -252,6 +258,5 @@ end
         Figures.tree.familyID = hist(index).Figures.tree.familyID;
         CellPhenotypes = hist(index).CellPhenotypes;
         SegmentationEdits = hist(index).SegmentationEdits;
-        UI.UpdateSegmentationEditsMenu();
     end
 end
