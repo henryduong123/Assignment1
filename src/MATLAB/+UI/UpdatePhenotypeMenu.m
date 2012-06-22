@@ -54,15 +54,30 @@ function setPhenotype(src, evnt)
     bActive = strcmp(get(src, 'checked'),'on');
     
     if ( clickPheno == 0 )
-        NewPhenotype=inputdlg('Enter description for new phenotype','Cell Phenotypes');
-        if isempty(NewPhenotype)
+        newDescription=inputdlg('Enter description for new phenotype','Cell Phenotypes');
+        if isempty(newDescription)
             return
         end
         
-        clickPheno = Editor.AddPhenotype(NewPhenotype);
+        % TODO: Special case handling of AddPhenotype action during replay
+        % since it should not push history
+        [bErr clickPheno] = Editor.ReplayableEditAction(@Editor.AddPhenotype, newDescription);
+        if ( bErr )
+            return;
+        end
     end
     
-    Editor.ContextSetPhenotype(hullID, clickPheno, bActive);
+    bErr = Editor.ReplayableEditAction(@Editor.ContextSetPhenotype, hullID,clickPheno,bActive);
+    if ( bErr )
+        return;
+    end
+    
+    Editor.History('Push');
+    if ( bActive )
+        Error.LogAction(['Clear phenotype for ' num2str(trackID)]);
+    else
+        Error.LogAction(['Set phenotype for ' num2str(trackID) ' to ' CellPhenotypes.descriptions{phenotype}]);
+    end
     
     UI.DrawTree(Figures.tree.familyID);
     UI.DrawCells();

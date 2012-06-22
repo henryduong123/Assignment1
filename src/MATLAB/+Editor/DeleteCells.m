@@ -1,4 +1,6 @@
-% RemoveTrackPrevious.m - Remove all segmentations on the current track.
+% DeleteCells(selectedHulls)
+% Edit Action:
+% Remove all selectedHulls
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,23 +25,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function droppedTracks = RemoveTrackHulls(trackID)
-    global CellTracks
-    
-    droppedTracks = [];
-    
-    Families.RemoveFromTree(trackID);
-    
-    hulls = CellTracks(trackID).hulls;
-    
-    for i=1:length(hulls)
-        if ( hulls(i) == 0 )
-            continue;
-        end
-        
-        Segmentation.RemoveSegmentationEdit(hulls(i));
-        droppedTracks = [droppedTracks Hulls.RemoveHull(hulls(i))];
+function DeleteCells(selectedHulls)
+    for i=1:length(selectedHulls)
+        Segmentation.RemoveSegmentationEdit(selectedHulls(i));
+        Hulls.RemoveHull(selectedHulls(i));
     end
-    
-    Families.ProcessNewborns();
 end

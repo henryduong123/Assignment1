@@ -1,5 +1,6 @@
-% ContextRemoveFromTree.m - context menu callback function remove track or
-% partial track from its current tree
+% ContextRemoveFromTree(trackID,time)
+% Edit Action:
+% Context menu callback function remove track or partial track from its current tree
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -31,21 +32,9 @@ if (~exist('time','var'))
     time = CellTracks(trackID).startTime;
 end
 
-oldParent = CellTracks(trackID).parentTrack;
-
-try
-    Tracker.GraphEditRemoveEdge(trackID, time);
-    droppedTracks = Families.RemoveFromTree(trackID, time);
-    Editor.History('Push');
-catch errorMessage
-    Error.ErrorHandling(['RemoveFromTreePrune(' num2str(trackID) ' ' num2str(time) ') -- ' errorMessage.message],errorMessage.stack);
-    return
-end
-
-Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],oldParent,trackID);
+Tracker.GraphEditRemoveEdge(trackID, time);
+droppedTracks = Families.RemoveFromTree(trackID, time);
 
 Families.ProcessNewborns();
 
-UI.DrawTree(CellTracks(oldParent).familyID);
-UI.DrawCells();
 end

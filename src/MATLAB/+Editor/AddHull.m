@@ -27,44 +27,39 @@
 function AddHull(num)
 global Figures CellHulls
 
-if(num>6)
-    msgbox('Please limit number of new cells to 6','Add Hull Limit','help');
-    return
-end
-
 [hullID trackID] = UI.GetClosestCell(1);
 clickPt = get(gca,'CurrentPoint');
 
-if ( ~Hulls.CheckHullsContainsPoint(clickPt(1,1:2), CellHulls(hullID)) )
+clickCoord = clickPt(1,1:2);
+
+if ( ~Hulls.CheckHullsContainsPoint(clickCoord, CellHulls(hullID)) )
     trackID = [];
 end
 
-if(~isempty(trackID))
+if(~isempty(trackID) && (num > 1))
     % Try to split the existing hull    
-    if ( num > 1 )
-        try
-            newTracks = Segmentation.SplitHull(hullID,num);
-            if(isempty(newTracks))
-                msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
-                return
-            end
-            Editor.History('Push');
-        catch errorMessage
-            Error.ErrorHandling(['SplitHull(' num2str(hullID) ' ' num2str(num) ') -- ' errorMessage.message], errorMessage.stack);
-            return
-        end
-        Error.LogAction('Split cell',trackID,[trackID newTracks]);
+    [bErr newTracks] = Editor.ReplayableEditAction(@Editor.SplitCell, hullID,num);
+    if ( bErr )
+        return;
     end
-elseif ( num<2 )
+    
+    if ( isempty(newTracks) )
+        msgbox(['Unable to split ' num2str(trackID) ' any further in this frame'],'Unable to Split','help','modal');
+        return;
+    end
+    
+    Editor.History('Push');
+    Error.LogAction('Split cell',trackID,[trackID newTracks]);
+    
+elseif ( num == 1 )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
-    try
-        newTrack = Segmentation.AddNewSegmentHull(clickPt(1,1:2));
-        Editor.History('Push');
-    catch errorMessage
-        Error.ErrorHandling(['AddNewSegmentHull(clickPt(1,1:2)) -- ' errorMessage.message], errorMessage.stack);
-        return
+    [bErr newTrack] = Editor.ReplayableEditAction(@Editor.AddNewCell, clickCoord);
+    if ( bErr )
+        return;
     end
+    
+    Editor.History('Push');
     Error.LogAction('Added cell',newTrack);
 else
     return;

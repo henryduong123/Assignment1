@@ -181,12 +181,12 @@ elseif strcmp(evnt.Key,'space')
         Figures.controlDown = Figures.controlDown(3);
      end
 elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
-    Hulls.DeleteSelectedCells();
+	deleteSelectedCells();
 elseif (strcmp(evnt.Key,'f12'))
 	Figures.cells.showInterior = ~Figures.cells.showInterior;
 	UI.DrawCells();
 elseif ( strcmp(evnt.Key,'return') )
-    tryMergeSelectedCells();
+    mergeSelectedCells();
 end
 end
 
@@ -355,58 +355,72 @@ if(strcmp(get(Figures.tree.handle,'SelectionType'),'normal'))
 end
 end
 
-function tryMergeSelectedCells()
-    global Figures
+function deleteSelectedCells()
+    global Figures CellFamilies
     
-    try
-        [deleteCells replaceCell] = Segmentation.MergeSplitCells(Figures.cells.selectedHulls);
-        if ( isempty(replaceCell) )
-            msgbox(['Unable to merge [' num2str(Figures.cells.selectedHulls) '] in this frame'],'Unable to Merge','help','modal');
-            return;
-        end
-        Editor.History('Push');
-    catch err
-        Error.ErrorHandling(['Merging Selected Cells -- ' err.message], err.stack);
+    bErr = Editor.ReplayableEditAction(@Editor.DeleteCells, Figures.cells.selectedHulls);
+    if ( bErr )
         return;
     end
 
-    UI.DrawCells();
+    Editor.History('Push');
+    Error.LogAction(['Removed selected cells [' num2str(Figures.cells.selectedHulls) ']'],Figures.cells.selectedHulls);
+
+    %if the whole family disappears with this change, pick a diffrent family to display
+    if(isempty(CellFamilies(Figures.tree.familyID).tracks))
+        for i=1:length(CellFamilies)
+            if(~isempty(CellFamilies(i).tracks))
+                Figures.tree.familyID = i;
+                break
+            end
+        end
+    end
+
     UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
+end
+
+function mergeSelectedCells()
+    global Figures
     
-    Error.LogAction('Merged cells',[deleteCells replaceCell],replaceCell);
+    [bErr deletedCells replaceCell] = Editor.ReplayableEditAction(@Editor.MergeCells, Figures.cells.selectedHulls);
+    if ( bErr )
+        return;
+    end
     
+    if ( isempty(replaceCell) )
+        msgbox(['Unable to merge [' num2str(Figures.cells.selectedHulls) '] in this frame'],'Unable to Merge','help','modal');
+        return;
+    end
+    
+    Editor.History('Push');
+    Error.LogAction('Merged cells', [deletedCells replaceCell], replaceCell);
+
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
 end
 
 
 function learnFromEdits(src,evnt)
-    global CellFamilies CellTracks HashedCells SegmentationEdits Figures
-    
-    if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))))
-        return;
-    end
+    global CellFamilies CellTracks SegmentationEdits Figures
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    try
-        Tracks.PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
-        Families.ProcessNewborns();
-    catch err
-        Error.ErrorHandling(['Propagating segmentation changes -- ' err.message],err.stack);
+    bErr = Editor.ReplayableEditAction(@Editor.LearnFromEdits);
+    if ( bErr )
         return;
     end
     
-    SegmentationEdits.newHulls = [];
-    SegmentationEdits.changedHulls = [];
-    
-    UI.UpdateSegmentationEditsMenu();
-    
-%     DrawCells();
-%     DrawTree(Figures.tree.familyID);
-    
-    Helper.RunGarbageCollect(currentHull);
-    
     Editor.History('Push');
     Error.LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
+    
+    currentTrackID = Hulls.GetTrackID(currentHull);
+    currentFamilyID = CellTracks(currentTrackID).familyID;
+    
+    Figures.tree.familyID = currentFamilyID;
+    
+    UI.DrawTree(currentFamilyID);
+    UI.DrawCells();
 end
 
 function forceRedrawCells(src,evnt)

@@ -39,9 +39,9 @@ function FigureCellDown(src,evnt, labelID)
         set(Figures.cells.handle,'WindowButtonUpFcn',@(src,evt) UI.FigureCellUp(src,evt));
     elseif(strcmp(selectionType,'extend'))
         if(Figures.cells.downHullID == -1)
-            Segmentation.AddHull(1);
+            Editor.AddHull(1);
         else
-            Segmentation.AddHull(2);
+            Editor.AddHull(2);
         end
     end
     if(strcmp(Figures.advanceTimerHandle.Running,'on'))

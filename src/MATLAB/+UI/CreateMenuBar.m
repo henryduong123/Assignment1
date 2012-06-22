@@ -245,11 +245,13 @@ end
 end
 
 function undo(src,evnt)
-Editor.History('Pop');
+    Editor.ReplayableEditAction(@Editor.Undo, 'Pop');
+    Editor.History('Pop');
 end
 
 function redo(src,evnt)
-Editor.History('Redo');
+    Editor.ReplayableEditAction(@Editor.Redo, 'Redo');
+    Editor.History('Redo');
 end
 
 function toggleLabels(src,evnt)
@@ -331,15 +333,19 @@ function treeInference(src, evt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    try
-        [iters totalTime] = Families.LinkFirstFrameTrees();
-    catch err
-        Error.ErrorHandling(['Tree Inference Error -- ' err.message],err.stack);
+    bErr = Editor.ReplayableEditAction(@Editor.TreeInference);
+    if ( bErr )
         return;
     end
     
-    Helper.RunGarbageCollect(currentHull);
-    
     Editor.History('Push');
     Error.LogAction('Completed Tree Inference', [iters totalTime],[]);
+    
+    currentTrackID = Hulls.GetTrackID(currentHull);
+    currentFamilyID = CellTracks(currentTrackID).familyID;
+    
+    Figures.tree.familyID = currentFamilyID;
+    
+    UI.DrawTree(currentFamilyID);
+    UI.DrawCells();
 end

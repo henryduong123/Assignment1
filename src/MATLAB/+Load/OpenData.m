@@ -28,7 +28,7 @@
 
 function opened = OpenData()
 
-global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes SegmentationEdits SegLevels softwareVersion
+global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes Log ReplayEditActions SegmentationEdits SegLevels softwareVersion
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
@@ -81,6 +81,7 @@ SegmentationEdits.changedHulls = [];
 CellFeatures = [];
 GraphEdits = [];
 SegLevels = [];
+ReplayEditActions = struct('funcName',{}, 'funcPtr',{}, 'args',{}, 'ret',{}, 'bErr',{}, 'ctx',{});
 
 oldCONSTANTS = CONSTANTS;
 

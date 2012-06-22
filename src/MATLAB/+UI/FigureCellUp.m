@@ -18,18 +18,16 @@ end
 previousTrackID = Hulls.GetTrackID(Figures.cells.downHullID);
 
 if(currentHullID~=Figures.cells.downHullID)
-    try
-        Tracker.GraphEditSetEdge(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
-        Tracker.GraphEditSetEdge(previousTrackID,Hulls.GetTrackID(currentHullID),Figures.time);
-        Tracks.SwapLabels(Hulls.GetTrackID(currentHullID),previousTrackID,Figures.time);
-        Editor.History('Push')
-    catch errorMessage
-        Error.ErrorHandling(['SwapTrackLabels(' num2str(Figures.time) ' ' num2str(Hulls.GetTrackID(currentHullID))...
-            ' ' num2str(previousTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-        return
+    trackID = Hulls.GetTrackID(currentHullID);
+    
+    bErr = Editor.ReplayableEditAction(@Editor.ContextSwapLabels, trackID, previousTrackID, Figures.time);
+    if ( bErr )
+        return;
     end
     
-    Families.ProcessNewborns();
+    Editor.History('Push')
+    Editor.LogAction(['Swapped tracks ' num2str(trackID) ', ' num2str(previousTrackID) ' beginning at t=' Figures.time], [],[]);
+    
     previousTrackID = Hulls.GetTrackID(currentHullID);
     
     UI.DrawTree(CellTracks(previousTrackID).familyID);

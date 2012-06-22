@@ -1,4 +1,6 @@
-% LEVer.m - This is the main program function for the LEVer application.
+% droppedTracks = RemoveTrackHulls(trackID)
+% Edit Action:
+% Remove all segmentations on the current track.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,30 +25,23 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
-
-global Figures softwareVersion
-
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
-    Editor.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+function droppedTracks = RemoveTrackHulls(trackID)
+    global CellTracks
+    
+    droppedTracks = [];
+    
+    Families.RemoveFromTree(trackID);
+    
+    hulls = CellTracks(trackID).hulls;
+    
+    for i=1:length(hulls)
+        if ( hulls(i) == 0 )
+            continue;
+        end
+        
+        Segmentation.RemoveSegmentationEdit(hulls(i));
+        droppedTracks = [droppedTracks Hulls.RemoveHull(hulls(i))];
     end
-end
-
-softwareVersion = '6.2 Adult';
-
-if(Load.OpenData())
-    UI.InitializeFigures();
-    Editor.ReplayableEditAction(@Editor.InitHistory);
-    Editor.History('Init');
-elseif(~isempty(Figures))
-    Editor.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-end
-
+    
+    Families.ProcessNewborns();
 end

@@ -26,14 +26,11 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
-% if the sibling has history get rid of it
-if (CellTracks(siblingTrack).startTime<time)
-    siblingTrack = Families.RemoveFromTreePrune(siblingTrack,time);
-end
+leftChildTrack = [];
 
 % if both tracks are starting on this frame see who the parent should be
 % and then merge the track with the parent
-if(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==time)
+if(CellTracks(trackID).startTime==time)
     valid = 0;
     while(~valid)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
@@ -53,20 +50,17 @@ if(CellTracks(siblingTrack).startTime==time && CellTracks(trackID).startTime==ti
         end
     end
     
-    droppedTracks = Tracks.ChangeLabel(trackID,parentTrack);
+    leftChildTrack = trackID;
     trackID = parentTrack;
 end
 
-try
-    Tracker.GraphEditAddMitosis(trackID, siblingTrack, time);
-    droppedTracks = Families.AddMitosis(siblingTrack,trackID);
-    Editor.History('Push');
-catch errorMessage
-    Error.ErrorHandling(['AddMitosis(' num2str(siblingTrack) ' ' num2str(trackID) ' ) -- ' errorMessage.message],errorMessage.stack);
-    return
+bErr = Editor.ReplayableEditAction(@Editor.AddMitosisAction, trackID,leftChildTrack,siblingTrack,time);
+if ( bErr )
+    return;
 end
 
-Error.LogAction(['Changed parent of ' num2str(trackID) ' and ' num2str(siblingTrack)]);
+Editor.History('Push');
+Error.LogAction(['Added ' num2str(siblingTrack) ' as sibling to ' num2str(parentTrack) ' at time t=' num2str(time)]);
 
 Figures.tree.familyID = CellTracks(trackID).familyID;
 UI.DrawTree(Figures.tree.familyID);

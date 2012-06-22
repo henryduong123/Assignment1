@@ -1,5 +1,5 @@
-% MergeSplitCells.m - Attempt to merge cells that are oversegmented and 
-% propagate the merge forward in time.
+% [deleteCells replaceCell] = MergeSplitCells(mergeCells)
+% Attempt to merge cells that are oversegmented and propagate the merge forward in time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -25,11 +25,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
-    global Figures CellHulls CellFeatures HashedCells SegmentationEdits CellFamilies
+    global CellHulls CellFeatures HashedCells
     
+    deleteCells = [];
     replaceCell = [];
     
-    t = Figures.time;
+    if ( isempty(mergeCells) )
+        return;
+    end
+    
+    t = CellHulls(mergeCells(1)).time;
     [mergeObj, mergeFeat, deleteCells] = Segmentation.CreateMergedCell(mergeCells);
     
     if ( isempty(mergeObj) || isempty(deleteCells) )
@@ -67,12 +72,6 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         
         Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, []);
     end
-    
-    SegmentationEdits.newHulls = [];
-    SegmentationEdits.changedHulls = [];
-    
-    UI.UpdateSegmentationEditsMenu();
-    Families.ProcessNewborns();
 end
 
 function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
@@ -162,7 +161,7 @@ function propHulls = getPropagationCells(t, mergeCells)
         trackIDs = [trackIDs Hulls.GetTrackID(mergeCells(i))];
     end
     if (length(trackIDs)~=length(mergeCells))
-        error('trackID doesn"t exist');
+        error('trackID doesn''t exist');
     end
     for i=1:length(trackIDs)
         hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;

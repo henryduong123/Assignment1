@@ -77,7 +77,18 @@ else
     return
 end
 
-Editor.ContextRemoveFromTree(choice);
+oldParent = CellTracks(choice).parentTrack;
+
+bErr = Editor.ReplayableEditAction(@Editor.ContextRemoveFromTree, choice);
+if ( bErr )
+    return;
+end
+
+Editor.History('Push');
+Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
+
+UI.DrawTree(CellTracks(oldParent).familyID);
+UI.DrawCells();
 end
 
 % ChangeLog:

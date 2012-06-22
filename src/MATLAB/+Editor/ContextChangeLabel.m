@@ -27,31 +27,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ContextChangeLabel(time,trackID)
+    global CellTracks
 
-global CellTracks
+    newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
+    if(isempty(newTrackID)),return,end;
+    newTrackID = str2double(newTrackID(1));
 
-newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
-if(isempty(newTrackID)),return,end;
-newTrackID = str2double(newTrackID(1));
+    curHull = CellTracks(newTrackID).hulls(1);
 
-try
-    %TODO: This edit graph update may need to more complicated to truly
-    %capture user edit intentions.
-    Tracker.GraphEditSetEdge(newTrackID,trackID,time, true);
-    Tracks.ChangeLabel(trackID,newTrackID,time);
+    bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
+    if ( bErr )
+        return;
+    end
+    
     Editor.History('Push');
-catch errorMessage
-    Error.ErrorHandling(['ChangeLabel(' num2str(time) ' ' num2str(trackID) ' ' num2str(newTrackID) ') -- ' errorMessage.message],errorMessage.stack);
-    return
-end
+    Error.LogAction('ChangeLabel',trackID,newTrackID);
 
-Error.LogAction('ChangeLabel',trackID,newTrackID);
-
-curHull = CellTracks(newTrackID).hulls(1);
-
-Families.ProcessNewborns();
-
-newTrackID = Hulls.GetTrackID(curHull);
-UI.DrawTree(CellTracks(newTrackID).familyID);
-UI.DrawCells();
+    newTrackID = Hulls.GetTrackID(curHull);
+    UI.DrawTree(CellTracks(newTrackID).familyID);
+    UI.DrawCells();
 end

@@ -45,33 +45,33 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
 
-addHull = uimenu(Figures.cells.contextMenuHandle,...
+addHullMenu = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Number of Cells',...
     'Separator',    'on');
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        'Number of Cells');
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        '1',...
-    'CallBack',     @addHull1);
+    'CallBack',     @(src,evt)(addHull(src,evt,1)));
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        '2',...
-    'CallBack',     @addHull2);
+    'CallBack',     @(src,evt)(addHull(src,evt,2)));
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        '3',...
-    'CallBack',     @addHull3);
+    'CallBack',     @(src,evt)(addHull(src,evt,3)));
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        '4',...
-    'CallBack',     @addHull4);
+    'CallBack',     @(src,evt)(addHull(src,evt,4)));
 
-uimenu(addHull,...
+uimenu(addHullMenu,...
     'Label',        'Other',...
     'Separator',    'on',...
-    'CallBack',     @addHullOther);
+    'CallBack',     @(src,evt)(addHull(src,evt,-1)));
 
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove Cell (this frame)',...
@@ -128,45 +128,29 @@ if(isempty(trackID)),return,end
 Editor.ContextChangeLabel(Figures.time,trackID);
 end
 
-function addHull1(src,evnt)
-Segmentation.AddHull(1);
-end
-
-function addHull2(src,evnt)
-Segmentation.AddHull(2);
-end
-
-function addHull3(src,evnt)
-Segmentation.AddHull(3);
-end
-
-function addHull4(src,evnt)
-Segmentation.AddHull(4);
-end
-
-function addHullOther(src,evnt)
-num = inputdlg('Enter Number of Cells Present','Add Hulls',1,{'1'});
-if(isempty(num)),return,end;
-num = str2double(num(1));
-Segmentation.AddHull(num);
+function addHull(src, evt, numhulls)
+    if ( numhulls < 0 )
+        num = inputdlg('Enter Number of Cells Present','Add Hulls',1,{'1'});
+        if(isempty(num)),return,end;
+        numhulls = str2double(num);
+    end
+    
+    Editor.AddHull(numhulls);
 end
 
 function removeHull(src,evnt)
 global Figures CellFamilies
 
 [hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
+if(isempty(hullID)),return,end
 
-try
-    Segmentation.RemoveSegmentationEdit(hullID);
-    Hulls.RemoveHull(hullID);
-    Editor.History('Push');
-catch errorMessage
-    Error.ErrorHandling(['RemoveHull(' num2str(hullID) ') -- ' errorMessage.message],errorMessage.stack);
-    return
+bErr = Editor.ReplayableEditAction(@Editor.DeleteCells, hullID);
+if ( bErr )
+    return;
 end
 
-Error.LogAction(['Removed hull from track ' num2str(trackID)],hullID);
+Editor.History('Push');
+Error.LogAction(['Removed selected cells [' num2str(hullID) ']'],hullID);
 
 %if the whole family disapears with this change, pick a diffrent family to
 %display
@@ -177,10 +161,6 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks))
             break
         end
     end
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
-    msgbox(['By removing this cell, the complete tree is no more. Displaying clone rooted at ' num2str(CellFamilies(i).rootTrackID) ' instead'],'Displaying Tree','help');
-    return
 end
 
 UI.DrawTree(Figures.tree.familyID);
@@ -193,14 +173,12 @@ function removeTrackPrevious(src,evnt)
     [hullID trackID] = UI.GetClosestCell(0);
     if(isempty(trackID)),return,end
     
-    try
-        Tracks.RemoveTrackHulls(trackID);
-        
-        Editor.History('Push');
-    catch errorMessage
-        Error.ErrorHandling(['RemoveTrackHulls(' num2str(trackID) ') -- ' errorMessage.message],errorMessage.stack);
-        return
+    bErr = Editor.ReplayableEditAction(@Editor.RemoveTrackHulls, trackID);
+    if ( bErr )
+        return;
     end
+    
+    Editor.History('Push');
     Error.LogAction(['Removed all hulls from track ' num2str(trackID)],[],[]);
     
     %if the whole family disapears with this change, pick a diffrent family to
@@ -212,9 +190,6 @@ function removeTrackPrevious(src,evnt)
                 break
             end
         end
-        UI.DrawTree(Figures.tree.familyID);
-        UI.DrawCells();
-        return
     end
 
     UI.DrawTree(Figures.tree.familyID);
@@ -222,17 +197,26 @@ function removeTrackPrevious(src,evnt)
 end
 
 function removeFromTree(src,evnt)
-global Figures
+    global Figures CellTracks
 
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
 
-Editor.ContextRemoveFromTree(trackID,Figures.time);
+    oldParent = CellTracks(trackID).parentTrack;
+
+    bErr = Editor.ReplayableEditAction(@Editor.ContextRemoveFromTree, trackID, Figures.time);
+    if ( bErr )
+        return;
+    end
+    
+    Editor.History('Push');
+    Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
+
+    UI.DrawTree(CellTracks(oldParent).familyID);
 end
 
 function properties(src,evnt)
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
-
-Editor.ContextProperties(hullID,trackID);
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
+    Editor.ContextProperties(hullID,trackID);
 end
