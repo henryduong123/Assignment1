@@ -59,8 +59,6 @@ function setPhenotype(src, evnt)
             return
         end
         
-        % TODO: Special case handling of AddPhenotype action during replay
-        % since it should not push history
         [bErr clickPheno] = Editor.ReplayableEditAction(@Editor.AddPhenotype, newDescription);
         if ( bErr )
             return;
@@ -72,7 +70,6 @@ function setPhenotype(src, evnt)
         return;
     end
     
-    Editor.History('Push');
     if ( bActive )
         Error.LogAction(['Clear phenotype for ' num2str(trackID)]);
     else

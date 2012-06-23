@@ -25,8 +25,7 @@ if(currentHullID~=Figures.cells.downHullID)
         return;
     end
     
-    Editor.History('Push')
-    Editor.LogAction(['Swapped tracks ' num2str(trackID) ', ' num2str(previousTrackID) ' beginning at t=' Figures.time], [],[]);
+    Error.LogAction(['Swapped tracks ' num2str(trackID) ', ' num2str(previousTrackID) ' beginning at t=' Figures.time], [],[]);
     
     previousTrackID = Hulls.GetTrackID(currentHullID);
     

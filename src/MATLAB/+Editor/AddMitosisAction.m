@@ -1,10 +1,11 @@
-% AddMitosisAction(parentTrack, leftChild, siblingTrack, time)
+% historyAction = AddMitosisAction(parentTrack, leftChild, siblingTrack, time)
 % Edit Action:
+% 
 % Add siblingTrack as a mitosis event from parentTrack at time. If
 % leftChild is non-empty also change its label to the parent track before
 % adding the mitosis.
 
-function AddMitosisAction(parentTrack, leftChild, siblingTrack, time)
+function historyAction = AddMitosisAction(parentTrack, leftChild, siblingTrack, time)
     global CellTracks
     
     if ( ~isempty(leftChild) )
@@ -18,4 +19,6 @@ function AddMitosisAction(parentTrack, leftChild, siblingTrack, time)
     
     Tracker.GraphEditAddMitosis(parentTrack, siblingTrack, time);
     droppedTracks = Families.AddMitosis(siblingTrack, parentTrack);
+    
+    historyAction = 'Push';
 end

@@ -1,5 +1,6 @@
-% droppedTracks = RemoveTrackHulls(trackID)
+% [historyAction droppedTracks] = RemoveTrackHulls(trackID)
 % Edit Action:
+% 
 % Remove all segmentations on the current track.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,7 +26,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function droppedTracks = RemoveTrackHulls(trackID)
+function [historyAction droppedTracks] = RemoveTrackHulls(trackID)
     global CellTracks
     
     droppedTracks = [];
@@ -44,4 +45,6 @@ function droppedTracks = RemoveTrackHulls(trackID)
     end
     
     Families.ProcessNewborns();
+    
+    historyAction = 'Push';
 end

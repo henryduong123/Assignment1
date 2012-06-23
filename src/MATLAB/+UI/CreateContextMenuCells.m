@@ -149,7 +149,6 @@ if ( bErr )
     return;
 end
 
-Editor.History('Push');
 Error.LogAction(['Removed selected cells [' num2str(hullID) ']'],hullID);
 
 %if the whole family disapears with this change, pick a diffrent family to
@@ -178,7 +177,6 @@ function removeTrackPrevious(src,evnt)
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction(['Removed all hulls from track ' num2str(trackID)],[],[]);
     
     %if the whole family disapears with this change, pick a diffrent family to
@@ -209,7 +207,6 @@ function removeFromTree(src,evnt)
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
 
     UI.DrawTree(CellTracks(oldParent).familyID);

@@ -1,4 +1,4 @@
-% DeleteCells(selectedHulls)
+% historyAction = DeleteCells(selectedHulls)
 % Edit Action:
 % Remove all selectedHulls
 
@@ -25,9 +25,11 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function DeleteCells(selectedHulls)
+function historyAction = DeleteCells(selectedHulls)
     for i=1:length(selectedHulls)
         Segmentation.RemoveSegmentationEdit(selectedHulls(i));
         Hulls.RemoveHull(selectedHulls(i));
     end
+    
+    historyAction = 'Push';
 end

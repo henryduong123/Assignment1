@@ -1,6 +1,8 @@
-% InitHistory
+% historyAction = InitHistory
 % Edit Action:
+% 
 % Tells the replay code that history has been reinitialized (on open).
 
-function InitHistory()
+function historyAction = InitHistory()
+    historyAction = 'Init';
 end

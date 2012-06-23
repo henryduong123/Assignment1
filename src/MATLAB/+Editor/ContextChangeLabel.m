@@ -40,7 +40,6 @@ function ContextChangeLabel(time,trackID)
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction('ChangeLabel',trackID,newTrackID);
 
     newTrackID = Hulls.GetTrackID(curHull);

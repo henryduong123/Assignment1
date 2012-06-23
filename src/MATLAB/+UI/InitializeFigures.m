@@ -363,7 +363,6 @@ function deleteSelectedCells()
         return;
     end
 
-    Editor.History('Push');
     Error.LogAction(['Removed selected cells [' num2str(Figures.cells.selectedHulls) ']'],Figures.cells.selectedHulls);
 
     %if the whole family disappears with this change, pick a diffrent family to display
@@ -393,7 +392,6 @@ function mergeSelectedCells()
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction('Merged cells', [deletedCells replaceCell], replaceCell);
 
     UI.DrawTree(Figures.tree.familyID);
@@ -411,7 +409,6 @@ function learnFromEdits(src,evnt)
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction('Propagated from segmentation edits',SegmentationEdits.newHulls);
     
     currentTrackID = Hulls.GetTrackID(currentHull);

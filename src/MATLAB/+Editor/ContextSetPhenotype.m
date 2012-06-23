@@ -1,9 +1,10 @@
-% ContextSetPhenotype(trackID, phenotype, bActive)
+% historyAction = ContextSetPhenotype(trackID, phenotype, bActive)
 % Edit Action:
+% 
 % Sets or clears the phenotype specified for the given hull. If the
 % phenotype is "dead" there is also some special handling to drop children.
 
-function ContextSetPhenotype(hullID, phenotype, bActive)
+function historyAction = ContextSetPhenotype(hullID, phenotype, bActive)
     global CellPhenotypes
     
     trackID = Hulls.GetTrackID(hullID);
@@ -16,4 +17,6 @@ function ContextSetPhenotype(hullID, phenotype, bActive)
 
     Tracks.SetPhenotype(hullID, phenotype, bActive);
     Families.ProcessNewborns();
+    
+    historyAction = 'Push';
 end

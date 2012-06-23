@@ -1,9 +1,12 @@
-% [deletedCells replaceCell] = MergeCells(selectedHulls)
+% [historyAction deletedCells replaceCell] = MergeCells(selectedHulls)
 % Edit Action:
+% 
 % Attempt to merge oversegmented cells.
 
-function [deletedCells replaceCell] = MergeCells(selectedHulls)
+function [historyAction deletedCells replaceCell] = MergeCells(selectedHulls)
     global SegmentationEdits
+    
+    historyAction = '';
     
     [deletedCells replaceCell] = Segmentation.MergeSplitCells(selectedHulls);
     
@@ -16,4 +19,6 @@ function [deletedCells replaceCell] = MergeCells(selectedHulls)
     
     UI.UpdateSegmentationEditsMenu();
     Families.ProcessNewborns();
+    
+    historyAction = 'Push';
 end

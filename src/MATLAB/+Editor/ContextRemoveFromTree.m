@@ -1,5 +1,6 @@
-% ContextRemoveFromTree(trackID,time)
+% historyAction = ContextRemoveFromTree(trackID,time)
 % Edit Action:
+% 
 % Context menu callback function remove track or partial track from its current tree
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,7 +26,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ContextRemoveFromTree(trackID,time)
+function historyAction = ContextRemoveFromTree(trackID,time)
 global CellTracks 
 
 if (~exist('time','var'))
@@ -36,5 +37,7 @@ Tracker.GraphEditRemoveEdge(trackID, time);
 droppedTracks = Families.RemoveFromTree(trackID, time);
 
 Families.ProcessNewborns();
+
+historyAction = 'Push';
 
 end

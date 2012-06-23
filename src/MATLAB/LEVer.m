@@ -42,7 +42,6 @@ softwareVersion = '6.2 Adult';
 if(Load.OpenData())
     UI.InitializeFigures();
     Editor.ReplayableEditAction(@Editor.InitHistory);
-    Editor.History('Init');
 elseif(~isempty(Figures))
     Editor.History('Top');
     UI.DrawTree(Figures.tree.familyID);

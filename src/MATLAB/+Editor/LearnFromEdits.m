@@ -1,8 +1,9 @@
-% LearnFromEdits()
+% historyAction = LearnFromEdits()
 % Edit Action:
+% 
 % Propagate segmentation edits forward.
 
-function LearnFromEdits()
+function historyAction = LearnFromEdits()
     global SegmentationEdits
     
     if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))))
@@ -18,4 +19,6 @@ function LearnFromEdits()
     UI.UpdateSegmentationEditsMenu();
     
     Helper.SweepDeleted();
+    
+    historyAction = 'Push';
 end

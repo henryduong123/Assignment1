@@ -84,8 +84,7 @@ if ( bErr )
     return;
 end
 
-Editor.History('Push');
-Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
+Error.LogAction(['Removed part or all of ' num2str(choice) ' from tree'],[],choice);
 
 UI.DrawTree(CellTracks(oldParent).familyID);
 UI.DrawCells();

@@ -245,13 +245,11 @@ end
 end
 
 function undo(src,evnt)
-    Editor.ReplayableEditAction(@Editor.Undo, 'Pop');
-    Editor.History('Pop');
+    Editor.ReplayableEditAction(@Editor.Undo);
 end
 
 function redo(src,evnt)
-    Editor.ReplayableEditAction(@Editor.Redo, 'Redo');
-    Editor.History('Redo');
+    Editor.ReplayableEditAction(@Editor.Redo);
 end
 
 function toggleLabels(src,evnt)
@@ -338,8 +336,7 @@ function treeInference(src, evt)
         return;
     end
     
-    Editor.History('Push');
-    Error.LogAction('Completed Tree Inference', [iters totalTime],[]);
+    Error.LogAction('Completed Tree Inference', [],[]);
     
     currentTrackID = Hulls.GetTrackID(currentHull);
     currentFamilyID = CellTracks(currentTrackID).familyID;

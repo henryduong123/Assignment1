@@ -48,7 +48,6 @@ if(~isempty(trackID) && (num > 1))
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction('Split cell',trackID,[trackID newTracks]);
     
 elseif ( num == 1 )
@@ -59,7 +58,6 @@ elseif ( num == 1 )
         return;
     end
     
-    Editor.History('Push');
     Error.LogAction('Added cell',newTrack);
 else
     return;
