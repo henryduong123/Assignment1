@@ -128,11 +128,9 @@ if(length(hullList)~=length(CellHulls))
 end
 UI.Progressbar(1);%clear it out
 
-try
-    errors = mexIntegrityCheck();
-catch errormsg
-    fprintf('\n%s\n',errormsg.message);
-    UI.ProgressBar(1);
+errors = mexIntegrityCheck();
+if ( ~isempty(errors) )
+    Dev.PrintIntegrityErrors(errors);
 end
 
 % Build initial CachedCostMatrix for new data

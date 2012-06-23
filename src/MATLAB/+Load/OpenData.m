@@ -179,13 +179,10 @@ switch answer
                 fprintf('New file saved as:\n%s_LEVer.mat',CONSTANTS.datasetName);
                 goodLoad = 1;
             elseif(exist('CellHulls','var'))
-                try
-                    errors = mexIntegrityCheck();
-                catch errorMessage
+                errors = mexIntegrityCheck();
+                if ( ~isempty(errors) )
                     warndlg('There were database inconsistencies.  LEVer might not behave properly!');
-                    UI.Progressbar(1);
-                    fprintf('%s\n',errorMessage.message);
-                    Error.LogAction(errorMessage.message);
+                    Dev.PrintIntegrityErrors(errors);
                 end
                 goodLoad = 1;
             else
