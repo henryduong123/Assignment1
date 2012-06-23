@@ -31,6 +31,11 @@ if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
     return;
 end
+
+if ( familyID > length(CellFamilies) )
+    Families.FindLargestTree();
+    return;
+end
    
 phenoScratch.phenoColors = hsv(length(CellPhenotypes.descriptions));
 phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.descriptions),1);
