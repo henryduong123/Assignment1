@@ -35,9 +35,6 @@
 
 const double costEpsilon = 1e-3;
 
-#define VMAX 40.0
-#define CCMAX 20.0
-
 double CCDist(int t0,int i0,int t1,int i1)
 {
 	int i;
@@ -51,7 +48,7 @@ double CCDist(int t0,int i0,int t1,int i1)
 			// connected!
 			return rgDetect[t0][i0].DarkConnectedCost[i];
 	}
-	return CCMAX+1.;
+	return gCCMax+1.; //dbltype::infinity();
 
 
 } // CCDist
@@ -113,7 +110,7 @@ int GetDestinyNode(int nSourceGIdx,int nOffset,int tOffset)
 double GetCost(std::vector<int>& frame, std::vector<int>& index, int srcFrameIdx, int bCheck)
 {
 	const double intensityCostWeight = 1.0;
-	double velo_max= VMAX,cc_max=CCMAX;
+	double velo_max= gVMax,cc_max=gCCMax;
 	double LocalCost = 0.0;
 	double OcclusionCost=1.;
 	double DestinyCost=1.;

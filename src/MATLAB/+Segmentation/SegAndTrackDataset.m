@@ -140,7 +140,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     %% Tracking
     tic
     fprintf(1,'Tracking...');
-    system(['.\MTC.exe "' fnameIn '" "' fnameOut '" > out.txt']);
+    system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
     fprintf('Done\n');
     tTrack=toc;
 

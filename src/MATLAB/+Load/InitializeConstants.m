@@ -38,8 +38,9 @@ Load.AddConstant('maxFrameDifference',1, 1);
 Load.AddConstant('historySize',10, 1);
 Load.AddConstant('clickMargin',500, 1);
 Load.AddConstant('timeResolution',10); %in frames per min
-Load.AddConstant('dMaxConnectComponent',40,1);
 Load.AddConstant('dMaxCenterOfMass',40,1);
+Load.AddConstant('dMaxConnectComponent',40,1);
+Load.AddConstant('dMaxConnectComponentTracker',20,1);
 Load.AddConstant('minTrackScore',0.5,1);
 Load.AddConstant('maxPropagateFrames',50,1);
 end

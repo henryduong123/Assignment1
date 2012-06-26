@@ -50,8 +50,8 @@ int gWindowSize;
 int gNumFrames;
 int gConstraintFrames;
 
-const double gVMax = 40.0;
-const double gCCMax = 20.0;
+double gVMax;
+double gCCMax;
 
 const double gCostEpsilon = 1e-3;
 
@@ -106,6 +106,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	if ( mxGetNumberOfElements(prhs[0]) != 1 )
 		mexErrMsgTxt("Parameter 1 must be a scalar frame number.");
+
+	const mxArray* gConstants = mexGetVariablePtr("global", "CONSTANTS");
+	if ( gConstants == NULL )
+		mexErrMsgTxt("Global CONSTANTS variable unavailable.");
+
+	gVMax = mxGetScalar(mxGetField(gConstants, C_IDX(0), "dMaxCenterOfMass"));
+	gCCMax = mxGetScalar(mxGetField(gConstants, C_IDX(0), "dMaxConnectComponentTracker"));
 
 	int dir = ((int) mxGetScalar(prhs[0]));
 	gWindowSize = ((int) mxGetScalar(prhs[1]));

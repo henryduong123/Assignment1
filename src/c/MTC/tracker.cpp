@@ -39,6 +39,9 @@ std::vector<tPathList> gAssignedTracklets;
 
 int gWindowSize = 4;
 
+double gVMax;
+double gCCMax;
+
 
 void WriteTracklets(int argc, char* argv[], int argIdx)
 {
@@ -152,13 +155,17 @@ int FindMinCostIdx(std::vector<CSourcePath*>& edges)
 int main(int argc, char* argv[])
 {
 	system("echo %TIME% > ttt.txt");
+
+	// Set default gate values.
+	gVMax = 40.0;
+	gCCMax = 20.0;
+
 	int outputargidx = ReadDetectionData(argc, argv);
 
 	if ( outputargidx < 0 )
 		return 0;
 
 	std::map<int,int> bestOutEdges;
-
 	for ( int t=0; t < gNumFrames-1; ++t )
 	{
 		bestOutEdges.clear();
@@ -206,7 +213,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	WriteTracklets(argc, argv, 2);
+	WriteTracklets(argc, argv, outputargidx);
 
 	system("echo %TIME% >> ttt.txt");
 

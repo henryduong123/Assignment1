@@ -44,6 +44,7 @@ extern SDetection** rgDetect;
 //Path global variables
 extern std::map<int,CSourcePath*>* gConnectOut;
 extern std::map<int,CSourcePath*>* gConnectIn;
+
 //For quick edge lookup from point (like inID/outID)
 extern int* gAssignedConnectOut;
 extern int* gAssignedConnectIn;
@@ -51,5 +52,7 @@ extern int* gAssignedTrackID;
 
 //Global variables
 extern int gWindowSize;
+extern double gVMax;
+extern double gCCMax;
 
 extern std::vector<tPathList> gAssignedTracklets;

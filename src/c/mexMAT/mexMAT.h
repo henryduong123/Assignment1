@@ -55,7 +55,7 @@ extern int gWindowSize;
 extern int gNumFrames;
 extern int gConstraintFrames;
 
-extern const double gVMax;
-extern const double gCCMax;
+extern double gVMax;
+extern double gCCMax;
 
 extern const double gCostEpsilon;

@@ -108,7 +108,15 @@ int ReadDetectionData(int argc, char* argv[])
 
 	int checkResult;
 
-	checkResult = ReadSegmentationData(argv[1], &gnumPts, &rgDetect, &rgDetectLengths, &rgDetectLengthSum);
+	int nxtArg = 1;
+	if ( argc >= 5 )
+	{
+		nxtArg = 3;
+		sscanf(argv[1], "%lf", &gVMax);
+		sscanf(argv[2], "%lf", &gCCMax);
+	}
+
+	checkResult = ReadSegmentationData(argv[nxtArg], &gnumPts, &rgDetect, &rgDetectLengths, &rgDetectLengthSum);
 	if ( checkResult < 0 )
 		return -1;
 
@@ -117,7 +125,6 @@ int ReadDetectionData(int argc, char* argv[])
 	gMaxDetections = 0;
 	for ( int t=0; t < gNumFrames; ++t )
 		gMaxDetections = std::max<int>(gMaxDetections, rgDetectLengths[t]);
-
 
 
 	gConnectOut = new std::map<int,CSourcePath*>[gnumPts];
@@ -132,5 +139,5 @@ int ReadDetectionData(int argc, char* argv[])
 		gAssignedTrackID[i] = -1;
 	}
 
-	return 3;
+	return (nxtArg+1);
 }
