@@ -24,10 +24,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newTrackID = AddNewSegmentHull(clickPt)
-    global CONSTANTS Figures
+function newTrackID = AddNewSegmentHull(clickPt, time)
+    global CONSTANTS
 
-    filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
+    filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(time) '.TIF'];
     img = Helper.LoadIntensityImage(filename);
     
     [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);
@@ -36,12 +36,12 @@ function newTrackID = AddNewSegmentHull(clickPt)
     newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     
     if ( ~isempty(newObj) )
-        newObj = makeNonOverlapping(newObj, Figures.time, clickPt);
+        newObj = makeNonOverlapping(newObj, time, clickPt);
     end
     
     if ( isempty(newObj) )
         % Add a point hull since we couldn't find a segmentation containing the click
-        newHull.time = Figures.time;
+        newHull.time = time;
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
@@ -49,7 +49,7 @@ function newTrackID = AddNewSegmentHull(clickPt)
         
         newFeature.polyPix = newHull.indexPixels;
     else
-        newHull.time = Figures.time;
+        newHull.time = time;
         newHull.points = newObj.points;
         [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
         newHull.centerOfMass = mean([r c]);

@@ -21,7 +21,12 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     
     newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin},...
                     'ret',{{}}, 'histAct',{''}, 'bErr',{0}, 'ctx',{actCtx});
-    ReplayEditActions = [ReplayEditActions; newAct];
+	
+    if ( isempty(ReplayEditActions) )
+        ReplayEditActions = newAct;
+    else
+        ReplayEditActions = [ReplayEditActions; newAct];
+    end
     
     varargout = cell(1,max(0,nargout-1));
     [bErr historyAction varargout{:}] = Editor.SafeExecuteAction(actPtr, varargin{:});
@@ -44,9 +49,9 @@ function context = getEditContext()
         return;
     end
     
-    curAx = get(Figures.cells.handle, 'CurrentAxis');
+    curAx = get(Figures.cells.handle, 'CurrentAxes');
     cellLims = [xlim(curAx);ylim(curAx)];
-    curAx = get(Figures.tree.handle, 'CurrentAxis');
+    curAx = get(Figures.tree.handle, 'CurrentAxes');
     treeLims = [xlim(curAx);ylim(curAx)];
     
     context = struct('time',{Figures.time}, 'family',{Figures.tree.familyID}, 'treeLims',{treeLims}, 'cellLims',{cellLims});

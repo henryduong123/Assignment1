@@ -73,7 +73,7 @@ function setPhenotype(src, evnt)
     if ( bActive )
         Error.LogAction(['Clear phenotype for ' num2str(trackID)]);
     else
-        Error.LogAction(['Set phenotype for ' num2str(trackID) ' to ' CellPhenotypes.descriptions{phenotype}]);
+        Error.LogAction(['Set phenotype for ' num2str(trackID) ' to ' CellPhenotypes.descriptions{clickPheno}]);
     end
     
     UI.DrawTree(Figures.tree.familyID);

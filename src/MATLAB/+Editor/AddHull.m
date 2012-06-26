@@ -53,7 +53,7 @@ if(~isempty(trackID) && (num > 1))
 elseif ( num == 1 )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
-    [bErr newTrack] = Editor.ReplayableEditAction(@Editor.AddNewCell, clickCoord);
+    [bErr newTrack] = Editor.ReplayableEditAction(@Editor.AddNewCell, clickCoord, Figures.time);
     if ( bErr )
         return;
     end

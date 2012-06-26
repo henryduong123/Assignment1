@@ -81,7 +81,7 @@ SegmentationEdits.changedHulls = [];
 CellFeatures = [];
 GraphEdits = [];
 SegLevels = [];
-ReplayEditActions = struct('funcName',{}, 'funcPtr',{}, 'args',{}, 'ret',{}, 'bErr',{}, 'ctx',{});
+ReplayEditActions = [];
 
 oldCONSTANTS = CONSTANTS;
 

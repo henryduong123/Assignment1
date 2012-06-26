@@ -6,6 +6,8 @@
 function historyAction = LearnFromEdits()
     global SegmentationEdits
     
+    historyAction = '';
+    
     if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))))
         return;
     end

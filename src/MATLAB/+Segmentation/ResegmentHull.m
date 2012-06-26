@@ -90,6 +90,12 @@ for i=1:k
     newHulls = [newHulls nh];
 end
 
+% Define an ordering on the hulls selected, COM is unique per component so
+% this gives a deterministic ordering to the components
+[sortCOM, sortIdx] = sortrows(vertcat(newHulls.centerOfMass));
+newHulls = newHulls(sortIdx);
+connComps = connComps(sortIdx);
+
 % Calculate new features if passed in feature structure is valids
 if ( isempty(feature) )
     return;
