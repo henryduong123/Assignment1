@@ -20,7 +20,7 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     actCtx = getEditContext();
     
     newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin},...
-                    'ret',{{}}, 'histAct',{''}, 'bErr',{0}, 'ctx',{actCtx});
+                    'ret',{{}}, 'histAct',{''}, 'bErr',{0}, 'ctx',{actCtx}, 'chkHash',{[]});
 	
     if ( isempty(ReplayEditActions) )
         ReplayEditActions = newAct;
@@ -38,6 +38,7 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
             Editor.History(historyAction);
             ReplayEditActions(end).histAct = historyAction;
         end
+        ReplayEditActions(end).chkHash = Dev.GetCoreHashList();
     end
 end
 

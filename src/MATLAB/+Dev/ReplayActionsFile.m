@@ -9,7 +9,12 @@ function ReplayActionsFile(filename)
         chkOut = cell(1,length(replayActions(i).ret));
         funcPtr = replayActions(i).funcPtr;
         funcArgs = replayActions(i).args;
-        [bErr chkOut{:}] = Editor.ReplayableEditAction(funcPtr, funcArgs{:});
+        [bErr chkHash chkOut{:}] = Dev.ReplayEditAction(funcPtr, funcArgs{:});
+        
+        cmpHash = replayActions(i).chkHash;
+        if ( ~all(strcmpi(chkHash, cmpHash)) )
+            fprintf('WARNING: Replaying action %d produced different core-hash\n', i);
+        end
         
         if ( bErr ~= replayActions(i).bErr )
             fprintf('WARNING: Replaying action %d produced different result\n', i);

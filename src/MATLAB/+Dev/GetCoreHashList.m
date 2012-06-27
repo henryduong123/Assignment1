@@ -3,15 +3,12 @@ function hashList = GetCoreHashList()
     
     hashList = cell(8,1);
     
-    opt.Method = 'SHA-1';
-    opt.Format = 'HEX';
-    
-    hashList{1} = Dev.DataHash(CellHulls, opt);
-    hashList{2} = Dev.DataHash(CellTracks, opt);
-    hashList{3} = Dev.DataHash(CellFamilies, opt);
-    hashList{4} = Dev.DataHash(CellFeatures, opt);
-    hashList{5} = Dev.DataHash(HashedCells, opt);
-    hashList{6} = Dev.DataHash(CellPhenotypes, opt);
-    hashList{7} = Dev.DataHash(Costs, opt);
-    hashList{8} = Dev.DataHash(GraphEdits, opt);
+    hashList{1} = mexHashData(CellHulls);
+    hashList{2} = mexHashData(CellTracks, '-ignoreField','color');
+    hashList{3} = mexHashData(CellFamilies);
+    hashList{4} = mexHashData(CellFeatures);
+    hashList{5} = mexHashData(HashedCells);
+    hashList{6} = mexHashData(CellPhenotypes);
+    hashList{7} = mexHashData(Costs);
+    hashList{8} = mexHashData(GraphEdits);
 end

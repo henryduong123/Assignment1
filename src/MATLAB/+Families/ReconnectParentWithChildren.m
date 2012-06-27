@@ -35,11 +35,6 @@ if (~isempty(CellTracks(parentTrack).childrenTracks))
         CellTracks(parentTrack).childrenTracks(1), CellTracks(parentTrack).childrenTracks(2));
 end
 
-%% Figure out which child should be on the left (lower cost child)
-costs = [Costs(parentTrack,children(1)) Costs(parentTrack,children(2))];
-[c index] = sort(costs);
-children = children(index);
-
 %% Connect up the track structure
 CellTracks(children(1)).siblingTrack = children(2);
 CellTracks(children(2)).siblingTrack = children(1);
