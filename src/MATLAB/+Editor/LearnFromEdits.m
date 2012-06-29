@@ -3,7 +3,7 @@
 % 
 % Propagate segmentation edits forward.
 
-function historyAction = LearnFromEdits()
+function historyAction = LearnFromEdits(randState)
     global SegmentationEdits
     
     historyAction = '';
@@ -11,6 +11,9 @@ function historyAction = LearnFromEdits()
     if ( isempty(SegmentationEdits) || ((isempty(SegmentationEdits.newHulls) || isempty(SegmentationEdits.changedHulls))))
         return;
     end
+    
+    globStream = RandStream.getGlobalStream();
+    globStream.State = randState;
     
     Tracks.PropagateChanges(SegmentationEdits.changedHulls, SegmentationEdits.newHulls);
     Families.ProcessNewborns();

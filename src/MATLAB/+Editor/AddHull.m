@@ -38,7 +38,11 @@ end
 
 if(~isempty(trackID) && (num > 1))
     % Try to split the existing hull    
-    [bErr newTracks] = Editor.ReplayableEditAction(@Editor.SplitCell, hullID,num);
+    
+    globStream = RandStream.getGlobalStream();
+    randState = globStream.State;
+    
+    [bErr newTracks] = Editor.ReplayableEditAction(@Editor.SplitCell, hullID, num, randState);
     if ( bErr )
         return;
     end
