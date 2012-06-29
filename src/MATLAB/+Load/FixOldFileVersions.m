@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls CellFeatures HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels
+    global CellHulls CellFeatures HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels ReplayEditActions
 
     bNeedsUpdate = 0;
     
@@ -81,6 +81,13 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
         fprintf('\nConverting Phenotype information...\n');
         Load.UpdatePhenotypeInfo();
         fprintf('Finished\n');
+        bNeedsUpdate = 1;
+    end
+    
+    % Adds the special origin action, to indicate that this is initial
+    % segmentation data from which edit actions are built.
+    if ( isempty(ReplayEditActions) || bNeedsUpdate )
+        Editor.ReplayableEditAction(@Editor.OriginAction, 1);
         bNeedsUpdate = 1;
     end
 end

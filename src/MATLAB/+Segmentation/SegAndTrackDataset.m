@@ -163,6 +163,11 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         status = 1;
         return;
     end
+    
+    % Adds the special origin action, to indicate that this is initial
+    % segmentation data from which edit actions are built.
+    Editor.ReplayableEditAction(@Editor.OriginAction, 1);
+    
     fprintf('Done\n');
     
     clear cellSegments;

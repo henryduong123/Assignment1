@@ -13,5 +13,6 @@ function [bErr chkHash varargout] = ReplayEditAction(actPtr, varargin)
         end
     end
     
-    chkHash = Dev.GetCoreHashList();
+%     chkHash = Dev.GetCoreHashList();
+    chkHash = {};
 end
