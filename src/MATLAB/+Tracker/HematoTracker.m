@@ -1,4 +1,4 @@
-function ExternalRetrack()
+function HematoTracker()
     global CONSTANTS CellHulls HashedCells CellFeatures ConnectedDist
     
     bKeep = (~[CellHulls.deleted]);
@@ -47,7 +47,7 @@ function ExternalRetrack()
     fnameOut=['.\segmentationData\Tracked_' CONSTANTS.datasetName '.txt'];
     tic
     fprintf(1,'Tracking...');
-    system(['.\MTC.exe "' fnameIn '" "' fnameOut '" > out.txt']);
+    system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
     fprintf('Done\n');
     tTrack=toc;
     

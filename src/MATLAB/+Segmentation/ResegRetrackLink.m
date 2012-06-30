@@ -26,7 +26,7 @@ function ResegRetrackLink()
     tReseg = toc();
     
     tic();
-    Tracker.ExternalRetrack();
+    Tracker.HematoTracker();
     tRetrack = toc();
     Error.LogAction('Resegmentation/Tracking',[tReseg tRetrack],[]);
     

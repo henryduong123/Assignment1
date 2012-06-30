@@ -57,7 +57,10 @@ function errStatus = SegAndTrack()
     
     if (strcmp(CONSTANTS.cellType,'Hemato'))
         Segmentation.HematoSegmentation(1.0);
-        Tracker.ExternalRetrack();
+        Load.AddConstant('dMaxCenterOfMass',80,1);
+        Load.AddConstant('dMaxConnectComponent',80,1);
+        Load.AddConstant('dMaxConnectComponentTracker',40,1);
+        Tracker.HematoTracker();
         errStatus = 0;
     else
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.imageDatasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);

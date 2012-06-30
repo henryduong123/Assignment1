@@ -71,6 +71,11 @@ fprintf('\nVisual Studio Compiling: %s...\n', ['mexIntegrityCheck.mexw' buildbit
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexIntegrityCheck.sln"']);
 fprintf('Done (%d sec)\n\n', toc());
 
+tic();
+fprintf('Visual Studio Compiling: %s...\n', 'HematoSeg.exe');
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\HematoSeg.sln"']);
+fprintf('Done (%f sec)\n', toc());
+
 % clears out mex cache so src/*.mexw(32/64) can be overwritten
 clear mex
 system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
@@ -78,6 +83,8 @@ system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDi
 system(['copy ..\c\mexIntegrityCheck\Release_' buildplatform '\mexIntegrityCheck.dll .\mexIntegrityCheck.mexw' buildbits]);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
+system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe .\']);
+system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe ' bindir]);
 
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);

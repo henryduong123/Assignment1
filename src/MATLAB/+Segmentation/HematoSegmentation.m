@@ -1,8 +1,13 @@
 function  HematoSegmentation(imageAlpha)
 global CONSTANTS CellHulls
-
-system(['del .\segmentationData\' CONSTANTS.datasetName '*.TIF_seg.txt']);
-system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '\* ' num2str(imageAlpha) '&& exit']);
+eccentricity = 1.0;
+minVol = 175;
+try
+    system(['del .\segmentationData\' CONSTANTS.datasetName '*.TIF_seg.txt']);
+catch errorMessage
+    %fprintf(errorMessage);
+end
+system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' && exit']);
 
 pause(5);
 CellHulls = struct(...

@@ -28,6 +28,14 @@ extern "C"{
 
 #define DIMENSIONS (2)
 
+struct segData {
+	std::string imageFile;
+	std::string outFile;
+	float imageAlpha;
+	int minSize;
+	float eccentricity;
+};
+
 typedef unsigned char CharPixelType;
 typedef unsigned short ShortPixelType;
 typedef unsigned int UintPixelType;
@@ -54,6 +62,17 @@ typedef itk::ConnectedComponentImageFilter<CharImageType,ShortImageType> Connect
 typedef itk::RelabelComponentImageFilter<ShortImageType,ShortImageType> RelabelComponentFilterType;
 typedef itk::LabelGeometryImageFilter<ShortImageType,CharImageType> LabelGeometryImageFilterType;
 
-int segmentation(std::string imageFilepath, std::string outputPath, float imageAlpha, int minVolume);
+struct coordinate{
+	float x;
+	float y;
+};
+
+struct Hull 
+{
+	float centerOfMass[DIMENSIONS];
+	std::vector<CharImageType::IndexType> pixels;
+};
+
+DWORD WINAPI segmentation(LPVOID lpParam);
 
 #endif
