@@ -20,7 +20,7 @@ CellHulls = struct(...
     'userEdited',       {});
 
 for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
-    filename = ['.\segmentationData\' CONSTANTS.datasetName '_t' Helper.GetDigitString(i) '.TIF_seg.txt'];
+    filename = ['.\segmentationData\' Helper.GetImageName(i) '_seg.txt'];
     while (isempty(dir(filename)))
         pause(5);
     end
@@ -46,7 +46,7 @@ for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
     
 end
 
-im = imread([CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF']);
+im = imread(Helper.GetFullImagePath(1));
 CONSTANTS.imageSize = size(im);
 
 for i=1:length(CellHulls)

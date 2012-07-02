@@ -1,7 +1,7 @@
 function [bwDark bwig bwHalo xlims ylims] = PartialSegDarkCenters(centerPt, t, imageAlpha)
     global CONSTANTS SegLevels
     
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
+    fileName = Helper.GetFullImagePath(t);
     if exist(fileName,'file')
         im = Helper.LoadIntensityImage(fileName);
     else

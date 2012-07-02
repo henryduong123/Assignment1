@@ -37,7 +37,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 % figure(Figures.cells.handle);
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
-filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
+filename = Helper.GetFullImagePath(Figures.time);
 if exist(filename,'file')
     img = Helper.LoadIntensityImage(filename);
 else

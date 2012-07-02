@@ -155,7 +155,7 @@ function newHullID = tryAddSegmentation(prevHull)
     global CONSTANTS CellHulls CellFeatures HashedCells Figures
 
     newHullID = [];
-    fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(Figures.time) '.TIF'];
+    fileName = Helper.GetFullImagePath(Figures.time);
     img = Helper.LoadIntensityImage(fileName);
     
     clickPt = [CellHulls(prevHull).centerOfMass(2) CellHulls(prevHull).centerOfMass(1)];

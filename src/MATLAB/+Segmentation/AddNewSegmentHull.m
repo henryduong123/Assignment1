@@ -27,7 +27,7 @@
 function newTrackID = AddNewSegmentHull(clickPt, time)
     global CONSTANTS
 
-    filename = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(time) '.TIF'];
+    filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
     
     [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);

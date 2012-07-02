@@ -14,7 +14,7 @@ function FindSegLevels(bShowProgress)
             UI.Progressbar((t-1)/length(HashedCells));
         end
         
-        fileName = [CONSTANTS.rootImageFolder CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
+        fileName = Helper.GetFullImagePath(t);
         if exist(fileName,'file')
             im = Helper.LoadIntensityImage(fileName);
         else

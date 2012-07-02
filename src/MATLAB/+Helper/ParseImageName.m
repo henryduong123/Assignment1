@@ -1,13 +1,35 @@
 % [sigDigits imageDataset] = ParseImageName(imageName)
 
-function [sigDigits imageDataset] = ParseImageName(imageName)
-    sigDigits = 0;
+function [sigDigits imageDataset] = ParseImageName(imageName)    
+    tIndex = strfind(imageName,'t');
     
-    index = strfind(imageName,'_t');
-    if ( ~isempty(index) )
-        indexEnd = strfind(imageName,'.');
-        sigDigits = indexEnd - index - 2;
-        
-        imageDataset = imageName(1:(index(length(index))-1));
+    if (isempty(tIndex))
+        error('File name does not have time component: %s',imageName);
     end
+    
+    endIndex = strfind(imageName,'.');
+    tIndex = tIndex(find(tIndex<endIndex,1,'last'));
+    
+    if (tIndex+1==endIndex)
+        %TODO the t comes after the number
+        error('File name pattern is not yet supported: %s',imageName);
+    end
+    
+    nanIndex = tIndex;
+    for i=1:endIndex-tIndex
+        if(isnan(str2double(imageName(tIndex+i))))
+            nanIndex = tIndex+i;
+            break;
+        end
+    end
+    
+    if (nanIndex~=tIndex)
+        endIndex = nanIndex;
+    end
+    
+    sigDigits = endIndex - tIndex - 1;
+    imageDataset = imageName(1:(tIndex)-1);
+    
+    imageNamePattern = [imageDataset 't%0' num2str(sigDigits) 'd' imageName(endIndex:end)];
+    Load.AddConstant('imageNamePattern',imageNamePattern,1);
 end

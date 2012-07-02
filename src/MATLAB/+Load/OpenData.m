@@ -44,16 +44,14 @@ else
     save('ColorScheme','colors');
 end
     
-if (~exist('settings','var') || isempty(settings))
-    if (exist('LEVerSettings.mat','file'))
-        load('LEVerSettings.mat');
-    else
-        settings.imagePath = '.\';
-        settings.matFilePath = '.\';
-    end
+
+if (exist('LEVerSettings.mat','file'))
+    load('LEVerSettings.mat');
+else
+    settings.imagePath = '.\';
+    settings.matFilePath = '.\';
 end
 
-filterIndexImage = 0;
 goodLoad = 0;
 opened = 0;
 
@@ -111,7 +109,7 @@ while ( (sigDigits == 0) || ~exist(fileName,'file') )
     CONSTANTS.imageDatasetName = imageDataset;
     CONSTANTS.datasetName = imageDataset;
     CONSTANTS.imageSignificantDigits = sigDigits;
-    fileName = [CONSTANTS.rootImageFolder imageDataset '_t' Helper.GetDigitString(1) '.TIF'];
+    fileName = Helper.GetFullImagePath(1);
 
     tryidx = tryidx + 1;
 end
