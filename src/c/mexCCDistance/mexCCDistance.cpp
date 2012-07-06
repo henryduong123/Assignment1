@@ -8,6 +8,7 @@
 #include "UpdateDistances.h"
 #include "UpdateDistancesThreaded.h"
 #include "Helpers.h"
+#include "Threader.h"
 
 #define WINDOW_SIZE (2)
 
@@ -24,103 +25,29 @@ double ccMaxDist;
 //#pragma optimize ("",off)
 void threadLoop(int j, int numHulls, double* updateCells)
 {
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo( &sysinfo );
-	int numCPU = sysinfo.dwNumberOfProcessors;
-
-	updateData* pArguments = new updateData[numCPU];
-	DWORD*   dwThreadIdArray = new DWORD[numCPU];
-	HANDLE*  hThreadArray = new HANDLE[numCPU]; 
-	int nextEmptyThread = 0;
-	bool filling = TRUE;
+	Threader threader;
+	std::vector<updateData> pArguments;
+	pArguments.reserve(numHulls);
 	char buffer[255];
-
-	for (int i=0; i<numCPU; ++i)
-		hThreadArray[i] = NULL;
 
 	for (int i=0; i<numHulls; ++i)
 	{
 		if (gCellHullsLcl[i].deleted)
 			continue;
+		updateData curData;
+		curData.cellID = updateCells[i];
+		curData.frameOfCell = gCellHullsLcl[MATLAB_TO_C(updateCells[i])].time;
+		curData.nextFrame = gCellHullsLcl[MATLAB_TO_C(updateCells[i])].time+j;
 
-		pArguments[nextEmptyThread].cellID = updateCells[i];
-		pArguments[nextEmptyThread].frameOfCell = gCellHullsLcl[MATLAB_TO_C(updateCells[i])].time;
-		pArguments[nextEmptyThread].nextFrame = gCellHullsLcl[MATLAB_TO_C(updateCells[i])].time+j;
-
-		hThreadArray[nextEmptyThread] = CreateThread(
-			NULL,
-			0,
-			UpdateDistancesThreaded,
-			(LPVOID)(&pArguments[nextEmptyThread]),
-			FALSE,
-			&dwThreadIdArray[nextEmptyThread]);
-
-		if( hThreadArray[nextEmptyThread] == NULL )
-		{
-			char buffer[255];
-			sprintf_s(buffer,"CreateThread error: %d\n", GetLastError());
-			mexErrMsgTxt(buffer);
-			return;
-		}
-
-		++nextEmptyThread;
-		if (nextEmptyThread==numCPU)
-			filling = false;
-
-		if (i==numHulls-1)
-			break;
-
-		if(!filling)
-		{
-			DWORD doneThread = WaitForMultipleObjects(
-				numCPU,
-				hThreadArray,
-				FALSE,
-				INFINITE);
-
-			DWORD ind = doneThread - WAIT_OBJECT_0;
-			nextEmptyThread = ind;
-			if (nextEmptyThread>=numCPU)
-			{
-				char* message;
-				FormatMessageA(
-					FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
-					NULL,
-					GetLastError(),
-					0,
-					(LPSTR)&message,
-					10,
-					NULL);
-				mexErrMsgTxt(message);
-			}
-			CloseHandle(hThreadArray[ind]);
-			hThreadArray[ind] = NULL;
-		}
+		pArguments.push_back(curData);
+	}
+	
+	for (int i=0; i<pArguments.size(); ++i)
+	{
+		threader.add(UpdateDistancesThreaded,&pArguments[i]);
 	}
 
-	if (filling)
-	{
-		WaitForMultipleObjects(
-			nextEmptyThread,
-			hThreadArray,
-			TRUE,
-			INFINITE);
-	}else
-	{
-		WaitForMultipleObjects(
-			numCPU,
-			hThreadArray,
-			TRUE,
-			INFINITE);
-	}
-
-	for (int i=0; i<numCPU; ++i)
-		if (hThreadArray[i]!=NULL)
-			CloseHandle(hThreadArray[i]);
-
-	delete[] pArguments;
-	delete[] dwThreadIdArray;
-	delete[]  hThreadArray;
+	threader.run();
 }
 
 //#pragma optimize ("",off)
@@ -287,4 +214,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	}
 
 	mexPutVariable("global","ConnectedDist",ccDistOut);
+
+	gConnectedDistLcl.clear();
+	gCellHullsLcl.clear();
+	gHashedCellsLcl.clear();
 }

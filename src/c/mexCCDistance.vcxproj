@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="mexCCDistance\Helpers.h" />
     <ClInclude Include="mexCCDistance\mexCCDistance.h" />
+    <ClInclude Include="mexCCDistance\Threader.h" />
     <ClInclude Include="mexCCDistance\UpdateDistances.h" />
     <ClInclude Include="mexCCDistance\UpdateDistancesThreaded.h" />
   </ItemGroup>
