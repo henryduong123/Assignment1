@@ -126,6 +126,10 @@ function SetDistance(updateCell, nextCell, dist, updateDir)
     
     if ( updateDir > 0 )
         ConnectedDist{updateCell} = [ConnectedDist{updateCell}; nextCell dist];
+        
+        % Sort hulls to match MEX code
+        [sortHulls sortIdx] = sort(ConnectedDist{updateCell}(:,1));
+        ConnectedDist{updateCell} = ConnectedDist{updateCell}(sortIdx,:);
     else
         chgIdx = [];
         if ( ~isempty(ConnectedDist{nextCell}) )
@@ -137,6 +141,10 @@ function SetDistance(updateCell, nextCell, dist, updateDir)
         else
             ConnectedDist{nextCell}(chgIdx,:) = [updateCell dist];
         end
+        
+        % Sort hulls to match MEX code
+        [sortHulls sortIdx] = sort(ConnectedDist{nextCell}(:,1));
+        ConnectedDist{nextCell} = ConnectedDist{nextCell}(sortIdx,:);
     end
 end
 
