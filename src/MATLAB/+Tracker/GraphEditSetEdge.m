@@ -24,10 +24,27 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function GraphEditSetEdge(trackID, nextTrackID, time)
-    global GraphEdits CachedCostMatrix
+function GraphEditSetEdge(trackID, nextTrackID, time, bLongDistance)
+    global GraphEdits CachedCostMatrix CellTracks
     
-    trackHull = Helper.GetNearestTrackHull(trackID, time-1, -1);
+    if(bLongDistance)
+        track = CellTracks(trackID);
+        if(isempty(track.hulls)) %check for valid track
+            trackHull = 0;
+        else
+            for i=length(track.hulls):-1:1  %search backward through hulls for last edit or first hull
+                trackHull = track.hulls(i);
+                if(trackHull)
+                    if(any(GraphEdits(trackHull,:)) || any(GraphEdits(:,trackHull)))
+                        break
+                    end
+                end
+            end
+        end
+    else
+        trackHull = Helper.GetNearestTrackHull(trackID, time-1, -1);
+    end
+    
     nextHull = Helper.GetNearestTrackHull(nextTrackID, time, 1);
     
     if ( trackHull == 0 || nextHull == 0 )

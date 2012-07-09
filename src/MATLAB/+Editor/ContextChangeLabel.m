@@ -37,7 +37,7 @@ newTrackID = str2double(newTrackID(1));
 try
     %TODO: This edit graph update may need to more complicated to truly
     %capture user edit intentions.
-    Tracker.GraphEditSetEdge(newTrackID,trackID,time);
+    Tracker.GraphEditSetEdge(newTrackID,trackID,time, true);
     Tracks.ChangeLabel(trackID,newTrackID,time);
     Editor.History('Push');
 catch errorMessage
