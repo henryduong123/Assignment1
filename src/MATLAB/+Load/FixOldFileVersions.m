@@ -30,9 +30,9 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
     bNeedsUpdate = 0;
     
     % Cannot fix this without resegmentation so give a warning if CellFeatures doesn't exist yet
-    if ( isempty(CellFeatures) )
-        msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
-    end
+%     if ( isempty(CellFeatures) )
+%         msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
+%     end
     
     emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
     if ( ~isempty(emptyHash) )
@@ -70,7 +70,8 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
     if ( ~Load.CheckFileVersionString('4.3') || isempty(ConnectedDist) )
         fprintf('\nBuilding Cell Distance Information...\n');
         ConnectedDist = [];
-        Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
+        mexCCDistance(1:length(CellHulls),0);
+%         Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
         fprintf('Finished\n');
         bNeedsUpdate = 1;
     end

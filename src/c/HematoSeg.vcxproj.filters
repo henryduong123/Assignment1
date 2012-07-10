@@ -24,6 +24,9 @@
     <ClInclude Include="HematoSeg\GapStatistic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HematoSeg\Threader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HematoSeg\HematoSeg.cpp">

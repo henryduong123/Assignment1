@@ -237,6 +237,9 @@ int getBest_K(const int K_MAX, std::vector<Hull>& hulls)
 		sigma /= B; //(1/B)sum{log(W_kb)-(1/B)sum(log(W_kb)}^2
 		sigma = sqrt(sigma); //sqrt[(1/B)sum{log(W_kb)-(1/B)sum(log(W_kb)}^2]
 
+		if (k_1==1)
+			sigma *= 1.3;
+
 		if (gap>=gap_1-sigma*(sqrt(1.0+1.0/B))) //Gap(K)>=Gap(k+1)-sigma_k+1(sqrt(1+1/B))
 			break;
 
@@ -272,10 +275,9 @@ void makeHulls(const Hull& ORG_HULL, std::vector<Hull>& newHulls, const std::vec
 }
 
 void GapStatistic(LabelGeometryImageFilterType::LabelPointType centerOfMass,
-	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates, std::vector<Hull>& hulls)
+	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates, std::vector<Hull>& hulls, const int K_MAX)
 {
 	const int B = 20; // B is the number of reference data from Tibshirani's paper
-	const int K_MAX = 10;
 	hulls.resize(1+B);
 	Hull tempHull;
 	tempHull.pixels.resize(pixelCoordinates.size());

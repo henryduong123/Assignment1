@@ -60,7 +60,7 @@ typedef itk::BinaryDilateImageFilter<CharImageType,CharImageType,StructuringElem
 typedef itk::BinaryFillholeImageFilter<CharImageType> BinaryFillholeImageFilterType;
 typedef itk::ConnectedComponentImageFilter<CharImageType,ShortImageType> ConnectedComponentFilterType;
 typedef itk::RelabelComponentImageFilter<ShortImageType,ShortImageType> RelabelComponentFilterType;
-typedef itk::LabelGeometryImageFilter<ShortImageType,CharImageType> LabelGeometryImageFilterType;
+typedef itk::LabelGeometryImageFilter<ShortImageType,ShortImageType> LabelGeometryImageFilterType;
 
 struct coordinate{
 	float x;

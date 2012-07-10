@@ -22,6 +22,7 @@
     <ClInclude Include="HematoSeg\GapStatistic.h" />
     <ClInclude Include="HematoSeg\Helpers.h" />
     <ClInclude Include="HematoSeg\Segmentation.h" />
+    <ClInclude Include="HematoSeg\Threader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HematoSeg\GapStatistic.cpp" />
@@ -135,8 +136,8 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
     </Link>
     <PostBuildEvent>
       <Message>Copy binaries to bin directory</Message>
-      <Command>copy /Y $(OutDir)$(ProjectName).exe ..\..\bin
-copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
+      <Command>copy /Y $(OutDir)$(ProjectName).exe ..\..\bin\$(ProjectName).exe
+copy /Y $(OutDir)$(ProjectName).exe ..\MATLAB\$(ProjectName).exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -187,8 +188,7 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
     </Link>
     <PostBuildEvent>
       <Message>Copy binaries to bin directory</Message>
-      <Command>copy /Y $(OutDir)$(ProjectName).exe ..\..\bin
-copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
+      <Command>echo copy /Y $(OutDir)$(ProjectName).exe ..\MATLAB\$(ProjectName).exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

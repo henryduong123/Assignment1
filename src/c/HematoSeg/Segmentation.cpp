@@ -5,10 +5,12 @@
 
 DWORD WINAPI segmentation(LPVOID lpParam)
 {
+	clock_t startTime = clock();
 	segData* paramaters = (segData*)lpParam;
 
 	CharImageFileReaderType::Pointer		charReader =		CharImageFileReaderType::New();
 	CharImageFileWriterType::Pointer		charWriter =		CharImageFileWriterType::New();
+	ShortImageFileWriterType::Pointer		shortWriter =		ShortImageFileWriterType::New();
 
 	itk::TIFFImageIO::Pointer				imageIO =			itk::TIFFImageIO::New();
 
@@ -68,7 +70,7 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	binaryHoleFiller->SetInput(binaryErode2->GetOutput());
 	binaryHoleFiller->SetFullyConnected(false);
 
-	//charWriter->SetFileName("D:\\Desktop\\holefiller.tiff");
+	//charWriter->SetFileName("C:\\Users\\Eric\\Desktop\\holefiller.tiff");
 	//charWriter->SetImageIO(imageIO);
 	//charWriter->SetInput(binaryHoleFiller->GetOutput());
 	//charWriter->Update();
@@ -90,11 +92,14 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 
 	std::vector<int> labelsToUse;
 
-	for (int i=1; i<labels.size(); ++i)
+	for (int i=0; i<labels.size(); ++i)
 	{
 		double eccentricity = labelGeometryImageFilter->GetEccentricity(i);
+		double minorAxes = labelGeometryImageFilter->GetMinorAxisLength(i);
 		int vol = labelGeometryImageFilter->GetVolume(i);
-		if (eccentricity>paramaters->eccentricity || vol<paramaters->minSize) continue;
+		if (vol<paramaters->minSize) continue;
+		if (eccentricity>paramaters->eccentricity && minorAxes<sqrt((double)paramaters->minSize))
+			continue;
 		labelsToUse.push_back(i);
 	}
 
@@ -113,9 +118,10 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	//charWriter->Update();
 
 	//sprintf_s(buffer,"geo_%s", paramaters->imageFile.substr(idx+1).c_str());
-	//charWriter->SetFileName(buffer);
-	//charWriter->SetInput(labelGeometryImageFilter->GetOutput());
-	//charWriter->Update();
+	//shortWriter->SetFileName("C:\\Users\\Eric\\Desktop\\geo.tiff");
+	//shortWriter->SetInput(labelGeometryImageFilter->GetOutput());
+	//shortWriter->SetImageIO(imageIO);
+	//shortWriter->Update();
 
 	std::vector<Hull> hulls;
 	hulls.reserve(labelsToUse.size());
@@ -127,7 +133,9 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 		LabelGeometryImageFilterType::LabelIndicesType pixelCoordinates= 
 			labelGeometryImageFilter->GetPixelIndices(labelsToUse[i]);
 		std::vector<Hull> tempHulls;
-		GapStatistic(centerOfMass,pixelCoordinates,tempHulls);
+		double vol = labelGeometryImageFilter->GetVolume(labelsToUse[i]);
+		int kMax = std::max(1.0,floor(vol/paramaters->minSize));
+		GapStatistic(centerOfMass,pixelCoordinates,tempHulls,kMax);
 
 		for (int i=0; i<tempHulls.size(); ++i)
 			hulls.push_back(tempHulls[i]);
@@ -151,6 +159,11 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 
 		outputText += "\n";
 	}
+
+	double dif = ((double)clock() - (double)startTime) / CLOCKS_PER_SEC;
+
+	sprintf_s(buffer,"\nseconds to segment: %f\n",dif);
+	outputText += buffer;
 
 	FILE* file = fopen(paramaters->outFile.c_str(),"w");
 	fprintf_s(file,"%s",outputText.c_str());

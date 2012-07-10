@@ -34,7 +34,10 @@ function HematoTracker()
     end
     
     ConnectedDist = [];
-    Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
+    fprintf(1,'Calculating Distances...');
+    mexCCDistance(1:length(CellHulls),0);
+    fprintf(1,'Done\n');
+%     Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
     
     if ( ~exist('segmentationData','dir') )
         mkdir('segmentationData');

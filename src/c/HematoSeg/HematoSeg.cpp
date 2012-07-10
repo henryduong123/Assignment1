@@ -3,23 +3,23 @@
 
 #include "Segmentation.h"
 #include "Helpers.h"
+#include "Threader.h"
 
 int main(int argc, char * argv[])
 {
-	if(argc<5)
+	if(argc<=5)
 	{
 		printf_s("Usage message here");//TODO this line
 		return 0;
 	}
 
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo( &sysinfo );
+	double processorUsage = 1.0;
+	if (argc==6)
+	{
+		processorUsage = atof(argv[5]);
+	}
 
-	int numCPU = sysinfo.dwNumberOfProcessors;
-
-	segData* pArguments = new segData[numCPU];
-	DWORD*   dwThreadIdArray = new DWORD[numCPU];
-	HANDLE*  hThreadArray = new HANDLE[numCPU]; 
+	Threader threader(processorUsage);
 
 	std::string imagePath = pathCreate(argv[1]);
 
@@ -37,6 +37,9 @@ int main(int argc, char * argv[])
 
 	if( handle!=INVALID_HANDLE_VALUE ) 
 	{
+		
+		std::vector<segData> pArguments;
+
 		do
 		{
 			std::string curfile(imagePath);
@@ -47,81 +50,27 @@ int main(int argc, char * argv[])
 			outputfile += fileNames.cFileName;
 			outputfile += "_seg.txt";
 
-			if (isTiffFile(curfile))
+			if (isTiffFile(curfile) && !fileExists(outputfile.c_str()))
 			{
-				pArguments[nextEmptyThread].imageFile = curfile;
-				pArguments[nextEmptyThread].outFile = outputfile;
-				pArguments[nextEmptyThread].imageAlpha = atof(argv[2]);
-				pArguments[nextEmptyThread].minSize = atoi(argv[3]);
-				pArguments[nextEmptyThread].eccentricity = atof(argv[4]);
+				segData curImage;
 
-				hThreadArray[nextEmptyThread] = CreateThread(
-					NULL,
-					0,
-					segmentation,
-					(LPVOID)(&pArguments[nextEmptyThread]),
-					FALSE,
-					&dwThreadIdArray[nextEmptyThread]);
-
-				if( hThreadArray[nextEmptyThread] == NULL )
-				{
-					printf("CreateThread error: %d\n", GetLastError());
-					return 1;
-				}
-
-				++nextEmptyThread;
-				if (nextEmptyThread==numCPU)
-					filling = false;
-
-				if(!filling)
-				{
-					DWORD doneThread = WaitForMultipleObjects(
-						numCPU,
-						hThreadArray,
-						FALSE,
-						INFINITE);
-
-					DWORD ind = doneThread - WAIT_OBJECT_0;
-					nextEmptyThread = ind;
-					if (nextEmptyThread>=numCPU)
-					{
-						char* message;
-						FormatMessageA(
-							FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
-							NULL,
-							GetLastError(),
-							0,
-							(LPSTR)&message,
-							10,
-							NULL);
-						printf_s(message);
-					}
-				}
+				curImage.imageFile = curfile;
+				curImage.outFile = outputfile;
+				curImage.imageAlpha = atof(argv[2]);
+				curImage.minSize = atoi(argv[3]);
+				curImage.eccentricity = atof(argv[4]);
+				pArguments.push_back(curImage);
 			}
 
 		} while(FindNextFileA(handle,&fileNames));
-	}
 
-	if (filling)
-	{
-		WaitForMultipleObjects(
-			nextEmptyThread,
-			hThreadArray,
-			TRUE,
-			INFINITE);
-	}else
-	{
-		WaitForMultipleObjects(
-			numCPU,
-			hThreadArray,
-			TRUE,
-			INFINITE);
-	}
+		for (int i=0; i<pArguments.size(); ++i)
+		{
+			threader.add(segmentation,&pArguments[i]);
+		}
 
-	FindClose(handle);
-	delete[] pArguments;
-	delete[] dwThreadIdArray;
-	delete[] hThreadArray;
+		threader.run();
+	}
 
 	return 0;
 }

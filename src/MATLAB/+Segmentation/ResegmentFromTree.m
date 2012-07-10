@@ -242,7 +242,8 @@ end
 function updateTracking(prevHulls, newHulls, dir)
     global CellHulls HashedCells Costs GraphEdits
     
-    Tracker.BuildConnectedDistance(newHulls, 1);
+    mexCCDistance(newHulls,1);
+%     Tracker.BuildConnectedDistance(newHulls, 1);
     % Add zero costs to cost matrix if necessary
     addCosts = max(max(newHulls)-size(Costs,1),0);
     if (  addCosts > 0 )
