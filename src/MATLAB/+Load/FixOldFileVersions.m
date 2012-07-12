@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions()
-    global CellHulls HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions
+    global CellHulls HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions Log
 
     bNeedsUpdate = 0;
     
@@ -84,5 +84,13 @@ function bNeedsUpdate = FixOldFileVersions()
     if ( isempty(ReplayEditActions) || bNeedsUpdate )
         Editor.ReplayableEditAction(@Editor.OriginAction, 1);
         bNeedsUpdate = 1;
+    end
+    
+    for i=1:length(Log)
+        if(isfield(Log(i),'figures'))
+            if(isfield(Log(i).figures,'advanceTimerHandle'))
+                Log(i).figures.advanceTimerHandle = [];
+            end
+        end
     end
 end
