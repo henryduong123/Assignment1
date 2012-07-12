@@ -1,4 +1,4 @@
-% History.m - 
+% History.m -
 % This will keep track of any state changes.  Call this function once the
 % new state is established. After the changes take place.
 % Possible actions are:
@@ -19,90 +19,63 @@
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
 %     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
-% 
+%
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     LEVer is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
-%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see
 %     <http://www.gnu.org/licenses/>.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function History(action)
 
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls CellFeatures Costs GraphEdits CachedCostMatrix ConnectedDist CellPhenotypes SegmentationEdits
+global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs GraphEdits CachedCostMatrix ConnectedDist CellPhenotypes SegmentationEdits
+% global test
 
 persistent hist;            %stack
 persistent current;         %points to the last state saved on the stack
 persistent bottom;          %points to the oldest or bottom most valid history
 persistent top;             %points to the youngest or top most valid history
-persistent empty;           %flag will be "empty" if only the original opened state is on the stack
-persistent full;            %flag
-persistent exceededLimit;   %flag to denote if CONSTANTS.historySize has ever been reached
+persistent saved;           %flag will be "empty" if only the original opened state is on the stack
 
 if (isempty(hist))
-    current = 1;
+    current = 0;
     bottom = 0;
     top = 0;
-    empty = 1;
-    full = 0;
-    exceededLimit = 0;
+    saved = 0;
 end
 
 switch action
-    case 'Push'
-        if (empty)
-            empty = 0;
-            bottom = 1;
-        elseif (full)
-            %drop oldest history
-            exceededLimit = 1;
-            if (bottom < CONSTANTS.historySize)
-                bottom = bottom + 1;
-            else
-                bottom = 1;
+    case 'Saved'
+        saved = current;
+        setMenus();
+    case 'Push'   
+        current = Increment(current);
+        
+        if (current==bottom)
+            if (bottom==saved)
+                saved = 0;
             end
-        end
-
-        current = current + 1;
-        if (current > CONSTANTS.historySize)
-            current = 1;
+            bottom = Increment(bottom);
         end
         
         top = current;
         
         SetHistElement(current);
-        
-        if (current==bottom)
-            full = 1;
-            empty = 0;
-        end
+
         setMenus();
-    case 'Pop'        
-        if (~empty)
-            if (current == 0)
-                current = CONSTANTS.historySize;
-            end
-            
-            if (current==bottom && ~full)
-                empty = 1;
-            end
-            
-            full = 0;
-            
-            current = current - 1;
-            
-            if(current==0)
-                current = CONSTANTS.historySize;
-            end
+    case 'Undo'
+        if (current~=bottom)                    
+            current = Decrement(current);
             
             GetHistElement(current);
             
@@ -111,121 +84,65 @@ switch action
             UI.DrawCells();
             UI.UpdateSegmentationEditsMenu();
             UI.UpdatePhenotypeMenu();
-            setMenus();
             Error.LogAction('Undo');
         end
+        setMenus();
     case 'Redo'
-        if (top>current || (bottom>=top && top~=current))
+        if (top~=current)
             %redo possible
-            current = current + 1;
-            if (current > CONSTANTS.historySize)
-                current = 1;
-            end
+            current = Increment(current);
             
             GetHistElement(current);
-            
-            empty = 0;
-            if(current==bottom)
-                full = 1;
-            end
             
             %Update displays
             UI.DrawTree(Figures.tree.familyID);
             UI.DrawCells();
             UI.UpdateSegmentationEditsMenu();
             UI.UpdatePhenotypeMenu();
-            setMenus();
             Error.LogAction('Redo');
         end
+        setMenus();
     case 'Top'
-         GetHistElement(current);
-         UI.UpdateSegmentationEditsMenu();
+        GetHistElement(current);
+        UI.UpdateSegmentationEditsMenu();
         UI.UpdatePhenotypeMenu();
     case 'Init'
         current = 1;
         bottom = 1;
         top = 1;
-        empty = 0;
-        full = 0;
-        exceededLimit = 0;
+        saved = 1;
         SetHistElement(current);
-        set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-        set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-        set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-        set(Figures.tree.menuHandles.undoMenu,'Enable','off');
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-        set(Figures.tree.menuHandles.saveMenu,'Enable','off');
+        setMenus();
 end
 
     function setMenus()
-        if(top>bottom)
-            %not "rolled over"
-            if(current<top)
-                %redo possible
-                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
-            else
-                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-            end
-            if(current>bottom)
-                %undo possible
-                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-            else
-                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
-            end
-        elseif(top==bottom && ~empty)
-            if(current~=top)
-                %redo and undo possible
-                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
-                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-            else
-                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-                if(~full)
-                    set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-                    set(Figures.tree.menuHandles.undoMenu,'Enable','off');
-                else
-                    set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-                    set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-                end
-            end
-            
+        if (current==bottom)
+            set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+            set(Figures.tree.menuHandles.undoMenu,'Enable','off');
         else
-            %"rolled over"
-            if(current>=bottom || current<top)
-                %redo possible
-                set(Figures.cells.menuHandles.redoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','on');
-            else
-                set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-            end
-            if(current>bottom || current<=top)
-                %undo possible
-                set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-            else
-                set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-                set(Figures.tree.menuHandles.undoMenu,'Enable','off');
-            end
+            set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+            set(Figures.tree.menuHandles.undoMenu,'Enable','on');
         end
         
-        %check to see if we are at the original state from the .mat file
-        if(exceededLimit)
-            set(Figures.cells.menuHandles.saveMenu,'Enable','on');
-            set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+        if (current==top)
+            set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+            set(Figures.tree.menuHandles.redoMenu,'Enable','off');
         else
-            if(empty)
+            set(Figures.cells.menuHandles.redoMenu,'Enable','on');
+            set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+        end
+        
+        if (isfield(Figures.cells,'menuHandles') && isfield(Figures.cells.menuHandles,'saveMenu'))
+            if (saved==current)
                 set(Figures.cells.menuHandles.saveMenu,'Enable','off');
                 set(Figures.tree.menuHandles.saveMenu,'Enable','off');
+                set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
+                set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
             else
                 set(Figures.cells.menuHandles.saveMenu,'Enable','on');
                 set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+                set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
+                set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
             end
         end
     end %setMenu
@@ -235,7 +152,6 @@ end
         hist(index).CellTracks = CellTracks;
         hist(index).HashedCells = HashedCells;
         hist(index).CellHulls = CellHulls;
-        hist(index).CellFeatures = CellFeatures;
         hist(index).Costs = Costs;
         hist(index).GraphEdits = GraphEdits;
         hist(index).CachedCostMatrix = CachedCostMatrix;
@@ -250,7 +166,6 @@ end
         CellTracks = hist(index).CellTracks;
         HashedCells = hist(index).HashedCells;
         CellHulls = hist(index).CellHulls;
-        CellFeatures = hist(index).CellFeatures;
         Costs = hist(index).Costs;
         GraphEdits = hist(index).GraphEdits;
         CachedCostMatrix = hist(index).CachedCostMatrix;
@@ -259,4 +174,20 @@ end
         CellPhenotypes = hist(index).CellPhenotypes;
         SegmentationEdits = hist(index).SegmentationEdits;
     end
+
+    function index = Increment(index)
+        index = index+1;
+        if (index > CONSTANTS.historySize)
+            index = 1;
+        end
+    end
+
+    function index = Decrement(index)
+        index = index-1;
+        if (index == 0 )
+            index = CONSTANTS.historySize;
+        end
+    end
+
+%test = [test; [current,bottom,top,saved]];
 end

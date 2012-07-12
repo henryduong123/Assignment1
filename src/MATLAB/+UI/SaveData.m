@@ -49,14 +49,6 @@ else
     end
 end
 
-%no longer "dirty"
-if(isfield(Figures,'tree') && isfield(Figures.tree,'menuHandles') && isfield(Figures.tree.menuHandles,'saveMenu'))
-    set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-    set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-end
-
-Error.LogAction('Saved');
-
 %let the user know that the drawing is done
 if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.tree.handle,'Pointer','arrow');

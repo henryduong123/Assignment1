@@ -4,6 +4,7 @@
 % This initial action creates a has of several core data structures to
 % allow verification that a run of edits starts from the correct data.
 
-function [coreHash bInitialSeg] = OriginAction(bInitialSeg)
+function [historyAction coreHash bInitialSeg] = OriginAction(bInitialSeg)
+    historyAction = '';
     coreHash = Dev.GetCoreHashList();
 end

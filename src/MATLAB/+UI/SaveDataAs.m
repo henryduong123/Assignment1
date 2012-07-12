@@ -25,7 +25,7 @@
 
 function SaveDataAs()
 
-global CONSTANTS Figures
+global CONSTANTS
 
 if (exist('LEVerSettings.mat','file')~=0)
         load('LEVerSettings.mat');
@@ -49,12 +49,7 @@ else
     return
 end
 
-
 save('LEVerSettings.mat','settings');
-
-%no longer "dirty"
-set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-set(Figures.cells.menuHandles.saveMenu,'Enable','off');
 
 Error.LogAction(['Saved As: ' settings.matFile]);
 end

@@ -5,5 +5,5 @@
 % was performed.
 
 function historyAction = Undo()
-    historyAction = 'Pop';
+    historyAction = 'Undo';
 end
