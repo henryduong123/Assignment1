@@ -36,6 +36,10 @@ if (isempty(currentTrack) || isempty(desiredTrack))
     error('Need both tracks, currentTrack: %d, desiredTrack: %d',currentTrack,desiredTrack);
 end
 
+if (time<CellTracks(desiredTrack).startTime)
+    error('DesiredTrack %d has to exist prior to time %d',desiredTrack,time);
+end
+
 droppedTracks = [];
 currentParent = [];
 
@@ -43,7 +47,7 @@ if(~exist('time','var'))
     time = CellTracks(currentTrack).startTime;
 end
 
-if (time>=CellTracks(desiredTrack).startTime)
+% if (time>=CellTracks(desiredTrack).startTime)
     %% The desiredTrack is before the currentTrack
     % Remove any future track on the desiredTrack
     if (time<=CellTracks(desiredTrack).endTime)
@@ -53,13 +57,13 @@ if (time>=CellTracks(desiredTrack).startTime)
     startHash = time-CellTracks(currentTrack).startTime+1;
     endHash = length(CellTracks(currentTrack).hulls);
     hulls = CellTracks(currentTrack).hulls(startHash:endHash);
-else
-    %% The currentTrack is before the desiredTrack
-    % Remove any future track on the currentTrack
-    currentParent = CellTracks(currentTrack).parentTrack;
-    droppedTracks = [droppedTracks Families.RemoveFromTreePrune(currentTrack,time)];
-    hulls = CellTracks(currentTrack).hulls;
-end
+% else
+%     %% The currentTrack is before the desiredTrack
+%     % Remove any future track on the currentTrack
+%     currentParent = CellTracks(currentTrack).parentTrack;
+%     droppedTracks = [droppedTracks Families.RemoveFromTreePrune(currentTrack,time)];
+%     hulls = CellTracks(currentTrack).hulls;
+% end
 
 if (any(droppedTracks==desiredTrack))
     % This means that the desired track is off the tree but still has all of

@@ -9,8 +9,14 @@
 function droppedTracks = ChangeLabel(currentTrack, desiredTrack, time)
 global CellTracks
 
+droppedTracks = [];
+
 if (~exist('time','var'))
     time = CellTracks(currentTrack).startTime;
+end
+
+if (time<CellTracks(desiredTrack).startTime)
+    return
 end
 
 children = CellTracks(currentTrack).childrenTracks;
