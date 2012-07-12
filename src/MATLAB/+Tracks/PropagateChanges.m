@@ -125,7 +125,7 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
 % TODO: This was the constraint to only split into actually tracked hulls
     while ( length(desireSplitHulls) > 1 )
         % Try to split
-        [newHulls oldHull oldFeat] = splitNextFrame(hull, length(desireSplitHulls));
+        [newHulls oldHull] = splitNextFrame(hull, length(desireSplitHulls));
         if ( isempty(newHulls) )
             return;
         end
@@ -150,25 +150,20 @@ function [newHulls] = attemptNextFrameSplit(t, hull, desireSplitHulls)
             break;
         end
         
-        revertSplit(t+1, hull, newHulls, oldHull, oldFeat);
+        revertSplit(t+1, hull, newHulls, oldHull);
         desireSplitHulls = trackedSplitHulls;
         newHulls = [];
     end
 end
 
-function [newHullIDs oldHull oldFeat] = splitNextFrame(hullID, k)
-    global CellHulls CellFeatures
+function [newHullIDs oldHull] = splitNextFrame(hullID, k)
+    global CellHulls 
 
     newHullIDs = [];
     
     oldHull = CellHulls(hullID);
-    oldFeat = [];
-    
-    if ( ~isempty(CellFeatures) )
-        oldFeat = CellFeatures(hullID);
-    end
 
-    [newHulls newFeats] = Segmentation.ResegmentHull(CellHulls(hullID), oldFeat, k);
+    newHulls = Segmentation.ResegmentHull(CellHulls(hullID), k);
     if ( isempty(newHulls) )
         return;
     end
@@ -176,7 +171,7 @@ function [newHullIDs oldHull oldFeat] = splitNextFrame(hullID, k)
     setHullIDs = zeros(1,length(newHulls));
     setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
-    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls, newFeats);
+    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
 end
 
 function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHulls, splitHulls)
@@ -223,8 +218,8 @@ function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHull
     end
 end
 
-function revertSplit(t, hull, newHulls, oldHull, oldFeat)
-    global CellHulls CellFeatures HashedCells CellTracks CellFamilies Costs GraphEdits CachedCostMatrix ConnectedDist
+function revertSplit(t, hull, newHulls, oldHull)
+    global CellHulls HashedCells CellTracks CellFamilies Costs GraphEdits CachedCostMatrix ConnectedDist
     
     rmHulls = setdiff(newHulls,hull);
     
@@ -252,13 +247,7 @@ function revertSplit(t, hull, newHulls, oldHull, oldFeat)
     
     CellHulls(hull) = oldHull;
     CellHulls = CellHulls(leaveHulls);
-    
-    % Reset cell features if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(hull) = oldFeat;
-        CellFeatures = CellFeatures(leaveHulls);
-    end
-    
+        
    mexCCDistance(hull,1);
 %     Tracker.BuildConnectedDistance(hull,1);
 end

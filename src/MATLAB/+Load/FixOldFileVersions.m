@@ -24,8 +24,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function bNeedsUpdate = FixOldFileVersions(currentVersion)
-    global CellHulls CellFeatures HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks SegLevels ReplayEditActions
+function bNeedsUpdate = FixOldFileVersions()
+    global CellHulls HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions
 
     bNeedsUpdate = 0;
     
@@ -40,13 +40,7 @@ function bNeedsUpdate = FixOldFileVersions(currentVersion)
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
     end
-    
-    % Find Segmentation levels per-frame for use in feature extraction
-    if ( isempty(SegLevels) )
-        Load.FindSegLevels();
-        bNeedsUpdate = 1;
-    end
-    
+   
     % Add imagePixels field to CellHulls structure (and resave in place)
     if ( ~isfield(CellHulls, 'imagePixels') )
         fprintf('\nAdding Image Pixel Information...\n');

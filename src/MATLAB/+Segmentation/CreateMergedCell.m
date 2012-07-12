@@ -23,11 +23,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(mergeCells)
-    global CONSTANTS CellHulls CellFeatures
+function [mergeObj, deleteCells] = CreateMergedCell(mergeCells)
+    global CONSTANTS CellHulls
     
     mergeObj = [];
-    mergeFeat = [];
     deleteCells = [];
     
     ccM = calcConnDistM(mergeCells);
@@ -59,74 +58,6 @@ function [mergeObj, mergeFeat, deleteCells] = CreateMergedCell(mergeCells)
         mergeObj.centerOfMass = mean([r c]);
         mergeObj.deleted = 0;
         mergeObj.userEdited = 0;
-        
-        % Calculate merged cell features
-        if ( isempty(CellFeatures) )
-            return;
-        end
-        
-        mergeFeat = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{0}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
-        
-%         [bwDark bwig bwHalo] = SegDarkCenters(mergeObj.time, CONSTANTS.imageAlpha);
-        center = [mergeObj.centerOfMass(2) mergeObj.centerOfMass(1)];
-        [bwDark bwig bwHalo] = Segmentation.PartialSegDarkCenters(center, mergeObj.time, CONSTANTS.imageAlpha);
-        
-        allPolyPix = vertcat(CellFeatures(deleteCells).polyPix);
-        [polyr polyc] = ind2sub(CONSTANTS.imageSize, allPolyPix);
-        
-        xlims = Helper.Clamp([min(polyc)-5 max(polyc)+5], 1, CONSTANTS.imageSize(2));
-        ylims = Helper.Clamp([min(polyr)-5 max(polyr)+5], 1, CONSTANTS.imageSize(1));
-        
-        locr = polyr - ylims(1) + 1;
-        locc = polyc - xlims(1) + 1;
-        
-        locsz = [ylims(2)-ylims(1) xlims(2)-xlims(1)]+1;
-        locind = sub2ind(locsz, locr, locc);
-
-        locbwpoly = false(locsz);
-        locbwpoly(locind) = 1;
-        
-%         figure;imagesc(locbwpoly);colormap(gray);hold on;
-        
-        % Do a bit of smoothing and attempt to get all "polys" on same
-        % connected component
-        for i=1:4
-            se = strel('disk',i);
-            connpoly = imclose(locbwpoly,se);
-            [LConn,NConn] = bwlabel(connpoly);
-            if ( NConn == 1 )
-                break;
-            end
-        end
-        
-        [nr nc] = find(connpoly);
-%         plot(nc,nr,'.r');
-        
-        polyr = nr + ylims(1) - 1;
-        polyc = nc + xlims(1) - 1;
-        
-        polyPix = sub2ind(CONSTANTS.imageSize, polyr, polyc);
-        perimPix = Segmentation.BuildPerimPix(polyPix, CONSTANTS.imageSize);
-        
-        igRat = nnz(bwig(perimPix)) / length(perimPix);
-        HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-        
-%         bwDarkInterior = bwDarkCenters(polyPix);
-%         DarkRat = nnz(bwDarkInterior) / length(polyPix);
-        DarkRat = length(mergeObj.indexPixels) / length(polyPix);
-
-        %
-        idxPix = mergeObj.indexPixels;
-        mergeFeat.darkRatio = nnz(bwDark(idxPix)) / length(idxPix);
-        mergeFeat.haloRatio = HaloRat;
-        mergeFeat.igRatio = igRat;
-        mergeFeat.darkIntRatio = DarkRat;
-        mergeFeat.brightInterior = 0;
-
-        mergeFeat.polyPix = polyPix;
-        mergeFeat.perimPix = perimPix;
-        mergeFeat.igPix = find(bwig(perimPix));
-        mergeFeat.haloPix = find(bwHalo(perimPix));
     end
 end
 

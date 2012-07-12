@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
-    global CellHulls CellFeatures HashedCells
+    global CellHulls HashedCells
     
     deleteCells = [];
     replaceCell = [];
@@ -35,7 +35,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     end
     
     t = CellHulls(mergeCells(1)).time;
-    [mergeObj, mergeFeat, deleteCells] = Segmentation.CreateMergedCell(mergeCells);
+    [mergeObj, deleteCells] = Segmentation.CreateMergedCell(mergeCells);
     
     if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
@@ -47,7 +47,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     deleteCells = setdiff(deleteCells,replaceCell);
     
     mergeObj.userEdited = 0;
-    Hulls.SetHullEntries(replaceCell, mergeObj, mergeFeat);
+    Hulls.SetHullEntries(replaceCell, mergeObj);
     
     for i=1:length(deleteCells)
         Hulls.RemoveHull(deleteCells(i));
@@ -178,7 +178,7 @@ function propHulls = getPropagationCells(t, mergeCells)
 end
 
 function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
-    global CellHulls CellFeatures
+    global CellHulls
     
     mergedIdx = find(checkHulls == mergedHull);
     bDeleteHulls = ismember(nextHulls, deleteHulls);

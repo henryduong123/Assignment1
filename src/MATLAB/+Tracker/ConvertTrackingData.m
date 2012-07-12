@@ -24,9 +24,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ConvertTrackingData(objHulls,gConnect, features)
+function ConvertTrackingData(objHulls,gConnect)
 
-global CONSTANTS Costs GraphEdits CellHulls CellFeatures CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
+global Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
 
 %ensure that the globals are empty
 Costs = [];
@@ -38,8 +38,6 @@ HashedCells = [];
 ConnectedDist = [];
 CellPhenotypes = [];
 Log = [];
-
-CellFeatures = [];
 
 Costs = gConnect;
 GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
@@ -56,18 +54,6 @@ cellHulls = struct(...
     'deleted',          {},...
     'userEdited',       {});
 
-%Initialize Structures
-locCellFeatures = struct(...
-    'darkRatio',        {},...
-    'haloRatio',        {},...
-    'igRatio',          {},...
-    'darkIntRatio',     {},...
-    'brightInterior',	{},...
-    'polyPix',          {},...
-    'perimPix',         {},...
-    'igPix',            {},...
-    'haloPix',          {});
-
 CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
 
 %loop through the Hulls
@@ -81,20 +67,9 @@ parfor i=1:length(objHulls)
     cellHulls(i).userEdited      =  0;
     
     connDist{i} = updateConnectedDistance(objHulls(i), objHulls, objHulls(i).DarkConnectedHulls);
-    
-    locCellFeatures(i).darkRatio       = features(i).darkRatio;
-    locCellFeatures(i).haloRatio       = features(i).haloRatio;
-    locCellFeatures(i).igRatio         = features(i).igRatio;
-    locCellFeatures(i).darkIntRatio	= features(i).darkIntRatio;
-    locCellFeatures(i).brightInterior	= features(i).brightInterior;
-    locCellFeatures(i).polyPix         = features(i).polyPix;
-    locCellFeatures(i).perimPix        = features(i).perimPix;
-    locCellFeatures(i).igPix           = features(i).igPix;
-    locCellFeatures(i).haloPix         = features(i).haloPix;
 end
 ConnectedDist = connDist;
 CellHulls = cellHulls;
-CellFeatures = locCellFeatures;
 
 % Initialize HashedCells such that 
 tmax = max([CellHulls.time]);
@@ -138,45 +113,6 @@ Load.InitializeCachedCosts(1);
 
 %create the family trees
 Families.ProcessNewborns();
-
-% try
-%     backupCellFamilies = CellFamilies;
-%     backupCellTracks = CellTracks;
-%     backupHashedCells = HashedCells;
-%     backupCellHulls = CellHulls;
-%     backupCellFeatures = CellFeatures;
-%     backupCosts = Costs;
-%     backupGraphEdits = GraphEdits;
-%     backupConnectedDist = ConnectedDist;
-%     backupCellPhenotypes = CellPhenotypes;
-%     
-%     [iters totalTime] = Families.LinkFirstFrameTrees();
-%     Error.LogAction('Completed Tree Inference', [iters totalTime],[]);
-%     
-%     backupCellFamilies = CellFamilies;
-%     backupCellTracks = CellTracks;
-%     backupHashedCells = HashedCells;
-%     backupCellHulls = CellHulls;
-%     backupCellFeatures = CellFeatures;
-%     backupCosts = Costs;
-%     backupGraphEdits = GraphEdits;
-%     backupConnectedDist = ConnectedDist;
-%     backupCellPhenotypes = CellPhenotypes;
-%     
-%     Segmentation.ResegRetrackLink();
-%     
-% catch excp
-%     CellFamilies = backupCellFamilies;
-%     CellTracks = backupCellTracks;
-%     HashedCells = backupHashedCells;
-%     CellHulls = backupCellHulls;
-%     CellFeatures = backupCellFeatures;
-%     Costs = backupCosts;
-%     GraphEdits = backupGraphEdits;
-%     ConnectedDist = backupConnectedDist;
-%     CellPhenotypes = backupCellPhenotypes;
-% end
-
 end
 
 function hullList = addToTrack(hull,hullList,objHulls)

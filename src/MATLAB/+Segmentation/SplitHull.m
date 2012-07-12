@@ -26,17 +26,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackIDs = SplitHull(hullID, k)
-    global CellHulls CellFeatures
+    global CellHulls
 
     oldCOM = CellHulls(hullID).centerOfMass;
 
-    if ( isempty(CellFeatures) )
-        splitFeat = [];
-    else
-        splitFeat = CellFeatures(hullID);
-    end
-
-    [newHulls newFeatures] = Segmentation.ResegmentHull(CellHulls(hullID), splitFeat, k, 1);
+    newHulls = Segmentation.ResegmentHull(CellHulls(hullID), k, 1);
 
     if ( isempty(newHulls) )
         newTrackIDs = [];
@@ -54,7 +48,7 @@ function newTrackIDs = SplitHull(hullID, k)
     setHullIDs = zeros(1,length(newHulls));
     setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
-    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls, newFeatures);
+    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
 
     newTrackIDs = Tracker.TrackAddedHulls(newHullIDs, oldCOM);
 end

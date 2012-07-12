@@ -152,7 +152,7 @@ function ResegmentFromTree(rootTracks,preserveTracks)
 end
 
 function newHullID = tryAddSegmentation(prevHull)
-    global CONSTANTS CellHulls CellFeatures HashedCells Figures
+    global CONSTANTS CellHulls HashedCells Figures
 
     newHullID = [];
     fileName = Helper.GetFullImagePath(Figures.time);
@@ -163,7 +163,6 @@ function newHullID = tryAddSegmentation(prevHull)
     [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);
 
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
-    newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     
     oldTracks = [HashedCells{Figures.time}.trackID];
     
@@ -180,41 +179,30 @@ function newHullID = tryAddSegmentation(prevHull)
         newHull.centerOfMass = mean([r c]);
         newHull.indexPixels = newObj.indPixels;
         newHull.imagePixels = newObj.imPixels;
-        
-        newFeature = newFeat;
     end
 
     newHullID = length(CellHulls)+1;
     CellHulls(newHullID) = newHull;
     
-    % Set feature if valid
-    if ( ~isempty(CellFeatures) )
-        CellFeatures(newHullID) = newFeature;
-    end
-    
     newFamilyIDs = Families.NewCellFamily(newHullID);
 end
 
 function newHullIDs = trySplitSegmentation(hullID, k)
-    global CellHulls CellFeatures
+    global CellHulls
 
     newHullIDs = [];
     
     oldHull = CellHulls(hullID);
-    oldFeat = [];
     
     if ( k == 1 )
         newHullIDs = hullID;
         return;
     end
     
-    if ( ~isempty(CellFeatures) )
-        oldFeat = CellFeatures(hullID);
-    end
     
 % 	[newHulls newFeats] = WatershedSplitCell(CellHulls(hullID), oldFeat, k);
 %     if ( isempty(newHulls) )
-        [newHulls newFeats] = Segmentation.ResegmentHull(CellHulls(hullID), oldFeat, k);
+        [newHulls newFeats] = Segmentation.ResegmentHull(CellHulls(hullID), k);
         if ( isempty(newHulls) )
             return;
         end
@@ -230,12 +218,6 @@ function newHullIDs = trySplitSegmentation(hullID, k)
         CellHulls(end+1) = newHulls(i);
         newFamilyIDs = [newFamilyIDs Families.NewCellFamily(length(CellHulls))];
         newHullIDs = [newHullIDs length(CellHulls)];
-    end
-    
-    if ( ~isempty(CellFeatures) )
-        for i=1:length(newHullIDs)
-            CellFeatures(newHullIDs(i)) = newFeats(i);
-        end
     end
 end
 

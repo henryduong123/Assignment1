@@ -24,8 +24,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SaveLEVerState(filename)
-    global CellFamilies CellHulls CellFeatures CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes SegLevels Log ReplayEditActions
+    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions
     
-    save(filename,'CellFamilies','CellHulls','CellFeatures','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
-        'ConnectedDist','CellPhenotypes','SegLevels','Log','ReplayEditActions');
+    save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
+        'ConnectedDist','CellPhenotypes','Log','ReplayEditActions');
+    
+    Editor.History('Saved');
 end

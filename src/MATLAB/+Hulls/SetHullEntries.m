@@ -5,19 +5,11 @@
 %
 % NOTE: This does not automatically update tracking information for hulls
 
-function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs, newFeat)
-    global CellHulls CellFeatures Costs GraphEdits CachedCostMatrix
+function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs)
+    global CellHulls Costs GraphEdits CachedCostMatrix
     
     newHulls = [];
     newFamilies = [];
-    
-    if ( ~exist('newFeat', 'var') )
-        if ( ~isempty(CellFeatures) )
-            error('Segmentation features exist in this data set and must be created for all new hull entries.');
-        end
-        
-        newFeat = [];
-    end
     
     if ( isempty(setHullIDs) )
         return;
@@ -40,11 +32,6 @@ function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs, newFeat)
         CellHulls(hullID).centerOfMass = setObjs(i).centerOfMass;
         CellHulls(hullID).deleted = setObjs(i).deleted;
         CellHulls(hullID).userEdited = setObjs(i).userEdited;
-        
-        % Set features if valid
-        if ( ~isempty(CellFeatures) )
-            CellFeatures(hullID) = newFeat(i);
-        end
         
         newHulls = [newHulls hullID];
         

@@ -230,7 +230,7 @@ global CellTracks HashedCells CellHulls Figures
     end
     
     if(length(likelyHulls) == 1) %attempt to split
-        newHulls = Segmentation.ResegmentHull(CellHulls(likelyHulls(1)), [], 2, 1, 1);
+        newHulls = Segmentation.ResegmentHull(CellHulls(likelyHulls(1)), 2, 1, 1);
         likelyHulls = [];
         if(isempty(newHulls)),return,end
         hull1 = newHulls(1);
