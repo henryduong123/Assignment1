@@ -28,28 +28,29 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features levels] = Segmentor(tStart,tStep,tEnd,rootImageFolder,datasetName,imageAlpha,imageSignificantDigits)
-    
+function [objs features levels] = Segmentor(tStart,tStep,tEnd,imageAlpha,rootImageFolder,imageNamePattern)
+global CONSTANTS
+
 objs=[];
 features = [];
 levels = struct('haloLevel',{}, 'igLevel',{});
 
 try
-    if(isempty(dir('.\segmentationData')))
-        system('mkdir .\segmentationData');
-    end
-
     if(ischar(tStart)),tStart = str2double(tStart);end
     if(ischar(tStep)),tStep = str2double(tStep);end
     if(ischar(tEnd)),tEnd = str2double(tEnd);end
     if(ischar(imageAlpha)),imageAlpha = str2double(imageAlpha);end
-    if(ischar(imageSignificantDigits)),imageSignificantDigits = str2double(imageSignificantDigits);end
-
+    
+    fprintf(1,'%s\n',rootImageFolder);
+    fprintf(1,'%s\n',imageNamePattern);
+    
+    CONSTANTS.rootImageFolder = rootImageFolder;
+    CONSTANTS.imageNamePattern = imageNamePattern;
+    
     numImages = tEnd/tStep;
 
     for t = tStart:tStep:tEnd
-        frameT = Helper.GetDigitString(t,imageSignificantDigits);
-        fname=fullfile(rootImageFolder, [datasetName '_t' frameT '.TIF']);
+        fname=Helper.GetFullImagePath(t);
         if(isempty(dir(fname)))
             continue;
         end
@@ -68,7 +69,7 @@ catch excp
     cltime = clock();
     errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
     fid = fopen(errFilename, 'w');
-    fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame %d\n',cltime(4),cltime(5),cltime(6), t);
+    fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));%, t);
     Error.PrintException(fid, excp);
     fclose(fid);
     return;

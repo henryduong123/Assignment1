@@ -14,7 +14,7 @@ CONSTANTS=[];
 softwareVersion = '6.1 Adult';
 
 Load.InitializeConstants();
-Load.UpdateFileVersionString(softwareVersion);
+Load.AddConstant('version',softwareVersion,1);
 
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if(~directory_name),return,end
@@ -69,7 +69,7 @@ for dd=1:length(dlist)
         continue;
     end
     
-    if ( ~strcmpi(firstimfile, [CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF']) )
+    if ( ~strcmpi(firstimfile, Helper.GetFullImagePath(1)) )
         fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n',CONSTANTS.datasetName);
         continue;
     end

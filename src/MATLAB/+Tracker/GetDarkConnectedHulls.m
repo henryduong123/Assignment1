@@ -31,7 +31,7 @@ global CONSTANTS
 
 th=max([objsSegment.t]);
 
-fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(1) '.TIF'];
+fname=Helper.GetFullImagePath(1);
 im = Helper.LoadIntensityImage(fname);
 HashedHulls=cell(th,1);
 
@@ -111,7 +111,7 @@ end
 
     function bwHalo=GetHalo(t)
         
-        fname=[CONSTANTS.rootImageFolder '\' CONSTANTS.datasetName '_t' Helper.GetDigitString(t) '.TIF'];
+        fname=Helper.GetFullImagePath(t);
         im = Helper.LoadIntensityImage(fname);
         
         

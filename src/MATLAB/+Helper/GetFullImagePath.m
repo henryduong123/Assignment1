@@ -3,6 +3,6 @@ global CONSTANTS
 
 image = Helper.GetImageName(frame);
 
-pathString = [CONSTANTS.rootImageFolder image];
+pathString = fullfile(CONSTANTS.rootImageFolder,image);
 end
 
