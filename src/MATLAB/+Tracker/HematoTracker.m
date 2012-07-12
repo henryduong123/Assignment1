@@ -1,27 +1,8 @@
 function HematoTracker()
-    global CONSTANTS CellHulls HashedCells CellFeatures ConnectedDist
+    global CONSTANTS CellHulls HashedCells ConnectedDist
     
     bKeep = (~[CellHulls.deleted]);
     CellHulls = CellHulls(bKeep);
-    
-    segtimes = [CellHulls.time];
-    
-    [srtseg srtidx] = sort(segtimes);
-    [dump idxmap] = sort(srtidx);
-    
-    CellHulls = CellHulls(srtidx);
-    if (~isempty(CellFeatures))
-        CellFeatures = CellFeatures(srtidx);
-    end
-    
-%     newConnectedDist = ConnectedDist(srtidx);
-%     for i=1:length(newConnectedDist)
-%         if ( isempty(newConnectedDist{i}) )
-%             continue;
-%         end
-%         
-%         newConnectedDist{i}(:,1) = idxmap(newConnectedDist{i}(:,1))';
-%     end
     
     tmax = max([CellHulls.time]);
     HashedCells = cell(1,tmax);
@@ -48,13 +29,14 @@ function HematoTracker()
     
     fnameIn=['.\segmentationData\SegObjs_' CONSTANTS.datasetName '.txt'];
     fnameOut=['.\segmentationData\Tracked_' CONSTANTS.datasetName '.txt'];
-    tic
+    
     fprintf(1,'Tracking...');
     system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
     fprintf('Done\n');
-    tTrack=toc;
     
-    [objTracks gConnect oldHashedHulls] = Tracker.RereadTrackData('segmentationData', CONSTANTS.datasetName);
+    fprintf(1,'Importing Tracking Results...');
+    [objTracks gConnect] = Tracker.RereadTrackData('segmentationData', CONSTANTS.datasetName);
+    fprintf('Done\n');
     
     fprintf('Finalizing Data...');
     Tracker.RebuildTrackingData(objTracks, gConnect);

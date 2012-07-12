@@ -1,5 +1,5 @@
 function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
-    global SegLevels CONSTANTS
+    global CONSTANTS
     
     status = 1;
     tSeg = 0;
@@ -22,11 +22,15 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
 
     if(~isempty(dir('.\segmentationData')))
-        system('rmdir /S /Q .\segmentationData');
+        errFile = '.\segmentationData\err_*.log';
+        fileName = '.\segmentationData\objs_*.mat';
+        semFile = '.\segmentationData\done_*.txt';
+        system(['del /Q' errFile ' ' fileName ' ' semFile]);
+%         system('rmdir /S /Q .\segmentationData');
     end
     
     % Set CONSTANTS.imageSize as soon as possible
-    firstImg = fullfile(rootFolder, [datasetName '_t' Helper.GetDigitString(1,sigDigits) '.TIF']);
+    firstImg = Helper.GetFullImagePath(1);
     chkIm = Helper.LoadIntensityImage(firstImg);
     CONSTANTS.imageSize = size(chkIm);
     
@@ -38,12 +42,17 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         return;
     end
     
+    if(isempty(dir('.\segmentationData')))
+        system('mkdir .\segmentationData');
+    end
+    
+    dirName = fileparts(CONSTANTS.rootImageFolder);
     for i=1:numProcessors
-        system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-            num2str(numberOfImages) ' "' rootFolder '" "' datasetName '" ' ...
-            num2str(imageAlpha) ' ' num2str(sigDigits) ' && exit']);
+         system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
+            num2str(numberOfImages) ' ' ...
+            num2str(imageAlpha) ' "' dirName '" ' CONSTANTS.imageNamePattern ' && exit']);
         %use line below instead of the 3 lines above for non-parallel or to debug
-        % Segmentor(i,numProcessors,numberOfImages,rootFolder,datasetName,imageAlpha,sigDigits);
+%         Segmentor(i,numProcessors,numberOfImages,imageAlpha,dir,CONSTANTS.imageNamePattern);
     end
 
     bSegFileExists = false(1,numProcessors);
@@ -146,12 +155,10 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
 
     %% Inport into LEVer's data sturcture
     [objHulls gConnect HashedHulls] = Tracker.ReadTrackData(CONSTANTS.imageSize, cellSegments, datasetName);
-    
-    SegLevels = cellSegLevels;
 
     fprintf('Finalizing Data...');
     try
-        Tracker.ConvertTrackingData(objHulls,gConnect,cellFeat);
+        Tracker.ConvertTrackingData(objHulls,gConnect);
     catch excp
         
         cltime = clock();
@@ -163,10 +170,6 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         status = 1;
         return;
     end
-    
-    % Adds the special origin action, to indicate that this is initial
-    % segmentation data from which edit actions are built.
-    Editor.ReplayableEditAction(@Editor.OriginAction, 1);
     
     fprintf('Done\n');
     

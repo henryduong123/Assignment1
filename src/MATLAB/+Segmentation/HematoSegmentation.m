@@ -7,7 +7,10 @@ minVol = 175;
 % catch errorMessage
 %     %fprintf(errorMessage);
 % end
-system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' 1.0 && exit']);
+
+fprintf(1,'Segmentation...');
+
+system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .75 && exit']);
 
 pause(5);
 CellHulls = struct(...
@@ -47,7 +50,7 @@ for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
 end
 
 im = imread(Helper.GetFullImagePath(1));
-CONSTANTS.imageSize = size(im);
+Load.AddConstant('imageSize',size(im),1);
 
 for i=1:length(CellHulls)
     [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(i).indexPixels);
@@ -55,5 +58,6 @@ for i=1:length(CellHulls)
     CellHulls(i).points = [c(ch) r(ch)];
 end
 
+fprintf(1,'Done\n');
 end
 
