@@ -3,6 +3,8 @@
 % results.  If the latter, the data will be converted to LEVer's data scheme
 % and save out to a new file.
 
+% ChangeLog:
+% EW - Rewrite 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -28,29 +30,36 @@
 
 function opened = OpenData()
 
-global Figures Colors CONSTANTS CellFamilies CellHulls CellFeatures HashedCells Costs GraphEdits CellTracks ConnectedDist CellPhenotypes Log ReplayEditActions SegmentationEdits SegLevels softwareVersion
+global Figures Colors CONSTANTS GraphEdits ReplayEditActions SegmentationEdits softwareVersion
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
 end
 
 if(exist('ColorScheme.mat','file'))
-    load 'ColorScheme.mat'
-    Colors = colors;
+    load 'ColorScheme.mat';
+    if(exist('colors','var'))
+        %legacy fix
+        Colors = colors;
+        save('ColorScheme','Colors');
+    end
 else
-    %the lowercase var is saved out where the capital var the one used
-    colors = Load.CreateColors();
-    Colors = colors;
-    save('ColorScheme','colors');
+    Colors = Load.CreateColors();
+    save('ColorScheme','Colors');
 end
     
-
+%Settings is used for open file dialog to remember last location
 if (exist('LEVerSettings.mat','file'))
     load('LEVerSettings.mat');
 else
     settings.imagePath = '.\';
     settings.matFilePath = '.\';
 end
+
+if (~isfield(settings,'matFilePath'))
+    settings.matFilePath = '.\';
+end
+
 
 goodLoad = 0;
 opened = 0;
@@ -61,13 +70,20 @@ if(~isempty(Figures))
         switch choice
             case 'Yes'
                 UI.SaveData(0);
-                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
             case 'Cancel'
                 return
             case 'No'
                 set(Figures.cells.menuHandles.saveMenu,'Enable','off');
             otherwise
                 return
+        end
+        try
+            %clear out globals so they can rewriten
+            if(ishandle(Figures.cells.handle))
+                close Figures.cells.handle
+                wasOpened = 1;
+            end
+        catch exception
         end
     end
 end
@@ -76,154 +92,92 @@ end
 SegmentationEdits.newHulls = [];
 SegmentationEdits.changedHulls = [];
 
-CellFeatures = [];
 GraphEdits = [];
-SegLevels = [];
 ReplayEditActions = [];
-
-oldCONSTANTS = CONSTANTS;
-
-%find the first image
-imageFilter = [settings.imagePath '*.TIF'];
-
-sigDigits = 0;
-fileName = [];
-tryidx = 0;
-while ( (sigDigits == 0) || ~exist(fileName,'file') )
-    if ( tryidx > 0 )
-        fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
-    else
-        fprintf('\nSelect first .TIF image...\n\n');
-    end
-
-    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
-    if (filterIndexImage==0)
-        CONSTANTS = oldCONSTANTS;
-        return
-    end
-
-    [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
-
-    CONSTANTS.rootImageFolder = settings.imagePath;
-
-    CONSTANTS.imageDatasetName = imageDataset;
-    CONSTANTS.datasetName = imageDataset;
-    CONSTANTS.imageSignificantDigits = sigDigits;
-    fileName = Helper.GetFullImagePath(1);
-
-    tryidx = tryidx + 1;
-end
-
-% while ( isempty(index) || ~exist(fileName,'file') )
-%     fprintf('Image file name not in correct format:%s_t%s.TIF\nPlease choose another...\n',CONSTANTS.datasetName,frameT);
-%     
-%     [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(settings.imagePath,'Open First Image');
-%     if(filterIndexImage==0)
-%         CONSTANTS = oldCONSTANTS;
-%         return
-%     end
-%     index = strfind(imageFile,'t');
-%     CONSTANTS.rootImageFolder = [settings.imagePath '\'];
-%     imageDataset = imageFile(1:(index(length(index))-2));
-%     fileName=[CONSTANTS.rootImageFolder imageDataSet '_t' Helper.GetDigitString(t) '.TIF'];
-% end
 
 answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
 switch answer
     case 'Segment & Track'
+        Helper.ImageFileDialog();
         save('LEVerSettings.mat','settings');
+        
         Load.InitializeConstants();
-        Load.UpdateFileVersionString(softwareVersion);
+        Load.AddConstant('version',softwareVersion,1);
+        
+        type = questdlg('Cell Type:','Cell Type','Adult','Hemato','Adult');
+        Load.AddConstant('cellType',type,1);
         errOpen = Segmentation.SegAndTrack();
+        if(~errOpen)
+            opened = 1;
+        else
+            return
+        end
     case 'Existing'
         while(~goodLoad)
             fprintf('Select .mat data file...\n');
             [settings.matFile,settings.matFilePath,filterIndexMatFile] = uigetfile([settings.matFilePath '*.mat'],...
-                ['Open Data (' CONSTANTS.datasetName ')']);
+                'Open Data');
             
             if (filterIndexMatFile==0)
                 return
             else
                 fprintf('Opening file...');
-                try
-                    %clear out globals so they can rewriten
-                    if(ishandle(Figures.cells.handle))
-                        close Figures.cells.handle
-                    end
-                catch exception
-                end
-                
-                rootImageFolder = CONSTANTS.rootImageFolder;
-                imageSignificantDigits = CONSTANTS.imageSignificantDigits;
 				
                 try
                     load([settings.matFilePath settings.matFile]);
                     fprintf('\nFile open.\n\n');
                 catch exception
-                    fprintf('%s\n',exception.message);
+                    errordlg(['Unable to open data: ' exception.msgString]);
+                    return
                 end
             end
             
-            CONSTANTS.rootImageFolder = rootImageFolder;
-            CONSTANTS.imageSignificantDigits = imageSignificantDigits;
+            save('LEVerSettings.mat','settings');
+            
             CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
-            Load.InitializeConstants();
             
-            if(exist('objHulls','var'))
-                fprintf('Converting File...');
-                Tracker.ConvertTrackingData(objHulls,gConnect);
-                fprintf('\nFile Converted.\n');
-                CONSTANTS.datasetName = strtok(settings.matFile,' ');
-                Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
-                fprintf('New file saved as:\n%s_LEVer.mat',CONSTANTS.datasetName);
-                goodLoad = 1;
-            elseif(exist('CellHulls','var'))
-                errors = mexIntegrityCheck();
-                if ( ~isempty(errors) )
-                    warndlg('There were database inconsistencies.  LEVer might not behave properly!');
-                    Dev.PrintIntegrityErrors(errors);
-                end
-                goodLoad = 1;
-            else
-                errordlg('Data either did not load properly or is not the right format for LEVer.');
-                goodLoad = 0;
+            if (~isfield(CONSTANTS,'imageNamePattern') || ~exist(Helper.GetFullImagePath(1),'file'))
+                Helper.ImageFileDialog();
+                save('LEVerSettings.mat','settings');
             end
+                
+            if(exist('objHulls','var'))
+                errordlg('Data too old to run with this version of LEVer');
+                return
+            end
+            
+            if (~isfield(CONSTANTS,'cellType'))
+                type = questdlg('Cell Type:','Cell Type','Adult','Hemeta','Adult');
+                Load.AddConstant('cellType',type,1);
+            end
+            
+            errors = mexIntegrityCheck();
+            if ( ~isempty(errors) )
+                warndlg('There were database inconsistencies.  LEVer might not behave properly!');
+                Dev.PrintIntegrityErrors(errors);
+            end
+            goodLoad = 1;
         end
-        
-        %save out settings
-        save('LEVerSettings.mat','settings');
         
         Figures.time = 1;
         
-        Error.LogAction(['Opened file ' settings.matFile]);
+        Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
+                
+        UI.InitializeFigures();
+                
+        bUpdated = Load.FixOldFileVersions();
+
+        if ( bUpdated )
+            Load.AddConstant('version',softwareVersion,1);
+            Helper.SaveLEVerState(CONSTANTS.matFullFile);
+        end
+
+        opened = 1;
         
-        errOpen = 0;
     otherwise
         return
 end
 
-opened = 1;
-
-if(errOpen)
-    opened = 0;
-    return
-end
-
-bUpdated = Load.FixOldFileVersions(softwareVersion);
-if ( bUpdated )
-    Load.UpdateFileVersionString(softwareVersion);
-    if( exist('objHulls','var') && strcmpi(answer,'Existing') )
-        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer']);
-    else
-        Helper.SaveLEVerState([settings.matFilePath settings.matFile]);
-    end
-end
-
 % Initialized cached costs here if necessary (placed after fix old file versions for compatibility)
 Load.InitializeCachedCosts(0);
-
-if (~strcmp(imageDataset,CONSTANTS.datasetName))
-    warndlg({'Image file name does not match .mat dataset name' '' 'LEVer may display cells incorectly!'},'Name mismatch','modal');
-end
-
 end

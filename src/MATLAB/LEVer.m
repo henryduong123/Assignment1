@@ -25,28 +25,24 @@
 
 function LEVer()
 
-global Figures softwareVersion CONSTANTS
+global Figures softwareVersion
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
 if(~isempty(Figures))
-    saveEnabled = strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on');
     Editor.History('Push');
-    if(~saveEnabled)
-        set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-    end
 end
 
-softwareVersion = '6.2 Adult';
-CONSTANTS.cellType = 'Hemato';
+softwareVersion = '7.0 Multi-Cell';
 
 if(Load.OpenData())
-    UI.InitializeFigures();
     Editor.ReplayableEditAction(@Editor.InitHistory);
-elseif(~isempty(Figures))
-    Editor.History('Top');
-    UI.DrawTree(Figures.tree.familyID);
-    UI.DrawCells();
+else
+    try
+        Editor.History('Top');
+        UI.InitializeFigures();
+    catch err
+    end
 end
 
 end

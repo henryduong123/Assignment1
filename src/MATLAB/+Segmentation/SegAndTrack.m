@@ -1,6 +1,8 @@
 % SegAndTrack.m - Spawns segmentation and tracking routines to identify and
 % track cells in a sequence of microscope images.
 
+% ChangeLog
+% EW - rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
@@ -26,9 +28,6 @@
 
 function errStatus = SegAndTrack()
     global CONSTANTS
-    
-    tSeg = 0;
-    tTrack = 0;
 
     % Modified 
     errStatus = 1;
@@ -40,7 +39,7 @@ function errStatus = SegAndTrack()
     end
 
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.imageDatasetName '_LEVer.mat']);
+        [CONSTANTS.datasetName '_LEVer.mat']);
 
     if(~FilterIndex)
         return;
@@ -55,27 +54,37 @@ function errStatus = SegAndTrack()
         numProcessors = 4;
     end
     
-    if (strcmp(CONSTANTS.cellType,'Hemato'))
-        tic;
-        Segmentation.HematoSegmentation(1.0);
-        tSeg = toc;
-        Load.AddConstant('dMaxCenterOfMass',80,1);
-        Load.AddConstant('dMaxConnectComponent',80,1);
-        Load.AddConstant('dMaxConnectComponentTracker',40,1);
-        tic;
-        Tracker.HematoTracker();
-        tTrack = toc;
-        errStatus = 0;
-    else
-        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.imageDatasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+    switch CONSTANTS.cellType
+        case 'Hemato'
+            tic;
+            Segmentation.HematoSegmentation(1.0);
+            tSeg = toc;
+            Load.AddConstant('dMaxCenterOfMass',80,1);
+            Load.AddConstant('dMaxConnectComponent',80,1);
+            Load.AddConstant('dMaxConnectComponentTracker',40,1);
+            tic;
+            Tracker.HematoTracker();
+            tTrack = toc;
+            errStatus = 0;
+        case 'Adult'
+            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
+                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
+                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+        otherwise
+            return
     end
-    if ( errStatus > 0 )
-        return;
+    
+    if (errStatus)
+        return
     end
     
     UI.SaveData(1);
     
     UI.InitializeFigures();
+    
+    % Adds the special origin action, to indicate that this is initial
+    % segmentation data from which edit actions are built.
+    Editor.ReplayableEditAction(@Editor.OriginAction, 1);
     
     Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end
