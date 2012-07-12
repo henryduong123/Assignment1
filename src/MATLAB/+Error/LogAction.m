@@ -89,11 +89,17 @@ logEntry = length(Log)+1;
 
 Log(logEntry).time = time;
 Log(logEntry).user = usr;
-Log(logEntry).figures = Figures;
 Log(logEntry).stack = callstack;
 Log(logEntry).action = action;
 Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;
+Log(logEntry).figures.time = Figures.time;
+if (isfield(Figures,'cells'))
+    Log(logEntry).figures.cells = Figures.cells;
+end
+if (isfield(Figures,'tree'))
+    Log(logEntry).figures.tree = Figures.tree;
+end
 
 file = fopen(logFile,'a');
 while(file<2)
@@ -106,7 +112,7 @@ while(file<2)
     end
 end
 
-fprintf(file,row);
+fprintf(file,'%s',row);
 fclose(file);
 end
 
