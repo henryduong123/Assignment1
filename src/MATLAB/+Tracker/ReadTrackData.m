@@ -46,16 +46,11 @@ while ~bDone
     end
     TrackList=[TrackList;dd'];
 end
+
 bDone=0;
 InList=[];
-while ~bDone
-    dd=fscanf(fid,'%d,%d,%f\n',3);
-    if isempty(dd)
-       bDone=1;
-       break
-    end
-    InList=[InList;dd'];
-end
+dd=textscan(fid,'%f,%f,%f');
+InList=[dd{1},dd{2},dd{3}];
 
 fclose(fid);
 for i=1:size(TrackList,1)
@@ -69,14 +64,6 @@ for i=1:size(TrackList,1)
     objHulls(o2).inID=o1;
 end
 
-cmap=hsv(256);
-for i=1:max([objHulls.Label])
-    oi = find([objHulls.Label]==i);
-    ccc=cmap(round(255*rand())+1,:);
-    for j=1:length( oi)
-        objHulls(oi(j)).ccc=ccc;
-    end
-end
 nLabel=max([objHulls.Label])+1;
 for n=1:length(objHulls)
     [r c]=ind2sub(imageSize,objHulls(n).indPixels);
@@ -84,13 +71,8 @@ for n=1:length(objHulls)
     if objHulls(n).Label>0,continue,end
     objHulls(n).Label= nLabel;
     nLabel=nLabel+1;
-    ccc=cmap(round(255*rand())+1,:);
-    objHulls(n).ccc=ccc;
 end
 
-gConnect=sparse([],[],[],length(objHulls),length(objHulls),round(.1*length(objHulls)));
-for i=1:size(InList,1)
-    gConnect(InList(i,2),InList(i,1))=InList(i,3);
-end
+gConnect=sparse(InList(:,2),InList(:,1),InList(:,3),length(objHulls),length(objHulls));
 end
 

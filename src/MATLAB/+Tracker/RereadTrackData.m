@@ -1,4 +1,4 @@
-function [objTracks gConnect hashedHulls] = RereadTrackData(DatasetDir, DatasetName)
+function [objTracks gConnect] = RereadTrackData(DatasetDir, DatasetName)
 global CellHulls
 
 th=max([CellHulls.time]);
@@ -13,9 +13,10 @@ for i=1:length(CellHulls)
 end
 
 fname = fullfile(DatasetDir,['Tracked_' DatasetName '.txt']);
-fid=fopen(fname,'r');
+fid=fopen(fname,'rt');
 bDone=0;
 TrackList=[];
+
 while ~bDone
     dd=fscanf(fid,'%d,%d,%d,%d,%d\n',5);
     if -1==dd(1)
@@ -27,14 +28,8 @@ end
 
 bDone=0;
 InList=[];
-while ~bDone
-    dd=fscanf(fid,'%d,%d,%f\n',3);
-    if isempty(dd)
-       bDone=1;
-       break
-    end
-    InList=[InList;dd'];
-end
+dd=textscan(fid,'%f,%f,%f');
+InList=[dd{1},dd{2},dd{3}];
 
 fclose(fid);
 
@@ -51,15 +46,6 @@ for i=1:size(TrackList,1)
     objTracks(o2).inID=o1;
 end
 
-cmap=hsv(256);
-for i=1:max([objTracks.Label])
-    oi = find([objTracks.Label]==i);
-    ccc=cmap(round(255*rand())+1,:);
-    for j=1:length( oi)
-        objTracks(oi(j)).ccc=ccc;
-    end
-end
-
 nLabel=max([objTracks.Label])+1;
 for n=1:length(objTracks)
     if (objTracks(n).Label>0)
@@ -68,13 +54,7 @@ for n=1:length(objTracks)
     
     objTracks(n).Label = nLabel;
     nLabel=nLabel+1;
-    ccc=cmap(round(255*rand())+1,:);
-    objTracks(n).ccc=ccc;
 end
 
-gConnect=sparse([],[],[],length(CellHulls),length(CellHulls),round(.1*length(CellHulls)));
-for i=1:size(InList,1)
-    gConnect(InList(i,2),InList(i,1))=InList(i,3);
-end
-
+gConnect=sparse(InList(:,2),InList(:,1),InList(:,3),length(CellHulls),length(CellHulls));
 end
