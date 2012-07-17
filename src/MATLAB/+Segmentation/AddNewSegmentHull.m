@@ -59,7 +59,7 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         newFeature = newFeat;
     end
     
-    newHullID = Hulls.SetHullEntries(0, newHull, newFeature);
+    newHullID = Hulls.SetHullEntries(0, newHull);
     
     newTrackID = Tracker.TrackAddedHulls(newHullID, newHull.centerOfMass);
 end

@@ -27,7 +27,7 @@
 function GraphEditSetEdge(trackID, nextTrackID, time, bLongDistance)
     global GraphEdits CachedCostMatrix CellTracks
     
-    if(bLongDistance)
+    if(exist('bLongDistance', 'var') && bLongDistance)
         track = CellTracks(trackID);
         if(isempty(track.hulls)) %check for valid track
             trackHull = 0;
