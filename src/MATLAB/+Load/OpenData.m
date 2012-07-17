@@ -136,8 +136,10 @@ switch answer
             
             CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
             
-            if (~isfield(CONSTANTS,'imageNamePattern') || ~exist(Helper.GetFullImagePath(1),'file'))
-                Helper.ImageFileDialog();
+            if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)
+                if (~Helper.ImageFileDialog())
+                    return
+                end
                 save('LEVerSettings.mat','settings');
             end
                 
