@@ -38,7 +38,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 %read in image
 filename = Helper.GetFullImagePath(Figures.time);
-if exist(filename,'file')
+if (exist(filename,'file')==2)
     img = Helper.LoadIntensityImage(filename);
 else
     img = zeros(CONSTANTS.imageSize);
