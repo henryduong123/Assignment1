@@ -16,8 +16,12 @@
 #include "itkBinaryErodeImageFilter.h"
 #include "itkBinaryDilateImageFilter.h"
 #include "itkBinaryFillholeImageFilter.h"
+#include "itkGrayscaleDilateImageFilter.h"
+#include "itkGrayscaleErodeImageFilter.h"
+#include "itkSubtractImageFilter.h"
+#include "itkBinaryNotImageFilter.h"
+#include "itkAndImageFilter.h"
 #include "itkConnectedComponentImageFilter.h"
-#include "itkRelabelComponentImageFilter.h"
 #include "itkLabelGeometryImageFilter.h"
 
 //qhull includes
@@ -58,8 +62,12 @@ typedef itk::BinaryBallStructuringElement<CharPixelType,DIMENSIONS> StructuringE
 typedef itk::BinaryErodeImageFilter<CharImageType,CharImageType,StructuringElementType > ErodeFilterType;
 typedef itk::BinaryDilateImageFilter<CharImageType,CharImageType,StructuringElementType > DilateFilterType;
 typedef itk::BinaryFillholeImageFilter<CharImageType> BinaryFillholeImageFilterType;
+typedef itk::GrayscaleDilateImageFilter<CharImageType,CharImageType,StructuringElementType > GrayscaleDilateFilterType;
+typedef itk::GrayscaleErodeImageFilter<CharImageType,CharImageType,StructuringElementType > GrayscaleErodeFilterType;
+typedef itk::SubtractImageFilter<CharImageType,CharImageType,CharImageType> SubtractImageFilterType;
+typedef itk::BinaryNotImageFilter<CharImageType> BinaryNotImageFilterType;
+typedef itk::AndImageFilter<CharImageType, CharImageType, CharImageType> AndImageFilterType;
 typedef itk::ConnectedComponentImageFilter<CharImageType,ShortImageType> ConnectedComponentFilterType;
-typedef itk::RelabelComponentImageFilter<ShortImageType,ShortImageType> RelabelComponentFilterType;
 typedef itk::LabelGeometryImageFilter<ShortImageType,ShortImageType> LabelGeometryImageFilterType;
 
 struct coordinate{

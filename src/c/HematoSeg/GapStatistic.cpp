@@ -4,11 +4,43 @@
 #include <vnl/vnl_vector.h>
 #include <vcl_iostream.h>
 
+//#pragma optimize("",off)
+void makeHulls(const Hull& ORG_HULL, std::vector<Hull>& newHulls, const std::vector<int>& CLASSES, const int K)
+{
+	newHulls.clear();
+	newHulls.resize(K);
+
+	if (K<=1)
+	{
+		newHulls[0].pixels = ORG_HULL.pixels;
+		newHulls[0].centerOfMass[0] = ORG_HULL.centerOfMass[0];
+		newHulls[0].centerOfMass[1] = ORG_HULL.centerOfMass[1];
+		return;
+	}
+
+	for (int i=0; i<ORG_HULL.pixels.size(); ++i)
+		newHulls[CLASSES[i]].pixels.push_back(ORG_HULL.pixels[i]);
+
+	for (int i=0; i<K; ++i)
+	{
+		newHulls[i].centerOfMass[0] = 0.0;
+		newHulls[i].centerOfMass[1] = 0.0;
+		for (int j=0; j<newHulls[i].pixels.size(); ++j)
+		{
+			newHulls[i].centerOfMass[0] += newHulls[i].pixels[j][0];
+			newHulls[i].centerOfMass[1] += newHulls[i].pixels[j][1];
+		}
+		newHulls[i].centerOfMass[0] /= (double)newHulls[i].pixels.size();
+		newHulls[i].centerOfMass[1] /= (double)newHulls[i].pixels.size();
+	}
+}
+
+
 float DistanceSquared(coordinate vec1, coordinate vec2){
 	return SQR(vec1.x-vec2.x) + SQR(vec1.y-vec2.y);
 }
 
-int Cluster(coordinate pixel, std::vector<coordinate>& means)
+int Cluster(coordinate pixel, const std::vector<coordinate>& means)
 {
 	double minDist = std::numeric_limits<double>::infinity();
 	int minIdx = -1;
@@ -25,14 +57,62 @@ int Cluster(coordinate pixel, std::vector<coordinate>& means)
 	return minIdx;
 }
 
-void KMeans(int k, const Hull& HULL, std::vector<int>& bestClasses) {
+//#pragma optimize("",off)
+void SetClusters(const Hull& HULL, std::vector<coordinate>& means, std::vector<Hull>& newHulls)
+{
+	if (means.empty())
+	{
+		coordinate tempCoor;
+		tempCoor.x = HULL.centerOfMass[0];
+		tempCoor.y = HULL.centerOfMass[1];
+		means.push_back(tempCoor);
+	}
+
+	newHulls.clear();
+	newHulls.resize(means.size());
+	std::vector<int> classes;
+	classes.resize(HULL.pixels.size());
+
+	for (int i=0; i<HULL.pixels.size(); ++i)
+	{
+		if (means.size()<=1)
+		{
+			classes[i] = 0;
+			continue;
+		}
+
+		coordinate pixel = {HULL.pixels[i][0],HULL.pixels[i][1]};
+		classes[i] = Cluster(pixel,means);
+	}
+
+	makeHulls(HULL,newHulls,classes,means.size());
+
+	std::vector<int> empty;
+	for (int i=0; i<newHulls.size(); ++i)
+	{
+		if (newHulls[i].pixels.empty())
+		{
+			empty.push_back(i);
+		}
+	}
+
+	//for (int i=0; i<empty.size(); ++i)
+	//{
+	//	newHulls.erase(i);
+	//}
+}
+//#pragma optimize("",on)
+
+std::vector<coordinate> KMeans(int k, const Hull& HULL, std::vector<int>& bestClasses) {
 	const float THRESH = 1.2;
 
 	int numPixels = HULL.pixels.size();
 	float oldSumMeanSqrDist = std::numeric_limits<float>::infinity();
 	std::vector<float> meanDistances;
-	std::vector<coordinate> newMeans, oldMeans;
+	std::vector<coordinate> newMeans, oldMeans, bestMeans;
 	std::vector<int> classCount,curClasses;
+
+	if (k<1) k=1;
 
 	meanDistances.resize(k);
 	newMeans.resize(k);
@@ -48,7 +128,11 @@ void KMeans(int k, const Hull& HULL, std::vector<int>& bestClasses) {
 	}
 
 	if (k<=1)
-		return;
+	{
+		newMeans[0].x = HULL.centerOfMass[0];
+		newMeans[0].y = HULL.centerOfMass[1];
+		return newMeans;
+	}
 
 	for (int i=0; i<10; ++i)
 	{
@@ -131,8 +215,11 @@ void KMeans(int k, const Hull& HULL, std::vector<int>& bestClasses) {
 			oldSumMeanSqrDist = sumMeanSqrDist;
 			for (int i=0; i<numPixels; ++i)
 				bestClasses[i] = curClasses[i];
+			bestMeans = newMeans;
 		}	
 	}
+
+	return bestMeans;
 }
 
 double gapWeight(int k, const Hull& HULL, std::vector<int>& idx)
@@ -252,32 +339,23 @@ int getBest_K(const int K_MAX, std::vector<Hull>& hulls)
 	return bestK;
 }
 
-void makeHulls(const Hull& ORG_HULL, std::vector<Hull>& newHulls, const std::vector<int>& CLASSES, const int K)
+//#pragma optimize("",off)
+void GapStatistic(const LabelGeometryImageFilterType::LabelPointType centerOfMass,
+	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates, const int K_MAX, std::vector<coordinate>& means)
 {
-	newHulls.clear();
-	newHulls.resize(K);
+	means.clear();
 
-	for (int i=0; i<ORG_HULL.pixels.size(); ++i)
-		newHulls[CLASSES[i]].pixels.push_back(ORG_HULL.pixels[i]);
-
-	for (int i=0; i<K; ++i)
+	if (K_MAX<=1)
 	{
-		newHulls[i].centerOfMass[0] = 0.0;
-		newHulls[i].centerOfMass[1] = 0.0;
-		for (int j=0; j<newHulls[i].pixels.size(); ++j)
-		{
-			newHulls[i].centerOfMass[0] += newHulls[i].pixels[j][0];
-			newHulls[i].centerOfMass[1] += newHulls[i].pixels[j][1];
-		}
-		newHulls[i].centerOfMass[0] /= (double)newHulls[i].pixels.size();
-		newHulls[i].centerOfMass[1] /= (double)newHulls[i].pixels.size();
+		coordinate mean;
+		mean.x = centerOfMass[0];
+		mean.y = centerOfMass[1];
+		means.push_back(mean);
+		return;
 	}
-}
 
-void GapStatistic(LabelGeometryImageFilterType::LabelPointType centerOfMass,
-	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates, std::vector<Hull>& hulls, const int K_MAX)
-{
 	const int B = 20; // B is the number of reference data from Tibshirani's paper
+	std::vector<Hull> hulls;
 	hulls.resize(1+B);
 	Hull tempHull;
 	tempHull.pixels.resize(pixelCoordinates.size());
@@ -305,12 +383,34 @@ void GapStatistic(LabelGeometryImageFilterType::LabelPointType centerOfMass,
 
 	int k = getBest_K(K_MAX,hulls);
 
+	if (k<=1)
+	{
+		means.clear();
+		coordinate mean;
+		mean.x = centerOfMass[0];
+		mean.y = centerOfMass[1];
+		means.push_back(mean);
+		return;
+	}
+
 	std::vector<int> classes;
 	classes.resize(pixelCoordinates.size());
 
-	KMeans(k,tempHull,classes);
+	means = KMeans(k,tempHull,classes);
 
-	hulls.clear();
+	//hulls.clear();
+	std::vector<Hull> testHulls;
 
-	makeHulls(tempHull,hulls,classes,k);
+	makeHulls(tempHull,testHulls,classes,k);
+
+	std::vector<Hull>::iterator iter = testHulls.begin();
+
+	int sml = 0;
+	for (; iter!=testHulls.end(); ++iter)
+	{
+		if (iter->pixels.size()<100)
+		{
+			++sml;
+		}
+	}
 }

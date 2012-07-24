@@ -3,6 +3,7 @@
 
 #include "GapStatistic.h"
 
+//#pragma optimize("",off)
 DWORD WINAPI segmentation(LPVOID lpParam)
 {
 	clock_t startTime = clock();
@@ -14,89 +15,173 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 
 	itk::TIFFImageIO::Pointer				imageIO =			itk::TIFFImageIO::New();
 
-	ScalarImageToHistogramGeneratorType::Pointer histogramGenerator = ScalarImageToHistogramGeneratorType::New();
-	OtsuThresholdCalculatorType::Pointer	thresholdCalculator = OtsuThresholdCalculatorType::New();
-
-	ThresholdFilterType::Pointer			thresholdFilter =	ThresholdFilterType::New();
+	ScalarImageToHistogramGeneratorType::Pointer histogramGeneratorOrg = ScalarImageToHistogramGeneratorType::New();
+	ScalarImageToHistogramGeneratorType::Pointer histogramGeneratorIg = ScalarImageToHistogramGeneratorType::New();
+	OtsuThresholdCalculatorType::Pointer	thresholdCalculatorOrg = OtsuThresholdCalculatorType::New();
+	OtsuThresholdCalculatorType::Pointer	thresholdCalculatorIg = OtsuThresholdCalculatorType::New();
+	ThresholdFilterType::Pointer			thresholdFilterOrg =	ThresholdFilterType::New();
+	ThresholdFilterType::Pointer			thresholdFilterIg =	ThresholdFilterType::New();
 	
 	ErodeFilterType::Pointer				binaryErode =		ErodeFilterType::New();
 	DilateFilterType::Pointer				binaryDilate =		DilateFilterType::New();
 	ErodeFilterType::Pointer				binaryErode2 =		ErodeFilterType::New();
 	DilateFilterType::Pointer				binaryDilate2 =		DilateFilterType::New();
-	BinaryFillholeImageFilterType::Pointer  binaryHoleFiller =  BinaryFillholeImageFilterType::New();
-	ConnectedComponentFilterType::Pointer	labeler =			ConnectedComponentFilterType::New();
-	RelabelComponentFilterType::Pointer		relabeler =			RelabelComponentFilterType::New();
-	LabelGeometryImageFilterType::Pointer	labelGeometryImageFilter = LabelGeometryImageFilterType::New();
+	GrayscaleDilateFilterType::Pointer		grayDilate =		GrayscaleDilateFilterType::New();
+	GrayscaleErodeFilterType::Pointer		grayErode =			GrayscaleErodeFilterType::New();
+	SubtractImageFilterType::Pointer		subtractor =		SubtractImageFilterType::New();
+	BinaryNotImageFilterType::Pointer		binaryNot =			BinaryNotImageFilterType::New();
+	AndImageFilterType::Pointer				binaryAnd =			AndImageFilterType::New();
+	BinaryFillholeImageFilterType::Pointer  binaryHoleFillerOrg =  BinaryFillholeImageFilterType::New();
+	BinaryFillholeImageFilterType::Pointer  binaryHoleFillerIg =  BinaryFillholeImageFilterType::New();
+	ConnectedComponentFilterType::Pointer	labelerOrg =			ConnectedComponentFilterType::New();
+	ConnectedComponentFilterType::Pointer	labelerIg =			ConnectedComponentFilterType::New();
+	LabelGeometryImageFilterType::Pointer	labelGeometryImageFilterOrg = LabelGeometryImageFilterType::New();
+	LabelGeometryImageFilterType::Pointer	labelGeometryImageFilterIg = LabelGeometryImageFilterType::New();
 	
-	StructuringElementType		structuringElement;
+	StructuringElementType		structuringElement1;
+	StructuringElementType		structuringElement2;
 
 	charReader->SetImageIO(imageIO);
 	charReader->SetFileName(paramaters->imageFile);
 	charReader->Update();
 
-	histogramGenerator->SetNumberOfBins(256);
-	histogramGenerator->SetInput(charReader->GetOutput());
-	histogramGenerator->Compute();
+	histogramGeneratorOrg->SetNumberOfBins(256);
+	histogramGeneratorOrg->SetInput(charReader->GetOutput());
+	histogramGeneratorOrg->Compute();
 
-	thresholdCalculator->SetInput(histogramGenerator->GetOutput());
-	thresholdCalculator->Update();
+	thresholdCalculatorOrg->SetInput(histogramGeneratorOrg->GetOutput());
+	thresholdCalculatorOrg->Update();
 
-	itk::SimpleDataObjectDecorator<double>* thresh = thresholdCalculator->GetOutput();
-	float threshold = thresh->Get();
+	itk::SimpleDataObjectDecorator<double>* threshOrg = thresholdCalculatorOrg->GetOutput();
+	float thresholdOrg = threshOrg->Get();
 
-	threshold *= paramaters->imageAlpha;
+	thresholdOrg *= paramaters->imageAlpha;
 
-	thresholdFilter->SetLowerThreshold(threshold);
-	thresholdFilter->SetOutsideValue(0);
-	thresholdFilter->SetInsideValue(-1);
-	thresholdFilter->SetUpperThreshold(255);
-	thresholdFilter->SetInput(charReader->GetOutput());
+	thresholdFilterOrg->SetLowerThreshold(thresholdOrg);
+	thresholdFilterOrg->SetOutsideValue(0);
+	thresholdFilterOrg->SetInsideValue(-1);
+	thresholdFilterOrg->SetUpperThreshold(255);
+	thresholdFilterOrg->SetInput(charReader->GetOutput());
 
-	structuringElement.SetRadius(4);
-	structuringElement.CreateStructuringElement();
+	structuringElement1.SetRadius(2);
+	structuringElement1.CreateStructuringElement();
 
-	binaryErode->SetKernel(structuringElement);
-	binaryErode->SetInput(thresholdFilter->GetOutput());
+	binaryErode->SetKernel(structuringElement1);
+	binaryErode->SetInput(thresholdFilterOrg->GetOutput());
 
-	binaryDilate->SetKernel(structuringElement);
+	binaryDilate->SetKernel(structuringElement1);
 	binaryDilate->SetInput(binaryErode->GetOutput());
 
-	binaryDilate2->SetKernel(structuringElement);
+	binaryDilate2->SetKernel(structuringElement1);
 	binaryDilate2->SetInput(binaryDilate->GetOutput());
 
-	binaryErode2->SetKernel(structuringElement);
+	binaryErode2->SetKernel(structuringElement1);
 	binaryErode2->SetInput(binaryDilate2->GetOutput());
 
-	binaryHoleFiller->SetInput(binaryErode2->GetOutput());
-	binaryHoleFiller->SetFullyConnected(false);
+	binaryHoleFillerOrg->SetInput(binaryErode2->GetOutput());
+	binaryHoleFillerOrg->SetFullyConnected(true);
 
-	//charWriter->SetFileName("C:\\Users\\Eric\\Desktop\\holefiller.tiff");
+	labelerOrg->SetInput(binaryHoleFillerOrg->GetOutput());
+
+	labelGeometryImageFilterOrg->CalculatePixelIndicesOn();
+	labelGeometryImageFilterOrg->SetInput(labelerOrg->GetOutput());
+
+	structuringElement2.SetRadius(2);
+	structuringElement2.CreateStructuringElement();
+
+	grayDilate->SetKernel(structuringElement2);
+	grayDilate->SetInput(charReader->GetOutput());
+	grayDilate->Update();
+	grayErode->SetKernel(structuringElement2);
+	grayErode->SetInput(charReader->GetOutput());
+	grayErode->Update();
+
+	subtractor->SetInput1(grayDilate->GetOutput());
+	subtractor->SetInput2(grayErode->GetOutput());
+	subtractor->Update();
+
+	histogramGeneratorIg->SetNumberOfBins(256);
+	histogramGeneratorIg->SetInput(subtractor->GetOutput());
+	histogramGeneratorIg->Compute();
+
+	thresholdCalculatorIg->SetInput(histogramGeneratorIg->GetOutput());
+	thresholdCalculatorIg->Update();
+
+	itk::SimpleDataObjectDecorator<double>* threshIg = thresholdCalculatorIg->GetOutput();
+	float thresholdIg = threshIg->Get();
+
+	thresholdFilterIg->SetLowerThreshold(thresholdIg);
+	thresholdFilterIg->SetOutsideValue(0);
+	thresholdFilterIg->SetInsideValue(-1);
+	thresholdFilterIg->SetUpperThreshold(255);
+	thresholdFilterIg->SetInput(subtractor->GetOutput());
+
+	binaryNot->SetInput(thresholdFilterIg->GetOutput());
+	binaryAnd->SetInput1(binaryNot->GetOutput());
+	binaryAnd->SetInput2(binaryHoleFillerOrg->GetOutput());
+
+	binaryHoleFillerIg->SetInput(binaryAnd->GetOutput());
+	binaryHoleFillerIg->SetFullyConnected(false);
+
+	labelerIg->SetInput(binaryHoleFillerIg->GetOutput());
+
+	labelGeometryImageFilterIg->CalculatePixelIndicesOn();
+	labelGeometryImageFilterIg->SetInput(labelerIg->GetOutput());
+
+	labelGeometryImageFilterOrg->Update();
+	labelGeometryImageFilterIg->Update();
+
+	//charWriter->SetFileName("test.tiff");
 	//charWriter->SetImageIO(imageIO);
-	//charWriter->SetInput(binaryHoleFiller->GetOutput());
+	//charWriter->SetInput(binaryHoleFillerIg->GetOutput());
 	//charWriter->Update();
 
-	//labeler->SetInput(binaryDilate2->GetOutput());
-	labeler->SetInput(binaryHoleFiller->GetOutput());
-
-	//relabeler->SetMinimumObjectSize(paramaters->minSize);
-	//relabeler->SetInput(labeler->GetOutput());
-
-	labelGeometryImageFilter->CalculatePixelIndicesOn();
-	labelGeometryImageFilter->SetInput(labeler->GetOutput());
-	//labelGeometryImageFilter->SetIntensityInput(charReader->GetOutput());
-	labelGeometryImageFilter->Update();
-
-	std::vector<ShortPixelType> labels = labelGeometryImageFilter->GetLabels();
+	std::vector<ShortPixelType> labelsOrg = labelGeometryImageFilterOrg->GetLabels();
+	std::vector<ShortPixelType> labelsIg = labelGeometryImageFilterIg->GetLabels();
 
 	CharImageType::SizeType size = charReader->GetOutput()->GetLargestPossibleRegion().GetSize();
 
+	ShortImageType::Pointer labelerOrgImg = labelerOrg->GetOutput();
+
+	std::vector<std::vector<coordinate>> means;
+	means.resize(labelsOrg.size());
+
+	for (int i=1; i<labelsIg.size(); ++i)
+	{
+		std::vector<coordinate> tempMeans;
+		LabelGeometryImageFilterType::LabelPointType centerOfMass = 
+			labelGeometryImageFilterIg->GetCentroid(labelsIg[i]);
+
+		LabelGeometryImageFilterType::LabelIndicesType pixelCoordinates= 
+			labelGeometryImageFilterIg->GetPixelIndices(labelsIg[i]);
+		std::vector<Hull> tempHulls;
+		double vol = labelGeometryImageFilterIg->GetVolume(labelsIg[i]);
+		if (vol<paramaters->minSize*.7)
+			continue;
+
+		int kMax = floor((double)vol/(paramaters->minSize*.6));
+
+		GapStatistic(centerOfMass,pixelCoordinates,kMax+1,tempMeans);
+
+		for (int j=0; j<tempMeans.size(); ++j)
+		{
+			ShortImageType::IndexType point;
+			point[0] = (unsigned short)tempMeans[j].x;
+			point[1] = (unsigned short)tempMeans[j].y;
+
+			unsigned short meanLabel = labelerOrgImg->GetPixel(point);
+			means[meanLabel].push_back(tempMeans[j]);
+		}
+		//printf("labelsIg=%d\n",i);
+	}
+
 	std::vector<int> labelsToUse;
 
-	for (int i=0; i<labels.size(); ++i)
+	for (int i=0; i<labelsOrg.size(); ++i)
 	{
-		double eccentricity = labelGeometryImageFilter->GetEccentricity(i);
-		double minorAxes = labelGeometryImageFilter->GetMinorAxisLength(i);
-		int vol = labelGeometryImageFilter->GetVolume(i);
+		double eccentricity = labelGeometryImageFilterOrg->GetEccentricity(i);
+		double minorAxes = labelGeometryImageFilterOrg->GetMinorAxisLength(i);
+		int vol = labelGeometryImageFilterOrg->GetVolume(i);
 		if (vol<paramaters->minSize) continue;
 		if (eccentricity>paramaters->eccentricity && minorAxes<sqrt((double)paramaters->minSize))
 			continue;
@@ -104,41 +189,33 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	}
 
 	char buffer[255];
-	int idx = paramaters->imageFile.find_last_of("\\");
-
-	//sprintf_s(buffer,"straight_%s", paramaters->imageFile.substr(idx+1).c_str());
-	//charWriter->SetFileName(buffer);
-	//charWriter->SetImageIO(imageIO);
-	//charWriter->SetInput(binaryErode2->GetOutput());
-	//charWriter->Update();
-
-	//sprintf_s(buffer,"fill_%s", paramaters->imageFile.substr(idx+1).c_str());
-	//charWriter->SetFileName(buffer);
-	//charWriter->SetInput(binaryHoleFiller->GetOutput());
-	//charWriter->Update();
-
-	//sprintf_s(buffer,"geo_%s", paramaters->imageFile.substr(idx+1).c_str());
-	//shortWriter->SetFileName("C:\\Users\\Eric\\Desktop\\geo.tiff");
-	//shortWriter->SetInput(labelGeometryImageFilter->GetOutput());
-	//shortWriter->SetImageIO(imageIO);
-	//shortWriter->Update();
+	//int idx = paramaters->imageFile.find_last_of("\\");
 
 	std::vector<Hull> hulls;
-	hulls.reserve(labelsToUse.size());
+	hulls.reserve(labelsToUse.size()*1.4);
 	for (int i=1; i<labelsToUse.size(); ++i)
 	{
 		LabelGeometryImageFilterType::LabelPointType centerOfMass = 
-			labelGeometryImageFilter->GetCentroid(labelsToUse[i]);
+			labelGeometryImageFilterOrg->GetCentroid(labelsToUse[i]);
 
 		LabelGeometryImageFilterType::LabelIndicesType pixelCoordinates= 
-			labelGeometryImageFilter->GetPixelIndices(labelsToUse[i]);
-		std::vector<Hull> tempHulls;
-		double vol = labelGeometryImageFilter->GetVolume(labelsToUse[i]);
-		int kMax = std::max(1.0,floor(vol/paramaters->minSize));
-		GapStatistic(centerOfMass,pixelCoordinates,tempHulls,kMax);
+			labelGeometryImageFilterOrg->GetPixelIndices(labelsToUse[i]);
 
-		for (int i=0; i<tempHulls.size(); ++i)
-			hulls.push_back(tempHulls[i]);
+		Hull hull;
+		hull.centerOfMass[0] = centerOfMass[0];
+		hull.centerOfMass[1] = centerOfMass[1];
+		hull.pixels.resize(pixelCoordinates.size());
+
+		for (int j=0; j<pixelCoordinates.size(); ++j)
+		{
+			hull.pixels[j][0] = pixelCoordinates[j][0];
+			hull.pixels[j][1] = pixelCoordinates[j][1];
+		}
+
+		std::vector<Hull> tempHulls;
+		SetClusters(hull,means[labelsToUse[i]],tempHulls);
+		hulls.insert(hulls.end(),tempHulls.begin(),tempHulls.end());
+		int sz=hulls.size();
 	}
 
 	std::string outputText = "";

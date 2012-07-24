@@ -6,6 +6,9 @@
 #define SQR(x) ((x)*(x))
 
 void GapStatistic(LabelGeometryImageFilterType::LabelPointType centerOfMass,
-	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates, std::vector<Hull>& hulls, const int K_MAX);
+	const LabelGeometryImageFilterType::LabelIndicesType& pixelCoordinates,
+	const int K_MAX, std::vector<coordinate>& means);
+
+void SetClusters(const Hull& HULL, std::vector<coordinate>& means, std::vector<Hull>& newHulls);
 
 #endif
