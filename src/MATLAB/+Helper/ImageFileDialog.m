@@ -22,16 +22,20 @@ while ( ~bOpened )
     if (~isfield(CONSTANTS,'datasetName'))
         CONSTANTS.datasetName = imageDataset;
     elseif (~strcmp(imageDataset,CONSTANTS.datasetName))
-        answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
-        switch answer
-            case 'Yes'
-                continue;
-            case 'No'
-                CONSTANTS.imageNamePattern = '';
-            case 'Close LEVer'
-                return
-            otherwise
-                continue;
+        if (strcmp(imageDataset,[CONSTANTS.datasetName '_']))
+            CONSTANTS.datasetName = [CONSTANTS.datasetName '_'];
+        else
+            answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
+            switch answer
+                case 'Yes'
+                    continue;
+                case 'No'
+                    CONSTANTS.imageNamePattern = '';
+                case 'Close LEVer'
+                    return
+                otherwise
+                    continue;
+            end
         end
     end
     
