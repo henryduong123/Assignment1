@@ -72,6 +72,11 @@ system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|'
 fprintf('Done (%d sec)\n\n', toc());
 
 tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexHashData.mexw' buildbits]);
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexHashData.sln"']);
+fprintf('Done (%d sec)\n\n', toc());
+
+tic();
 fprintf('\nVisual Studio Compiling: %s...\n', ['mexCCDistance.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexCCDistance.sln"']);
 fprintf('Done (%f sec)\n\n', toc());
