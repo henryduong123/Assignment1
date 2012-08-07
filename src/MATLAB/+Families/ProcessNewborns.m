@@ -155,7 +155,7 @@ for i=1:size
             sibling = CellTracks(parentTrackID).hulls(siblingHullIndex);
             parentCosts(j) = parentCosts(j) + Tracker.SiblingDistance(childHullID,sibling);
         end
-        if ( GraphEdits(parentHullCandidates(j),childHullID) > 0 )
+        if ( GraphEdits(parentHullCandidates(j),childHullID) > 1 )
             parentCosts(j) = costMatrix(parentHullCandidates,childHullID);
         end
     end
