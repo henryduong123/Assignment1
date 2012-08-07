@@ -196,7 +196,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
         return;
     end
     
-    [mergeObj, mergeFeat, deleteCells] = Segmentation.CreateMergedCell(nextMergeHulls);
+    [mergeObj, deleteCells] = Segmentation.CreateMergedCell(nextMergeHulls);
     if ( isempty(mergeObj) || isempty(deleteCells) )
         return;
     end
@@ -204,7 +204,7 @@ function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, merg
     replaceIdx = min(nextMergeHulls);
     deleteCells = setdiff(nextMergeHulls, replaceIdx);
     
-    Hulls.SetHullEntries(replaceIdx, mergeObj, mergeFeat);
+    Hulls.SetHullEntries(replaceIdx, mergeObj);
     
     for i=1:length(deleteCells)
         Hulls.RemoveHull(deleteCells(i));
