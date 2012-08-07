@@ -141,7 +141,6 @@ switch answer
                 if (~Helper.ImageFileDialog())
                     return
                 end
-                save('LEVerSettings.mat','settings');
             end
                 
             if(exist('objHulls','var'))
