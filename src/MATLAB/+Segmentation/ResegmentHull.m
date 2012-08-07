@@ -38,17 +38,25 @@ end
 [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
 gmoptions = statset('Display','off', 'MaxIter',400);
 
-if(exist('bKmeansInit', 'var') && bKmeansInit)
-    %initialize GMM using kmeans result instead of randomly
-    % ~10x faster but ocassionally poor results - used for interactivity
-    [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
-    start = struct('mu', {centers}, 'Sigma', {repmat(eye(2,2), [1 1 k])},'PComponents',{(ones(1,k)/k)});
-    obj = gmdistribution.fit([c,r], k, 'Start', start, 'Options',gmoptions);
-else
-    obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
-end
 
-kIdx = cluster(obj, [c,r]);
+
+switch CONSTANTS.cellType
+    case 'Adult'
+        if(exist('bKmeansInit', 'var') && bKmeansInit)
+            %initialize GMM using kmeans result instead of randomly
+            % ~10x faster but ocassionally poor results - used for interactivity
+            [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+            start = struct('mu', {centers}, 'Sigma', {repmat(eye(2,2), [1 1 k])},'PComponents',{(ones(1,k)/k)});
+            obj = gmdistribution.fit([c,r], k, 'Start', start, 'Options',gmoptions);
+        else
+            obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
+        end
+        kIdx = cluster(obj, [c,r]);
+    case 'Hemato'
+        [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+    otherwise
+        [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+end
 
 if ( any(isnan(kIdx)) )
     return;
