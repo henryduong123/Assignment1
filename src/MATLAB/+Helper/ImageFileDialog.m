@@ -19,14 +19,15 @@ while ( ~bOpened )
     
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
     
-    if (~strcmp(imageDataset,CONSTANTS.datasetName))
+    if (~isfield(CONSTANTS,'datasetName'))
+        CONSTANTS.datasetName = imageDataset;
+    elseif (~strcmp(imageDataset,CONSTANTS.datasetName))
         answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
         switch answer
             case 'Yes'
                 continue;
             case 'No'
                 CONSTANTS.imageNamePattern = '';
-                bOpened = 1;
             case 'Close LEVer'
                 return
             otherwise
@@ -37,6 +38,8 @@ while ( ~bOpened )
     CONSTANTS.rootImageFolder = settings.imagePath;
     CONSTANTS.imageSignificantDigits = sigDigits;
     CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
+    
+    bOpened = 1;
 end
 
 save('LEVerSettings.mat','settings');

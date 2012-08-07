@@ -78,9 +78,9 @@ function errStatus = SegAndTrack()
         return
     end
     
-    UI.SaveData(1);
-    
     UI.InitializeFigures();
+    
+    UI.SaveData(1);
     
     % Adds the special origin action, to indicate that this is initial
     % segmentation data from which edit actions are built.

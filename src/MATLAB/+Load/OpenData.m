@@ -98,8 +98,10 @@ ReplayEditActions = [];
 answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
 switch answer
     case 'Segment & Track'
-        Helper.ImageFileDialog();
-        save('LEVerSettings.mat','settings');
+        if (~Helper.ImageFileDialog())
+            return;
+        end
+        load('LEVerSettings.mat');
         
         Load.InitializeConstants();
         Load.AddConstant('version',softwareVersion,1);
