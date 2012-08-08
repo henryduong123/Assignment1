@@ -138,6 +138,13 @@ labelsMenu = uimenu(...
     'Checked',          'on',...
     'Accelerator',      'l');
 
+treeLabelsOn = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Off Tree Labels',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleTreeLabels,...
+    'Checked',          'on');
+
 siblingsMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Show Sister Cell Relationships',...
@@ -199,6 +206,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.undoMenu = undoMenu;
     Figures.cells.menuHandles.redoMenu = redoMenu;
     Figures.cells.menuHandles.labelsMenu = labelsMenu;
+    Figures.cells.menuHandles.treeLabelsOn = treeLabelsOn;
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
@@ -208,6 +216,7 @@ else
     Figures.tree.menuHandles.undoMenu = undoMenu;
     Figures.tree.menuHandles.redoMenu = redoMenu;
     Figures.tree.menuHandles.labelsMenu = labelsMenu;
+    Figures.tree.menuHandles.treeLabelsOn = treeLabelsOn;
     Figures.tree.menuHandles.playMenu = playMenu;
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
@@ -262,6 +271,21 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'), 'on'))
 else
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'on');
+    UI.DrawCells();
+    UI.DrawTree(Figures.tree.familyID);
+end
+end
+
+function toggleTreeLabels(src,evnt)
+global Figures
+if(strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'), 'on'))
+    set(Figures.cells.menuHandles.treeLabelsOn, 'Checked', 'off');
+    set(Figures.tree.menuHandles.treeLabelsOn, 'Checked', 'off');
+    UI.DrawCells();
+    UI.DrawTree(Figures.tree.familyID);
+else
+    set(Figures.cells.menuHandles.treeLabelsOn, 'Checked', 'on');
+    set(Figures.tree.menuHandles.treeLabelsOn, 'Checked', 'on');
     UI.DrawCells();
     UI.DrawTree(Figures.tree.familyID);
 end
