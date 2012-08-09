@@ -139,6 +139,8 @@ public:
 
 		for (int i=0; i<runningThreads; ++i)
 			CloseHandle(hTreadArray[i]);
+
+		return 0;
 	}
 
 

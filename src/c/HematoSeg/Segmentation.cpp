@@ -131,9 +131,14 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	labelGeometryImageFilterOrg->Update();
 	labelGeometryImageFilterIg->Update();
 
-	//charWriter->SetFileName("test.tiff");
+	//charWriter->SetFileName("ig.tiff");
 	//charWriter->SetImageIO(imageIO);
-	//charWriter->SetInput(binaryHoleFillerIg->GetOutput());
+	//charWriter->SetInput(thresholdFilterIg->GetOutput());
+	//charWriter->Update();
+
+	//charWriter->SetFileName("fore.tiff");
+	//charWriter->SetImageIO(imageIO);
+	//charWriter->SetInput(binaryHoleFillerOrg->GetOutput());
 	//charWriter->Update();
 
 	std::vector<ShortPixelType> labelsOrg = labelGeometryImageFilterOrg->GetLabels();
@@ -156,7 +161,7 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 			labelGeometryImageFilterIg->GetPixelIndices(labelsIg[i]);
 		std::vector<Hull> tempHulls;
 		double vol = labelGeometryImageFilterIg->GetVolume(labelsIg[i]);
-		if (vol<paramaters->minSize*.7)
+		if (vol<paramaters->minSize*.4)
 			continue;
 
 		int kMax = floor((double)vol/(paramaters->minSize*.6));
