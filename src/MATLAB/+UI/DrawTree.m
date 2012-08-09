@@ -25,7 +25,7 @@
 
 function DrawTree(familyID)
 
-global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
+global CellFamilies HashedCells Figures CellPhenotypes  
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
@@ -39,10 +39,6 @@ end
    
 phenoScratch.phenoColors = hsv(length(CellPhenotypes.descriptions));
 phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.descriptions),1);
-
-if(~isfield(CONSTANTS,'timeResolution'))
-    CONSTANTS.timeResolution = 10;
-end
 
 if(isempty(CellFamilies(familyID).tracks)),return,end
 

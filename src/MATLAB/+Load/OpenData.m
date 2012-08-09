@@ -103,11 +103,10 @@ switch answer
         end
         load('LEVerSettings.mat');
         
-        Load.InitializeConstants();
         Load.AddConstant('version',softwareVersion,1);
+        CONSTANTS.cellType = [];
+        Load.InitializeConstants();
         
-        type = questdlg('Cell Type:','Cell Type','Adult','Hemato','Adult');
-        Load.AddConstant('cellType',type,1);
         errOpen = Segmentation.SegAndTrack();
         if(~errOpen)
             opened = 1;
@@ -150,11 +149,6 @@ switch answer
                 return
             end
             
-            if (~isfield(CONSTANTS,'cellType'))
-                type = questdlg('Cell Type:','Cell Type','Adult','Hemeta','Adult');
-                Load.AddConstant('cellType',type,1);
-            end
-            
             errors = mexIntegrityCheck();
             if ( ~isempty(errors) )
                 warndlg('There were database inconsistencies.  LEVer might not behave properly!');
@@ -166,6 +160,8 @@ switch answer
         Figures.time = 1;
         
         Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
+        
+        Load.InitializeConstants();
                 
         UI.InitializeFigures();
                 

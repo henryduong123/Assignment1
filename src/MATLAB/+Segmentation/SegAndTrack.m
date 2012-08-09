@@ -57,11 +57,8 @@ function errStatus = SegAndTrack()
     switch CONSTANTS.cellType
         case 'Hemato'
             tic;
-            Segmentation.HematoSegmentation(1.2);
+            Segmentation.HematoSegmentation();
             tSeg = toc;
-            Load.AddConstant('dMaxCenterOfMass',80,1);
-            Load.AddConstant('dMaxConnectComponent',80,1);
-            Load.AddConstant('dMaxConnectComponentTracker',40,1);
             tic;
             Tracker.HematoTracker();
             tTrack = toc;

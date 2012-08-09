@@ -1,4 +1,4 @@
-function  HematoSegmentation(imageAlpha)
+function  HematoSegmentation()
 global CONSTANTS CellHulls
 eccentricity = 1.0;
 minVol = 200;
@@ -10,7 +10,7 @@ end
 
 fprintf(1,'Segmentation...');
 
-system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
+system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(CONSTANTS.imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
 
 pause(20);
 CellHulls = struct(...
@@ -48,9 +48,6 @@ for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
     fclose(file);
     
 end
-
-im = imread(Helper.GetFullImagePath(1));
-Load.AddConstant('imageSize',size(im),1);
 
 for i=1:length(CellHulls)
     [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(i).indexPixels);

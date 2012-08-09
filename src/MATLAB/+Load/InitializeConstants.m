@@ -25,22 +25,48 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function InitializeConstants()
-%Set all constants here
+%% Set all constants here
 
-Load.AddConstant('imageAlpha',1.5);
-Load.AddConstant('maxPixelDistance',40,1);
-Load.AddConstant('maxCenterOfMassDistance',40,1);
-Load.AddConstant('minParentCandidateTimeFrame',5, 1);
-Load.AddConstant('minParentHistoryTimeFrame',5, 1);
-Load.AddConstant('minParentFuture',5, 1);
-Load.AddConstant('minFamilyTimeFrame',25, 1);
-Load.AddConstant('maxFrameDifference',1, 1);
-Load.AddConstant('historySize',10, 1);
-Load.AddConstant('clickMargin',500, 1);
-Load.AddConstant('timeResolution',10); %in frames per min
-Load.AddConstant('dMaxCenterOfMass',40,1);
-Load.AddConstant('dMaxConnectComponent',40,1);
-Load.AddConstant('dMaxConnectComponentTracker',20,1);
-Load.AddConstant('minTrackScore',0.5,1);
-Load.AddConstant('maxPropagateFrames',50,1);
+global CONSTANTS
+
+im = imread(Helper.GetFullImagePath(1));
+Load.AddConstant('imageSize',size(im),1);
+
+if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
+    type = questdlg('Cell Type:','Cell Type','Adult','Hemato','Adult');
+    Load.AddConstant('cellType',type,1);
+end
+
+%% Common Constants
+Load.AddConstant('imageAlpha',                  1.5);
+Load.AddConstant('maxPixelDistance',            40,1);
+Load.AddConstant('maxCenterOfMassDistance',     40,1);
+Load.AddConstant('minParentCandidateTimeFrame', 5, 1);
+Load.AddConstant('minParentHistoryTimeFrame',   5, 1);
+Load.AddConstant('minParentFuture',             5, 1);
+Load.AddConstant('minFamilyTimeFrame',          25, 1);
+Load.AddConstant('maxFrameDifference',          1, 1);
+Load.AddConstant('historySize',                 10, 1);
+Load.AddConstant('clickMargin',                 500, 1);
+Load.AddConstant('minTrackScore',               0.5,1);
+Load.AddConstant('maxPropagateFrames',          50,1);
+
+%% Particular Constants
+switch CONSTANTS.cellType
+    case 'Adult'
+        Load.AddConstant('timeResolution',              10); %in min per frame
+        Load.AddConstant('dMaxCenterOfMass',            40,1);
+        Load.AddConstant('dMaxConnectComponent',        40,1);
+        Load.AddConstant('dMaxConnectComponentTracker', 20,1);
+    case 'Hemato'
+        Load.AddConstant('timeResolution',              5); %in min per frame
+        Load.AddConstant('dMaxCenterOfMass',            80,1);
+        Load.AddConstant('dMaxConnectComponent',        80,1);
+        Load.AddConstant('dMaxConnectComponentTracker', 40,1);
+    otherwise
+        Load.AddConstant('timeResolution',              10); %in min per frame
+        Load.AddConstant('dMaxCenterOfMass',            40,1);
+        Load.AddConstant('dMaxConnectComponent',        40,1);
+        Load.AddConstant('dMaxConnectComponentTracker', 20,1);
+end
 end
