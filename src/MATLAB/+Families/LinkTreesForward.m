@@ -13,14 +13,6 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     costMatrix = Tracker.GetCostMatrix();
     mexDijkstra('initGraph', costMatrix);
     
-    % Use changelabel to try and extend tracks back to first frame
-    backTracks = rootTracks([CellTracks(rootTracks).startTime] ~= 1);
-    for i=1:length(backTracks)
-        linkTreeBack(backTracks(i));
-    end
-    
-    rootTracks = unique(getRootTracks(rootTracks));
-    
     leafHulls = getLeafHulls(rootTracks);
     tStart = CellHulls(leafHulls(1)).time;
     tEnd = length(HashedCells);
@@ -127,28 +119,6 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     UI.Progressbar(1);
 
     extTime = toc(chkExtendTime);
-end
-
-function linkTreeBack(rootTrack)
-    global CellTracks
-    
-    costMatrix = Tracker.GetCostMatrix();
-    
-    curTrack = rootTrack;
-    while ( CellTracks(curTrack).startTime > 1 )
-        curHull = CellTracks(curTrack).hulls(1);
-        prevHulls = find(costMatrix(:,curHull) > 0);
-        
-        if ( isempty(prevHulls) )
-            break;
-        end
-        
-        [bestCost bestIdx] = min(costMatrix(prevHulls,curHull));
-        prevTrack = Hulls.GetTrackID(prevHulls(bestIdx));
-        
-        Tracks.ChangeLabel(curTrack, prevTrack);
-        curTrack = getRootTracks(prevTrack);
-    end
 end
 
 function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt)
