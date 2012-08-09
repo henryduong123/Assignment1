@@ -3,8 +3,8 @@
 % 
 % Applies inference to attempt to improve tree structure.
 
-function historyAction = TreeInference()
-    [iters totalTime] = Families.LinkFirstFrameTrees();
+function historyAction = TreeInference(families)
+    [iters totalTime] = Families.LinkTrees(families);
     
     Helper.SweepDeleted();
     
