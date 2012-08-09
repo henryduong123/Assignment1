@@ -29,7 +29,7 @@ function InitializeConstants()
 
 global CONSTANTS
 
-im = imread(Helper.GetFullImagePath(1));
+im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
 Load.AddConstant('imageSize',size(im),1);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
@@ -54,7 +54,7 @@ Load.AddConstant('maxPropagateFrames',          50,1);
 %% Particular Constants
 switch CONSTANTS.cellType
     case 'Adult'
-        Load.AddConstant('timeResolution',              10); %in min per frame
+        Load.AddConstant('timeResolution',              5); %in min per frame
         Load.AddConstant('dMaxCenterOfMass',            40,1);
         Load.AddConstant('dMaxConnectComponent',        40,1);
         Load.AddConstant('dMaxConnectComponentTracker', 20,1);
