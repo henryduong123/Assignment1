@@ -257,7 +257,25 @@ bool checkFamilySizes(mwIndex familyID)
 	return true;
 }
 
-bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCount)
+void addTrackFamilyReference(mwIndex familyID, std::vector<std::vector<int>>& trackRefCount)
+{
+	mxArray* tracks = mxGetField(gCellFamilies, C_IDX(familyID), "tracks");
+
+	mwSize numTracks = mxGetNumberOfElements(tracks);
+	double* trackData = mxGetPr(tracks);
+
+	for ( mwSize i=0; i < numTracks; ++i )
+	{
+		mwIndex matTrackID = (mwIndex) trackData[i];
+
+		if ( MATLAB_IDX(matTrackID) >= mxGetNumberOfElements(gCellTracks) || (MATLAB_IDX(matTrackID) < 0) )
+			continue;
+
+		trackRefCount[MATLAB_IDX(matTrackID)].push_back(familyID+1);
+	}
+}
+
+bool checkTrackFamilyReferences(mwIndex familyID)
 {
 	mxArray* rootTrackID = mxGetField(gCellFamilies, C_IDX(familyID), "rootTrackID");
 	mxArray* tracks = mxGetField(gCellFamilies, C_IDX(familyID), "tracks");
@@ -280,8 +298,6 @@ bool checkTrackFamilyReferences(mwIndex familyID, std::vector<int>& trackRefCoun
 			gFamilyErrors.insert(tErrorPair(C_IDX(familyID), "Family track list contains trackID larger than CellTracks"));
 			return false;
 		}
-
-		++trackRefCount[MATLAB_IDX(matTrackID)];
 
 		if ( gTrackErrors.count(MATLAB_IDX(matTrackID)) > 0 )
 		{
@@ -581,7 +597,27 @@ int findTrackID(mwIndex matHullID)
 	return -1;
 }
 
-bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
+void addHullReference(mwIndex trackID, std::vector<std::vector<int>>& hullRefCount)
+{
+	mxArray* trackHulls = mxGetField(gCellTracks, C_IDX(trackID), "hulls");
+
+	mwSize numHulls = mxGetNumberOfElements(trackHulls);
+	double* hullData = mxGetPr(trackHulls);
+
+	for ( mwIndex i=0; i < numHulls; ++i )
+	{
+		mwIndex matHullID = (mwIndex) hullData[i];
+		if ( matHullID == 0 )
+			continue;
+
+		if ( MATLAB_IDX(matHullID) >= mxGetNumberOfElements(gCellHulls) || (MATLAB_IDX(matHullID) < 0) )
+			continue;
+
+		hullRefCount[MATLAB_IDX(matHullID)].push_back(trackID+1);
+	}
+}
+
+bool checkHullReferences(mwIndex trackID)
 {
 	mxArray* trackHulls = mxGetField(gCellTracks, C_IDX(trackID), "hulls");
 
@@ -606,8 +642,6 @@ bool checkHullReferences(mwIndex trackID, std::vector<int>& hullRefCount)
 			bError = true;
 			continue;
 		}
-
-		++hullRefCount[MATLAB_IDX(matHullID)];
 
 		if ( gHullErrors.count(MATLAB_IDX(matHullID)) > 0 )
 		{
@@ -693,12 +727,18 @@ bool verifyStructureElements()
 				continue;
 	}
 
-	std::vector<int> familyTrackRefCount;
+	std::vector<std::vector<int>> familyTrackRefCount;
 	familyTrackRefCount.resize(mxGetNumberOfElements(gCellTracks));
+
+	// TODO: Verify that all tracks referenced in families are actually
+	// connected in the tree heirarchy, this isn't detected right now!
 
 	// Verify family->track references
 	for ( mwIndex i=0; i < numFamilies; ++i )
 	{
+		// Always add references to ref count
+		addTrackFamilyReference(i, familyTrackRefCount);
+
 		// Ignore families for which we've already discovered errors
 		if ( gFamilyErrors.count(i) > 0 )
 			continue;
@@ -708,27 +748,38 @@ bool verifyStructureElements()
 		if ( mxGetNumberOfElements(startTime) == 0 )
 			continue;
 
-		if ( !checkTrackFamilyReferences(i, familyTrackRefCount) )
+		// Verify correctness of references
+		if ( !checkTrackFamilyReferences(i) )
 			continue;
 	}
 
 	// Verify that all tracks referenced by CellFamilies are referenced no more than once
 	for ( size_t i=0; i < familyTrackRefCount.size(); ++i )
 	{
-		if ( familyTrackRefCount[i] > 1 )
+		if ( familyTrackRefCount[i].size() > 1 )
 		{
 			char errMsg[errBufSize];
-			sprintf(errMsg, "Track referenced %d (>1) times by families", familyTrackRefCount[i]);
+			char refList[200];
+
+			sprintf(refList, "%d", familyTrackRefCount[i][0]);
+
+			for ( size_t j=1; j < familyTrackRefCount[i].size(); ++j )
+				sprintf(refList, "%s %d", refList, familyTrackRefCount[i][j]);
+
+			sprintf(errMsg, "Track referenced %d times by families [%s]", familyTrackRefCount[i].size(), refList);
 			gTrackErrors.insert(tErrorPair(C_IDX(i), errMsg));
 		}
 	}
 
-	std::vector<int> trackHullRefCount;
+	std::vector<std::vector<int>> trackHullRefCount;
 	trackHullRefCount.resize(mxGetNumberOfElements(gCellHulls));
 
 	// Verify track references
 	for ( mwIndex i=0; i < numTracks; ++i )
 	{
+		// Always add references to ref count
+		addHullReference(i, trackHullRefCount);
+
 		// Ignore tracks for which we've already discovered errors
 		if ( gTrackErrors.count(i) > 0 )
 			continue;
@@ -754,7 +805,7 @@ bool verifyStructureElements()
 				continue;
 		}
 
-		if ( !checkHullReferences(i, trackHullRefCount) )
+		if ( !checkHullReferences(i) )
 			continue;
 	}
 
@@ -762,10 +813,17 @@ bool verifyStructureElements()
 	// Verify that all hulls referenced by CellTracks are referenced no more than once
 	for ( size_t i=0; i < trackHullRefCount.size(); ++i )
 	{
-		if ( trackHullRefCount[i] > 1 )
+		if ( trackHullRefCount[i].size() > 1 )
 		{
 			char errMsg[errBufSize];
-			sprintf(errMsg, "Hull referenced %d (>1) times by tracks", trackHullRefCount[i]);
+			char refList[200];
+
+			sprintf(refList, "%d", trackHullRefCount[i][0]);
+
+			for ( size_t j=1; j < trackHullRefCount[i].size(); ++j )
+				sprintf(refList, "%s %d", refList, trackHullRefCount[i][j]);
+
+			sprintf(errMsg, "Hull referenced %d times by tracks [%s]", trackHullRefCount[i].size(), refList);
 			gHullErrors.insert(tErrorPair(C_IDX(i), errMsg));
 		}
 	}
@@ -787,7 +845,7 @@ bool verifyStructureElements()
 			continue;
 		}
 
-		if ( trackHullRefCount[i] == 1 )
+		if ( trackHullRefCount[i].size() >= 1 )
 			continue;
 
 		if ( trackID < 0 )
@@ -802,12 +860,11 @@ bool verifyStructureElements()
 		continue;
 	}
 
-	// Reuse these for HashedCells ref count
-	for ( size_t i=0; i < familyTrackRefCount.size(); ++i )
-		familyTrackRefCount[i] = 0;
+	std::vector<int> hashTrackRefCount;
+	std::vector<int> hashHullRefCount;
 
-	for ( size_t i=0; i < trackHullRefCount.size(); ++i )
-		trackHullRefCount[i] = 0;
+	hashTrackRefCount.resize(mxGetNumberOfElements(gCellTracks));
+	hashHullRefCount.resize(mxGetNumberOfElements(gCellHulls));
 
 	for ( mwIndex i=0; i < numFrames; ++i )
 	{
@@ -841,8 +898,8 @@ bool verifyStructureElements()
 				continue;
 			}
 
-			++familyTrackRefCount[MATLAB_IDX(matHashTrack)];
-			++trackHullRefCount[MATLAB_IDX(matHashHull)];
+			++hashTrackRefCount[MATLAB_IDX(matHashTrack)];
+			++hashHullRefCount[MATLAB_IDX(matHashHull)];
 
 			mxArray* trackStartTime = mxGetField(gCellTracks, MATLAB_IDX(matHashTrack), "startTime");
 			if ( mxGetNumberOfElements(trackStartTime) == 0 )
