@@ -6,7 +6,5 @@
 function historyAction = TreeInference()
     [iters totalTime] = Families.LinkFirstFrameTrees();
     
-    Helper.SweepDeleted();
-    
     historyAction = 'Push';
 end

@@ -23,7 +23,5 @@ function historyAction = LearnFromEdits(randState)
     SegmentationEdits.changedHulls = [];
     UI.UpdateSegmentationEditsMenu();
     
-    Helper.SweepDeleted();
-    
     historyAction = 'Push';
 end
