@@ -136,7 +136,6 @@ switch answer
             
             save('LEVerSettings.mat','settings');
             
-            Load.InitializeConstants();
             CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
             
             if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)
@@ -163,9 +162,9 @@ switch answer
         Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
         
         Load.InitializeConstants();
-                
+        
         UI.InitializeFigures();
-                
+        
         bUpdated = Load.FixOldFileVersions();
 
         if ( bUpdated )
