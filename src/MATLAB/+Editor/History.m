@@ -93,7 +93,7 @@ switch action
             current = Increment(current);
             
             GetHistElement(current);
-            
+            global Figures
             %Update displays
             UI.DrawTree(Figures.tree.familyID);
             UI.DrawCells();
