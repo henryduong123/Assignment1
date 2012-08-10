@@ -1,11 +1,17 @@
 function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
-    global CellHulls HashedCells Costs
+    global CellHulls CellTracks HashedCells Costs
 
     assignedExtensions = 0;
     foundExtensions = 0;
     
     findTime = 0;
     extTime = 0;
+    
+    rootTracks = unique(getRootTracks(rootTracks));
+    
+    % Initialize mex routine with current cost-graph
+    costMatrix = Tracker.GetCostMatrix();
+    mexDijkstra('initGraph', costMatrix);
     
     leafHulls = getLeafHulls(rootTracks);
     tStart = CellHulls(leafHulls(1)).time;
@@ -15,11 +21,6 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     
 	extGraph = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
     extEnds = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
-    
-    costMatrix = Tracker.GetCostMatrix();
-    
-    % Initialize mex routine with current cost-graph
-    mexDijkstra('initGraph', costMatrix);
     
     chkFindTime = tic();
     UI.Progressbar(0);
@@ -49,7 +50,6 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
             for k=1:length(extIdx)
                 for l = 1:length(nextLeaves)
                     trackCost = calcTrackCost(costMatrix, extHulls(j),nextLeaves(l), maxFrameExt);
-                    
                     
                     extendCost = trackCost + pathCost(extIdx(k));
                     extGraph(checkExtHulls(i),nextLeaves(l)) = extendCost;
@@ -322,5 +322,19 @@ function [paths pathCosts] = dijkstraSearch(startHull, costGraph, acceptFunc, ma
     for i=1:length(termHulls)
         paths{i} = bestPaths{termHulls(i)};
         pathCosts(i) = bestCosts(termHulls(i));
+    end
+end
+
+function rootTracks = getRootTracks(tracks)
+    global CellTracks CellFamilies
+    
+    rootTracks = [];
+    for i=1:length(tracks)
+        if ( isempty(CellTracks(tracks(i)).startTime) )
+            continue;
+        end
+        
+        familyID = CellTracks(tracks(i)).familyID;
+        rootTracks = [rootTracks CellFamilies(familyID).rootTrackID];
     end
 end

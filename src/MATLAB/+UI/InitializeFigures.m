@@ -280,7 +280,7 @@ global Figures CellTracks;
 
     previousMitosisTime = get(mitosisHandle.hLine, 'YData');
     set(mitosisHandle.hLine, 'YData', [Y Y]);
-    set(mitosisHandle.diamondHandle, 'YData', Y+1);
+%     set(mitosisHandle.diamondHandle, 'YData', Y+1);
     
     set(mitosisHandle.child1Handles(1), 'YData', Y+1);
     text1 = get(mitosisHandle.child1Handles(2), 'Position');

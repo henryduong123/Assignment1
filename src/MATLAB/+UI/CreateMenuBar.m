@@ -355,7 +355,7 @@ function treeInference(src, evt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    bErr = Editor.ReplayableEditAction(@Editor.TreeInference);
+    bErr = Editor.ReplayableEditAction(@Editor.TreeInference, Figures.tree.familyID);
     if ( bErr )
         return;
     end
