@@ -34,6 +34,10 @@ if ( ~exist('bUserEdit','var') )
     bUserEdit = 0;
 end
 
+if (~exist('bKmeansInit', 'var'))
+    bKmeansInit = 0;
+end
+
 % guassian clustering (x,y) coordinates of cell interior
 [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
 gmoptions = statset('Display','off', 'MaxIter',400);
