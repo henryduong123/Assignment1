@@ -54,6 +54,7 @@ if (exist('LEVerSettings.mat','file'))
 else
     settings.imagePath = '.\';
     settings.matFilePath = '.\';
+    settings.matFile = '*.mat';
 end
 
 if (~isfield(settings,'matFilePath'))
@@ -135,6 +136,7 @@ switch answer
             
             save('LEVerSettings.mat','settings');
             
+            Load.InitializeConstants();
             CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
             
             if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)

@@ -19,6 +19,7 @@ while ( ~bOpened )
     
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
     
+<<<<<<< Updated upstream
     if (~isfield(CONSTANTS,'datasetName'))
         CONSTANTS.datasetName = imageDataset;
     elseif (~strcmp(imageDataset,CONSTANTS.datasetName))
@@ -36,6 +37,23 @@ while ( ~bOpened )
                 otherwise
                     continue;
             end
+=======
+    if (strcmp(imageDataset,[CONSTANTS.datasetName '_']))
+        CONSTANTS.datasetName = [CONSTANTS.datasetName '_'];
+        bOpened = 1;
+    elseif (~strcmp(imageDataset,CONSTANTS.datasetName))        
+        answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
+        switch answer
+            case 'Yes'
+                continue;
+            case 'No'
+                CONSTANTS.imageNamePattern = '';
+                bOpened = 1;
+            case 'Close LEVer'
+                return
+            otherwise
+                continue;
+>>>>>>> Stashed changes
         end
     end
     

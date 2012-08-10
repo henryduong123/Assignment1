@@ -29,15 +29,17 @@ global Figures softwareVersion
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
+previousOpened = 0;
 if(~isempty(Figures))
     Editor.History('Push');
+    previousOpened = 1;
 end
 
 softwareVersion = '7.0 Multi-Cell';
 
 if(Load.OpenData())
     Editor.ReplayableEditAction(@Editor.InitHistory);
-else
+elseif(previousOpened)
     try
         Editor.History('Top');
         UI.InitializeFigures();
