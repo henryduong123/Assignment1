@@ -50,7 +50,7 @@ Tracker.PatchMatchedTracks();
 deadHulls = CellPhenotypes.hullPhenoSet(1,(CellPhenotypes.hullPhenoSet(2,:) == 1));
 deadTracks = unique(Hulls.GetTrackID(deadHulls));
 for i=1:length(deadTracks)
-    Tracks.StraightenTrack(deadTracks);
+    Tracks.StraightenTrack(deadTracks(i));
 end
 
 % %Remove any newly created parasite tracks from tree

@@ -33,6 +33,11 @@ function ContextChangeLabel(time,trackID)
     if(isempty(newTrackID)),return,end;
     newTrackID = str2double(newTrackID(1));
 
+    if(isempty(CellTracks(newTrackID).hulls))
+        warn = sprintf('Track %d does not exist, cannot change',newTrackID);
+        warndlg(warn);
+        return
+    end
     curHull = CellTracks(newTrackID).hulls(1);
 
     bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
