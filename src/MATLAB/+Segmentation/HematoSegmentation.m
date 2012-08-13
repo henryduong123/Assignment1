@@ -10,7 +10,7 @@ end
 
 fprintf(1,'Segmentation...');
 
-system(['start HematoSeg.exe ' CONSTANTS.rootImageFolder '* ' num2str(CONSTANTS.imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
+system(['start HematoSeg.exe "' CONSTANTS.rootImageFolder '*" ' num2str(CONSTANTS.imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
 
 pause(20);
 CellHulls = struct(...

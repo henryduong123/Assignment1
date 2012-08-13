@@ -19,6 +19,9 @@ while ( ~bOpened )
     
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
     
+    if ~isfield(CONSTANTS,'datasetName')
+        CONSTANTS.datasetName = imageDataset;
+    end
     if (strcmp(imageDataset,[CONSTANTS.datasetName '_']))
         CONSTANTS.datasetName = [CONSTANTS.datasetName '_'];
         bOpened = 1;
