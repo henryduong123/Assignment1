@@ -86,6 +86,11 @@ fprintf('Visual Studio Compiling: %s...\n', 'HematoSeg.exe');
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\HematoSeg.sln"']);
 fprintf('Done (%f sec)\n', toc());
 
+tic();
+fprintf('Visual Studio Compiling: %s...\n', 'GrayScaleCrop.exe');
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\GrayScaleCrop.sln"']);
+fprintf('Done (%f sec)\n', toc());
+
 % clears out mex cache so src/*.mexw(32/64) can be overwritten
 clear mex
 system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
@@ -95,6 +100,8 @@ system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
 system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe .\']);
 system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe ' bindir]);
+system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe .\']);
+system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe ' bindir]);
 
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);
