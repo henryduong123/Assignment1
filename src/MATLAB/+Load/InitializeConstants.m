@@ -30,7 +30,7 @@ function InitializeConstants()
 global CONSTANTS
 
 im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
-Load.AddConstant('imageSize',size(im),1);
+Load.AddConstant('imageSize',size(im),0);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     type = questdlg('Cell Type:','Cell Type','Adult','Hemato','Adult');
