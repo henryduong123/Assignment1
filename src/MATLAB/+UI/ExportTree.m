@@ -37,7 +37,7 @@ phenoScratch.phenoColors = hsv(length(CellPhenotypes.descriptions));
 phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.descriptions),1);
 
 if(~isfield(CONSTANTS,'timeResolution'))
-    CONSTANTS.timeResolution = 10;
+    Load.AddConstant('timeResolution', 10, 1);
 end
 
 if(isempty(CellFamilies(familyID).tracks)),return,end

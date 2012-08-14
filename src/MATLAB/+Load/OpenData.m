@@ -29,8 +29,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function opened = OpenData()
-
-global Figures Colors CONSTANTS GraphEdits ReplayEditActions SegmentationEdits softwareVersion
+global Figures Colors CONSTANTS softwareVersion
 
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
@@ -61,6 +60,7 @@ if (~isfield(settings,'matFilePath'))
     settings.matFilePath = '.\';
 end
 
+save('LEVerSettings.mat','settings');
 
 goodLoad = 0;
 opened = 0;
@@ -89,12 +89,9 @@ if(~isempty(Figures))
     end
 end
 
-% Clear edits when new data set is opened
-SegmentationEdits.newHulls = [];
-SegmentationEdits.changedHulls = [];
+oldCONSTANTS = CONSTANTS;
 
-GraphEdits = [];
-ReplayEditActions = [];
+Helper.ClearAllGlobals();
 
 answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
 switch answer
@@ -105,13 +102,14 @@ switch answer
         load('LEVerSettings.mat');
         
         Load.AddConstant('version',softwareVersion,1);
-        CONSTANTS.cellType = [];
+        Load.AddConstant('cellType', [], 1);
         Load.InitializeConstants();
         
         errOpen = Segmentation.SegAndTrack();
         if(~errOpen)
             opened = 1;
         else
+            CONSTANTS = oldCONSTANTS;
             return
         end
     case 'Existing'
@@ -136,16 +134,18 @@ switch answer
             
             save('LEVerSettings.mat','settings');
             
-            CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
+            Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
             if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)
                 if (~Helper.ImageFileDialog())
+                    CONSTANTS = oldCONSTANTS;
                     return
                 end
             end
                 
             if(exist('objHulls','var'))
                 errordlg('Data too old to run with this version of LEVer');
+                CONSTANTS = oldCONSTANTS;
                 return
             end
             

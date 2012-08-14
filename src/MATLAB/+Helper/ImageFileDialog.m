@@ -1,8 +1,6 @@
 function bOpened = ImageFileDialog()
 global CONSTANTS
 
-oldCONSTANTS = CONSTANTS;
-
 load('LEVerSettings.mat');
 
 %find the first image
@@ -13,17 +11,16 @@ bOpened = 0;
 while ( ~bOpened )  
     [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
     if (filterIndexImage==0)
-        CONSTANTS = oldCONSTANTS;
         return
     end
     
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
     
     if ~isfield(CONSTANTS,'datasetName')
-        CONSTANTS.datasetName = imageDataset;
+        Load.AddConstant('datasetName', imageDataset, 1);
     end
     if (strcmp(imageDataset,[CONSTANTS.datasetName '_']))
-        CONSTANTS.datasetName = [CONSTANTS.datasetName '_'];
+        Load.AddConstant('datasetName', [CONSTANTS.datasetName '_'], 1);
         bOpened = 1;
     elseif (~strcmp(imageDataset,CONSTANTS.datasetName))        
         answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
@@ -31,7 +28,7 @@ while ( ~bOpened )
             case 'Yes'
                 continue;
             case 'No'
-                CONSTANTS.imageNamePattern = '';
+                Load.AddConstant('imageNamePattern', '', 1);
                 bOpened = 1;
             case 'Close LEVer'
                 return
@@ -40,9 +37,9 @@ while ( ~bOpened )
         end
     end
     
-    CONSTANTS.rootImageFolder = settings.imagePath;
-    CONSTANTS.imageSignificantDigits = sigDigits;
-    CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
+    Load.AddConstant('rootImageFolder', settings.imagePath, 1);
+    Load.AddConstant('imageSignificantDigits', sigDigits, 1);
+    Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
     
     bOpened = 1;
 end

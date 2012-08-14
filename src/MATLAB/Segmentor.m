@@ -29,7 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [objs features levels] = Segmentor(tStart,tStep,tEnd,imageAlpha,rootImageFolder,imageNamePattern)
-global CONSTANTS
 
 objs=[];
 features = [];
@@ -44,8 +43,8 @@ try
     fprintf(1,'%s\n',rootImageFolder);
     fprintf(1,'%s\n',imageNamePattern);
     
-    CONSTANTS.rootImageFolder = rootImageFolder;
-    CONSTANTS.imageNamePattern = imageNamePattern;
+    Load.AddConstant('rootImageFolder', rootImageFolder, 1);
+    Load.AddConstant('imageNamePattern', imageNamePattern, 1);
     
     numImages = tEnd/tStep;
 

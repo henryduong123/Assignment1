@@ -25,13 +25,12 @@
 
 function LEVer()
 
-global Figures softwareVersion
+global Figures softwareVersion ReplayEditActions CONSTANTS
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
 previousOpened = 0;
 if(~isempty(Figures))
-    Editor.History('Push');
     previousOpened = 1;
 end
 
@@ -42,7 +41,9 @@ if(Load.OpenData())
 elseif(previousOpened)
     try
         Editor.History('Top');
-        UI.InitializeFigures();
+        %UI.InitializeFigures();
+        temp = load(CONSTANTS.matFullFile,'ReplayEditActions');
+        ReplayEditActions = temp.ReplayEditActions;
     catch err
     end
 end
