@@ -29,9 +29,6 @@ global Figures CONSTANTS HashedCells
 
 tic
 
-outfile =  [ CONSTANTS.datasetName ' _cine.avi'];
-aviobj = avifile(outfile,'compression','cinepak');
-
 nframes = length(HashedCells);
 
 xLim = get(get(Figures.cells.handle, 'CurrentAxes'),'XLim');
@@ -54,30 +51,44 @@ end
 set(Figures.cells.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);   
 set(Figures.tree.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);
 
-for t=1:nframes
-    UI.TimeChange(t);
-    UI.Progressbar(t/nframes);
-    
-    figure(Figures.cells.handle)
-    
-    X=getframe();
-    i1=X.cdata;
-    
-    figure(Figures.tree.handle)
-    X=getframe();
-    i2=X.cdata;
-    
-    dim = [1080 960];
-    
-    i1 = imresize(i1,[dim(1) dim(2)]);
-    i2 = imresize(i2,[dim(1) dim(2)]);
-    
-    icomp=[i1 i2];
-    fr = im2frame(icomp);
-    aviobj = addframe(aviobj,fr);
-end
+% Split movie into approximately 1GB chunks
+mvsize = 2*1920*1080*nframes;
+mvsplits = ceil(mvsize / (2^30));
 
-aviobj = close(aviobj);
+tStarts = round(((0:mvsplits)/mvsplits)*nframes) + 1;
+
+for i=1:mvsplits
+    outfile =  [ CONSTANTS.datasetName '_uncomp' num2str(i,'%02d') '.avi'];
+    aviobj = avifile(outfile,'compression','none');
+    
+    tStart = tStarts(i);
+    tEnd = tStarts(i+1)-1;
+
+    for t=tStart:tEnd
+        UI.TimeChange(t);
+        UI.Progressbar(t/nframes);
+
+        figure(Figures.cells.handle)
+
+        X=getframe();
+        i1=X.cdata;
+
+        figure(Figures.tree.handle)
+        X=getframe();
+        i2=X.cdata;
+
+        dim = [1080 960];
+
+        i1 = imresize(i1,[dim(1) dim(2)]);
+        i2 = imresize(i2,[dim(1) dim(2)]);
+
+        icomp=[i1 i2];
+        fr = im2frame(icomp);
+        aviobj = addframe(aviobj,fr);
+    end
+
+    aviobj = close(aviobj);
+end
 
 tElapsed = toc;
 Error.LogAction('GenerateAVI: elapsed time',tElapsed,0);
