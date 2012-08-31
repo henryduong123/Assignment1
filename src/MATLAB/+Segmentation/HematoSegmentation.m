@@ -8,16 +8,17 @@ catch errorMessage
     %fprintf(errorMessage);
 end
 
-fprintf(1,'Segmentation...');
-
 answr = questdlg('Crop these images?','Crop?','Yes','No','Yes');
 if (strcmp(answr,'Yes'))
     croppedFolder = [CONSTANTS.rootImageFolder(1:end-1) '_cropped\.'];
+    fprintf(1,'Cropping Images...');
     system(['GrayScaleCrop.exe "' CONSTANTS.rootImageFolder '*" ' croppedFolder]);
     CONSTANTS.rootImageFolder = croppedFolder;
     im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
     Load.AddConstant('imageSize',size(im),1);
 end
+
+fprintf(1,'Segmentation...');
 
 system(['start HematoSeg.exe "' CONSTANTS.rootImageFolder '*" ' num2str(CONSTANTS.imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
 
