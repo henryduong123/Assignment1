@@ -47,6 +47,7 @@ function errStatus = SegAndTrack()
 
     % 
     save('LEVerSettings.mat','settings');
+    Load.AddConstant('matFullFile',[settings.matFilePath settings.matFile],1);
     
     numProcessors = getenv('Number_of_processors');
     numProcessors = str2double(numProcessors);
