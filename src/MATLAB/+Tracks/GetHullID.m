@@ -3,7 +3,7 @@
 
 function hullID = GetHullID(time, trackID)
 global CellTracks
-hullID = [];
+hullID = 0;
 
 if (time<CellTracks(trackID).startTime), return, end
 if (time>CellTracks(trackID).endTime), return, end
