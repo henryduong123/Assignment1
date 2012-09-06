@@ -366,6 +366,37 @@ void mexCmd_initGraph(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 	gPathBack.resize(gCostGraph->getNumVerts());
 }
 
+void mexCmd_updateGraph(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs > 0 )
+		mexErrMsgTxt("updateGraph: Expect no output arguments.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("updateGraph: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") )
+		mexErrMsgTxt("updateGraph: Expected double cost matrix as second parameter.");
+
+	mwSize m = mxGetM(prhs[1]);
+	mwSize n = mxGetN(prhs[1]);
+
+	if ( m < 1 || n < 1 )
+		mexErrMsgTxt("updateGraph: Expected non-empty cost matrix as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != m )
+		mexErrMsgTxt("updateGraph: Expected fromHulls list as third parameter.");
+
+	if ( nrhs < 4 || !mxIsClass(prhs[3], "double") || mxGetNumberOfElements(prhs[3]) != n )
+		mexErrMsgTxt("updateGraph: Expected fromHulls list as fourth parameter.");
+
+	gCostGraph->updateEdges(prhs[1], prhs[2], prhs[3]);
+
+	gbTraversed.resize(gCostGraph->getNumVerts());
+	gPathCosts.resize(gCostGraph->getNumVerts());
+	gPathLengths.resize(gCostGraph->getNumVerts());
+	gPathBack.resize(gCostGraph->getNumVerts());
+}
+
 void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nlhs != 2 )
@@ -710,6 +741,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		CALL_COMMAND(initGraph);
 	}
+	else if ( IS_COMMAND(commandStr, updateGraph) )
+	{
+		CALL_COMMAND(updateGraph);
+	}
 	else if ( IS_COMMAND(commandStr, checkExtension) )
 	{
 		CALL_COMMAND(checkExtension);
@@ -748,6 +783,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
 		mexPrintf("Supported Commands:\n");
 		mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
+		mexPrintf("\t updateGraph(costMatrix, fromHulls, toHulls) - Update internal cost edges using costMatrix and from/to hulls lists");
 		mexPrintf("\t checkExtension(startVert, maxLength, direction = 1) - Find suitable extensions out to maxLength from startVert. Optionally search backwards (direction < 0).\n");
 		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc, direction = 1) - Find suitable extensions using matlab acceptFunc(startIdx,endIdx) as acceptance criterion. Optionally search backwards (direction < 0).\n");
 		mexPrintf("\t removeEdges(startVertList, endVertList) - Remove all edges in list.\n");

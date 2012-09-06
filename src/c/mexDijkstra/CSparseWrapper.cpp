@@ -38,6 +38,63 @@ CSparseWrapper::CSparseWrapper(const mxArray* sparseArray)
 	}
 }
 
+void CSparseWrapper::updateEdges(const mxArray* costs, const mxArray* fromHulls, const mxArray* toHulls)
+{
+	mwSize numFrom = mxGetNumberOfElements(fromHulls);
+	mwSize numTo = mxGetNumberOfElements(toHulls);
+
+	double* fromHullData = mxGetPr(fromHulls);
+	double* toHullData = mxGetPr(toHulls);
+
+	mwIndex maxHull = 0;
+	for ( mwIndex i=0; i < numFrom; ++i )
+		maxHull = std::max<mwIndex>(maxHull, fromHullData[i]);
+
+	for ( mwIndex i=0; i < numTo; ++i )
+		maxHull = std::max<mwIndex>(maxHull, toHullData[i]);
+
+	if ( (maxHull > numVerts) )
+	{
+		numVerts = maxHull;
+
+		outEdges.resize(numVerts);
+		inEdges.resize(numVerts);
+	}
+
+	double* costData = mxGetPr(costs);
+	for ( mwIndex i=0; i < numFrom; ++i )
+	{
+		mwIndex matFromHull = fromHullData[i];
+		for ( mwIndex j=0; j < numTo; ++j )
+		{
+			mwIndex matToHull = toHullData[j];
+			double edgeCost = costData[i + j*numFrom];
+
+			bool bEdgeExists = (outEdges[MATLAB_IDX(matFromHull)].count(matToHull) > 0);
+			bool bDeleteEdge = (edgeCost == 0.0) || (edgeCost == CSparseWrapper::noEdge);
+
+			if ( bEdgeExists )
+			{
+				if ( bDeleteEdge )
+				{
+					outEdges[MATLAB_IDX(matFromHull)].erase(matToHull);
+					inEdges[MATLAB_IDX(matToHull)].erase(matFromHull);
+				}
+				else
+				{
+					outEdges[MATLAB_IDX(matFromHull)][matToHull] = edgeCost;
+					inEdges[MATLAB_IDX(matToHull)][matFromHull] = edgeCost;
+				}
+			}
+			else if ( !bDeleteEdge )
+			{
+				outEdges[MATLAB_IDX(matFromHull)].insert(std::pair<mwIndex,double>(matToHull,edgeCost));
+				inEdges[MATLAB_IDX(matToHull)].insert(std::pair<mwIndex,double>(matFromHull,edgeCost));
+			}
+		}
+	}
+}
+
 int CSparseWrapper::getOutEdgeLength(mwIndex startVert)
 {
 	return outEdges[MATLAB_IDX(startVert)].size();
