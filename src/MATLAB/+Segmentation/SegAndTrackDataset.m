@@ -25,7 +25,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         errFile = '.\segmentationData\err_*.log';
         fileName = '.\segmentationData\objs_*.mat';
         semFile = '.\segmentationData\done_*.txt';
-        system(['del /Q' errFile ' ' fileName ' ' semFile]);
+        system(['del /Q ' errFile ' ' fileName ' ' semFile]);
 %         system('rmdir /S /Q .\segmentationData');
     end
     
