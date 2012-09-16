@@ -158,7 +158,7 @@ UI.TimeChange(time);
 end
 
 function figureKeyPress(src,evnt)
-global Figures
+global Figures CellFamilies
 
 if strcmp(evnt.Key,'downarrow') || strcmp(evnt.Key,'rightarrow')
     time = Figures.time + 1;
@@ -397,7 +397,6 @@ function mergeSelectedCells()
     UI.DrawTree(Figures.tree.familyID);
     UI.DrawCells();
 end
-
 
 function learnFromEdits(src,evnt)
     global CellFamilies CellTracks SegmentationEdits Figures

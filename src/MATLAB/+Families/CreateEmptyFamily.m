@@ -11,5 +11,6 @@ function familyID = CreateEmptyFamily()
     for i=1:length(strFieldNames)
         CellFamilies(familyID).(strFieldNames{i}) = [];
     end
+    CellFamilies(familyID).bLocked = false;
 end
 

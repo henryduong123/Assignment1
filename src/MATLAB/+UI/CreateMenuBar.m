@@ -130,6 +130,17 @@ uimenu(...
     'Enable',           'on',...
     'Accelerator',      'i');
 
+lockMenu = uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Lock Tree',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @toggleTreeLock,...
+    'Separator',        'on',...
+    'Enable',           'on',...
+    'Checked',          'off',...
+    'Accelerator',      'u');
+    
+
 labelsMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Show Labels',...
@@ -210,6 +221,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
+    Figures.cells.menuHandles.lockMenu = lockMenu;
 %     Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
@@ -221,6 +233,7 @@ else
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
+    Figures.tree.menuHandles.lockMenu = lockMenu;
 %     Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
 end
 end
@@ -350,8 +363,20 @@ UI.DrawTree(CellTracks(answer).familyID);
 UI.DrawCells();
 end
 
+function toggleTreeLock(src, evnt)
+    global Figures
+    
+    Editor.ReplayableEditAction(@Editor.TreeLockAction, Figures.tree.familyID);
+    UI.DrawTree(Figures.tree.familyID);
+end
+
 function treeInference(src, evt)
     global Figures CellFamilies CellTracks
+    
+    if ( CellFamilies(Figures.tree.familyID).bLocked )
+        msgbox('Inference cannot be run on a locked tree.', 'Tree Locked', 'warn');
+        return;
+    end
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     

@@ -73,6 +73,17 @@ hold on
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
+
+if ( CellFamilies(familyID).bLocked )
+    set(Figures.tree.menuHandles.lockMenu, 'Checked','on');
+    set(Figures.cells.menuHandles.lockMenu, 'Checked','on');
+    set(overAxes, 'Color',[.75 .75 .75]);
+else
+    set(Figures.tree.menuHandles.lockMenu, 'Checked','off');
+    set(Figures.cells.menuHandles.lockMenu, 'Checked','off');
+    set(overAxes, 'Color','w');
+end
+
 UI.UpdateTimeIndicatorLine();
 phenoHandles = [];
 for i=1:length(phenoScratch.phenoLegendSet)

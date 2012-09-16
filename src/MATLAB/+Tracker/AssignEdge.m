@@ -3,7 +3,7 @@
 % trackHull.
 
 function changedHulls = AssignEdge(trackHull, assignHull)
-    global CellHulls;
+    global CellHulls CellTracks CellFamilies
     
     changedHulls = [];
     
@@ -20,6 +20,14 @@ function changedHulls = AssignEdge(trackHull, assignHull)
     
     % Hull - track assignment is unchanged
     if ( oldTrackHull == assignHull )
+        return;
+    end
+    
+    % Check family locks
+    assignFamilyID = CellTracks(Hulls.GetTrackID(assignHull)).familyID;
+    trackFamilyID = CellTracks(Hulls.GetTrackID(trackHull)).familyID;
+    
+    if ( CellFamilies(assignFamilyID).bLocked || CellFamilies(trackFamilyID).bLocked )
         return;
     end
     

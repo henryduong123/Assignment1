@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions()
-    global CellHulls HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions Log
+    global CellHulls CellFamilies HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions Log
 
     bNeedsUpdate = 0;
     
@@ -83,6 +83,12 @@ function bNeedsUpdate = FixOldFileVersions()
     % segmentation data from which edit actions are built.
     if ( isempty(ReplayEditActions) || bNeedsUpdate )
         Editor.ReplayableEditAction(@Editor.OriginAction, 1);
+        bNeedsUpdate = 1;
+    end
+    
+    % Add bLockedField if necessary
+    if ( ~isfield(CellFamilies, 'bLocked') )
+        Load.AddLockedField();
         bNeedsUpdate = 1;
     end
     

@@ -134,6 +134,14 @@ bool checkAcceptPath(mwIndex startVert, mwIndex endVert, mwSize maxExtent, const
 		if ( hullTime != startTime )
 			return false;
 
+		int matFamilyID = ((int) mxGetScalar(mxGetField(gCellTracks, MATLAB_IDX(trackID), "familyID")));
+		if ( matFamilyID <= 0 )
+			return false;
+
+		int bLocked = ((int) mxGetScalar(mxGetField(gCellFamilies, MATLAB_IDX(matFamilyID), "bLocked")));
+		if ( bLocked )
+			return false;
+
 		// TODO: Do we need to deal with GraphEdit "removed edges" here?
 		// Valid if track has no parent
 		mxArray* parentTrack = mxGetField(gCellTracks, MATLAB_IDX(trackID), "parentTrack");

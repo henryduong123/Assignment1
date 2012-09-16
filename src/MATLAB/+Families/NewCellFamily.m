@@ -38,7 +38,8 @@ if(isempty(CellFamilies))
         'rootTrackID',   {trackID},...
         'tracks',       {trackID},...
         'startTime',    {time},...
-        'endTime',      {time});
+        'endTime',      {time},...
+        'bLocked',      {false});
     
     curFamilyID = 1;
 else
@@ -51,6 +52,7 @@ else
     CellFamilies(curFamilyID).tracks = trackID;
     CellFamilies(curFamilyID).startTime = time;
     CellFamilies(curFamilyID).endTime = time;
+    CellFamilies(curFamilyID).bLocked = false;
 end
 
 end
