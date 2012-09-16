@@ -28,6 +28,4 @@ function SaveLEVerState(filename)
     
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions');
-    
-    Editor.History('Saved');
 end

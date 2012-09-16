@@ -163,15 +163,14 @@ switch answer
         
         Load.InitializeConstants();
         
-        UI.InitializeFigures();
-        
         bUpdated = Load.FixOldFileVersions();
 
         if ( bUpdated )
             Load.AddConstant('version',softwareVersion,1);
             Helper.SaveLEVerState(CONSTANTS.matFullFile);
         end
-
+        
+        UI.InitializeFigures();
         opened = 1;
         
     otherwise

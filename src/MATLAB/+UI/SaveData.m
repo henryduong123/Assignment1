@@ -49,6 +49,8 @@ else
     end
 end
 
+Editor.History('Saved');
+
 %let the user know that the drawing is done
 if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.tree.handle,'Pointer','arrow');

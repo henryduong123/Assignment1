@@ -119,8 +119,6 @@ Figures.tree.timeLabel = uicontrol(Figures.tree.handle,...
     'Position',[1 0 60 20],...
     'String',['Time: ' num2str(Figures.time)]);
 
-Families.FindLargestTree([],[]);
-
 if(~isempty(oldCellsHandle) && ishandle(oldCellsHandle))
     set(oldCellsHandle,'CloseRequestFcn','remove');
     close(oldCellsHandle);
@@ -138,6 +136,8 @@ Figures.cells.learnButton = uicontrol(...
    'CallBack',     @learnFromEdits);
 
 Figures.cells.maxEditedFrame = length(HashedCells);
+
+Families.FindLargestTree([],[]);
 end
 
 %% Callback Functions

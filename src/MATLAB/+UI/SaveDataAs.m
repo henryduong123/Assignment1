@@ -45,6 +45,8 @@ end
 if (FilterIndex~=0)
     CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
     Helper.SaveLEVerState(CONSTANTS.matFullFile);
+    
+    Editor.History('Saved');
 else
     return
 end
