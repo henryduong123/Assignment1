@@ -40,6 +40,10 @@ if (time<CellTracks(desiredTrack).startTime)
     error('DesiredTrack %d has to exist prior to time %d',desiredTrack,time);
 end
 
+if ( currentTrack == desiredTrack )
+    return;
+end
+
 droppedTracks = [];
 currentParent = [];
 
@@ -55,6 +59,10 @@ end
     end
     %Gather the hulls to move and leave the rest on the currentTrack
     startHash = time-CellTracks(currentTrack).startTime+1;
+    if ( startHash <= 0 )
+        startHash = 1;
+    end
+    
     endHash = length(CellTracks(currentTrack).hulls);
     hulls = CellTracks(currentTrack).hulls(startHash:endHash);
 % else

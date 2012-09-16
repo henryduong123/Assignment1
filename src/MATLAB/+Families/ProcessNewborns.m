@@ -65,7 +65,7 @@ end
 %         parentHullID = Tracks.GetHullID(CellTracks(trackID).startTime-1, CellTracks(trackID).parentTrack);
 %         childHullID = Tracks.GetHullID(CellTracks(trackID).startTime, trackID);
 %         
-%         if ( isempty(parentHullID) || GraphEdits(parentHullID,childHullID) > 0 )
+%         if ( (parentHullID == 0) || GraphEdits(parentHullID,childHullID) > 0 )
 %             continue;
 %         end
 %         
@@ -185,7 +185,7 @@ for i=1:size
     end
     
     % Parent track must have a hull in the mitosis frame
-    if ( isempty(Tracks.GetHullID(CellTracks(childTrackID).startTime, parentTrackID)) )
+    if ( Tracks.GetHullID(CellTracks(childTrackID).startTime, parentTrackID) == 0 )
         continue;
     end
     
