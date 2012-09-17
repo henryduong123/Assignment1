@@ -34,7 +34,7 @@ if(~isempty(Figures))
     previousOpened = 1;
 end
 
-softwareVersion = '7.0 Multi-Cell';
+softwareVersion = '7.1 Multi-Cell';
 
 if(Load.OpenData())
     Editor.ReplayableEditAction(@Editor.InitHistory);
