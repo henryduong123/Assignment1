@@ -19,8 +19,19 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     
     maxFrameExt = 10;
     
-	extGraph = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
-    extEnds = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
+% 	extGraph = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
+% 	extEnds = sparse([],[],[], size(Costs,1),size(Costs,1), round(0.01*size(Costs,1)));
+
+    hull2Track = cellfun(@(x)(cell2mat(struct2cell(x'))), HashedCells, 'UniformOutput',0);
+    hull2Track = [hull2Track{:}];
+    cachedTracks = zeros(length(CellHulls),1);
+    cachedTracks(hull2Track(1,:)) = hull2Track(2,:);
+    
+    extGraphSize = 0;
+    extGraphR = zeros(2*nnz(Costs),1);
+    extGraphC = zeros(2*nnz(Costs),1);
+    extGraphCost = zeros(2*nnz(Costs),1);
+    extGraphEnds = zeros(2*nnz(Costs),1);
     
     chkFindTime = tic();
     UI.Progressbar(0);
@@ -41,7 +52,8 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
         end
         
         extHulls = unique(endHulls);
-        extTracks = Hulls.GetTrackID(extHulls);
+%         extTracks = Hulls.GetTrackID(extHulls);
+        extTracks = cachedTracks(extHulls);
         
         for j=1:length(extHulls)
             nextLeaves = getLeafHulls(extTracks(j));
@@ -49,11 +61,18 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
             extIdx = find(endHulls == extHulls(j));
             for k=1:length(extIdx)
                 for l = 1:length(nextLeaves)
-                    trackCost = calcTrackCost(costMatrix, extHulls(j),nextLeaves(l), maxFrameExt);
+                    trackCost = calcTrackCost(costMatrix, extHulls(j),nextLeaves(l), maxFrameExt, cachedTracks);
                     
                     extendCost = trackCost + pathCost(extIdx(k));
-                    extGraph(checkExtHulls(i),nextLeaves(l)) = extendCost;
-                    extEnds(checkExtHulls(i),nextLeaves(l)) = pathExt{extIdx(k)}(end);
+                    
+                    extGraphSize = extGraphSize + 1;
+                    
+                    extGraphR(extGraphSize) = checkExtHulls(i);
+                    extGraphC(extGraphSize) = nextLeaves(l);
+                    extGraphCost(extGraphSize) = extendCost;
+                    extGraphEnds(extGraphSize) = pathExt{extIdx(k)}(end);
+%                     extGraph(checkExtHulls(i),nextLeaves(l)) = extendCost;
+%                     extEnds(checkExtHulls(i),nextLeaves(l)) = pathExt{extIdx(k)}(end);
                 end
             end
             
@@ -64,6 +83,9 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
         
         i = i + 1;
     end
+    
+    extGraph = sparse(extGraphR(1:extGraphSize),extGraphC(1:extGraphSize),extGraphCost(1:extGraphSize), size(Costs,1),size(Costs,1));
+	extEnds = sparse(extGraphR(1:extGraphSize),extGraphC(1:extGraphSize),extGraphEnds(1:extGraphSize), size(Costs,1),size(Costs,1));
     
     findTime = toc(chkFindTime);
     
@@ -121,13 +143,14 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     extTime = toc(chkExtendTime);
 end
 
-function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt)
+function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt, cachedTracks)
     global CellHulls CellTracks
     
     cost = 0;
     backHull = endHull;
     while ( backHull ~= startHull )
-        trackID = Hulls.GetTrackID(backHull);
+%         trackID = Hulls.GetTrackID(backHull);
+        trackID = cachedTracks(backHull);
         curHash = CellHulls(backHull).time - CellTracks(trackID).startTime + 1;
         nzHullIdx = find(CellTracks(trackID).hulls(1:(curHash-1)),1,'last');
         nzHull = CellTracks(trackID).hulls(nzHullIdx);
@@ -204,9 +227,11 @@ function leafHulls = getLeafHulls(rootTracks)
                 endHull = Tracks.GetHullID(CellTracks(subtreeTracks(j)).endTime,subtreeTracks(j));
             end
             
-            leafHulls = union(leafHulls, endHull);
+            leafHulls = [leafHulls, endHull];
         end
     end
+    
+    leafHulls = unique(leafHulls);
     
     trackEnds = [CellHulls(leafHulls).time];
     [trackEnds srtidx] = sort(trackEnds);
