@@ -60,12 +60,14 @@ if ( ~exist('callstack','var') )
 end
 
 if(isempty(Figures) || ~isfield(Figures,'time'))
-    Figures.time = -1;
+    figTime = -1;
+else
+    figTime = Figures.time;
 end
 
 row = [[num2str(time(1)) '/' num2str(time(2)) '/' num2str(time(3))] ','...
     [num2str(time(4)) ':' num2str(time(5)) ':' num2str(round(time(6)))] ',' usr ',,'...
-    action ',' num2str(Figures.time) ','];
+    action ',' num2str(figTime) ','];
 if(~isempty(oldValue))
     row = [row num2str(oldValue) ','];
 else
@@ -93,7 +95,7 @@ Log(logEntry).stack = callstack;
 Log(logEntry).action = action;
 Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;
-Log(logEntry).figures.time = Figures.time;
+Log(logEntry).figures.time = figTime;
 if (isfield(Figures,'cells'))
     Log(logEntry).figures.cells = Figures.cells;
 end

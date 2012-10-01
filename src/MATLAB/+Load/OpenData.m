@@ -157,8 +157,6 @@ switch answer
             goodLoad = 1;
         end
         
-        Figures.time = 1;
-        
         Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
         
         Load.InitializeConstants();
