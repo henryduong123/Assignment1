@@ -68,7 +68,11 @@ set(overAxes,...
 
 hold on
 
-[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch);
+% build a map with the heights for each node in the tree rooted at trackID
+trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
+computeTrackHeights(trackID, trackHeights);
+
+[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch, trackHeights);
 
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
@@ -113,12 +117,23 @@ set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
 end
 
-function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch)
+function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch, trackHeights)
 global CellTracks
 
 if(~isempty(CellTracks(trackID).childrenTracks))
-    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(CellTracks(trackID).childrenTracks(1),initXmin,phenoScratch);
-    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(CellTracks(trackID).childrenTracks(2),child1Xmax+1,phenoScratch);
+    % the taller subtree should go on the left
+    ID1 = CellTracks(trackID).childrenTracks(1);
+    ID2 = CellTracks(trackID).childrenTracks(2);
+    if (trackHeights(ID1) >= trackHeights(ID2))
+        left = ID1;
+        right = ID2;
+    else
+        left = ID2;
+        right = ID1;
+    end
+    
+    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(left,initXmin,phenoScratch,trackHeights);
+    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(right,child1Xmax+1,phenoScratch,trackHeights);
     xMin = min(child1Xmin,child2Xmin);
     xMax = max(child1Xmax,child2Xmax);
     
@@ -149,6 +164,24 @@ else
     xCenter = initXmin;
     xMax = initXmin;
 end
+end
+
+% WCM - 10/1/2012 - Created
+% This function does a breadth-first search starting from trackID and
+% computes the height of each node in the tree. These are stored in the map
+% trackHeights.
+function height = computeTrackHeights(trackID, trackHeights)
+global CellTracks
+    if(~isempty(CellTracks(trackID).childrenTracks))
+        % root node
+        leftHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(1), trackHeights);
+        rightHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(2), trackHeights);
+        height = 1 + max(leftHeight, rightHeight);
+    else
+        % leaf node
+        height = 1;
+    end
+    trackHeights(trackID) = height;
 end
 
 % NLS - 6/8/2012 - Created
