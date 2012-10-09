@@ -49,10 +49,10 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     dirName = fileparts(CONSTANTS.rootImageFolder);
     for i=1:numProcessors
          system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-            num2str(numberOfImages) ' ' ...
+            num2str(numberOfImages) ' ' CONSTANTS.cellType ' ' ...
             num2str(imageAlpha) ' "' dirName '" ' CONSTANTS.imageNamePattern ' && exit']);
         %use line below instead of the 3 lines above for non-parallel or to debug
-%         Segmentor(i,numProcessors,numberOfImages,imageAlpha,dir,CONSTANTS.imageNamePattern);
+%         Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern);
     end
 
     bSegFileExists = false(1,numProcessors);

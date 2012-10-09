@@ -33,14 +33,11 @@ im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
 Load.AddConstant('imageSize',size(im),0);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
-    type = questdlg('Cell Type:','Cell Type','Adult','Hemato','Adult');
-    Load.AddConstant('cellType',type,1);
+    cellType = Load.QueryCellType();
+    Load.AddConstant('cellType',cellType,1);
 end
 
 %% Common Constants
-Load.AddConstant('imageAlpha',                  1.5);
-Load.AddConstant('maxPixelDistance',            40,1);
-Load.AddConstant('maxCenterOfMassDistance',     40,1);
 Load.AddConstant('minParentCandidateTimeFrame', 5, 1);
 Load.AddConstant('minParentHistoryTimeFrame',   5, 1);
 Load.AddConstant('minParentFuture',             5, 1);
@@ -52,21 +49,19 @@ Load.AddConstant('minTrackScore',               0.5,1);
 Load.AddConstant('maxPropagateFrames',          50,1);
 
 %% Particular Constants
-switch CONSTANTS.cellType
-    case 'Adult'
-        Load.AddConstant('timeResolution',              5); %in min per frame
-        Load.AddConstant('dMaxCenterOfMass',            40,1);
-        Load.AddConstant('dMaxConnectComponent',        40,1);
-        Load.AddConstant('dMaxConnectComponentTracker', 20,1);
-    case 'Hemato'
-        Load.AddConstant('timeResolution',              5); %in min per frame
-        Load.AddConstant('dMaxCenterOfMass',            80,1);
-        Load.AddConstant('dMaxConnectComponent',        80,1);
-        Load.AddConstant('dMaxConnectComponentTracker', 40,1);
-    otherwise
-        Load.AddConstant('timeResolution',              10); %in min per frame
-        Load.AddConstant('dMaxCenterOfMass',            40,1);
-        Load.AddConstant('dMaxConnectComponent',        40,1);
-        Load.AddConstant('dMaxConnectComponentTracker', 20,1);
+typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+if (~isfield(typeParams.segParams, 'imageAlpha'))
+    Load.AddConstant('imageAlpha', 1.5);
+else
+    Load.AddConstant('imageAlpha', typeParams.segParams.imageAlpha);
 end
+
+Load.AddConstant('timeResolution', typeParams.leverParams.timeResolution); %in min per frame
+
+Load.AddConstant('maxPixelDistance', typeParams.leverParams.maxPixelDistance, 1);
+Load.AddConstant('maxCenterOfMassDistance', typeParams.leverParams.maxCenterOfMassDistance,1);
+Load.AddConstant('dMaxConnectComponent', typeParams.leverParams.dMaxConnectComponent,1);
+
+Load.AddConstant('dMaxCenterOfMass', typeParams.trackParams.dMaxCenterOfMass,1);
+Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConnectComponentTracker,1);
 end

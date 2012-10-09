@@ -55,6 +55,11 @@ function errStatus = SegAndTrack()
         numProcessors = 4;
     end
     
+    % TODO: Rewrite for more extensible segmentation/tracking interface:
+    % Check for <celltype>Seg.exe, if it exists it is assumed to be a
+    % full-movie segmentation which handles threading internally
+    % (see e.g. HematoSeg.exe)
+    
     switch CONSTANTS.cellType
         case 'Hemato'
             tic;
@@ -64,13 +69,22 @@ function errStatus = SegAndTrack()
             Tracker.HematoTracker();
             tTrack = toc;
             errStatus = 0;
+            
         case 'Adult'
             [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
                 CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
                 CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+            
+        case 'Embryonic'
+            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
+                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
+                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+            
         otherwise
             return
     end
+    
+    
     
     if (errStatus)
         return

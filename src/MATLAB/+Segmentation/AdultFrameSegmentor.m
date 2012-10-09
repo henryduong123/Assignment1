@@ -1,4 +1,4 @@
-function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
+function [objs features levels] = AdultFrameSegmentor(im, t, imageAlpha)
     objs = [];
     features = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});
@@ -48,7 +48,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
     stats = regionprops(CC, 'Area');
     idx = find([stats.Area] < 500);
     bwHoles = ismember(LHoles, idx);
-    bwCells=bwDarkCenters| bwHoles;
+    bwCells=bwDarkCenters | bwHoles;
     bwCells(~bwHaloMask)=0;
     
     bwCells(bwig)=0;
@@ -88,7 +88,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         
         bwDarkInterior = bwDarkCenters & bwPoly;
         DarkRat = length(find(bwDarkInterior)) / length(find(bwPoly));
-        if  ( HaloRat>0.5   || igRat<.1 || (DarkRat < 0.5 && igRat < 0.5 && length(pix) < 175) )
+        if ( HaloRat > 0.5   || igRat < 0.1 || (DarkRat < 0.5 && igRat < 0.5 && length(pix) < 175) )
             bwCells(pix)=0;
             continue;
         end
@@ -98,7 +98,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         
         dmax=max(d(pix));
         if dmax>4
-            bwCells(pix(d(pix)<2))=0;
+            bwCells(pix(d(pix)<2)) = 0;
             continue;
         end
     end
@@ -123,7 +123,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         
         ch=convhull(r,c);
         
-        % one last check for parasites
+        % one  last check for parasites
         if length(find(bwDark(pix)))/length(pix)< 0.4
 %             plot(c(ch),r(ch),'-c')
             continue
@@ -133,7 +133,8 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         
         no=[];
         no.t=t;
-        no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
+        no.points = [c(ch),r(ch)];
+        
         no.indPixels=pix;
         if LTails(r(1),c(1))
             TailPix = find(LTails==LTails(r(1),c(1)));
@@ -143,12 +144,14 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         end
         no.indTailPixels=TailPix;
         no.imPixels=im(pix);
+        
         % surround completely by Halo?
         if all(bwHaloHoles(pix))
             no.BrightInterior=1;
         else
             no.BrightInterior=0;
         end
+        
         no.ID=-1;
         no.Eccentricity=stats(idx(i)).Eccentricity;
         
@@ -156,10 +159,28 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         oldLbl = LCenters(pix(1));
         
         polyPix = LPolyPix{oldLbl};
+%         [polyR polyC] = ind2sub(size(im), polyPix);
+        
+%         perimPix = LPerimPix{oldLbl};
+%         [perimR perimC] = ind2sub(size(im), perimPix);
         
         oldPix = find(LCenters==oldLbl);
         newLbls = unique(LCells(oldPix));
         newLbls = newLbls(newLbls > 0);
+%         centroid = [];
+%         
+%         polyDist = Inf*ones(length(polyR),length(newLbls));
+% %         perimDist = Inf*ones(length(perimR),length(newLbls));
+%         for j=1:length(newLbls)
+%             [newR newC] = find(LCells == newLbls(j));
+%             centroid = mean([newR newC],1);
+%             
+%             polyDist(:,j) = ((polyR - centroid(1)).^2 + (polyC - centroid(2)).^2);
+% %             perimDist(:,j) = ((perimR - centroid(1)).^2 + (perimC - centroid(2)).^2);
+%         end
+%         
+%         [mpd polyIdx] = min(polyDist,[],2);
+%         [mpd perimIdx] = min(perimDist,[],2);
 
         if ( length(newLbls) > 1 )
             lblPix = cell(1,length(newLbls));
@@ -195,7 +216,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         nf.igPix = find(bwig(perimPix));
         nf.haloPix = find(bwHalo(perimPix));
         
-        objs=[objs no];
+        objs = [objs no];
         features = [features nf];
         %     drawnow
     end
@@ -223,8 +244,8 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         if ~isempty(find(bwCellFG &bwPoly, 1)),continue,end
         no=[];
         no.t=t;
-        %no.pts=[c(ch),r(ch)];
-        no.points=[c(ch),r(ch)]; % ACK MARK HACK HACK
+        
+        no.points=[c(ch),r(ch)];
         no.ID=-1;
         
         no.indPixels=pix;
@@ -251,7 +272,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         nf.igPix = [];
         nf.haloPix = [];
         
-        objs=[objs no];
+        objs = [objs no];
         features = [features nf];
     end
 end

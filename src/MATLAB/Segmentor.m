@@ -28,11 +28,18 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features levels] = Segmentor(tStart,tStep,tEnd,imageAlpha,rootImageFolder,imageNamePattern)
+function [objs features levels] = Segmentor(tStart,tStep,tEnd,cellType,imageAlpha,rootImageFolder,imageNamePattern)
 
 objs=[];
 features = [];
 levels = struct('haloLevel',{}, 'igLevel',{});
+
+if ( exist(fullfile('+Segmentation',[cellType 'FrameSegmentor']), 'file') )
+    segFunc = str2func(['Segmentation.' cellType 'FrameSegmentor']);
+else
+    fprintf(['WARNING: Could not find Segmentation.' cellType 'FrameSegmentor() using default segmentation routine\n']);
+    segFunc = @Segmentation.FrameSegmentor;
+end
 
 try
     if(ischar(tStart)),tStart = str2double(tStart);end
@@ -58,7 +65,7 @@ try
 
         im = Helper.LoadIntensityImage(fname);
 
-        [frmObjs frmFeatures frmLevels] = Segmentation.FrameSegmentor(im, t, imageAlpha);
+        [frmObjs frmFeatures frmLevels] = segFunc(im, t, imageAlpha);
         objs = [objs frmObjs];
         features = [features frmFeatures];
         levels = [levels frmLevels];

@@ -108,17 +108,17 @@ system(['copy "' mcrfile '" "' bindir '\"']);
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
+!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
-mcc -R -startmsg -m Segmentor.m
+!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
-mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
+!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
 fprintf('Done (%f sec)\n', toc());
 
 % tic();
