@@ -80,27 +80,6 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
     set(im,'Visible','off');
 end
 
-imageAlpha = 0.95;
-
-levels = struct('haloLevel',{[]}, 'igLevel',{[]});
-levels.haloLevel = graythresh(img);
-level=imageAlpha*levels.haloLevel;
-bwHalo=im2bw(img,level);
-
-se=strel('square',3);
-gd=imdilate(img,se);
-ge=imerode(img,se);
-ig=gd-ge;
-levels.igLevel = graythresh(ig);
-lig=levels.igLevel;
-bwig=im2bw(ig,lig);
-
-[r c] = find(bwig);
-plot(curAx, c,r, '.b');
-
-[r c] = find(bwHalo);
-plot(curAx, c,r, '.y');
-
 %draw labels if turned on
 Figures.cells.labelHandles = [];
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
