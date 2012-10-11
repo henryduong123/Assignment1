@@ -1,6 +1,16 @@
 % [sigDigits imageDataset] = ParseImageName(imageName)
 
-function [sigDigits imageDataset] = ParseImageName(imageName)    
+function [sigDigits imageDataset] = ParseImageName(imageName, isFluor)    
+    if nargin < 2
+        isFluor = 0;
+    end
+    
+    if isFluor
+        namePattern = 'fluorNamePattern';
+    else
+        namePattern = 'imageNamePattern';
+    end
+    
     tIndex = strfind(imageName,'t');
     
     if (isempty(tIndex))
@@ -31,5 +41,6 @@ function [sigDigits imageDataset] = ParseImageName(imageName)
     imageDataset = imageName(1:(tIndex)-1);
     
     imageNamePattern = [imageDataset 't%0' num2str(sigDigits) 'd' imageName(endIndex:end)];
-    Load.AddConstant('imageNamePattern',imageNamePattern,1);
+%    Load.AddConstant('imageNamePattern',imageNamePattern,1);
+    Load.AddConstant(namePattern,imageNamePattern,1);
 end
