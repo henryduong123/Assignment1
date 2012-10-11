@@ -14,7 +14,15 @@ while ( ~bOpened )
         return
     end
     
-    [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile);
+    [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile, 0);
+    answer = questdlg('Do you have fluorescence images?', 'Fluorescence?', 'Yes', 'No', 'No');
+    if strcmp(answer, 'Yes')
+        [settings.imageFileFl,settings.imagePathFl,filterIndexImage] = uigetfile(imageFilter,'Open First Fluoresence Image in dataset: ');
+        if (filterIndexImage==0)
+            return
+        end
+        [sigDigitsFl fluorDataset] = Helper.ParseImageName(settings.imageFileFl, 1);
+    end
     
     if ~isfield(CONSTANTS,'datasetName')
         Load.AddConstant('datasetName', imageDataset, 1);
