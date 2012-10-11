@@ -80,6 +80,11 @@ function errStatus = SegAndTrack()
                 CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
                 CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
             
+        case 'Wehi'
+            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
+                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
+                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+            
         otherwise
             return
     end
