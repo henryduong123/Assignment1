@@ -17,7 +17,8 @@ while ( ~bOpened )
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile, 0);
     answer = questdlg('Do you have fluorescence images?', 'Fluorescence?', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
-        [settings.imageFileFl,settings.imagePathFl,filterIndexImage] = uigetfile(imageFilter,'Open First Fluoresence Image in dataset: ');
+        imageFilterFl = [settings.imagePathFl '*.TIF'];
+        [settings.imageFileFl,settings.imagePathFl,filterIndexImage] = uigetfile(imageFilterFl,'Open First Fluoresence Image in dataset: ');
         if (filterIndexImage==0)
             return
         end
