@@ -10,6 +10,8 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     
     fileList = dir(fullfile(rootFolder, [datasetName '*.tif']));
     numberOfImages = length(fileList);
+    % numberOfImages = 10;
+    numProcessors = min(numProcessors, numberOfImages);
     
     if ( numberOfImages < 1 )
         return;
@@ -47,10 +49,12 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     end
     
     dirName = fileparts(CONSTANTS.rootImageFolder);
+    rootFluorFolder=CONSTANTS.rootFluorFolder(1:end-1);
     for i=1:numProcessors
          system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
             num2str(numberOfImages) ' ' CONSTANTS.cellType ' ' ...
-            num2str(imageAlpha) ' "' dirName '" ' CONSTANTS.imageNamePattern ' && exit']);
+            num2str(imageAlpha) ' "' dirName '" ' CONSTANTS.imageNamePattern  ...
+            ' "' rootFluorFolder '" ' CONSTANTS.fluorNamePattern ' && exit']);
         %use line below instead of the 3 lines above for non-parallel or to debug
 %         Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern);
     end

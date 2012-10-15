@@ -28,7 +28,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features levels] = Segmentor(tStart,tStep,tEnd,cellType,imageAlpha,rootImageFolder,imageNamePattern)
+function [objs features levels] = Segmentor(tStart,tStep,tEnd,cellType,imageAlpha,rootImageFolder,imageNamePattern,rootFluorFolder,fluorNamePattern)
 
 objs=[];
 features = [];
@@ -52,6 +52,8 @@ try
     
     Load.AddConstant('rootImageFolder', rootImageFolder, 1);
     Load.AddConstant('imageNamePattern', imageNamePattern, 1);
+    Load.AddConstant('rootFluorFolder', [rootFluorFolder '\'], 1);
+    Load.AddConstant('fluorNamePattern', fluorNamePattern, 1);
     
     numImages = tEnd/tStep;
 
