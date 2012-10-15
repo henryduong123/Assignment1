@@ -17,4 +17,9 @@ function SupportedTypes = GetSupportedCellTypes()
     SupportedTypes(3).trackParams = struct('dMaxCenterOfMass',{80}, 'dMaxConnectComponentTracker',{40});
     SupportedTypes(3).leverParams = struct('timeResolution',{10}, 'maxPixelDistance',{80}, 'maxCenterOfMassDistance',{80}, 'dMaxConnectComponent',{40});
     
+    SupportedTypes(4).name = 'Wehi';
+    SupportedTypes(4).segParams = struct('imageAlpha',{1.5});
+    SupportedTypes(4).trackParams = struct('dMaxCenterOfMass',{80}, 'dMaxConnectComponentTracker',{40});
+    SupportedTypes(4).leverParams = struct('timeResolution',{10}, 'maxPixelDistance',{80}, 'maxCenterOfMassDistance',{80}, 'dMaxConnectComponent',{40});
+    
 end
