@@ -65,17 +65,17 @@ function PatchMatchedTracks()
             continue;
         end
         
-        nzOutEdge = find(costMatrix(bestInHull,:));
-        [minCost minIdx] = min(costMatrix(bestInHull,nzOutEdge));
-        if ( isempty(minIdx) )
-            continue;
-        end
-        
-        % Check for matching between best in/out edge
-        bestOutHull = nzOutEdge(minIdx);
-        if ( bestOutHull ~= checkHulls(i) )
-            continue;
-        end
+%         nzOutEdge = find(costMatrix(bestInHull,:));
+%         [minCost minIdx] = min(costMatrix(bestInHull,nzOutEdge));
+%         if ( isempty(minIdx) )
+%             continue;
+%         end
+%         
+%         % Check for matching between best in/out edge
+%         bestOutHull = nzOutEdge(minIdx);
+%         if ( bestOutHull ~= checkHulls(i) )
+%             continue;
+%         end
         
         childTrack = Hulls.GetTrackID(checkHulls(i));
         parentTrack = Hulls.GetTrackID(bestInHull);
