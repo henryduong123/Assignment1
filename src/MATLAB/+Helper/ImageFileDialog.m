@@ -2,6 +2,10 @@ function bOpened = ImageFileDialog()
 global CONSTANTS
 
 load('LEVerSettings.mat');
+% settings = rmfield(settings, ['imageFileFl'; 'imagePathFl']); % debugging
+if ~isfield(settings,'imagePathFl')
+    settings.imagePathFl = settings.imagePath;
+end
 
 %find the first image
 imageFilter = [settings.imagePath '*.TIF'];
