@@ -11,10 +11,10 @@ global CONSTANTS softwareVersion;
 
 CONSTANTS=[];
 
-softwareVersion = '6.1 Adult';
+softwareVersion = '7.1 Multi-Cell';
 
-Load.InitializeConstants();
-Load.AddConstant('version',softwareVersion,1);
+cellType = Load.QueryCellType();
+Load.AddConstant('cellType',cellType,1);
 
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if(~directory_name),return,end
@@ -51,12 +51,22 @@ for dd=1:length(dlist)
     end
         
     CONSTANTS.rootImageFolder = [directory_name filesep dlist(dd).name];
-    CONSTANTS.datasetName = dlist(dd).name;
+    CONSTANTS.datasetName = [dlist(dd).name '_'];
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
+    
+    flist = dir(fullfile(CONSTANTS.rootImageFolder,'*.tif'));
+    if ( isempty(flist) )
+        continue;
+    end
+    
+    Helper.ParseImageName(flist(1).name);
     
     if exist(CONSTANTS.matFullFile,'file')
         continue
     end
+    
+    Load.InitializeConstants();
+    Load.AddConstant('version',softwareVersion,1);
     
     fprintf('seg&track file : %s\n',CONSTANTS.datasetName);
     tic
@@ -69,7 +79,7 @@ for dd=1:length(dlist)
         continue;
     end
     
-    if ( ~strcmpi(firstimfile, Helper.GetFullImagePath(1)) )
+    if ( ~strcmpi(firstimfile, Helper.GetImageName(1)) )
         fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n',CONSTANTS.datasetName);
         continue;
     end
@@ -80,7 +90,7 @@ for dd=1:length(dlist)
         continue;
     end
     
-    UI.SaveData(1);
+    Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 
     Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end %dd
