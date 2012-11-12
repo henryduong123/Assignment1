@@ -11,6 +11,12 @@ function [objs features levels] = WehiFrameSegmentor(im, t, imageAlpha)
     
     fluor = Helper.LoadIntensityImage(fname);
     [bw] = Segmentation.Michel(fluor, [3 3]);
+    
+    % zero out all but the area of the frame we're interested in
+    mask = zeros(size(bw));
+    mask(46:172,721:850) = 1;
+    bw = bw & mask;
+    
     [r c] = find(bw);
     [L num] = bwlabel(bw);
     for n=1:num
