@@ -16,6 +16,12 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     if ( numberOfImages < 1 )
         return;
     end
+    
+    % Wehi fluorescence breaks down after around frame 500
+    if strcmp(CONSTANTS.cellType, 'Wehi')
+%        numberOfImages = 550;
+        numberOfImages = 500;
+    end
 
     cellSegments = [];
     cellFeat = [];
