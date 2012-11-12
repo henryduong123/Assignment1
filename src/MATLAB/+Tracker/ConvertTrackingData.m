@@ -26,7 +26,7 @@
 
 function ConvertTrackingData(objHulls,gConnect)
 
-global Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log
+global Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log CONSTANTS
 
 %ensure that the globals are empty
 Costs = [];
@@ -110,6 +110,11 @@ end
 
 % Build initial CachedCostMatrix for new data
 Load.InitializeCachedCosts(1);
+
+% try to patch Wehi data
+if strcmp(CONSTANTS.cellType, 'Wehi')
+    Tracker.PatchWehi();
+end
 
 %create the family trees
 Families.ProcessNewborns();
