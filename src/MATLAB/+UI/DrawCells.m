@@ -60,6 +60,7 @@ im = imagesc(img, 'Parent',curAx);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
 set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
 
+%set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 axis(curAx,'off');
 if xl(1)~=0 && xl(2)~=1
@@ -80,26 +81,26 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
     set(im,'Visible','off');
 end
 
-imageAlpha = 0.95;
-
-levels = struct('haloLevel',{[]}, 'igLevel',{[]});
-levels.haloLevel = graythresh(img);
-level=imageAlpha*levels.haloLevel;
-bwHalo=im2bw(img,level);
-
-se=strel('square',3);
-gd=imdilate(img,se);
-ge=imerode(img,se);
-ig=gd-ge;
-levels.igLevel = graythresh(ig);
-lig=levels.igLevel;
-bwig=im2bw(ig,lig);
-
-[r c] = find(bwig);
-plot(curAx, c,r, '.b');
-
-[r c] = find(bwHalo);
-plot(curAx, c,r, '.y');
+% imageAlpha = 0.95;
+% 
+% levels = struct('haloLevel',{[]}, 'igLevel',{[]});
+% levels.haloLevel = graythresh(img);
+% level=imageAlpha*levels.haloLevel;
+% bwHalo=im2bw(img,level);
+% 
+% se=strel('square',3);
+% gd=imdilate(img,se);
+% ge=imerode(img,se);
+% ig=gd-ge;
+% levels.igLevel = graythresh(ig);
+% lig=levels.igLevel;
+% bwig=im2bw(ig,lig);
+% 
+% [r c] = find(bwig);
+% plot(curAx, c,r, '.b');
+% 
+% [r c] = find(bwHalo);
+% plot(curAx, c,r, '.y');
 
 %draw labels if turned on
 Figures.cells.labelHandles = [];
@@ -169,10 +170,10 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             end
         end
         
-        drawWidth = 1;
+        drawWidth = 2;
         drawStyle = '-';
         if ( any(Figures.cells.selectedHulls == curHullID) )
-            drawWidth = 1.5;
+            drawWidth = 2.5;
             drawStyle = '--';
         end
         
