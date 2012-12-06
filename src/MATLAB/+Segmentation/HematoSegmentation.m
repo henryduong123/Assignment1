@@ -1,7 +1,7 @@
 function  HematoSegmentation()
 global CONSTANTS CellHulls
 eccentricity = 1.0;
-minVol = 200;
+minVol = 75;
 try
     system(['del .\segmentationData\' CONSTANTS.datasetName '*.TIF_seg.txt']);
 catch errorMessage
