@@ -41,14 +41,17 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	StructuringElementType		structuringElement1;
 	StructuringElementType		structuringElement2;
 
+	// setup charReader to read from TIFs
 	charReader->SetImageIO(imageIO);
 	charReader->SetFileName(paramaters->imageFile);
 	charReader->Update();
 
+	// compute a histogram of the image
 	histogramGeneratorOrg->SetNumberOfBins(256);
 	histogramGeneratorOrg->SetInput(charReader->GetOutput());
 	histogramGeneratorOrg->Compute();
 
+	// maximize between-class variance in the histogram
 	thresholdCalculatorOrg->SetInput(histogramGeneratorOrg->GetOutput());
 	thresholdCalculatorOrg->Update();
 
@@ -63,6 +66,7 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	thresholdFilterOrg->SetUpperThreshold(255);
 	thresholdFilterOrg->SetInput(charReader->GetOutput());
 
+	// this sets up the image dilation
 	structuringElement1.SetRadius(2);
 	structuringElement1.CreateStructuringElement();
 
