@@ -236,6 +236,14 @@ int main(int argc, char * argv[])
 	search += "\\*.*";
 
 	std::string croppedDir = pathCreate(argv[2]);
+
+	std::string fluorDir, fluorCroppedDir, fluorSearch;
+	if (argc == 5)
+	{
+		fluorDir = pathCreate(argv[3]);
+		fluorCroppedDir = pathCreate(argv[4]);
+		fluorSearch = fluorDir + "\\*.*";
+	}
 	
 	WIN32_FIND_DATAA fileNames;
 	HANDLE handle = FindFirstFileA(search.c_str(),&fileNames);
@@ -283,6 +291,35 @@ int main(int argc, char * argv[])
 	}
 
 	FindClose(handle);
+
+	if (fluorDir.length() > 0)
+	{
+		handle = FindFirstFileA(fluorSearch.c_str(),&fileNames);
+
+		if( handle!=INVALID_HANDLE_VALUE ) 
+		{
+			do
+			{
+				std::string curfile(fluorDir);
+				curfile += "\\";
+				curfile += fileNames.cFileName;
+
+				if (isTiffFile(curfile))
+				{
+					cropData curData;
+					curData.filePath = (fluorDir+"\\");
+					curData.imageName = fileNames.cFileName;
+					curData.regionToKeep = region;
+					curData.destination = (fluorCroppedDir+"\\");
+
+					pArguments.push_back(curData);
+				}
+
+			} while(FindNextFileA(handle,&fileNames));
+
+			FindClose(handle);
+		}
+	}
 
 	for (int i=0; i<pArguments.size(); ++i)
 	{
