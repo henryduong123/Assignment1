@@ -11,9 +11,18 @@ end
 answr = questdlg('Crop these images?','Crop?','Yes','No','Yes');
 if (strcmp(answr,'Yes'))
     croppedFolder = [CONSTANTS.rootImageFolder(1:end-1) '_cropped\.'];
+    if (isfield(CONSTANTS, 'rootFluorFolder'))
+        croppedFluor = [' ' CONSTANTS.rootFluorFolder '* ' CONSTANTS.rootFluorFolder(1:end-1) '_cropped\.'];
+    else
+        croppedFluor = '';
+    end
     fprintf(1,'Cropping Images...');
-    system(['GrayScaleCrop.exe "' CONSTANTS.rootImageFolder '*" ' croppedFolder]);
+    system(['GrayScaleCrop.exe "' CONSTANTS.rootImageFolder '*" ' croppedFolder croppedFluor]);
+%    system(['GrayScaleCrop.exe "' CONSTANTS.rootImageFolder '*" ' croppedFolder]);
     CONSTANTS.rootImageFolder = croppedFolder;
+    if (isfield(CONSTANTS, 'rootFluorFolder'))
+        CONSTANTS.rootFluorFolder = [CONSTANTS.rootFluorFolder(1:end-1) '_cropped\.'];
+    end
     im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
     Load.AddConstant('imageSize',size(im),1);
 end
