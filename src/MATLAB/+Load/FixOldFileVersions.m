@@ -79,12 +79,12 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = 1;
     end
     
-    % Adds the special origin action, to indicate that this is initial
-    % segmentation data from which edit actions are built.
-    if ( isempty(ReplayEditActions) || bNeedsUpdate )
-        Editor.ReplayableEditAction(@Editor.OriginAction, 1);
-        bNeedsUpdate = 1;
-    end
+%     % Adds the special origin action, to indicate that this is initial
+%     % segmentation data from which edit actions are built.
+%     if ( isempty(ReplayEditActions) || bNeedsUpdate )
+%         Editor.ReplayableEditAction(@Editor.OriginAction, 1);
+%         bNeedsUpdate = 1;
+%     end
     
     % Add bLockedField if necessary
     if ( ~isfield(CellFamilies, 'bLocked') )

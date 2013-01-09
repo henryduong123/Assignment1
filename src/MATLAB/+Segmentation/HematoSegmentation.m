@@ -1,5 +1,5 @@
 function  HematoSegmentation()
-global CONSTANTS CellHulls
+global CONSTANTS CellHulls FluorHulls HaveFluor
 eccentricity = 1.0;
 minVol = 75;
 try
@@ -32,6 +32,7 @@ fprintf(1,'Segmentation...');
 system(['start HematoSeg.exe "' CONSTANTS.rootImageFolder '*" ' num2str(CONSTANTS.imageAlpha) ' ' num2str(minVol) ' ' num2str(eccentricity) ' .9 && exit']);
 
 pause(20);
+
 CellHulls = struct(...
     'time',             {},...
     'points',           {},...
@@ -72,6 +73,33 @@ for i=1:length(CellHulls)
     [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(i).indexPixels);
     ch = convhull(r,c);
     CellHulls(i).points = [c(ch) r(ch)];
+end
+
+% do fluor segmentation (if provided)
+FluorHulls = struct(...
+    'time',             {},...
+    'points',           {},...
+    'centerOfMass',     {},...
+    'indexPixels',      {},...
+    'imagePixels',      {},...
+    'deleted',          {},...
+    'userEdited',       {});
+
+HaveFluor = zeros(1,length(dir([CONSTANTS.rootImageFolder '\*.tif'])));
+
+if (isfield(CONSTANTS, 'rootFluorFolder'))
+    % rather than hard-wire the interval between fluor images, we'll loop
+    % over each possible one from the phase images and see if we have a
+    % corresponding fluor image
+    for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
+        filename = Helper.GetFullFluorPath(i);
+        if (isempty(dir(filename)))
+            continue;
+        end
+        HaveFluor(i) = 1;
+        filename
+    end
+        
 end
 
 fprintf(1,'Done\n');
