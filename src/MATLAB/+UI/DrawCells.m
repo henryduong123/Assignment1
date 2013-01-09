@@ -30,12 +30,16 @@
 
 function DrawCells()
 
-global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS
+global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS HaveFluor
 
 if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 
 % figure(Figures.cells.handle);
-set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+if (HaveFluor(Figures.time))
+    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
+else
+    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+end
 %read in image
 filename = Helper.GetFullImagePath(Figures.time);
 if (exist(filename,'file')==2)
