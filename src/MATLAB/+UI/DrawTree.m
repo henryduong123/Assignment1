@@ -25,7 +25,7 @@
 
 function DrawTree(familyID)
 
-global CellFamilies HashedCells Figures CellPhenotypes  
+global CellFamilies HashedCells Figures CellPhenotypes HaveFluor
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
@@ -104,6 +104,16 @@ for i=1:length(phenoScratch.phenoLegendSet)
         'MarkerSize',12);
     phenoHandles = [phenoHandles hPheno];
     set(hPheno,'DisplayName',CellPhenotypes.descriptions{i});
+end
+
+% draw ticks to indicate which times have fluorescence
+fluorTimes = find(HaveFluor);
+xlim = get(Figures.tree.axesHandle,'XLim');
+tickLen = (xlim(2) - xlim(1)) * 0.01;
+for i=1:length(fluorTimes)
+    line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
+    'color', 'green',...
+    'linewidth', 1);
 end
 
 hold off
