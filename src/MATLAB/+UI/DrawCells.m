@@ -30,15 +30,15 @@
 
 function DrawCells()
 
-global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS HaveFluor
+global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData
 
 if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 
 % figure(Figures.cells.handle);
-if (HaveFluor(Figures.time))
-    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
-else
+if (isempty(FluorData(Figures.time).greenInd))
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+else
+    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
 end
 %read in image
 filename = Helper.GetFullImagePath(Figures.time);
@@ -189,6 +189,16 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
             plot(curAx, c, r, '.', 'Color',edgeColor);
         end
+        
+        %flor marker exists
+        if(isfield(CellHulls(curHullID),'greenInd') && ~isempty(CellHulls(curHullID).greenInd))
+            edgeColor = 'g';
+            drawStyle = '--';
+            drawWidth = 2;
+            [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
+            plot(curAx,c,r,'.g');
+        end
+        
         %draw outline
         plot(curAx, CellHulls(curHullID).points(:,1),...
             CellHulls(curHullID).points(:,2),...

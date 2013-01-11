@@ -1,5 +1,5 @@
 function HematoTracker()
-    global CONSTANTS CellHulls HashedCells ConnectedDist
+    global CONSTANTS CellHulls HashedCells ConnectedDist FluorData
     
     bKeep = (~[CellHulls.deleted]);
     CellHulls = CellHulls(bKeep);
@@ -13,6 +13,21 @@ function HematoTracker()
     for i=1:length(CellHulls)
         HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
     end
+    
+    fprintf(1,'Computing intersections with fluorescence images...');
+    for t=1:tmax
+        hulls = [HashedCells{t}(:).hullID];
+        greenInd = FluorData(t).greenInd;
+        for i=1:length(hulls)
+            inter = intersect(CellHulls(hulls(i)).indexPixels, greenInd);
+            if (isempty(inter))
+                CellHulls(hulls(i)).greenInd = [];
+            else
+                CellHulls(hulls(i)).greenInd = greenInd;
+            end
+        end
+    end
+    fprintf(1, 'Done\n');
     
     ConnectedDist = [];
     fprintf(1,'Calculating Distances...');

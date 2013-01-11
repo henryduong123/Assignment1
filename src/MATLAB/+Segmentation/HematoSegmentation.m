@@ -1,5 +1,5 @@
 function  HematoSegmentation()
-global CONSTANTS CellHulls FluorHulls HaveFluor
+global CONSTANTS CellHulls FluorData HaveFluor
 eccentricity = 1.0;
 minVol = 75;
 try
@@ -76,14 +76,11 @@ for i=1:length(CellHulls)
 end
 
 % do fluor segmentation (if provided)
-FluorHulls = struct(...
-    'time',             {},...
-    'points',           {},...
-    'centerOfMass',     {},...
-    'indexPixels',      {},...
-    'imagePixels',      {},...
-    'deleted',          {},...
-    'userEdited',       {});
+
+% one of these per frame
+FluorData = struct(...
+    'greenInd',         {}...
+);
 
 HaveFluor = zeros(1,length(dir([CONSTANTS.rootImageFolder '\*.tif'])));
 
@@ -94,10 +91,15 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
     for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
         filename = Helper.GetFullFluorPath(i);
         if (isempty(dir(filename)))
+            FluorData(i).greenInd = {};
             continue;
         end
         HaveFluor(i) = 1;
-        filename
+        
+        % find all the fluorescence pixels in the image
+        fluor = Helper.LoadIntensityImage(filename);
+        [bw] = Segmentation.Michel(fluor, [3 3]);
+        FluorData(i).greenInd = find(bw);
     end
         
 end

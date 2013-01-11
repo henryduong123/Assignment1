@@ -25,7 +25,7 @@
 
 function DrawTree(familyID)
 
-global CellFamilies HashedCells Figures CellPhenotypes HaveFluor
+global CellFamilies HashedCells Figures CellPhenotypes FluorData HaveFluor
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
