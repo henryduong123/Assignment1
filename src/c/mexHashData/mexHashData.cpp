@@ -185,6 +185,15 @@ void hashStructArray(SHA1Context* pShaContext, const mxArray* pData)
 
 void hashData(SHA1Context* pShaContext, const mxArray* pData)
 {
+	// If the data pointer is null (e.g. empty cells/structs)
+	// then just hash the NULL pointer
+	if ( pData == NULL )
+	{
+		hashElementData<const mxArray*>(pShaContext, &pData, 1);
+
+		return;
+	}
+
 	mxClassID classID = mxGetClassID(pData);
 
 	switch (classID)
@@ -248,7 +257,7 @@ void hashData(SHA1Context* pShaContext, const mxArray* pData)
 		case mxVOID_CLASS:
 		case mxUNKNOWN_CLASS:
 		default:
-			mexErrMsgTxt("Cannot hash data of unkown or void class");
+			mexErrMsgTxt("Cannot hash data of unknown or void class");
 	}
 }
 
