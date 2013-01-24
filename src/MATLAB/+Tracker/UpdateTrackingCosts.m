@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function UpdateTrackingCosts(t, trackHulls, nextHulls)
-    global CellHulls HashedCells CellTracks
+    global CellHulls HashedCells CellTracks ConnectedDist
     
     windowSize = 4;
     
@@ -48,7 +48,7 @@ function UpdateTrackingCosts(t, trackHulls, nextHulls)
     
     avoidHulls = setdiff(trackToHulls,nextHulls);
     %[costMatrix fromHulls toHulls] = TrackingCosts(trackHulls, t, avoidHulls, CellHulls, HashedCells);
-    [costMatrix fromHulls toHulls] = Tracker.GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, CellHulls, HashedCells, CellTracks);
+    [costMatrix fromHulls toHulls] = Tracker.GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, CellHulls, HashedCells, CellTracks, ConnectedDist);
     
     % Update newly tracked costs
     if ( dir > 0 )

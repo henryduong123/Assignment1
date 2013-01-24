@@ -96,7 +96,7 @@ void buildStructFieldIdx(int fieldIdx[], int numFields, char* fieldNames[], cons
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-	char* expectTypes[] = {"double", "double", "cell", "struct", "cell", "struct"};
+	char* expectTypes[] = {"double", "double", "cell", "struct", "cell", "struct", "cell"};
 	int expectNumArgs = ARRAY_SIZE(expectTypes);
 
 	checkInputs(nrhs, prhs, expectNumArgs, expectTypes);
@@ -118,11 +118,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	gWindowSize = ((int) mxGetScalar(prhs[1]));
 
 	gTrackHulls = prhs[2];
+
 	gCellHulls = prhs[3];
 	gHashHulls = prhs[4];
 	gCellTracks = prhs[5];
-
-	gCellConnDist = mexGetVariablePtr("global", "ConnectedDist");
+	gCellConnDist = prhs[6];
 
 	if ( gCellHulls == NULL || gCellTracks == NULL || gHashHulls == NULL || gCellConnDist == NULL )
 		mexErrMsgTxt("Unable to access global cell variables.");
