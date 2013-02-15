@@ -127,7 +127,7 @@ switch answer
                     load([settings.matFilePath settings.matFile]);
                     fprintf('\nFile open.\n\n');
                 catch exception
-                    errordlg(['Unable to open data: ' exception.msgString]);
+                    errordlg(['Unable to open data: ' exception.message]);
                     return
                 end
             end
