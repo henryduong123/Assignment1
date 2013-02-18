@@ -168,6 +168,7 @@ bool checkFamilySizes(mwIndex familyID)
 	mxArray* endTime = mxGetField(gCellFamilies, C_IDX(familyID), "endTime");
 	mxArray* rootTrackID = mxGetField(gCellFamilies, C_IDX(familyID), "rootTrackID");
 	mxArray* tracks = mxGetField(gCellFamilies, C_IDX(familyID), "tracks");
+	mxArray* bLocked = mxGetField(gCellFamilies, C_IDX(familyID), "bLocked");
 
 	mwSize startTimeSz = mxGetNumberOfElements(startTime);
 	if ( startTimeSz == 0 )
@@ -182,6 +183,9 @@ bool checkFamilySizes(mwIndex familyID)
 
 		if ( mxGetNumberOfElements(tracks) != 0 )
 			nonemptyFields = nonemptyFields.append("tracks ");
+
+		//if ( mxGetNumberOfElements(bLocked) != 0 )
+		//	nonemptyFields = nonemptyFields.append("bLocked ");
 
 		if ( nonemptyFields.length() > 0 )
 		{
@@ -207,6 +211,16 @@ bool checkFamilySizes(mwIndex familyID)
 		if ( tracksSz == 0 )
 			emptyFields = emptyFields.append("tracks ");
 
+		mwSize bLockedSz = 0;
+		if ( bLocked != NULL )
+		{
+			bLockedSz = mxGetNumberOfElements(bLocked);
+			if ( bLockedSz == 0 )
+				emptyFields = emptyFields.append("bLocked ");
+		}
+		else
+			emptyFields = emptyFields.append("bLocked ");
+
 		if ( emptyFields.length() > 0 )
 		{
 			char errMsg[errBufSize];
@@ -224,6 +238,9 @@ bool checkFamilySizes(mwIndex familyID)
 
 		if ( rootTrackIDSz != 1 )
 			invalidSizes = invalidSizes.append("rootTrackID ");
+
+		if ( bLockedSz != 1 )
+			invalidSizes = invalidSizes.append("bLocked ");
 
 		if ( invalidSizes.length() > 0 )
 		{
