@@ -79,13 +79,14 @@ if (~isempty(CellTracks(trackID).hulls))
         droppedTracks = [droppedTracks Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(1))];
     end
 else
-    curFamilyID = length(CellFamilies) + 1;
+    curFamilyID = Families.CreateEmptyFamily();
     
     %setup defaults for family tree
     CellFamilies(curFamilyID).rootTrackID = trackID;
     CellFamilies(curFamilyID).tracks = trackID;
     CellFamilies(curFamilyID).startTime = time;
     CellFamilies(curFamilyID).endTime = time;
+    
     CellTracks(trackID).familyID = curFamilyID;
     CellTracks(trackID).color = UI.GetNextColor();
 end
