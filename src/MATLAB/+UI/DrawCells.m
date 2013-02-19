@@ -35,7 +35,7 @@ global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData
 if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 
 % figure(Figures.cells.handle);
-if (isempty(FluorData(Figures.time).greenInd))
+if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 else
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
