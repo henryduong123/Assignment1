@@ -191,12 +191,12 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         end
         
         %flor marker exists
-        if(isfield(CellHulls(curHullID),'greenInd') && ~isempty(CellHulls(curHullID).greenInd))
+        if(strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on') && isfield(CellHulls(curHullID),'greenInd') && ~isempty(CellHulls(curHullID).greenInd))
             edgeColor = 'g';
             drawStyle = '--';
             drawWidth = 2;
             [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
-            plot(curAx,c,r,'.g');
+            plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
         end
         
         %draw outline
