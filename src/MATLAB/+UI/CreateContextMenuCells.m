@@ -96,6 +96,7 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Separator',    'on');
 
 UI.CreatePhenotypeMenu();
+UI.CreateFluorescenceMenu();
 end
 
 %% Callback functions
@@ -176,6 +177,7 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks))
     end
 end
 
+Tracker.UpdateHematoFluor(Figures.time);
 UI.DrawTree(Figures.tree.familyID);
 UI.DrawCells();
 end
@@ -204,6 +206,7 @@ function removeTrackPrevious(src,evnt)
         end
     end
 
+    Tracker.UpdateHematoFluor(Figures.time);
     UI.DrawTree(Figures.tree.familyID);
     UI.DrawCells();
 end
@@ -223,6 +226,7 @@ function removeFromTree(src,evnt)
     
     Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
 
+    Tracker.UpdateHematoFluor(Figures.time);
     UI.DrawTree(CellTracks(oldParent).familyID);
 end
 
