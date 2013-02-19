@@ -316,6 +316,98 @@ else
         'uicontextmenu',        Figures.tree.contextMenuHandle)];
     phenoScratch.phenoLegendSet(1)=1;
 end
+
+% if (trackID == 15844 || trackID == 18075)
+%     trackID=trackID;
+% end
+% if (trackID == 17984)
+%     trackID=17984;
+% end
+if (trackID == 18386)
+    trackID = 18386;
+end
+% if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
+%     if(CellTracks(trackID).markerTimes(2,1))
+%         if (size(CellTracks(trackID).markerTimes, 2) == 1)
+%             drawVertFluor(trackID, xVal, yMin, CellTracks(trackID).markerTimes(1,1));
+%         else
+%             drawVertFluor(trackID, xVal, yMin, CellTracks(trackID).markerTimes(1,2));
+%         end            
+%     end
+%     for i=2:length(CellTracks(trackID).markerTimes)-1
+%         if(CellTracks(trackID).markerTimes(2,i))
+%             drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), CellTracks(trackID).markerTimes(1,i+1)); 
+%         end
+%     end
+%     if(CellTracks(trackID).markerTimes(2,end))
+%         drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1); 
+%     end
+% end
+
+if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
+    yFrom = yMin;
+    wasGreen = 0;
+    drewLine = 0;
+    for i=1:size(CellTracks(trackID).markerTimes, 2)
+        if(CellTracks(trackID).markerTimes(2,i))
+            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+            wasGreen = 1;
+            drewLine = 0;
+            if (~CellTracks(trackID).fluorTimes(2,i))
+                drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'g');
+            end
+        elseif (wasGreen && ~drewLine)
+%             drawVertLostFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+%            if (CellTracks(trackID).fluorTimes(2,i))
+                drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'k');
+%            end
+            drewLine = 1;
+        end
+        yFrom = CellTracks(trackID).markerTimes(1,i);
+    end
+    if(CellTracks(trackID).markerTimes(2,end))
+        drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+%     elseif (wasGreen)
+%         drawVertLostFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+    end
+end
+    
+
+
 end
 
+function drawVertFluor(trackID, x, yMin, yMax)
+global Figures;
 
+plot([x x], [yMin yMax],...
+    '-g','LineWidth',3,...
+    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+end
+
+function drawVertLostFluor(trackID, x, yMin, yMax)
+global Figures;
+
+plot([x x], [yMin yMax],...
+    '-r','LineWidth',3,...
+    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+plot([x x], [yMin yMax],...
+    'xr','LineWidth',11,...
+    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+end
+
+function drawHorzFluor(trackID, x, y, colorspec)
+global Figures;
+
+% xlim = get(Figures.tree.axesHandle,'XLim');
+% tickLen = (xlim(2) - xlim(1)) * 0.01;
+tickLen = 0.4;
+
+%xlim = get(Figures.tree.axesHandle,'XLim');
+%tickLen = (xlim(2) - xlim(1)) * 0.01;
+%line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
+
+plot([x-tickLen x+tickLen], [y y],...
+    ['-' colorspec],'LineWidth',1,...
+    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+end
