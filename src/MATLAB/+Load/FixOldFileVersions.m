@@ -29,11 +29,6 @@ function bNeedsUpdate = FixOldFileVersions()
 
     bNeedsUpdate = 0;
     
-    % Cannot fix this without resegmentation so give a warning if CellFeatures doesn't exist yet
-%     if ( isempty(CellFeatures) )
-%         msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
-%     end
-    
     emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
     if ( ~isempty(emptyHash) )
         for i=1:length(emptyHash)
@@ -52,6 +47,14 @@ function bNeedsUpdate = FixOldFileVersions()
     % Need userEdited field as of ver 5.0
     if ( ~isfield(CellHulls, 'userEdited') )
         Load.AddUserEditedField();
+        bNeedsUpdate = 1;
+    end
+    
+    % Remove HashedCells.editedFlag field as of ver 7.0
+    if ( ~isempty(HashedCells) && isfield(HashedCells{1}, 'editedFlag') )
+        for t=1:length(HashedCells)
+            HashedCells{t} = rmfield(HashedCells{t}, 'editedFlag');
+        end
         bNeedsUpdate = 1;
     end
     
