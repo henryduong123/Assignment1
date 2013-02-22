@@ -271,7 +271,7 @@ void buildOutputPaths(mxArray* cellPaths, mxArray* arrayCost)
 }
 
 // Functions
-int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle, int dir = 1)
+int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle, int dir = 1, bool bStopAtTerminals = true)
 {
 	gAcceptedPaths.clear();
 	for ( mwSize i=0; i < numVerts; ++i )
@@ -293,8 +293,12 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArr
 		if ( (curVert != startVert) && checkAcceptPath(startVert, curVert, maxExtent, matFuncHandle) )
 		{
 			gAcceptedPaths.push_back(curVert);
-			curVert = popNextVert(costQueue, maxExtent);
-			continue;
+
+			if ( bStopAtTerminals )
+			{
+				curVert = popNextVert(costQueue, maxExtent);
+				continue;
+			}
 		}
 
 		double curCost = gPathCosts[MATLAB_IDX(curVert)];
@@ -418,6 +422,12 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	if ( nrhs == 4 )
 		dir = ((int) mxGetScalar(prhs[3]));
 
+	bool bStopAtTerms = true;
+	if ( nrhs == 5 && !mxIsClass(prhs[3], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar bStopAtTerminals for fifth parameter.");
+	if ( nrhs == 5 )
+		bStopAtTerms = ((bool) mxGetScalar(prhs[4]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -430,7 +440,7 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL, dir);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL, dir, bStopAtTerms);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
@@ -463,6 +473,12 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	if ( nrhs == 5 )
 		dir = ((int) mxGetScalar(prhs[4]));
 
+	bool bStopAtTerms = true;
+	if ( nrhs == 6 && !mxIsClass(prhs[5], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar bStopAtTerminals for sixth parameter.");
+	if ( nrhs == 6 )
+		bStopAtTerms = ((bool) mxGetScalar(prhs[5]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -477,7 +493,7 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	const mxArray* acceptFuncHandle = prhs[3];
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle, dir);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle, dir, bStopAtTerms);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);

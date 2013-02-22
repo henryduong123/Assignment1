@@ -5,18 +5,36 @@
 % 
 % rootTracks - List of root tree tracks to resegment
 
-function segEdits = ResegFromTree(rootTracks)
-    global HashedCells CellTracks
+function tLast = ResegFromTree(rootTracks, tStart, tEnd)
+    global HashedCells CellTracks CellHulls Costs
     
-    global Figures
+    global Figures CONSTANTS
+    outMovieDir = fullfile('B:\Users\mwinter\Documents\Figures\Reseg',CONSTANTS.datasetName);
+    
+    if ( ~exist('tStart','var') )
+        tStart = 2;
+    end
+    
+    if ( ~exist('tEnd','var') )
+        tEnd = length(HashedCells);
+    end
+    
+    tStart = max(tStart,2);
+    tEnd = min(tEnd, length(HashedCells));
     
     checkTracks = Segmentation.Reseg.GetSubtreeTracks(rootTracks);
     
-    segEdits = {};
-    
     invalidPreserveTracks = [];
     
-    for t=2:length(HashedCells)
+    % Need to worry about deleted hulls?
+    costMatrix = Costs;
+    bDeleted = ([CellHulls.deleted] > 0);
+    costMatrix(bDeleted,:) = 0;
+    costMatrix(:,bDeleted) = 0;
+    
+    mexDijkstra('initGraph', costMatrix);
+    
+    for t=tStart:tEnd
         checkTracks = setdiff(checkTracks, invalidPreserveTracks);
         
         newPreserveTracks = fixupFrame(t, checkTracks);
@@ -38,10 +56,38 @@ function segEdits = ResegFromTree(rootTracks)
         UI.TimeChange(t);
         drawnow();
         
-%         % Make Movie code
-%         saveMovieFrame(t, famID, 'C:\Users\mwinter\Documents\Figures\isbi_movie\edited_reseg');
+        % Make Movie code
+        saveMovieFrame(t, famID, outMovieDir);
+        
+        tLast = t;
     end
     
+%     saveMovieFrame(1, famID, outMovieDir);
+end
+
+function saveMovieFrame(t, famID, outdir)
+    global Figures CONSTANTS
+    
+    UI.DrawTree(famID);
+    UI.TimeChange(t);
+    drawnow();
+    
+    if ( ~exist(outdir, 'dir') )
+        recmkdir(outdir);
+    end
+    
+    figure(Figures.cells.handle)
+    XCells = getframe();
+    imwrite(XCells.cdata, fullfile(outdir,['cells_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
+
+    figure(Figures.tree.handle)
+    XTree = getframe();
+    imwrite(XTree.cdata, fullfile(outdir,['tree_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
+    
+    frameSize = [size(XCells.cdata); size(XTree.cdata)];
+    outSize = max(frameSize,[],1);
+    imOut = [imresize(XCells.cdata, outSize(1:2)) imresize(XTree.cdata, outSize(1:2))];
+    imwrite(imOut, fullfile(outdir,['_comb_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
 end
 
 function newPreserveTracks = fixupFrame(t, preserveTracks)
@@ -60,13 +106,18 @@ function newPreserveTracks = fixupFrame(t, preserveTracks)
     % Find best (t-1) -> t assignment (adding/splitting hulls)
     newEdges = findBestReseg(t, oldEdges);
     
-    % Use Dijkstra or just manually find best t -> (t+1) assignment, and
-    % move hulls in frame t into the appropriate dropped tracks
-    reassignNextHulls(t, droppedTracks, newEdges);
-    
+    % Update tracking costs and dijkstra internal state
     updateHulls = [HashedCells{t-1}.hullID];
     tHulls = [HashedCells{t}.hullID];
+    
     Tracker.UpdateTrackingCosts(t-1, updateHulls, tHulls);
+    
+    updateDijkstraGraph(t-1);
+    updateDijkstraGraph(t);
+    
+    % Use Dijkstra or just manually find best t -> (t+1) assignment, and
+    % move hulls in frame t into the appropriate dropped tracks
+    newEdges = reassignNextHulls(t, droppedTracks, newEdges);
     
     % Do appropriate linking up of tracks from (t-1) -> t as found above
     newPreserveTracks = linkupEdges(newEdges, preserveTracks);
@@ -99,15 +150,100 @@ function newPreserveTracks = linkupEdges(edges, preserveTracks)
     newPreserveTracks = setdiff(newPreserveTracks, preserveTracks);
 end
 
-function reassignNextHulls(t, droppedTracks, newEdges)
-
-    % Assign all hulls to next frames
-    [bOnTrack trackIdx] = ismember(Hulls.GetTrackID(newEdges(:,2)), droppedTracks);
-    trackIdx(~bOnTrack) = setdiff(1:length(droppedTracks),trackIdx(bOnTrack));
-    assignToTrack = droppedTracks(trackIdx);
+function newEdges = reassignNextHulls(t, droppedTracks, newEdges)
+    global CellTracks CellHulls 
+    
+    if ( length(droppedTracks) ~= size(newEdges,1) )
+        error('There are too few edges to preserve structure!');
+    end
+    
+    % Use Dijkstra to assign t->t+1 edges (except mitosis edges, don't
+    % break those!)
+    
+    assignToTrack = zeros(size(newEdges,1),1);
+    
+	termHulls = zeros(1,size(newEdges,1));
+    for i=1:length(droppedTracks)
+        termHulls(i) = Helper.GetNearestTrackHull(droppedTracks(i), t+1, +1);
+    end
+    
+    bCurrentMitosis = (arrayfun(@(x)((~isempty(x.childrenTracks)) & (x.endTime == t)), CellTracks(droppedTracks)));
+    
+    if ( any((termHulls == 0) & ~bCurrentMitosis) )
+        error('There are no hulls on dropped track after frame t!');
+    end
+    
+    forwardCosts = Inf*ones(size(newEdges,1), size(newEdges,1));
+    
+    % Use Dijkstra to find other costs
+    maxT = max([CellHulls(termHulls(~bCurrentMitosis)).time]);
+    for i=1:size(newEdges,1)
+        extendHull = newEdges(i,2);
+        if ( extendHull == 0 )
+            extendHull = newEdges(i,1);
+        end
+        
+        maxExt = maxT - CellHulls(extendHull).time + 1;
+        
+        [endpaths endCosts] = mexDijkstra('matlabExtend', extendHull, maxExt, @(x,y)(any(y==termHulls)), 1, 0);
+        lastHulls = cellfun(@(x)(x(end)), endpaths);
+        [bFoundPath arrIdx] = ismember(termHulls, lastHulls);
+        
+        forwardCosts(i,bFoundPath) = endCosts(arrIdx(bFoundPath));
+    end
+    
+    % Deal with mitosis events
+    currentMitosis = find(bCurrentMitosis);
+    for i=1:length(currentMitosis)
+        childrenTracks = CellTracks(droppedTracks(currentMitosis(i))).childrenTracks;
+        leftHull = Helper.GetNearestTrackHull(childrenTracks(1), t+1, +1);
+        rightHull = Helper.GetNearestTrackHull(childrenTracks(2), t+1, +1);
+        
+        if ( leftHull == 0 || rightHull == 0 )
+            error('Badly defined mitosis event, parent hull not followed by two child hulls');
+        end
+        
+        totalCosts = Inf*ones(size(newEdges,1),1);
+        bRealHullIdx = (newEdges(:,2) ~= 0);
+        
+        mitCosts = getNextCosts(t,newEdges(bRealHullIdx,2), [leftHull rightHull]);
+        totalCosts(bRealHullIdx) = sum(mitCosts,2);
+        
+        [minCost bestFromIdx] = min(totalCosts);
+        if ( isinf(minCost) )
+            error('There is no hull in frame t from which to build the mitosis event');
+        end
+        
+        forwardCosts(bestFromIdx,:) = Inf;
+        forwardCosts(:,currentMitosis(i)) = Inf;
+        forwardCosts(bestFromIdx,currentMitosis(i)) = 1;
+    end
+    
+    assignIdx = assignmentoptimal(forwardCosts);
+    if ( any(assignIdx == 0) )
+        error('Unable to assign all t->t+1 edges');
+    end
+    
+    for i=1:size(newEdges,1)
+        if ( newEdges(i,2) == 0 )
+            newEdges(i,2) = termHulls(assignIdx(i));
+            continue;
+        end
+        
+        assignToTrack(i) = droppedTracks(assignIdx(i));
+    end
+    
+%     % Assign all hulls to next frames
+%     [bOnTrack trackIdx] = ismember(Hulls.GetTrackID(newEdges(bnzEdges,2)), droppedTracks);
+%     trackIdx(~bOnTrack) = setdiff(1:length(droppedTracks),trackIdx(bOnTrack));
+%     assignToTrack = droppedTracks(trackIdx);
     
     relinkTracks = cell(length(assignToTrack), 1);
     for i=1:length(assignToTrack)
+        if ( assignToTrack(i) == 0 )
+            continue;
+        end
+        
         curTrack = Hulls.GetTrackID(newEdges(i,2));
         if ( curTrack == assignToTrack(i) )
             continue;
@@ -185,7 +321,8 @@ function newEdges = findBestReseg(t, curEdges)
     
     bLongEdge = ((t-tFrom) > 1);
     
-    checkEdges = curEdges(~bLongEdge,:);
+%     checkEdges = curEdges(~bLongEdge,:);
+    checkEdges = curEdges;
     
     [checkHulls uniqueIdx] = unique(checkEdges(:,1));
     nextHulls = [HashedCells{t}.hullID];
@@ -195,6 +332,19 @@ function newEdges = findBestReseg(t, curEdges)
     mitosisParents = checkEdges(mitIdx,1);
     
     costMatrix = getNextCosts(t-1, checkHulls, nextHulls);
+    
+    % TODO: Do I need to handle erroneous missed mitoses?
+    missIdx = find(bLongEdge(uniqueIdx));
+    for i=1:length(missIdx)
+        extendHull = checkHulls(missIdx(i));
+        maxExt = t - CellHulls(extendHull).time + 1;
+        
+        [endpaths endCosts] = mexDijkstra('matlabExtend', extendHull, maxExt, @(x,y)(any(y==nextHulls)), 1, 0);
+        lastHulls = cellfun(@(x)(x(end)), endpaths);
+        [bFoundPath arrIdx] = ismember(nextHulls, lastHulls);
+        
+        costMatrix(missIdx(i),bFoundPath) = endCosts(arrIdx(bFoundPath));
+    end
 
     % TODO: handle this better in the case of a not completely edited tree.
     % Force-keep mitosis edges
@@ -213,6 +363,10 @@ function newEdges = findBestReseg(t, curEdges)
     for i=1:length(checkHulls)
         if ( ismember(checkHulls(i),mitosisParents) )
             continue;
+        end
+        
+        if ( any(i == missIdx) )
+            continue
         end
         
         overlapDist = getOverlapDist(checkHulls(i), nextHulls);
@@ -258,7 +412,7 @@ function newEdges = findBestReseg(t, curEdges)
     end
     
     % TODO: assign mitosis edges first without bothering to change, can
-    % do this by making sure the mitosis hull is assigned right in the
+    % do this by making sure the mitosis hull is assigned correctly in the
     % split code
     
     % Find matched tracks and assign, then assign everything else by
@@ -305,9 +459,37 @@ function newEdges = findBestReseg(t, curEdges)
         [minCost minIdx] = min(costMatrix(:));
     end
     
-    if ( size(newEdges,1) ~= size(checkEdges,1) )
-        error(['Not all edges were assigned into frame t=' num2str(t)]);
+    % TODO: Use dijkstra or some other method to "share" hulls, Keep this
+    % info around so that these shares can get back into the mix later
+    shareEdges = [];
+    missedHulls = curEdges(~ismember(curEdges(:,1), newEdges(:,1)), 1);
+    if ( ~isempty(missedHulls) )
+        missedEdges = curEdges(ismember(curEdges(:,1),missedHulls),:);
+        for i=1:size(missedEdges,1)
+            shareEdges = [shareEdges; missedEdges(i,1) 0];
+        end
     end
+    
+    newEdges = [newEdges; shareEdges];
+    
+end
+
+function updateDijkstraGraph(t)
+    global HashedCells
+    
+    if ( t < 1 || t+1 > length(HashedCells) )
+        return;
+    end
+    
+    updateHulls = [HashedCells{t}.hullID];
+    nextHulls = [HashedCells{t+1}.hullID];
+
+    costMatrix = getNextCosts(t, updateHulls, nextHulls);
+    if ( isempty(costMatrix) )
+        return;
+    end
+    
+    mexDijkstra('updateGraph', costMatrix, updateHulls, nextHulls);
 end
 
 function [addedHull costMatrix nextHulls] = tryAddSegmentation(prevHull, costMatrix, checkHulls, nextHulls)
@@ -374,6 +556,96 @@ function [addedHull costMatrix nextHulls] = tryAddSegmentation(prevHull, costMat
     costMatrix = [costMatrix chkCosts];
 end
 
+function newHulls = tryResegDeterministic(hull, k, checkHullIDs)
+    global CONSTANTS CellHulls
+    
+    newHulls = [];
+    
+    hullTimes = unique([CellHulls(checkHullIDs).time]);
+    if ( length(hullTimes) > 1 )
+        newHulls = Segmentation.ResegmentHull(hull, k);
+        return;
+    end
+    
+    oldMeans = zeros(k,2);
+    for i=1:length(checkHullIDs)
+        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(checkHullIDs(i)).indexPixels);
+        oldMeans(i,:) = mean([c r],1);
+    end
+    
+    [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
+    if ( strcmpi(CONSTANTS.cellType,'Adult') )
+        % Cheat and initially cluster about equiprobably
+        com = mean([c r],1);
+        oldCom = mean(oldMeans,1);
+        deltaCom = com - oldCom;
+        
+        distSq = zeros(length(r), k);
+%         startVar = ones(k,1);
+        for i=1:length(checkHullIDs)
+            oldMeans(i,:) = oldMeans(i,:) + deltaCom;
+%             dcomSq(i) = (com(1)-oldMeans(i,1)).^2 + (com(2)-oldMeans(i,2)).^2;
+            
+            distSq(:,i) = ((c-oldMeans(i,1)).^2 + (r-oldMeans(i,2)).^2);
+        end
+        
+        [minDist minIdx] = min(distSq,[],2);
+        gmoptions = statset('Display','off', 'MaxIter',400);
+        obj = gmdistribution.fit([c,r], k, 'Start',minIdx, 'Regularize',0.5 , 'Options',gmoptions);
+        kIdx = cluster(obj, [c,r]);
+    elseif ( strcmpi(CONSTANTS.cellType,'Hemato') )
+        [kIdx centers] = kmeans([c,r], k, 'start',oldMeans, 'EmptyAction','drop');
+    else
+        [kIdx centers] = kmeans([c,r], k, 'start',oldMeans, 'EmptyAction','drop');
+    end
+    
+    if ( any(isnan(kIdx)) )
+        return;
+    end
+
+    connComps = cell(1,k);
+
+    nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 0);
+    for i=1:k
+        bIdxPix = (kIdx == i);
+
+        hx = c(bIdxPix);
+        hy = r(bIdxPix);
+
+        % If any sub-object is less than 15 pixels then cannot split this
+        % hull
+        if ( nnz(bIdxPix) < 15 )
+            newHulls = [];
+            return;
+        end
+
+        connComps{i} = hull.indexPixels(bIdxPix);
+
+        nh.indexPixels = hull.indexPixels(bIdxPix);
+        nh.imagePixels = hull.imagePixels(bIdxPix);
+        nh.centerOfMass = mean([hy hx]);
+        nh.time = hull.time;
+
+        try
+            chIdx = convhull(hx, hy);
+        catch excp
+            newHulls = [];
+            return;
+        end
+
+        nh.points = [hx(chIdx) hy(chIdx)];
+
+        newHulls = [newHulls nh];
+    end
+
+    % Define an ordering on the hulls selected, COM is unique per component so
+    % this gives a deterministic ordering to the components
+    [sortCOM, sortIdx] = sortrows(vertcat(newHulls.centerOfMass));
+    newHulls = newHulls(sortIdx);
+    connComps = connComps(sortIdx);
+    
+end
+
 function [newSegs costMatrix nextHulls] = trySplitSegmentation(splitHull, numSplit, prevHulls, mitosisParents, costMatrix, checkHulls, nextHulls)
     global CellHulls HashedCells
 
@@ -384,22 +656,26 @@ function [newSegs costMatrix nextHulls] = trySplitSegmentation(splitHull, numSpl
         return;
     end
     
-    
-    newHulls = Segmentation.ResegmentHull(CellHulls(splitHull), numSplit);
+    newHulls = tryResegDeterministic(CellHulls(splitHull), numSplit, prevHulls);
+    % newHulls = Segmentation.ResegmentHull(CellHulls(splitHull), numSplit);
     if ( isempty(newHulls) )
         return;
     end
     
     for i=1:length(newHulls)
-        newHulls.userEdited = 0;
+        newHulls(i).userEdited = 0;
     end
     
     % TODO: fixup incoming graphedits
     
     % TODO: Deal with mitosis events, 
     % TODO: This definitely needs work
-    t = CellHulls(checkHulls(1)).time;
+    t = max([CellHulls(checkHulls).time]);
     newCosts = getTempCosts(t, checkHulls, newHulls);
+    
+    % Just set long edges to a uniformly high cost
+    bLongEdge = ([CellHulls(checkHulls).time] < t);
+    newCosts(bLongEdge,:) = 1e20;
     
     splitIdx = find(nextHulls == splitHull,1,'first');
     [bHadMitosis mitIdx] = ismember(prevHulls, mitosisParents);
@@ -414,6 +690,16 @@ function [newSegs costMatrix nextHulls] = trySplitSegmentation(splitHull, numSpl
         
         bAssignHullIdx(1) = 0;
         bAssignHullIdx(bestMitIdx) = 1;
+    end
+    
+    [bDump prevIdx] = ismember(prevHulls, checkHulls);
+    % Force a hungarian assignment for splits
+    assignIdx = assignmentoptimal(newCosts(prevIdx,:));
+    for i=1:length(assignIdx)
+        newCosts(prevIdx(i),:) = Inf;
+        newCosts(prevIdx,assignIdx(i)) = Inf;
+        
+        newCosts(prevIdx(i),assignIdx(i)) = 3;
     end
     
     setHullIDs = zeros(1,length(newHulls));
@@ -613,7 +899,7 @@ function costMatrix = getTempCosts(t, checkHulls, tempHulls)
     augCosts = [costs; Inf*ones(1,size(costs,2))];
     costMatrix = augCosts(checkIdx,:);
     
-    augCosts = [costMatrix Inf*ones(size(costs,1),1)];
+    augCosts = [costMatrix Inf*ones(size(costMatrix,1),1)];
     costMatrix = augCosts(:,nextIdx);
 end
 
@@ -636,7 +922,7 @@ function costMatrix = getNextCosts(t, checkHulls, nextHulls)
     augCosts = [costs; Inf*ones(1,size(costs,2))];
     costMatrix = augCosts(checkIdx,:);
     
-    augCosts = [costMatrix Inf*ones(size(costs,1),1)];
+    augCosts = [costMatrix Inf*ones(size(costMatrix,1),1)];
     costMatrix = augCosts(:,nextIdx);
 end
 
