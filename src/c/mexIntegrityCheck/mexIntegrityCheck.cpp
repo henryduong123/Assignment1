@@ -630,6 +630,31 @@ bool checkHullReferences(mwIndex trackID)
 	double* hullData = mxGetPr(trackHulls);
 
 	bool bError = false;
+
+	mxArray* parentTrack = mxGetField(gCellTracks, C_IDX(trackID), "parentTrack");
+	mxArray* childrenTracks = mxGetField(gCellTracks, C_IDX(trackID), "childrenTracks");
+	if ( numHulls > 0 && mxGetNumberOfElements(parentTrack) != 0 )
+	{
+		mwIndex matHullID = (mwIndex) hullData[0];
+
+		if ( matHullID == 0 )
+		{
+			gTrackErrors.insert(tErrorPair(C_IDX(trackID), "Non-root track start hull is zero."));
+			bError = true;
+		}
+	}
+
+	if ( numHulls > 0 && mxGetNumberOfElements(childrenTracks) != 0 )
+	{
+		mwIndex matHullID = (mwIndex) hullData[numHulls-1];
+
+		if ( matHullID == 0 )
+		{
+			gTrackErrors.insert(tErrorPair(C_IDX(trackID), "Non-leaf track end hull is zero."));
+			bError = true;
+		}
+	}
+
 	for ( mwIndex i=0; i < numHulls; ++i )
 	{
 		mwIndex matHullID = (mwIndex) hullData[i];
