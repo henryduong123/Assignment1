@@ -114,6 +114,8 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	itk::SimpleDataObjectDecorator<double>* threshIg = thresholdCalculatorIg->GetOutput();
 	float thresholdIg = threshIg->Get();
 
+	thresholdIg *= parameters->imageAlpha;
+
 	thresholdFilterIg->SetLowerThreshold(thresholdIg);
 	thresholdFilterIg->SetOutsideValue(0);
 	thresholdFilterIg->SetInsideValue(-1);
