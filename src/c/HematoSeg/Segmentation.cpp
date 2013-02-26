@@ -7,7 +7,7 @@
 DWORD WINAPI segmentation(LPVOID lpParam)
 {
 	clock_t startTime = clock();
-	segData* paramaters = (segData*)lpParam;
+	segData* parameters = (segData*)lpParam;
 
 	CharImageFileReaderType::Pointer		charReader =		CharImageFileReaderType::New();
 	CharImageFileWriterType::Pointer		charWriter =		CharImageFileWriterType::New();
@@ -43,7 +43,7 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 
 	// setup charReader to read from TIFs
 	charReader->SetImageIO(imageIO);
-	charReader->SetFileName(paramaters->imageFile);
+	charReader->SetFileName(parameters->imageFile);
 	charReader->Update();
 
 	// compute a histogram of the image
@@ -58,7 +58,7 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	itk::SimpleDataObjectDecorator<double>* threshOrg = thresholdCalculatorOrg->GetOutput();
 	float thresholdOrg = threshOrg->Get();
 
-	thresholdOrg *= paramaters->imageAlpha;
+	thresholdOrg *= parameters->imageAlpha;
 
 	thresholdFilterOrg->SetLowerThreshold(thresholdOrg);
 	thresholdFilterOrg->SetOutsideValue(0);
@@ -165,10 +165,10 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 			labelGeometryImageFilterIg->GetPixelIndices(labelsIg[i]);
 		std::vector<Hull> tempHulls;
 		double vol = labelGeometryImageFilterIg->GetVolume(labelsIg[i]);
-		if (vol<paramaters->minSize*.4)
+		if (vol<parameters->minSize*.4)
 			continue;
 
-		int kMax = floor((double)vol/(paramaters->minSize*.6));
+		int kMax = floor((double)vol/(parameters->minSize*.6));
 
 		GapStatistic(centerOfMass,pixelCoordinates,kMax+1,tempMeans);
 
@@ -191,14 +191,14 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 		double eccentricity = labelGeometryImageFilterOrg->GetEccentricity(i);
 		double minorAxes = labelGeometryImageFilterOrg->GetMinorAxisLength(i);
 		int vol = labelGeometryImageFilterOrg->GetVolume(i);
-		if (vol<paramaters->minSize) continue;
-		if (eccentricity>paramaters->eccentricity && minorAxes<sqrt((double)paramaters->minSize))
+		if (vol<parameters->minSize) continue;
+		if (eccentricity>parameters->eccentricity && minorAxes<sqrt((double)parameters->minSize))
 			continue;
 		labelsToUse.push_back(i);
 	}
 
 	char buffer[255];
-	//int idx = paramaters->imageFile.find_last_of("\\");
+	//int idx = parameters->imageFile.find_last_of("\\");
 
 	std::vector<Hull> hulls;
 	hulls.reserve(labelsToUse.size()*1.4);
@@ -251,10 +251,10 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	sprintf_s(buffer,"\nseconds to segment: %f\n",dif);
 	outputText += buffer;
 
-	FILE* file = fopen(paramaters->outFile.c_str(),"w");
+	FILE* file = fopen(parameters->outFile.c_str(),"w");
 	fprintf_s(file,"%s",outputText.c_str());
 	fclose(file);
-	printf("wrote %s\n",paramaters->outFile.c_str());
+	printf("wrote %s\n",parameters->outFile.c_str());
 
 	return 0;
 }
