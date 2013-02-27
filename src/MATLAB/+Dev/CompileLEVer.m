@@ -25,10 +25,23 @@
 
 totalTime = tic();
 
+% Give a messagebox warning if there are uncommitted changes.
+% Note: even committed changes may not have been pushed to server.
+[status,result] = system('git status --porcelain');
+if ( status == 0 && (length(result) > 1) )
+    questionStr = sprintf('%s\n%s','There are uncommitted changes in your working directory','Are you sure you wish to continue with the build?');
+    result = questdlg(questionStr,'Build Warning','Yes','No','No');
+    if ( strcmpi(result,'No') )
+        return;
+    end
+end
+
 vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
     error('Cannot compile MTC and mexMAT without Visual Studio 2010');
 end
+
+Dev.MakeVersion();
 
 comparch = computer('arch');
 if ( strcmpi(comparch,'win64') )
@@ -108,17 +121,17 @@ system(['copy "' mcrfile '" "' bindir '\"']);
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
+!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
-!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m
+!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
-!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
+!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 % tic();

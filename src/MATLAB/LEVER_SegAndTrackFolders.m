@@ -7,11 +7,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
 function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
-global CONSTANTS softwareVersion;
+global CONSTANTS;
 
 CONSTANTS=[];
 
-softwareVersion = '7.1 Multi-Cell';
+softwareVersion = Helper.GetVersion();
 
 cellType = Load.QueryCellType();
 Load.AddConstant('cellType',cellType,1);

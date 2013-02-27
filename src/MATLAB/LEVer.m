@@ -25,7 +25,7 @@
 
 function LEVer()
 
-global Figures softwareVersion ReplayEditActions CONSTANTS
+global Figures ReplayEditActions CONSTANTS
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
@@ -33,8 +33,6 @@ previousOpened = 0;
 if(~isempty(Figures))
     previousOpened = 1;
 end
-
-softwareVersion = '7.1 Multi-Cell';
 
 if(Load.OpenData())
     Editor.ReplayableEditAction(@Editor.InitHistory);

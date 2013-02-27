@@ -29,8 +29,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function opened = OpenData()
-global Figures Colors CONSTANTS softwareVersion
+global Figures Colors CONSTANTS
 
+softwareVersion = Helper.GetVersion();
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
 end
