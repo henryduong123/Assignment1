@@ -136,9 +136,22 @@ system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe ' b
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);
 
+toolboxAddCommand = '';
+depToolboxes = Dev.GetToolboxDependencies();
+if ( ~isempty(depToolboxes) )
+    toolboxAddCommand = '-N';
+    for i=1:length(depToolboxes)
+        toolboxAddCommand = [toolboxAddCommand ' -p ' depToolboxes{i}];
+    end
+end
+
+
+
+
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
+% !mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
+system(['mcc -v -R -startmsg -m LEVer.m ' toolboxAddCommand ' -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
 fprintf('Done (%f sec)\n', toc());
 
 tic();
