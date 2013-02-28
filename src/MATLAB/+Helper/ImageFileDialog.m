@@ -9,7 +9,12 @@ imageFilter = [settings.imagePath '*.TIF'];
 bOpened = 0;
 
 while ( ~bOpened )  
-    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
+	dataSetString = '';
+    if ( isfield(CONSTANTS,'datasetName') )
+        dataSetString = CONSTANTS.datasetName;
+    end
+    
+    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,['Open First Image in Dataset (' dataSetString '): ' ]);
     if (filterIndexImage==0)
         return
     end
