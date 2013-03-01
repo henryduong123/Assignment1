@@ -27,12 +27,19 @@ function verInfo = MakeVersion(bTransientUpdate)
                 'branchName',{'UNKNOWN'},...
                 'buildNumber',{'UNKNOWN'},...
                 'buildMachine',{'UNKNOWN'});
+	
+	
+	fallbackFile = 'version.txt';
+	
+	bFoundGit = Dev.SetupGit();
+    if ( ~bFoundGit )
+        fprintf('WARNING: Could not find git directory, falling back to %s\n', fallbackFile);
+    end
+    
+    [verTag branchName] = gitVersionAndBranch(bFoundGit, fallbackFile);
     
     % Get version info from git tag
-    [status,verTag] = system('git describe --tags --match v[0-9]*.[0-9]* --abbrev=0');
-    if ( status ~= 0 )
-        fprintf('WARNING: There was an error retrieving current version information:\n %s\n', verTag);
-    else
+    if ( ~isempty(verTag) )
         verTag = strtrim(verTag);
         numTok = regexp(verTag, '[Vv]([0-9]+)[.]([0-9]+).*', 'tokens', 'once');
         if ( length(numTok) >= 2 )
@@ -43,17 +50,15 @@ function verInfo = MakeVersion(bTransientUpdate)
         end
     end
     
+    % Try to get a branch name
+    [status,branchName] = system('git rev-parse --abbrev-ref HEAD');
+    if ( ~isempty(branchName) )
+        verInfo.branchName = strtrim(branchName);
+    end
+    
     % Get a timestamp build-number
     c = clock();
     verInfo.buildNumber = sprintf('%d.%02d.%02d.%02d', c(1), c(2), c(3), c(4));
-    
-    % Try to get a branch name
-    [status,branchName] = system('git rev-parse --abbrev-ref HEAD');
-    if ( status ~= 0 )
-        fprintf('WARNING: There was an error retrieving current branch information:\n %s\n', branchName);
-    else
-        verInfo.branchName = strtrim(branchName);
-    end
     
     % Get machine ID
     [status,buildMachine] = system('hostname');
@@ -80,4 +85,55 @@ function verInfo = MakeVersion(bTransientUpdate)
 
         fclose(fid);
     end
+    
+    % Update fallback file if we used git to retrieve version info.
+    if ( bFoundGit )
+        fid = fopen(fallbackFile, 'wt');
+        if ( fid < 0 )
+            return;
+        end
+        
+        fprintf(fid, '%s\n', verTag);
+        fprintf(fid, '%s\n', branchName);
+        
+        fclose(fid);
+    end
+end
+
+function [verTag branchName] = gitVersionAndBranch(bUseGit, fallbackFile)
+    verTag = '';
+    branchName = '';
+    
+    if ( bUseGit )
+        [verStatus,verTag] = system('git describe --tags --match v[0-9]*.[0-9]* --abbrev=0');
+        [branchStatus,branchName] = system('git rev-parse --abbrev-ref HEAD');
+        
+        if ( verStatus ~= 0 )
+            fprintf('WARNING: There was an error retrieving tag from git:\n %s\n', verTag);
+            verTag = '';
+        end
+        
+        if ( branchStatus ~= 0 )
+            fprintf('WARNING: There was an error retrieving branch name from git:\n %s\n', branchName);
+            branchName = '';
+        end
+        
+        return;
+    end
+    
+    if ( ~exist(fallbackFile, 'file') )
+        fprintf('ERROR: There is no fallback version.txt file!\n');
+        return;
+    end
+    
+    fid = fopen(fallbackFile, 'rt');
+    
+    if ( fid < 0 )
+        return;
+    end
+    
+    verTag = fgetl(fid);
+    branchName = fgetl(fid);
+    
+    fclose(fid);
 end

@@ -25,6 +25,17 @@
 
 totalTime = tic();
 
+% Try to set up git for the build, give a warning about checking the
+% fallback file if we can't find git.
+bFoundGit = Dev.SetupGit();
+if ( ~bFoundGit )
+    questionStr = sprintf('%s\n%s','Cannot find git you should verify the fallback file version info before building.','Are you sure you wish to continue with the build?');
+    result = questdlg(questionStr,'Build Warning','Yes','No','No');
+    if ( strcmpi(result,'No') )
+        return;
+    end
+end
+
 % Give a messagebox warning if there are uncommitted changes.
 % Note: even committed changes may not have been pushed to server.
 [status,result] = system('git status --porcelain');
@@ -36,12 +47,12 @@ if ( status == 0 && (length(result) > 1) )
     end
 end
 
+Dev.MakeVersion();
+
 vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
     error('Cannot compile MTC and mexMAT without Visual Studio 2010');
 end
-
-Dev.MakeVersion();
 
 comparch = computer('arch');
 if ( strcmpi(comparch,'win64') )
