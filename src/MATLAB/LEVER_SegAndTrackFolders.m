@@ -23,6 +23,18 @@ if ( ~exist('outputDir','var') )
     outputDir = directory_name;
 end
 
+% Trial run command
+bTrialRun = 0;
+if ( strcmpi(outputDir(1:2),'-T') )
+    outputDir = outputDir(3:end);
+    if ( isempty(outputDir) )
+        outputDir = directory_name;
+    end
+    bTrialRun = 1;
+end
+
+processedDatasets = {};
+
 numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors < 4)
@@ -43,25 +55,19 @@ for dd=1:length(dlist)
         continue
     end
  
-    fileList = dir(fullfile([directory_name filesep dlist(dd).name], '*.tif'));
-    numberOfImages = length(fileList);
-
-    if ( 0 == numberOfImages )
+    fileList = dir(fullfile(directory_name, dlist(dd).name, '*.tif'));
+    if ( isempty(fileList) )
         continue
     end
         
-    CONSTANTS.rootImageFolder = [directory_name filesep dlist(dd).name];
+    CONSTANTS.rootImageFolder = fullfile(directory_name, dlist(dd).name);
     CONSTANTS.datasetName = [dlist(dd).name '_'];
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
     
-    flist = dir(fullfile(CONSTANTS.rootImageFolder,'*.tif'));
-    if ( isempty(flist) )
-        continue;
-    end
-    
-    Helper.ParseImageName(flist(1).name);
+    Helper.ParseImageName(fileList(1).name);
     
     if exist(CONSTANTS.matFullFile,'file')
+        fprintf('%s - LEVer data already exists.  Skipping\n', CONSTANTS.datasetName);
         continue
     end
     
@@ -84,15 +90,19 @@ for dd=1:length(dlist)
         continue;
     end
     
-    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-    if ( errStatus ~= 0 )
-        fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n',CONSTANTS.datasetName);
-        continue;
+    if ( ~bTrialRun )    
+        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+        if ( errStatus ~= 0 )
+            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n',CONSTANTS.datasetName);
+            continue;
+        end
+
+        Helper.SaveLEVerState([CONSTANTS.matFullFile]);
+
+        Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
     end
     
-    Helper.SaveLEVerState([CONSTANTS.matFullFile]);
-
-    Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
+    processedDatasets = [processedDatasets; {CONSTANTS.datasetName}];
 end %dd
 
 clear global;
