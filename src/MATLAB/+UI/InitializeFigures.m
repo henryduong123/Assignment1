@@ -185,6 +185,7 @@ elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
 elseif (strcmp(evnt.Key,'f12'))
 	Figures.cells.showInterior = ~Figures.cells.showInterior;
 	UI.DrawCells();
+    UI.DrawTree(Figures.tree.familyID);
 elseif ( strcmp(evnt.Key,'return') )
     mergeSelectedCells();
 end
