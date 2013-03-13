@@ -1,4 +1,5 @@
 % GraphEditSetEdge(trackID, nextTrackID, time)
+% 
 % Set an edge edit in GraphEdits structure.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,22 +32,29 @@ function GraphEditSetEdge(trackID, nextTrackID, time, bLongDistance)
         bLongDistance = 0;
     end
     
+    [trackHull hullTime] = Helper.GetNearestTrackHull(trackID, time-1, -1);
+    if ( trackHull == 0 )
+        return;
+    end
+    
     if(bLongDistance)
-        track = CellTracks(trackID);
-        if(isempty(track.hulls)) %check for valid track
-            trackHull = 0;
-        else
-            for i=length(track.hulls):-1:1  %search backward through hulls for last edit or first hull
-                trackHull = track.hulls(i);
-                if(trackHull)
-                    if(any(GraphEdits(trackHull,:)) || any(GraphEdits(:,trackHull)))
-                        break
-                    end
-                end
-            end
+        hash = hullTime - CellTracks(trackID).startTime + 1;
+        if ( hash < 1 )
+            return;
         end
-    else
-        trackHull = Helper.GetNearestTrackHull(trackID, time-1, -1);
+        
+        trackHulls = CellTracks(trackID).hulls(1:hash);
+        nzHulls = trackHulls(trackHulls > 0);
+        if ( isempty(nzHulls) )
+            return;
+        end
+        
+        trackHullIdx = find(any(GraphEdits(:,nzHulls),1),1,'last');
+        if ( isempty(trackHullIdx) )
+            trackHull = CellTracks(trackID).hulls(1);
+        else
+            trackHull = nzHulls(trackHullIdx);
+        end
     end
     
     nextHull = Helper.GetNearestTrackHull(nextTrackID, time, 1);

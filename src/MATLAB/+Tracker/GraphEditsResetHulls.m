@@ -1,5 +1,6 @@
-% GraphEditsResetHulls(hulls)
-% Resets (zeros) all user edits into (bResetBack) and out of (bResetForward)
+% GraphEditsResetHulls(hulls, bResetForward, bResetBack)
+% 
+% Clears all user edits into (bResetBack) and/or out of (bResetForward)
 % a hull, updates associated cached costs.
 
 function GraphEditsResetHulls(hulls, bResetForward, bResetBack)
