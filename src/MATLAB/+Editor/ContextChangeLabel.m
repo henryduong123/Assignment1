@@ -39,6 +39,17 @@ function ContextChangeLabel(time,trackID)
         return
     end
     curHull = CellTracks(newTrackID).hulls(1);
+    
+    if ( newTrackID == trackID )
+        warndlg('New label is the same as the current label.');
+        return;
+    end
+    
+    if ( time < CellTracks(newTrackID).startTime )
+        warn = sprintf('Cannot change label from %d to %d, track %d does not exist until frame %d.',trackID, newTrackID,newTrackID, CellTracks(newTrackID).startTime);
+        warndlg(warn);
+        return
+    end
 
     bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
     if ( bErr )
