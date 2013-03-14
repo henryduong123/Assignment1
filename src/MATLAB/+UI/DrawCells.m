@@ -37,8 +37,10 @@ if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
 % figure(Figures.cells.handle);
 if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+    haveFluor = 0;
 else
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
+    haveFluor = 1;
 end
 %read in image
 filename = Helper.GetFullImagePath(Figures.time);
@@ -106,6 +108,12 @@ end
 % [r c] = find(bwHalo);
 % plot(curAx, c,r, '.y');
 
+% draw fluor background for this cell
+if(haveFluor && strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on'))
+    [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
+    plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
+end
+        
 %draw labels if turned on
 Figures.cells.labelHandles = [];
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
@@ -195,8 +203,9 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             edgeColor = 'g';
             drawStyle = '--';
             drawWidth = 2;
-            [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
-            plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
+%            [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
+%            [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
+%            plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
         end
         
         %draw outline

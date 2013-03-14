@@ -1,4 +1,4 @@
-function AddHematoFluor()
+function AddHematoFluor(addToHistory)
     global CONSTANTS CellHulls HashedCells ConnectedDist FluorData CellTracks HaveFluor
 
     tmax = max([CellHulls.time]);
@@ -33,7 +33,7 @@ function AddHematoFluor()
             if (isempty(inter))
                 CellHulls(hulls(i)).greenInd = [];
             else
-                CellHulls(hulls(i)).greenInd = greenInd;
+                CellHulls(hulls(i)).greenInd = 1;
             end
         end
     end
@@ -69,10 +69,12 @@ function AddHematoFluor()
         end
         CellTracks(i).fluorTimes = CellTracks(i).markerTimes;
     end
-    
-    [bErr] = Editor.ReplayableEditAction(@Editor.AddHematoFluor, []);
-    if ( bErr )
-        return;
+ 
+    if (addToHistory)
+        [bErr] = Editor.ReplayableEditAction(@Editor.AddHematoFluor, []);
+        if ( bErr )
+            return;
+        end
     end
 
     fprintf(1, 'Done, %f sec\n', toc);

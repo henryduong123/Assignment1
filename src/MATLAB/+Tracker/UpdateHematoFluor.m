@@ -23,7 +23,7 @@ function UpdateHematoFluor(t)
         if (isempty(inter))
             CellHulls(hulls(i)).greenInd = [];
         else
-            CellHulls(hulls(i)).greenInd = greenInd;
+            CellHulls(hulls(i)).greenInd = 1;
         end
     end
     fprintf(1, 'Done, %f sec\n', toc);
@@ -34,6 +34,9 @@ function UpdateHematoFluor(t)
     for i=1:length(CellTracks)
         if (i == 18386)
             i = 18386;
+        end
+        if (i == 23505)
+            i = 23505;
         end
         if (isempty(CellTracks(i).startTime) || isempty(CellTracks(i).endTime))
             continue;
@@ -51,7 +54,7 @@ function UpdateHematoFluor(t)
                     CellTracks(i).markerTimes(2,j) = wasGreen;
                     continue;
                 elseif (~isempty(CellHulls(hullID).greenInd))
-                    inter = intersect(CellHulls(hullID).greenInd,CellHulls(hullID).indexPixels);
+                    inter = intersect(greenInd,CellHulls(hullID).indexPixels);
                     if (length(inter)>length(CellHulls(hullID).indexPixels)*0.3)
                         CellTracks(i).markerTimes(2,j) = 1;
                         wasGreen = 1;
