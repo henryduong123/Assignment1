@@ -20,7 +20,8 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
     end
     
     tStart = max(tStart,2);
-    tEnd = min(tEnd, length(HashedCells));
+    tMax = length(HashedCells);
+    tEnd = min(tEnd, tMax);
     
     checkTracks = Segmentation.Reseg.GetSubtreeTracks(rootTracks);
     
@@ -37,7 +38,7 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
     for t=tStart:tEnd
         checkTracks = setdiff(checkTracks, invalidPreserveTracks);
         
-        newPreserveTracks = fixupFrame(t, checkTracks, tEnd);
+        newPreserveTracks = fixupFrame(t, checkTracks, tMax);
         
         checkTracks = [checkTracks newPreserveTracks];
         [dump sortedIdx] = unique(checkTracks, 'first');
@@ -179,6 +180,12 @@ function newEdges = reassignNextHulls(t, droppedTracks, newEdges)
     
     % Use Dijkstra to find other costs
     maxT = max([CellHulls(termHulls(~bCurrentMitosis)).time]);
+    
+    % Handle the case that only mitosis event options exist
+    if ( isempty(maxT) )
+        maxT = max(horzcat(CellHulls(newEdges(:,2)).time) + 5);
+    end
+    
     for i=1:size(newEdges,1)
         extendHull = newEdges(i,2);
         if ( extendHull == 0 )
