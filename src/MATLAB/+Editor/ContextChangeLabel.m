@@ -50,6 +50,9 @@ function ContextChangeLabel(time,trackID)
         warndlg(warn);
         return
     end
+    
+    % TODO: If locked, verify this edit is "safe" otherwise ask before
+    % continuing
 
     bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
     if ( bErr )

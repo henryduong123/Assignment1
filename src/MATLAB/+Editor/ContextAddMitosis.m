@@ -3,7 +3,7 @@
 % ChangeLog:
 % EW 6/8/12 created
 function ContextAddMitosis(trackID, siblingTrack, time)
-global CellTracks Figures
+global CellTracks CellFamilies Figures
 
 if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
     msgbox([num2str(siblingTrack) ' is not a valid cell'],'Not a valid cell','error');
@@ -26,6 +26,23 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
+bBreakLock = 0;
+trackFamily = CellTracks(trackID).familyID;
+siblingFamily = CellTracks(siblingTrack).familyID;
+if ( CellFamilies(trackFamily).bLocked || CellFamilies(siblingFamily).bLocked )
+    lockedList = [];
+    if ( CellFamilies(trackFamily).bLocked )
+        lockedList = CellFamilies(trackFamily).rootTrackID;
+    end
+    if ( CellFamilies(siblingFamily).bLocked )
+        lockedList = [lockedList CellFamilies(siblingFamily).rootTrackID];
+    end
+    
+    resp = questdlg(['This edit will affect locked tree(s) ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Locked Tree');
+    if ( strcmpi(resp,'Yes') )
+        bBreakLock = 1;
+    end
+end
 leftChildTrack = [];
 
 % if both tracks are starting on this frame see who the parent should be
@@ -36,6 +53,7 @@ if(CellTracks(trackID).startTime==time)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
         parentTrack = str2double(answer(1));
+        parentFamily = CellTracks(parentTrack).familyID;
         
         if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
                 (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
@@ -44,6 +62,14 @@ if(CellTracks(trackID).startTime==time)
             switch choice
                 case 'Cancel'
                     return
+            end
+        elseif ( ~bBreakLock && CellFamilies(parentFamily).bLocked )
+            resp = questdlg(['This edit will affect locked tree ' num2str(CellFamilies(parentFamily).rootTrackID) '. Do you wish to continue?'],...
+                'Warning: Locked Tree','Yes','No','Cance','Cancel');
+            if ( strcmpi(resp,'Yes') )
+                valid = 1;
+            elseif ( strcmpi(resp,'Cancel') )
+                return;
             end
         else
             valid = 1;

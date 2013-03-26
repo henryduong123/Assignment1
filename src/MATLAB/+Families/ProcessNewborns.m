@@ -83,6 +83,11 @@ costMatrix = Tracker.GetCostMatrix();
 % track edit time.
 [rEdit cEdit] = find(GraphEdits);
 editedHulls = union(rEdit,cEdit);
+
+% TODO: I think this is totally unnecessary for newer data.
+bDeleted = ([CellHulls(editedHulls).deleted] ~= 0);
+editedHulls = editedHulls(~bDeleted);
+
 editTimes = [CellHulls(editedHulls).time];
 
 [srtTimes srtIdx] = sort(editTimes);
@@ -148,6 +153,9 @@ for i=1:size
         elseif ( parentScore < CONSTANTS.minTrackScore )
             parentCosts(j) = Inf;
         elseif ( ~isempty(editedIdx) && (editTimes(editedIdx) >= CellHulls(childHullID).time) )
+            parentCosts(j) = Inf;
+        elseif ( CellFamilies(CellTracks(parentTrackID).familyID).bLocked )
+            % Don't let locked families be possible parent candidates
             parentCosts(j) = Inf;
         else
             siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;

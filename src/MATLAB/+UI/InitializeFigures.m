@@ -364,6 +364,7 @@ function deleteSelectedCells()
         return;
     end
 
+    UI.ClearCellSelection();
     Error.LogAction(['Removed selected cells [' num2str(Figures.cells.selectedHulls) ']'],Figures.cells.selectedHulls);
 
     %if the whole family disappears with this change, pick a diffrent family to display
@@ -393,6 +394,8 @@ function mergeSelectedCells()
         return;
     end
     
+    
+    UI.ClearCellSelection();
     Error.LogAction('Merged cells', [deletedCells replaceCell], replaceCell);
 
     UI.DrawTree(Figures.tree.familyID);
