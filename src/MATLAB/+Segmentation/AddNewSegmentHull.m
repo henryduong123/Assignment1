@@ -31,6 +31,16 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     img = Helper.LoadIntensityImage(filename);
     
     [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);
+    
+    % Aggressive add segmentation
+    if ( isempty(newObj) )
+        for tryAlpha = 1.25:(-0.05):0.5
+            [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, tryAlpha);
+            if ( ~isempty(newObj) )
+                break;
+            end
+        end
+    end
 
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
     newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});

@@ -5,6 +5,10 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
     
     levels.haloLevel = graythresh(im);
     level=imageAlpha*levels.haloLevel;
+    
+    level = min(level,0.95);
+    level = max(level,0.05);
+    
     bwHalo=im2bw(im,level);
     
     bwDark=0*im;
