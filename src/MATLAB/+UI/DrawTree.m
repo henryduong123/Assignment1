@@ -69,9 +69,7 @@ hold on
 trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
 computeTrackHeights(trackID, trackHeights);
 
-phenoColors = hsv(length(CellPhenotypes.descriptions));
-phenoLength = length(CellPhenotypes.descriptions);
-[xTracks bFamHasPheno] = simpleTraverseTree(trackID, 0, phenoLength, trackHeights);
+[xTracks bFamHasPheno] = simpleTraverseTree(trackID, 0, trackHeights);
 
 xMin = min(xTracks(:,2));
 xMax = max(xTracks(:,2));
@@ -85,7 +83,7 @@ for i=1:size(xTracks,1)
 end
 
 for i=1:size(xTracks,1)
-    drawVerticalEdge(xTracks(i,1), xTracks(i,2), phenoColors);
+    drawVerticalEdge(xTracks(i,1), xTracks(i,2));
 end
 
 if ( Figures.cells.showInterior )
@@ -114,7 +112,7 @@ for i=1:length(hasPhenos)
         color = [0 0 0];
         sym = 'o';
     else
-        color = phenoColors(hasPhenos(i),:);
+        color = CellPhenotypes.colors(hasPhenos(i),:);
         sym = 's';
     end
     
@@ -171,8 +169,8 @@ function hLine = drawHorizontalEdge(xMin,xMax,y,trackID)
     plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
 end
 
-function labelHandles = drawVerticalEdge(trackID, xVal, phenoColors)
-global CellTracks Figures
+function labelHandles = drawVerticalEdge(trackID, xVal)
+global CellTracks CellPhenotypes Figures
 
 labelHandles = [];
 bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
@@ -203,7 +201,7 @@ if ( phenotype ~= 1 )
 
         cPheno = [];
         if (phenotype > 0)
-            cPheno = phenoColors(phenotype,:);
+            cPheno = CellPhenotypes.colors(phenotype,:);
         end
         
         if isempty(cPheno)
@@ -224,7 +222,7 @@ if ( phenotype ~= 1 )
             scaleMarker=1.2;
         end;
         
-        color = phenoColors(phenotype,:);
+        color = CellPhenotypes.colors(phenotype,:);
         labelHandles = [labelHandles plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
             'MarkerEdgeColor',  'w',...
@@ -279,10 +277,10 @@ else
 end
 end
 
-function [xTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, phenoLength, trackHeights)
-    global CellTracks
+function [xTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, trackHeights)
+    global CellTracks CellPhenotypes
     
-    bFamHasPheno = false(phenoLength,1);
+    bFamHasPheno = false(length(CellPhenotypes.descriptions),1);
     phenoType = Tracks.GetTrackPhenotype(trackID);
     if ( phenoType > 0 )
         bFamHasPheno(phenoType) = 1;
@@ -303,10 +301,10 @@ function [xTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, phenoLength,
         rightChild = 1;
     end
     
-    [xTracks bLeftChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(leftChild), xVal, phenoLength, trackHeights);
+    [xTracks bLeftChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(leftChild), xVal, trackHeights);
     leftMax = max(xTracks(:,2));
     
-    [xChild bRightChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(rightChild), leftMax+1, phenoLength, trackHeights);
+    [xChild bRightChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(rightChild), leftMax+1, trackHeights);
     xTracks = [xTracks;xChild];
     
     bFamHasPheno = (bFamHasPheno | bLeftChildHasPheno | bRightChildHasPheno);

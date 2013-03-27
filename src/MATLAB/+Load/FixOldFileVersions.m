@@ -35,6 +35,12 @@ function bNeedsUpdate = FixOldFileVersions()
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
     end
+    
+    % Add color field to phenotype structure as of ver 7.2
+    if ( ~isfield(CellPhenotypes,'colors') )
+        CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
+        CellPhenotypes.colors(1,:) = [0 0 0];
+    end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
     if ( ~isfield(CellHulls, 'imagePixels') )
@@ -51,11 +57,13 @@ function bNeedsUpdate = FixOldFileVersions()
     end
     
     % Remove HashedCells.editedFlag field as of ver 7.0
-    if ( ~isempty(HashedCells) && isfield(HashedCells{1}, 'editedFlag') )
+    if ( ~isempty(HashedCells) )
         for t=1:length(HashedCells)
-            HashedCells{t} = rmfield(HashedCells{t}, 'editedFlag');
+            if ( isfield(HashedCells{t}, 'editedFlag') )
+                HashedCells{t} = rmfield(HashedCells{t}, 'editedFlag');
+                bNeedsUpdate = 1;
+            end
         end
-        bNeedsUpdate = 1;
     end
     
     if ( isempty(GraphEdits) )
@@ -95,6 +103,7 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = 1;
     end
     
+    % Get rid of timer handle in Log
     for i=1:length(Log)
         if(isfield(Log(i),'figures'))
             if(isfield(Log(i).figures,'advanceTimerHandle'))
