@@ -143,11 +143,25 @@ lockMenu = uimenu(...
 
 labelsMenu = uimenu(...
     'Parent',           viewMenu,...
-    'Label',            'Show Labels',...
+    'Label',            'Show Cell Labels',...
     'HandleVisibility', 'callback',...
     'Callback',         @toggleLabels,...
     'Checked',          'on',...
     'Accelerator',      'l');
+
+treeColorMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Color Tree',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleTreeColors,...
+    'Checked',          'on');
+
+structOnlyMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Draw Only Structure (faster)',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleOnlyStructure,...
+    'Checked',          'off');
 
 treeLabelsOn = uimenu(...
     'Parent',           viewMenu,...
@@ -222,6 +236,8 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
+    Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
+    Figures.cells.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
@@ -234,6 +250,8 @@ else
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
+    Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
+    Figures.tree.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
 end
 end
@@ -280,13 +298,35 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'), 'on'))
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'off');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'off');
     UI.DrawCells();
-    UI.DrawTree(Figures.tree.familyID);
 else
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'on');
     UI.DrawCells();
+end
+end
+
+function toggleTreeColors(src,evnt)
+    global Figures
+    if(strcmp(get(Figures.cells.menuHandles.treeColorMenu, 'Checked'), 'on'))
+        set(Figures.cells.menuHandles.treeColorMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.treeColorMenu, 'Checked', 'off');
+    else
+        set(Figures.cells.menuHandles.treeColorMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.treeColorMenu, 'Checked', 'on');
+    end
     UI.DrawTree(Figures.tree.familyID);
 end
+
+function toggleOnlyStructure(src,evnt)
+    global Figures
+    if(strcmp(get(Figures.cells.menuHandles.structOnlyMenu, 'Checked'), 'on'))
+        set(Figures.cells.menuHandles.structOnlyMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.structOnlyMenu, 'Checked', 'off');
+    else
+        set(Figures.cells.menuHandles.structOnlyMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.structOnlyMenu, 'Checked', 'on');
+    end
+    UI.DrawTree(Figures.tree.familyID);
 end
 
 function toggleTreeLabels(src,evnt)

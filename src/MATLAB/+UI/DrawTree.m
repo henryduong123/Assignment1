@@ -173,7 +173,8 @@ function labelHandles = drawVerticalEdge(trackID, xVal)
 global CellTracks CellPhenotypes Figures
 
 labelHandles = [];
-bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
+bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.treeColorMenu, 'Checked'));
+bStructOnly = strcmp('on',get(Figures.tree.menuHandles.structOnlyMenu, 'Checked'));
 
 %draw circle for node
 [FontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
@@ -189,6 +190,10 @@ if ( phenotype ~= 1 )
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+    
+    if ( bStructOnly )
+        return;
+    end
     
     bHasPheno = 0;
     if bDrawLabels
@@ -261,6 +266,10 @@ else
         '--k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
     
 	plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+    
+    if ( bStructOnly )
+        return;
+    end
     
     labelHandles = [labelHandles plot(xVal,yMin,'o',...
         'MarkerFaceColor',  'k',...
