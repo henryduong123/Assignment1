@@ -1,9 +1,6 @@
 function UpdateHematoFluor(t)
     global CellHulls HashedCells FluorData CellTracks HaveFluor
 
-    fprintf(1, 'Running UpdateHematoFluor()\n');
-    fprintf(1, 'Clearing out old fluorescence indicators...');
-    tic;
     hulls = [HashedCells{t}(:).hullID];
     for i=1:length(hulls)
         CellHulls(hulls(i)).greenInd = [];
@@ -12,10 +9,7 @@ function UpdateHematoFluor(t)
 %     for i=1:length(CellTracks)
 %         CellTracks(i).markerTimes = {};
 %     end
-    fprintf(1, 'Done, %f sec\n', toc);
-    
-    fprintf(1,'Computing intersections with fluorescence images...');
-    tic;
+
     hulls = [HashedCells{t}(:).hullID];
     greenInd = FluorData(t).greenInd;
     for i=1:length(hulls)
@@ -26,10 +20,7 @@ function UpdateHematoFluor(t)
             CellHulls(hulls(i)).greenInd = 1;
         end
     end
-    fprintf(1, 'Done, %f sec\n', toc);
     
-    fprintf(1,'Checking tracks for fluorescence...');
-    tic;
     flTimes = find(HaveFluor);
     for i=1:length(CellTracks)
         if (i == 18386)
@@ -49,12 +40,13 @@ function UpdateHematoFluor(t)
         if(~isempty(CellTracks(i).markerTimes))
             wasGreen = 0;
             for j=1:size(CellTracks(i).markerTimes,2)
-                hullID = Tracks.GetHullID(CellTracks(i).markerTimes(1,j),i);
+                t2 = CellTracks(i).markerTimes(1,j);
+                hullID = Tracks.GetHullID(t2,i);
                 if (hullID <= 0)
                     CellTracks(i).markerTimes(2,j) = wasGreen;
                     continue;
                 elseif (~isempty(CellHulls(hullID).greenInd))
-                    inter = intersect(greenInd,CellHulls(hullID).indexPixels);
+                    inter = intersect(FluorData(t2).greenInd,CellHulls(hullID).indexPixels);
                     if (length(inter)>length(CellHulls(hullID).indexPixels)*0.3)
                         CellTracks(i).markerTimes(2,j) = 1;
                         wasGreen = 1;
@@ -67,6 +59,4 @@ function UpdateHematoFluor(t)
         end
         CellTracks(i).fluorTimes = CellTracks(i).markerTimes;
     end
-    fprintf(1, 'Done, %f sec\n', toc);
-
 end
