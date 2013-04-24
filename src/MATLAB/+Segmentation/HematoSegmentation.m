@@ -103,7 +103,16 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
         % find all the fluorescence pixels in the image
         fluor = Helper.LoadIntensityImage(filename);
         [bw] = Segmentation.Michel(fluor, [3 3]);
-        FluorData(i).greenInd = find(bw);
+        
+        % some early fluor frames are so faint that Michel oversegments
+        % them
+        w = find(bw);
+        wPct = numel(w) / numel(bw(:));
+        if wPct < 0.1
+            FluorData(i).greenInd = w;
+        else
+            FluorData(i).greenInd = {};
+        end
     end
         
 end
