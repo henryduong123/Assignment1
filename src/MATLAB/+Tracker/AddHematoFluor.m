@@ -3,8 +3,6 @@ function AddHematoFluor(addToHistory)
 
     tmax = max([CellHulls.time]);
 
-    fprintf(1, 'Clearing out old fluorescence indicators...');
-    tic;
     for t=1:tmax
         hulls = [HashedCells{t}(:).hullID];
         for i=1:length(hulls)
@@ -15,10 +13,7 @@ function AddHematoFluor(addToHistory)
         CellTracks(i).markerTimes = {};
         CellTracks(i).fluorTimes = {};
     end
-    fprintf(1, 'Done, %f sec\n', toc);
     
-    fprintf(1,'Computing intersections with fluorescence images...');
-    tic;
     for t=1:tmax
         if (t == 961)
             t = 961;
@@ -37,10 +32,7 @@ function AddHematoFluor(addToHistory)
             end
         end
     end
-    fprintf(1, 'Done, %f sec\n', toc);
     
-    fprintf(1,'Checking tracks for fluorescence...');
-    tic;
     flTimes = find(HaveFluor);
     for i=1:length(CellTracks)
         if (i == 18075)
@@ -51,12 +43,13 @@ function AddHematoFluor(addToHistory)
         if(~isempty(CellTracks(i).markerTimes))
             wasGreen = 0;
             for j=1:size(CellTracks(i).markerTimes,2)
-                hullID = Tracks.GetHullID(CellTracks(i).markerTimes(1,j),i);
+                t = CellTracks(i).markerTimes(1,j);
+                hullID = Tracks.GetHullID(t,i);
                 if (hullID <= 0)
                     CellTracks(i).markerTimes(2,j) = wasGreen;
                     continue;
                 elseif (~isempty(CellHulls(hullID).greenInd))
-                    inter = intersect(CellHulls(hullID).greenInd,CellHulls(hullID).indexPixels);
+                    inter = intersect(FluorData(t).greenInd,CellHulls(hullID).indexPixels);
                     if (length(inter)>length(CellHulls(hullID).indexPixels)*0.3)
                         CellTracks(i).markerTimes(2,j) = 1;
                         wasGreen = 1;
@@ -76,7 +69,5 @@ function AddHematoFluor(addToHistory)
             return;
         end
     end
-
-    fprintf(1, 'Done, %f sec\n', toc);
 
 end
