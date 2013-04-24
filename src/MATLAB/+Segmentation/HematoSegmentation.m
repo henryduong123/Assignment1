@@ -71,7 +71,11 @@ end
 
 for i=1:length(CellHulls)
     [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(i).indexPixels);
-    ch = convhull(r,c);
+    try
+        ch = convhull(r,c);
+    catch exception
+        disp(i);
+    end
     CellHulls(i).points = [c(ch) r(ch)];
 end
 
