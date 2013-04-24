@@ -70,9 +70,11 @@ hold on
 
 % build a map with the heights for each node in the tree rooted at trackID
 trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
-computeTrackHeights(trackID, trackHeights);
+[trackHeight trackWidth] = computeTrackHeights(trackID, trackHeights);
 
-[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch, trackHeights);
+% build a map with the x-coordinate for each trackID
+trackXCoord = containers.Map('KeyType', 'uint32', 'ValueType', 'double');
+[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch, trackHeights, trackXCoord);
 
 set(overAxes,...
     'XLim',     [xMin-1 xMax+1]);
@@ -108,13 +110,18 @@ end
 
 % draw ticks to indicate which times have fluorescence
 fluorTimes = find(HaveFluor);
-xlim = get(Figures.tree.axesHandle,'XLim');
-tickLen = (xlim(2) - xlim(1)) * 0.01;
+pdelta = pixelDelta;
+x_lim = xlim;
+% xlim = get(Figures.tree.axesHandle,'XLim');
+% tickLen = (xlim(2) - xlim(1)) * 0.01;
 for i=1:length(fluorTimes)
-    line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
+%    line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
+    line([x_lim(2)-10*pdelta x_lim(2)], [fluorTimes(i) fluorTimes(i)],...
     'color', 'green',...
     'linewidth', 1);
 end
+
+drawFluorMarkers(trackID, trackXCoord, 4*pdelta);
 
 hold off
 
@@ -127,7 +134,7 @@ set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
 end
 
-function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch, trackHeights)
+function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch, trackHeights, trackXCoord)
 global CellTracks
 
 if(~isempty(CellTracks(trackID).childrenTracks))
@@ -142,8 +149,8 @@ if(~isempty(CellTracks(trackID).childrenTracks))
         right = ID1;
     end
     
-    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(left,initXmin,phenoScratch,trackHeights);
-    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(right,child1Xmax+1,phenoScratch,trackHeights);
+    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(left,initXmin,phenoScratch,trackHeights,trackXCoord);
+    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(right,child1Xmax+1,phenoScratch,trackHeights,trackXCoord);
     xMin = min(child1Xmin,child2Xmin);
     xMax = max(child1Xmax,child2Xmax);
     
@@ -174,22 +181,26 @@ else
     xCenter = initXmin;
     xMax = initXmin;
 end
+
+trackXCoord(trackID) = xCenter;
 end
 
 % WCM - 10/1/2012 - Created
 % This function does a breadth-first search starting from trackID and
 % computes the height of each node in the tree. These are stored in the map
 % trackHeights.
-function height = computeTrackHeights(trackID, trackHeights)
+function [height width] = computeTrackHeights(trackID, trackHeights)
 global CellTracks
     if(~isempty(CellTracks(trackID).childrenTracks))
         % root node
-        leftHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(1), trackHeights);
-        rightHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(2), trackHeights);
+        [leftHeight leftWidth] = computeTrackHeights(CellTracks(trackID).childrenTracks(1), trackHeights);
+        [rightHeight rightWidth] = computeTrackHeights(CellTracks(trackID).childrenTracks(2), trackHeights);
         height = 1 + max(leftHeight, rightHeight);
+        width = leftWidth + rightWidth;
     else
         % leaf node
         height = 1;
+        width = 1;
     end
     trackHeights(trackID) = height;
 end
@@ -326,6 +337,9 @@ end
 if (trackID == 18386)
     trackID = 18386;
 end
+if (trackID == 23505)
+    trackID = 23505;
+end
 % if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
 %     if(CellTracks(trackID).markerTimes(2,1))
 %         if (size(CellTracks(trackID).markerTimes, 2) == 1)
@@ -344,13 +358,59 @@ end
 %     end
 % end
 
+%%%%%
+% if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
+%     yFrom = yMin;
+%     wasGreen = 0;
+%     drewLine = 0;
+%     for i=1:size(CellTracks(trackID).markerTimes, 2)
+%         if(CellTracks(trackID).markerTimes(2,i))
+%             drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+%             wasGreen = 1;
+%             drewLine = 0;
+%             if (~CellTracks(trackID).fluorTimes(2,i))
+%                 drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'g');
+%             end
+%         elseif (wasGreen && ~drewLine)
+% %             drawVertLostFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+%             drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+% %            if (CellTracks(trackID).fluorTimes(2,i))
+%                 drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'k');
+% %            end
+%             drewLine = 1;
+%         end
+%         yFrom = CellTracks(trackID).markerTimes(1,i);
+%     end
+%     if(CellTracks(trackID).markerTimes(2,end))
+%         drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+% %     elseif (wasGreen)
+% %         drawVertLostFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+%     end
+% end
+    
+
+
+end
+
+function drawFluorMarkers(trackID, trackXCoord, delta)
+global CellTracks;
+
+if (~isempty(CellTracks(trackID).childrenTracks))
+    % draw children
+    drawFluorMarkers(CellTracks(trackID).childrenTracks(1), trackXCoord, delta);
+    drawFluorMarkers(CellTracks(trackID).childrenTracks(2), trackXCoord, delta);
+end
+
+xVal = trackXCoord(trackID);
+yMin = CellTracks(trackID).startTime;
+
 if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
     yFrom = yMin;
     wasGreen = 0;
     drewLine = 0;
     for i=1:size(CellTracks(trackID).markerTimes, 2)
         if(CellTracks(trackID).markerTimes(2,i))
-            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i), delta);
             wasGreen = 1;
             drewLine = 0;
             if (~CellTracks(trackID).fluorTimes(2,i))
@@ -358,7 +418,7 @@ if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).m
             end
         elseif (wasGreen && ~drewLine)
 %             drawVertLostFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
-            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
+            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i), delta);
 %            if (CellTracks(trackID).fluorTimes(2,i))
                 drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'k');
 %            end
@@ -367,21 +427,30 @@ if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).m
         yFrom = CellTracks(trackID).markerTimes(1,i);
     end
     if(CellTracks(trackID).markerTimes(2,end))
-        drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+        drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1, delta);
 %     elseif (wasGreen)
 %         drawVertLostFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
     end
 end
-    
-
 
 end
 
-function drawVertFluor(trackID, x, yMin, yMax)
+% how far is 1 pixel in normalized units?
+function delta = pixelDelta()
+
+x_lim = xlim;
+set(gca, 'units', 'pixels');
+pos = get(gca, 'position');
+delta = x_lim(2) / pos(3);
+set(gca, 'units', 'normalized');
+
+end
+
+function drawVertFluor(trackID, x, yMin, yMax, delta)
 global Figures;
 
-plot([x x], [yMin yMax],...
-    '-g','LineWidth',3,...
+plot([x+delta x+delta], [yMin yMax],...
+    '-g','LineWidth',1,...
     'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
 end
 
