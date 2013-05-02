@@ -23,7 +23,7 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
     tMax = length(HashedCells);
     tEnd = min(tEnd, tMax);
     
-    checkTracks = Segmentation.Reseg.GetSubtreeTracks(rootTracks);
+    checkTracks = Segmentation.ResegFromTree.GetSubtreeTracks(rootTracks);
     
     invalidPreserveTracks = [];
     
@@ -435,7 +435,20 @@ function newEdges = findBestReseg(t, curEdges)
     % Try to split hulls
     splitIdx = find(desiredCellCount > 1);
     for i=1:length(splitIdx)
-        [newSegs costMatrix nextHulls] = trySplitSegmentation(nextHulls(splitIdx(i)), desiredCellCount(splitIdx(i)), desirers{splitIdx(i)}, mitosisParents, costMatrix, checkHulls, nextHulls);
+        validSplitCount = 0;
+        validDesirers = [];
+        
+        % Only allow splits if cells are really close together
+        chkDist = zeros(desiredCellCount(splitIdx(i)));
+        for j=1:desiredCellCount(splitIdx(i))
+            chkDist(j) = getOverlapDist(desirers{splitIdx(i)}(j), nextHulls(splitIdx(i)));
+            if ( chkDist(j) < 2.0 )
+                validSplitCount = validSplitCount + 1;
+                validDesirers = [validDesirers desirers{splitIdx(i)}(j)];
+            end
+        end
+        
+        [newSegs costMatrix nextHulls] = trySplitSegmentation(nextHulls(splitIdx(i)), validSplitCount, validDesirers, mitosisParents, costMatrix, checkHulls, nextHulls);
     end
     
     % TODO: assign mitosis edges first without bothering to change, can
