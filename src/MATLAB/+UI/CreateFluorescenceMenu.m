@@ -12,7 +12,6 @@ function CreateFluorescenceMenu()
     % Initialize fluorescence structure if necessary
     if isempty(FluorTypes) || ~isfield(FluorTypes,'descriptions')
         FluorTypes.descriptions={'GFP'};
-        FluorTypes.hullPhenoSet = zeros(2,0);
     end
 
     UI.UpdateFluorescenceMenu(FluorMenu);
