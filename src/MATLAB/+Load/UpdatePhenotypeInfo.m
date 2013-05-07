@@ -36,11 +36,11 @@ function UpdatePhenotypeInfo()
     phenoTracks = netracks(bPhenoCells);
     
     if ( isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions') )
-        CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]});
+        CellPhenotypes = struct('descriptions', {{'died'}});
     end
     
     oldCellPheno = CellPhenotypes;
-    CellPhenotypes = struct('descriptions', {oldCellPheno.descriptions}, 'contextMenuID', {[]}, 'hullPhenoSet', cell(size(oldCellPheno)));
+    CellPhenotypes = struct('descriptions', {oldCellPheno.descriptions}, 'hullPhenoSet', cell(size(oldCellPheno)));
     
     for i=1:length(phenoTracks)
         phenotype = CellTracks(phenoTracks(i)).phenotype;

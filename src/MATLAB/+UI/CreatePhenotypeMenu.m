@@ -12,7 +12,6 @@ function CreatePhenotypeMenu()
     % Initialize phenotype structure if necessary
     if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
         CellPhenotypes.descriptions={'died'};
-        CellPhenotypes.contextMenuID=[];
         CellPhenotypes.hullPhenoSet = zeros(2,0);
     end
 

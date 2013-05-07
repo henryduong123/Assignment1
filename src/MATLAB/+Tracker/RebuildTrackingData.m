@@ -9,7 +9,7 @@ function RebuildTrackingData(objTracks, gConnect)
     CellTracks = [];
     HashedCells = [];
     
-    CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
+    CellPhenotypes = struct('descriptions', {{'died'}}, 'hullPhenoSet', {zeros(2,0)});
     
     hullList = [];
     for i=length(objTracks):-1:1

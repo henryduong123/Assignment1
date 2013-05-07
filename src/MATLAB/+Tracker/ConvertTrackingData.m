@@ -54,7 +54,7 @@ cellHulls = struct(...
     'deleted',          {},...
     'userEdited',       {});
 
-CellPhenotypes = struct('descriptions', {{'died'}}, 'contextMenuID', {[]}, 'hullPhenoSet', {zeros(2,0)});
+CellPhenotypes = struct('descriptions', {{'died'}}, 'hullPhenoSet', {zeros(2,0)});
 
 %loop through the Hulls
 parfor i=1:length(objHulls)
