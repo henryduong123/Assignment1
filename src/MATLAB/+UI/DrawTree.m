@@ -25,7 +25,7 @@
 
 function DrawTree(familyID)
 
-global CellFamilies HashedCells Figures CellPhenotypes FluorData HaveFluor
+global CellFamilies CellTracks HashedCells Figures CellPhenotypes FluorData HaveFluor
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
@@ -36,9 +36,6 @@ if ( familyID > length(CellFamilies) )
     Families.FindLargestTree();
     return;
 end
-   
-phenoScratch.phenoColors = hsv(length(CellPhenotypes.descriptions));
-phenoScratch.phenoLegendSet = zeros(length(CellPhenotypes.descriptions),1);
 
 if(isempty(CellFamilies(familyID).tracks)),return,end
 
@@ -57,7 +54,7 @@ overAxes = axes;
     
 set(overAxes,...
     'YDir',     'reverse',...
-    'YLim',     [-10 length(HashedCells)],...
+    'YLim',     [0 length(HashedCells)],...
     'Position', [.06 .06 .90 .90],...
     'XColor',   'w',...
     'XTick',    [],...
@@ -70,14 +67,32 @@ hold on
 
 % build a map with the heights for each node in the tree rooted at trackID
 trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
-[trackHeight trackWidth] = computeTrackHeights(trackID, trackHeights);
+computeTrackHeights(trackID, trackHeights);
 
-% build a map with the x-coordinate for each trackID
-trackXCoord = containers.Map('KeyType', 'uint32', 'ValueType', 'double');
-[xMin xCenter xMax phenoScratch] = traverseTree(trackID,0,phenoScratch, trackHeights, trackXCoord);
+phenoColors = hsv(length(CellPhenotypes.descriptions));
+phenoLength = length(CellPhenotypes.descriptions);
+[xTracks bFamHasPheno] = simpleTraverseTree(trackID, 0, phenoLength, trackHeights);
 
-set(overAxes,...
-    'XLim',     [xMin-1 xMax+1]);
+xMin = min(xTracks(:,2));
+xMax = max(xTracks(:,2));
+
+for i=1:size(xTracks,1)
+    curTrack = xTracks(i,1);
+    if ( ~isempty(CellTracks(curTrack).childrenTracks) )
+        childLoc = getTrackLocation(CellTracks(curTrack).childrenTracks, xTracks);
+        drawHorizontalEdge(childLoc(1), childLoc(2), CellTracks(curTrack).endTime+1, curTrack);
+    end
+end
+
+for i=1:size(xTracks,1)
+    drawVerticalEdge(xTracks(i,1), xTracks(i,2), phenoColors);
+end
+
+if ( Figures.cells.showInterior )
+    debugDrawGraphEdits(familyID, xTracks);
+end
+
+set(overAxes, 'XLim', [xMin-1 xMax+1]);
 Figures.tree.axesHandle = overAxes;
 
 if ( CellFamilies(familyID).bLocked )
@@ -91,21 +106,24 @@ else
 end
 
 UI.UpdateTimeIndicatorLine();
+
 phenoHandles = [];
-for i=1:length(phenoScratch.phenoLegendSet)
-    if 0==phenoScratch.phenoLegendSet(i),continue,end
-    if 1==i
+hasPhenos = find(bFamHasPheno);
+for i=1:length(hasPhenos)
+    if ( hasPhenos(i) == 1 )
         color = [0 0 0];
-        sym='o';
+        sym = 'o';
     else
-        color = phenoScratch.phenoColors(i,:);
-        sym='s';        
+        color = phenoColors(hasPhenos(i),:);
+        sym = 's';
     end
-        
-    hPheno=plot(-5,-5,sym,'MarkerFaceColor',color,'MarkerEdgeColor','w',...
+    
+    hPheno = plot(-5,-5,sym,'MarkerFaceColor',color,'MarkerEdgeColor','w',...
         'MarkerSize',12);
+    
     phenoHandles = [phenoHandles hPheno];
-    set(hPheno,'DisplayName',CellPhenotypes.descriptions{i});
+    
+    set(hPheno,'DisplayName',CellPhenotypes.descriptions{hasPhenos(i)});
 end
 
 % draw ticks to indicate which times have fluorescence
@@ -121,7 +139,9 @@ for i=1:length(fluorTimes)
     'linewidth', 1);
 end
 
-drawFluorMarkers(trackID, trackXCoord, 4*pdelta);
+for i=1:size(xTracks,1)
+    drawFluorMarkers(xTracks(i,1), xTracks(i,2), 4*pdelta);
+end
 
 hold off
 
@@ -134,73 +154,20 @@ set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
 end
 
-function [xMin xCenter xMax phenoScratch labelHandles] = traverseTree(trackID,initXmin,phenoScratch, trackHeights, trackXCoord)
-global CellTracks
-
-if(~isempty(CellTracks(trackID).childrenTracks))
-    % the taller subtree should go on the left
-    ID1 = CellTracks(trackID).childrenTracks(1);
-    ID2 = CellTracks(trackID).childrenTracks(2);
-    if (trackHeights(ID1) >= trackHeights(ID2))
-        left = ID1;
-        right = ID2;
-    else
-        left = ID2;
-        right = ID1;
-    end
-    
-    [child1Xmin child1Xcenter child1Xmax phenoScratch child1Handles] = traverseTree(left,initXmin,phenoScratch,trackHeights,trackXCoord);
-    [child2Xmin child2Xcenter child2Xmax phenoScratch child2Handles] = traverseTree(right,child1Xmax+1,phenoScratch,trackHeights,trackXCoord);
-    xMin = min(child1Xmin,child2Xmin);
-    xMax = max(child1Xmax,child2Xmax);
-    
-    minChildCenter = min([child1Xcenter,child2Xcenter]);
-    maxChildCenter = max([child1Xcenter,child2Xcenter]);
-    
-    hLine = drawHorizontalEdge(minChildCenter,maxChildCenter,CellTracks(trackID).endTime+1,trackID);
-    xCenter = mean([child1Xcenter,child2Xcenter]);
-        
-    [phenoScratch labelHandles] = drawVerticalEdge(trackID,xCenter,phenoScratch);
-	
-%     diamondHandle = plot(xCenter,CellTracks(trackID).endTime+1,'d', ...
-%             'MarkerFaceColor',  [.5 .5 .5],...
-%             'MarkerEdgeColor',  [0 0 0],...
-%             'MarkerSize',       15,...
-%             'ButtonDownFcn',    @mitosisHandleDown);
-%     mitosisHandles = struct('trackID', {trackID},...
-%         'hLine', {hLine},...
-%         'child1Handles', {child1Handles},...
-%         'child2Handles', {child2Handles},...
-%         'diamondHandle', {diamondHandle});
-%     
-%     set(diamondHandle, 'UserData', mitosisHandles);
-else
-    %This is when the edge is for a leaf node
-    [phenoScratch labelHandles] = drawVerticalEdge(trackID,initXmin,phenoScratch);
-    xMin = initXmin;
-    xCenter = initXmin;
-    xMax = initXmin;
-end
-
-trackXCoord(trackID) = xCenter;
-end
-
 % WCM - 10/1/2012 - Created
 % This function does a breadth-first search starting from trackID and
 % computes the height of each node in the tree. These are stored in the map
 % trackHeights.
-function [height width] = computeTrackHeights(trackID, trackHeights)
+function height = computeTrackHeights(trackID, trackHeights)
 global CellTracks
     if(~isempty(CellTracks(trackID).childrenTracks))
         % root node
-        [leftHeight leftWidth] = computeTrackHeights(CellTracks(trackID).childrenTracks(1), trackHeights);
-        [rightHeight rightWidth] = computeTrackHeights(CellTracks(trackID).childrenTracks(2), trackHeights);
+        leftHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(1), trackHeights);
+        rightHeight = computeTrackHeights(CellTracks(trackID).childrenTracks(2), trackHeights);
         height = 1 + max(leftHeight, rightHeight);
-        width = leftWidth + rightWidth;
     else
         % leaf node
         height = 1;
-        width = 1;
     end
     trackHeights(trackID) = height;
 end
@@ -217,15 +184,11 @@ global Figures mitosisMotionListener mitosisMouseUpListener CellTracks
 end
 
 function hLine = drawHorizontalEdge(xMin,xMax,y,trackID)
-global Figures
-hLine = plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-%Place the line behind all other elements already graphed
-h = get(gca,'child');
-h = h([2:end, 1]);
-set(gca, 'child', h);
+    global Figures
+    plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
 end
 
-function [phenoScratch, labelHandles] = drawVerticalEdge(trackID,xVal,phenoScratch)
+function labelHandles = drawVerticalEdge(trackID, xVal, phenoColors)
 global CellTracks Figures
 
 labelHandles = [];
@@ -235,7 +198,7 @@ bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.labelsMenu, 'Checked'));
 [FontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
 
 if ~bDrawLabels
-        FontSize=6;
+    FontSize=6;
 end
 yMin = CellTracks(trackID).startTime;
 
@@ -245,6 +208,7 @@ if ( phenotype ~= 1 )
     %draw vertical line to represent edge length
     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+    
     bHasPheno = 0;
     if bDrawLabels
         FaceColor = CellTracks(trackID).color.background;
@@ -256,13 +220,13 @@ if ( phenotype ~= 1 )
 
         cPheno = [];
         if (phenotype > 0)
-            cPheno = phenoScratch.phenoColors(phenotype,:);
+            cPheno = phenoColors(phenotype,:);
         end
         
         if isempty(cPheno)
             TextColor='k';
         else
-            m=rgb2hsv(cPheno);
+            m = rgb2hsv(cPheno);
             if m(1)>0.5
                 TextColor='w';
             else
@@ -271,15 +235,19 @@ if ( phenotype ~= 1 )
         end
     end
     if ( phenotype > 1 )
-        if bDrawLabels,scaleMarker=1.5;else,scaleMarker=1.2;end;
-        color = phenoScratch.phenoColors(phenotype,:);
+        if bDrawLabels
+            scaleMarker=1.5;
+        else
+            scaleMarker=1.2;
+        end;
+        
+        color = phenoColors(phenotype,:);
         labelHandles = [labelHandles plot(xVal,yMin,'s',...
             'MarkerFaceColor',  color,...
             'MarkerEdgeColor',  'w',...
             'MarkerSize',       scaleMarker*circleSize,...
             'UserData',         trackID,...
             'uicontextmenu',    Figures.tree.contextMenuHandle)];
-        phenoScratch.phenoLegendSet(phenotype)=1;
         bHasPheno = 1;
     end
     
@@ -325,83 +293,120 @@ else
         'color',                'r',...
         'UserData',             trackID,...
         'uicontextmenu',        Figures.tree.contextMenuHandle)];
-    phenoScratch.phenoLegendSet(1)=1;
+end
 end
 
-% if (trackID == 15844 || trackID == 18075)
-%     trackID=trackID;
-% end
-% if (trackID == 17984)
-%     trackID=17984;
-% end
-if (trackID == 18386)
-    trackID = 18386;
-end
-if (trackID == 23505)
-    trackID = 23505;
-end
-% if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
-%     if(CellTracks(trackID).markerTimes(2,1))
-%         if (size(CellTracks(trackID).markerTimes, 2) == 1)
-%             drawVertFluor(trackID, xVal, yMin, CellTracks(trackID).markerTimes(1,1));
-%         else
-%             drawVertFluor(trackID, xVal, yMin, CellTracks(trackID).markerTimes(1,2));
-%         end            
-%     end
-%     for i=2:length(CellTracks(trackID).markerTimes)-1
-%         if(CellTracks(trackID).markerTimes(2,i))
-%             drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), CellTracks(trackID).markerTimes(1,i+1)); 
-%         end
-%     end
-%     if(CellTracks(trackID).markerTimes(2,end))
-%         drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1); 
-%     end
-% end
-
-%%%%%
-% if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
-%     yFrom = yMin;
-%     wasGreen = 0;
-%     drewLine = 0;
-%     for i=1:size(CellTracks(trackID).markerTimes, 2)
-%         if(CellTracks(trackID).markerTimes(2,i))
-%             drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
-%             wasGreen = 1;
-%             drewLine = 0;
-%             if (~CellTracks(trackID).fluorTimes(2,i))
-%                 drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'g');
-%             end
-%         elseif (wasGreen && ~drewLine)
-% %             drawVertLostFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
-%             drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
-% %            if (CellTracks(trackID).fluorTimes(2,i))
-%                 drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'k');
-% %            end
-%             drewLine = 1;
-%         end
-%         yFrom = CellTracks(trackID).markerTimes(1,i);
-%     end
-%     if(CellTracks(trackID).markerTimes(2,end))
-%         drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
-% %     elseif (wasGreen)
-% %         drawVertLostFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
-%     end
-% end
+function [xTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, phenoLength, trackHeights)
+    global CellTracks
     
-
-
+    bFamHasPheno = false(phenoLength,1);
+    phenoType = Tracks.GetTrackPhenotype(trackID);
+    if ( phenoType > 0 )
+        bFamHasPheno(phenoType) = 1;
+    end
+    
+    if ( isempty(CellTracks(trackID).childrenTracks) )
+        xTracks = [trackID xVal (xVal-0.5) (xVal+0.5) CellTracks(trackID).startTime CellTracks(trackID).endTime+1];
+        return;
+    end
+    
+    leftChild = 1;
+    rightChild = 2;
+    
+    ID1 = CellTracks(trackID).childrenTracks(1);
+    ID2 = CellTracks(trackID).childrenTracks(2);
+    if ( trackHeights(ID1) < trackHeights(ID2) )
+        leftChild = 2;
+        rightChild = 1;
+    end
+    
+    [xTracks bLeftChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(leftChild), xVal, phenoLength, trackHeights);
+    leftMax = max(xTracks(:,2));
+    
+    [xChild bRightChildHasPheno] = simpleTraverseTree(CellTracks(trackID).childrenTracks(rightChild), leftMax+1, phenoLength, trackHeights);
+    xTracks = [xTracks;xChild];
+    
+    bFamHasPheno = (bFamHasPheno | bLeftChildHasPheno | bRightChildHasPheno);
+    
+    xCenter = mean(getTrackLocation(CellTracks(trackID).childrenTracks, xTracks));
+    xTracks = [xTracks; trackID xCenter min(xTracks(:,3)) max(xTracks(:,4)) CellTracks(trackID).startTime max(xTracks(:,6))];
 end
 
-function drawFluorMarkers(trackID, trackXCoord, delta)
+function xLoc = getTrackLocation(trackID, xTracks)
+    xLoc = NaN*ones(1,length(trackID));
+    for i=1:length(trackID)
+        if ( any(xTracks(:,1) == trackID(i)) )
+            xLoc(i) = xTracks(xTracks(:,1) == trackID(i), 2);
+        end
+    end
+end
+
+% Draws User edge edits for debugging
+function debugDrawGraphEdits(familyID, xTracks)
+    global CellFamilies CellTracks CellHulls HashedCells GraphEdits
+    
+    famHulls = [];
+    xMin = min(xTracks(1,:));
+    xMax = max(xTracks(1,:));
+    
+    for i=1:length(CellFamilies(familyID).tracks)
+        curTrack = CellFamilies(familyID).tracks(i);
+        famHulls = [famHulls CellTracks(curTrack).hulls(CellTracks(curTrack).hulls > 0)];
+    end
+
+    [rEdits cEdits] = find(GraphEdits);
+    bKeep = (ismember(rEdits,famHulls) | ismember(cEdits,famHulls));
+    rEdits = rEdits(bKeep);
+    cEdits = cEdits(bKeep);
+    
+    randmap = hsv(128);
+    randcols = randmap(randi(128,length(rEdits)),:);
+    
+    fromTimes = [CellHulls(rEdits).time];
+    toTimes = [CellHulls(cEdits).time];
+    for i=1:length(rEdits)
+        xFromTrack = getTrackLocation(Hulls.GetTrackID(rEdits(i)), xTracks);
+        xToTrack = getTrackLocation(Hulls.GetTrackID(cEdits(i)), xTracks);
+        
+        plotStyle = '-';
+        if ( isnan(xFromTrack) )
+            xFromTrack = xMin-1;
+            if ( xToTrack > (xMax-xMin)/2 )
+                xFromTrack = xMax+1;
+            end
+            plotStyle = '--';
+        elseif ( isnan(xToTrack) )
+            xToTrack = xMin-1;
+            if ( xFromTrack > (xMax-xMin)/2 )
+                xToTrack = xMax+1;
+            end
+            plotStyle = '--';
+        end
+        
+        if ( GraphEdits(rEdits(i),cEdits(i)) < 0 )
+            plotStyle = 'x';
+            plot([xFromTrack xToTrack], [fromTimes(i) toTimes(i)], plotStyle);
+            continue;
+        end
+        
+        editTime = abs(toTimes(i)-fromTimes(i)) / 80;
+        yrat = ((xMax-xMin+2) / (length(HashedCells) + 1));
+        drawSnakey([xFromTrack xToTrack], [fromTimes(i) toTimes(i)], (20*yrat)*editTime*[1 1], (20*yrat)*editTime*[1 1]/yrat, plotStyle, randcols(i,:), 1);
+    end
+end
+
+% Draws a an interpolated curve around the standard tree-edge
+function drawSnakey(x,y, a,b, style, color, width)
+    t=0:0.01:1;
+    xint = (2*(x(1)-x(2)) + (a(1)+a(2)))*(t.^3) + (3*(x(2)-x(1)) - (a(2)+2*a(1)))*(t.^2) + a(1)*t + x(1);
+    yint = (2*(y(1)-y(2)) + (b(1)+b(2)))*(t.^3) + (3*(y(2)-y(1)) - (b(2)+2*b(1)))*(t.^2) + b(1)*t + y(1);
+    
+    plot(xint, yint, style, 'LineWidth',width, 'Color',color);
+end
+
+function drawFluorMarkers(trackID, xVal, delta)
 global CellTracks;
 
-if (~isempty(CellTracks(trackID).childrenTracks))
-    % draw children
-    drawFluorMarkers(CellTracks(trackID).childrenTracks(1), trackXCoord, delta);
-    drawFluorMarkers(CellTracks(trackID).childrenTracks(2), trackXCoord, delta);
-end
-
-xVal = trackXCoord(trackID);
 yMin = CellTracks(trackID).startTime;
 
 if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
