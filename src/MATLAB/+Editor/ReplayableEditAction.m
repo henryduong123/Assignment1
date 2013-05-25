@@ -19,8 +19,10 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     
     actCtx = getEditContext();
     
-    newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin},...
-                    'ret',{{}}, 'histAct',{''}, 'bErr',{0}, 'ctx',{actCtx}, 'chkHash',{{}});
+    startRandState = Helper.GetRandomState();
+    
+    newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin}, 'ret',{{}}, ...
+                    'histAct',{''}, 'bErr',{0}, 'randState',{[]}, 'ctx',{actCtx}, 'chkHash',{{}});
 	
     if ( isempty(ReplayEditActions) )
         ReplayEditActions = newAct;
@@ -33,6 +35,12 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     
     ReplayEditActions(end).bErr = bErr;
     if ( ~bErr )
+        % Only bother to save random state if it's changed (rand was used)
+        endRandState = Helper.GetRandomState();
+        if ( ~isequal(endRandState, startRandState) )
+            ReplayEditActions(end).randState = startRandState;
+        end
+        
         ReplayEditActions(end).ret = varargout;
         if ( ~isempty(historyAction) )
             % Allow history action/arg pairs if necessary
@@ -45,6 +53,9 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
             ReplayEditActions(end).histAct = historyAction;
         end
 %         ReplayEditActions(end).chkHash = Dev.GetCoreHashList();
+    else
+        % Always save on errors, just in case
+        ReplayEditActions(end).randState = startRandState;
     end
 end
 

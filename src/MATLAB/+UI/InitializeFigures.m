@@ -407,10 +407,7 @@ function learnFromEdits(src,evnt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    globStream = RandStream.getGlobalStream();
-    randState = globStream.State;
-    
-    bErr = Editor.ReplayableEditAction(@Editor.LearnFromEdits, randState);
+    bErr = Editor.ReplayableEditAction(@Editor.LearnFromEdits);
     if ( bErr )
         return;
     end

@@ -3,13 +3,10 @@
 % 
 % Attempt to split specified hull into k pieces.
 
-function [historyAction newTracks] = SplitCell(hullID, k, randState)
+function [historyAction newTracks] = SplitCell(hullID, k)
     oldTrackID = Hulls.GetTrackID(hullID);
     
     historyAction = '';
-    
-    globStream = RandStream.getGlobalStream();
-    globStream.State = randState;
     
     newTracks = Segmentation.SplitHull(hullID, k);
     
