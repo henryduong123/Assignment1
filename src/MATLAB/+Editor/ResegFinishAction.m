@@ -4,12 +4,9 @@
 % Finish resegmentation action, (push history)
 
 function historyAction = ResegFinishAction()
-    global ResegState
+    global ResegState bResegPaused
     
-    if ( ResegState.bPaused )
-        Editor.History('PopStack');
-    end
-    
+    bResegPaused = [];
     ResegState = [];
     
     historyAction = 'PopStack';

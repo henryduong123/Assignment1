@@ -1,19 +1,17 @@
-% [historyAction bFinished] = ResegPlayAction()
+% [historyAction bFinished] = ResegPlayAction(tStart)
 % Edit Action:
 % 
 % Begin resegmenting (from pause)
 
-function [historyAction bFinished] = ResegPlayAction()
-    global ResegState
+function [historyAction bFinished] = ResegPlayAction(tStart)
+    global ResegState bResegPaused
     
-    ResegState.bPaused = 0;
+    bResegPaused = 0;
     
-    Editor.History('PopStack');
     bFinished = Segmentation.ResegFromTreeInteractive();
     
     if ( bFinished )
         ResegState = [];
-        Editor.History('PopStack');
     end
     
     historyAction = '';

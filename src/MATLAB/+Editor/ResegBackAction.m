@@ -5,23 +5,6 @@
 % current frame
 
 function historyAction = ResegBackAction()
-    global Figures ResegState
-    
-    historyAction = '';
-    if ( ResegState.currentTime < 2 )
-        return;
-    end
-    
-%     if ( ~Editor.StackedHistory.CanUndo(level) )
-%     end
-    
-    Editor.History('DropStack');
-    Editor.History('Undo');
-    Editor.History('PushStack');
-    
-    ResegState.currentTime = ResegState.currentTime - 1;
-    
-    Figures.time = (ResegState.currentTime - 1);
-    UI.DrawTree(ResegState.primaryTree);
-    UI.DrawCells();
+    historyAction.action = 'Undo';
+    historyAction.arg = 'Jump';
 end

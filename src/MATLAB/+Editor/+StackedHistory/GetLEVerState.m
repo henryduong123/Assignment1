@@ -1,6 +1,6 @@
 
 function histState = GetLEVerState()
-    global CellFamilies CellTracks HashedCells CellHulls Costs GraphEdits CachedCostMatrix ConnectedDist Figures CellPhenotypes SegmentationEdits
+    global CellFamilies CellTracks HashedCells CellHulls Costs GraphEdits CachedCostMatrix ConnectedDist Figures CellPhenotypes SegmentationEdits ResegState
 
     histState.CellFamilies = CellFamilies;
     histState.CellTracks = CellTracks;
@@ -13,4 +13,5 @@ function histState = GetLEVerState()
     histState.selectedFamID = Figures.tree.familyID;
     histState.CellPhenotypes = CellPhenotypes;
     histState.SegmentationEdits = SegmentationEdits;
+    histState.ResegState = ResegState;
 end

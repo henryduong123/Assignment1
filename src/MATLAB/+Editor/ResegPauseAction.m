@@ -4,11 +4,9 @@
 % Pause resegmentation
 
 function historyAction = ResegPauseAction()
-    global ResegState
+    global ResegState bResegPaused
     
-    ResegState.bPaused = 1;
-    
-    Editor.History('PushStack');
+    bResegPaused = 1;
     
     historyAction = '';
 end

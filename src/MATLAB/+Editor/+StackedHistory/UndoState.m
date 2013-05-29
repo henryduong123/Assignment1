@@ -1,5 +1,5 @@
 
-function UndoState(stackEntry)
+function editTime = UndoState(stackEntry)
     global HistoryStack
     
     if ( ~exist('stackEntry','var') )
@@ -16,12 +16,14 @@ function UndoState(stackEntry)
         return;
     end
     
+    oldIdx = curStack.current;
     nextIdx = modDec(curStack.current, curStack.maxSize);
     
     HistoryStack.stack(stackEntry).pushedCount = curStack.pushedCount - 1;
     
     HistoryStack.stack(stackEntry).current = nextIdx;
     Editor.StackedHistory.SetLEVerState(curStack.history(nextIdx));
+    editTime = curStack.time(oldIdx);
 end
 
 function y = modInc(x,size)

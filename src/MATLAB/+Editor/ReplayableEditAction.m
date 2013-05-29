@@ -35,7 +35,13 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     if ( ~bErr )
         ReplayEditActions(end).ret = varargout;
         if ( ~isempty(historyAction) )
-            Editor.History(historyAction);
+            % Allow history action/arg pairs if necessary
+            if ( isstruct(historyAction) )
+                Editor.History(historyAction.action, historyAction.arg);
+            else
+                Editor.History(historyAction);
+            end
+            
             ReplayEditActions(end).histAct = historyAction;
         end
 %         ReplayEditActions(end).chkHash = Dev.GetCoreHashList();

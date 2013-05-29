@@ -1,5 +1,5 @@
 
-function RedoState(stackEntry)
+function editTime = RedoState(stackEntry)
     global HistoryStack
     
     if ( ~exist('stackEntry','var') )
@@ -22,6 +22,7 @@ function RedoState(stackEntry)
     
     HistoryStack.stack(stackEntry).current = nextIdx;
     Editor.StackedHistory.SetLEVerState(curStack.history(nextIdx));
+    editTime = curStack.time(nextIdx);
 end
 
 function y = modInc(x,size)

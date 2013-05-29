@@ -1,5 +1,5 @@
 
-function PushState(stackEntry)
+function PushState(editTime, stackEntry)
     global HistoryStack
     
     if ( ~exist('stackEntry','var') )
@@ -26,6 +26,7 @@ function PushState(stackEntry)
     HistoryStack.stack(stackEntry).top = nextIdx;
     HistoryStack.stack(stackEntry).current = nextIdx;
     HistoryStack.stack(stackEntry).history(nextIdx) = Editor.StackedHistory.GetLEVerState();
+    HistoryStack.stack(stackEntry).time(nextIdx) = editTime;
 end
 
 function y = modInc(x,size)

@@ -36,19 +36,31 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function History(action)
+function History(action, varargin)
     global Figures
-
+    
     switch action
         case 'Saved'
             Editor.StackedHistory.SetSaved();
             setMenus();
-        case 'Push'   
-            Editor.StackedHistory.PushState();
+        case 'Push'
+            % Push time context with edit
+            if ( isempty(varargin) || ~isnumeric(varargin{1}) )
+                varargin{1} = Figures.time;
+            end
+            
+            Editor.StackedHistory.PushState(varargin{1});
             setMenus();
         case 'Undo'
             if ( Editor.StackedHistory.CanUndo() )
-                Editor.StackedHistory.UndoState();
+                if ( isempty(varargin) )
+                    varargin{1} = '';
+                end
+                jumpTime = Editor.StackedHistory.UndoState();
+                
+                if ( strcmpi(varargin{1},'Jump') )
+                    Figures.time = jumpTime;
+                end
 
                 %Update displays
                 UI.DrawTree(Figures.tree.familyID);
@@ -60,8 +72,15 @@ function History(action)
             setMenus();
         case 'Redo'
             if ( Editor.StackedHistory.CanRedo() )
-                Editor.StackedHistory.RedoState();
-
+                if ( isempty(varargin) )
+                    varargin{1} = '';
+                end
+                jumpTime = Editor.StackedHistory.RedoState();
+                
+                if ( strcmpi(varargin{1},'Jump') )
+                    Figures.time = jumpTime;
+                end
+                
                 %Update displays
                 UI.DrawTree(Figures.tree.familyID);
                 UI.DrawCells();
@@ -82,10 +101,11 @@ function History(action)
             Editor.StackedHistory.PushStack();
             setMenus();
         case 'PopStack'
-            Editor.StackedHistory.PopStack();
+            Editor.StackedHistory.PopStack(varargin{:});
             setMenus();
         case 'DropStack'
             Editor.StackedHistory.DropStack();
+            setMenus();
     end
 end
 

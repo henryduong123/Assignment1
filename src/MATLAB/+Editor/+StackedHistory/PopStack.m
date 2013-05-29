@@ -1,5 +1,5 @@
 
-function PopStack()
+function PopStack(editTime)
     global HistoryStack
     
     if ( isempty(HistoryStack) )
@@ -11,8 +11,13 @@ function PopStack()
         return;
     end
     
+    % A little arbitrarily use max edit time from the stack
+    if ( ~exist('editTime','var') )
+        editTime = max(HistoryStack.stack(HistoryStack.level-1).time);
+    end
+    
     if ( HistoryStack.stack(HistoryStack.level).pushedCount > 0 )
-        Editor.StackedHistory.PushState(HistoryStack.level-1);
+        Editor.StackedHistory.PushState(editTime,HistoryStack.level-1);
     end
     
     HistoryStack.stack(HistoryStack.level) = [];
