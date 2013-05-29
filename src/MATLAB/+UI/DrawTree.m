@@ -407,34 +407,52 @@ end
 function drawFluorMarkers(trackID, xVal, delta)
 global CellTracks;
 
-yMin = CellTracks(trackID).startTime;
+if (~isfield(CellTracks, 'markerTimes'))
+    return;
+end
 
-if (isfield(CellTracks(trackID),'markerTimes') && ~isempty(CellTracks(trackID).markerTimes))
-    yFrom = yMin;
-    wasGreen = 0;
-    drewLine = 0;
-    for i=1:size(CellTracks(trackID).markerTimes, 2)
-        if(CellTracks(trackID).markerTimes(2,i))
-            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i), delta);
-            wasGreen = 1;
-            drewLine = 0;
-            if (~CellTracks(trackID).fluorTimes(2,i))
-                drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'g');
-            end
-        elseif (wasGreen && ~drewLine)
-%             drawVertLostFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i));
-            drawVertFluor(trackID, xVal, yFrom, CellTracks(trackID).markerTimes(1,i), delta);
-%            if (CellTracks(trackID).fluorTimes(2,i))
-                drawHorzFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,i), 'k');
-%            end
-            drewLine = 1;
-        end
-        yFrom = CellTracks(trackID).markerTimes(1,i);
+ct = CellTracks(trackID);
+len = size(ct.markerTimes, 2);
+
+if (len == 0)
+    return;
+end
+
+% if fluor on in first frame, draw marker from startTime to first frame
+if (ct.markerTimes(1,1) > ct.startTime)
+    if (ct.markerTimes(2,1) > 0)
+        drawVertFluor(trackID, xVal, ct.startTime, ct.markerTimes(1,1), delta);
+        state = 1;
+    else
+        state = 0;
     end
-    if(CellTracks(trackID).markerTimes(2,end))
-        drawVertFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1, delta);
-%     elseif (wasGreen)
-%         drawVertLostFluor(trackID, xVal, CellTracks(trackID).markerTimes(1,end), CellTracks(trackID).endTime+1);
+else
+    state = -1;
+end
+
+% if fluor is on for a frame, draw marker until next fluor frame
+for i=1:len - 1
+    if (ct.markerTimes(2,i) > 0)
+        drawVertFluor(trackID, xVal, ct.markerTimes(1,i), ct.markerTimes(1,i+1), delta);
+        if (state == 0)
+            drawHorzFluor(trackID, xVal, ct.markerTimes(1, i), 'g');
+        end
+        state = 1;
+    elseif (state == 1)
+        drawHorzFluor(trackID, xVal, ct.markerTimes(1, i), 'k');
+        state = 0;
+    end
+end
+
+% if fluor is on for last frame, draw marker until endTime
+if (ct.markerTimes(1, len) < ct.endTime)
+    if (ct.markerTimes(2,len) > 0)
+        drawVertFluor(trackID, xVal, ct.markerTimes(1, len), ct.endTime, delta);
+        if (state == 0)
+            drawHorzFluor(trackID, xVal, ct.markerTimes(1, len), 'g');
+        end
+    elseif (state == 1)
+        drawHorzFluor(trackID, xVal, ct.markerTimes(1, len), 'k');
     end
 end
 
