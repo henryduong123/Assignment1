@@ -43,27 +43,53 @@ if(isempty(CellFamilies(familyID).tracks)),return,end
 set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
 
+if ( ~isfield(Figures.tree,'axesHandle') || isempty(Figures.tree.axesHandle) )
+    Figures.tree.axesHandle = axes('Parent', Figures.tree.handle);
+    
+    set(Figures.tree.axesHandle,...
+        'YDir',     'reverse',...
+        'YLim',     [-25 length(HashedCells)],...
+        'Position', [.06 .06 .90 .90],...
+        'XColor',   'w',...
+        'XTick',    [],...
+        'Box',      'off');
+end
+
+if ( ~UI.DrawPool.HasPool(Figures.tree.axesHandle) )
+    numTracks = length(CellFamilies(familyID).tracks);
+    
+    hold(Figures.tree.axesHandle, 'on');
+    
+    hLine = line([0 1], [0 0], 'Parent',Figures.tree.axesHandle);
+    UI.DrawPool.AddPool(Figures.tree.axesHandle, 'VertLines', hLine, 2*numTracks);
+    UI.DrawPool.AddPool(Figures.tree.axesHandle, 'HorzLines', hLine, numTracks);
+    delete(hLine);
+    
+    hMarker = plot(Figures.tree.axesHandle, 0,0, 'ro');
+    UI.DrawPool.AddPool(Figures.tree.axesHandle, 'Markers', hMarker, 2*numTracks);
+    delete(hMarker);
+    
+    hLabel = text(0,0, '', 'Parent',Figures.tree.axesHandle);
+    UI.DrawPool.AddPool(Figures.tree.axesHandle, 'Labels', hLabel, numTracks);
+    delete(hLabel);
+    
+    hold(Figures.tree.axesHandle, 'off');
+end
+
 Figures.tree.familyID = familyID;
 
 trackID = CellFamilies(familyID).tracks(1);
 
 figure(Figures.tree.handle);
-delete(gca);
 
-overAxes = axes;
-    
-set(overAxes,...
-    'YDir',     'reverse',...
-    'YLim',     [0 length(HashedCells)],...
-    'Position', [.06 .06 .90 .90],...
-    'XColor',   'w',...
-    'XTick',    [],...
-    'Box',      'off');
 % ylabel('Time (Frames)');
 
 % title(overAxes, CONSTANTS.datasetName, 'Position',[0 0 1], 'HorizontalAlignment','left', 'Interpreter','none');
 
-hold on
+% Clear non-pooled draw resources
+cla(Figures.tree.axesHandle)
+
+hold(Figures.tree.axesHandle, 'on');
 
 % build a map with the heights for each node in the tree rooted at trackID
 trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
@@ -73,6 +99,8 @@ computeTrackHeights(trackID, trackHeights);
 
 xMin = min(xTracks(:,2));
 xMax = max(xTracks(:,2));
+
+UI.DrawPool.StartDraw(Figures.tree.axesHandle);
 
 for i=1:size(xTracks,1)
     curTrack = xTracks(i,1);
@@ -86,24 +114,28 @@ for i=1:size(xTracks,1)
     drawVerticalEdge(xTracks(i,1), xTracks(i,2));
 end
 
-if ( Figures.cells.showInterior )
-    debugDrawGraphEdits(familyID, xTracks);
-end
+% if ( Figures.cells.showInterior )
+%     debugDrawGraphEdits(familyID, xTracks);
+% end
 
-set(overAxes, 'XLim', [xMin-1 xMax+1]);
-Figures.tree.axesHandle = overAxes;
+UI.DrawPool.FinishDraw(Figures.tree.axesHandle);
+
+set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1]);
+% Figures.tree.axesHandle = overAxes;
 
 if ( CellFamilies(familyID).bLocked )
     set(Figures.tree.menuHandles.lockMenu, 'Checked','on');
     set(Figures.cells.menuHandles.lockMenu, 'Checked','on');
-    set(overAxes, 'Color',[.75 .75 .75]);
+    set(Figures.tree.axesHandle, 'Color',[.75 .75 .75]);
 else
     set(Figures.tree.menuHandles.lockMenu, 'Checked','off');
     set(Figures.cells.menuHandles.lockMenu, 'Checked','off');
-    set(overAxes, 'Color','w');
+    set(Figures.tree.axesHandle, 'Color','w');
 end
 
 UI.UpdateTimeIndicatorLine();
+
+zoom(Figures.tree.handle, 'reset');
 
 phenoHandles = [];
 hasPhenos = find(bFamHasPheno);
@@ -124,10 +156,10 @@ for i=1:length(hasPhenos)
     set(hPheno,'DisplayName',CellPhenotypes.descriptions{hasPhenos(i)});
 end
 
-hold off
+hold(Figures.tree.axesHandle, 'off');
 
 if(~isempty(phenoHandles))
-    legend(phenoHandles);
+    legend(Figures.tree.axesHandle, phenoHandles);
 end
 
 %let the user know that the drawing is done
@@ -166,124 +198,174 @@ end
 
 function hLine = drawHorizontalEdge(xMin,xMax,y,trackID)
     global Figures
-    plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+%     plot([xMin xMax],[y y],'-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+    hLine = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'HorzLines');
+    set(hLine, 'XData',[xMin xMax], 'YData',[y y],...
+               'Color','k', 'UserData',trackID,...
+               'uicontextmenu',Figures.tree.contextMenuHandle);
 end
 
-function labelHandles = drawVerticalEdge(trackID, xVal)
-global CellTracks CellPhenotypes Figures
+function drawVerticalEdge(trackID, xVal)
+    global CellTracks CellPhenotypes Figures
 
-labelHandles = [];
-bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.treeColorMenu, 'Checked'));
-bStructOnly = strcmp('on',get(Figures.tree.menuHandles.structOnlyMenu, 'Checked'));
+    bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.treeColorMenu, 'Checked'));
+    bStructOnly = strcmp('on',get(Figures.tree.menuHandles.structOnlyMenu, 'Checked'));
 
-%draw circle for node
-[FontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
+    %draw circle for node
+    [fontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
 
-if ~bDrawLabels
-    FontSize=6;
-end
-yMin = CellTracks(trackID).startTime;
+    if ~bDrawLabels
+        fontSize=6;
+    end
+    yMin = CellTracks(trackID).startTime;
 
-phenotype = Tracks.GetTrackPhenotype(trackID);
+    phenotype = Tracks.GetTrackPhenotype(trackID);
 
-if ( phenotype ~= 1 )
-    %draw vertical line to represent edge length
-    plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
-        '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+    if ( phenotype ~= 1 )
+        %draw vertical line to represent edge length
+    %     plot([xVal xVal],[yMin CellTracks(trackID).endTime+1],...
+    %         '-k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+
+        hLine = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'VertLines');
+        set(hLine, 'XData',[xVal xVal],...
+                   'YData',[yMin CellTracks(trackID).endTime+1],...
+                   'Color','k', 'UserData',trackID,...
+                   'LineStyle','-',...
+                   'uicontextmenu',Figures.tree.contextMenuHandle);
+
+    else
+        yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
+
+%         plot([xVal xVal],[yMin yPhenos(end)],...
+%             '-k','UserData',trackID);
+%         plot([xVal xVal],[yPhenos(end) CellTracks(trackID).endTime+1],...
+%             '--k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
+        hLine = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'VertLines');
+        set(hLine, 'XData',[xVal xVal],...
+                   'YData',[yMin yPhenos(end)],...
+                   'Color','k', 'UserData',trackID,...
+                   'LineStyle','-',...
+                   'uicontextmenu',Figures.tree.contextMenuHandle);
+        
+        hLine = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'VertLines');
+        set(hLine, 'XData',[xVal xVal],...
+                   'YData',[yPhenos(end) CellTracks(trackID).endTime+1],...
+                   'Color','k', 'UserData',trackID,...
+                   'LineStyle','--',...
+                   'uicontextmenu',Figures.tree.contextMenuHandle);
+    end
     
-    if ( bStructOnly )
+    drawTrackLabel(xVal, trackID, phenotype, bDrawLabels);
+end
+
+function drawTrackLabel(x, trackID, phenotype, bDrawLabels)
+    global Figures CellTracks CellPhenotypes
+    
+    yMin = CellTracks(trackID).startTime;
+    
+    [fontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
+    if ( ~bDrawLabels )
+        fontSize = 6;
+        phenoScale = 1.2;
+    else
+        phenoScale = 1.5;
+    end
+    
+    textColor = getTextColor(trackID, phenotype, bDrawLabels);
+    % Draw text
+%     text(xVal,yMin,num2str(trackID),...
+%         'HorizontalAlignment',  'center',...
+%         'FontSize',             fontSize,...
+%         'color',                TextColor,...
+%         'UserData',             trackID,...
+%         'uicontextmenu',        Figures.tree.contextMenuHandle);
+    hLabel = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Labels');
+    set(hLabel, 'String',num2str(trackID),...
+                'Position',[x, yMin],...
+                'HorizontalAlignment','center',...
+                'FontSize',fontSize,...
+                'color',textColor,...
+                'UserData',trackID,...
+                'uicontextmenu',Figures.tree.contextMenuHandle);
+    
+    % Draw a dead cell marker
+    if ( phenotype == 1 )
+        hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
+        set(hMarker, 'XData',x, 'YData',yMin,...
+                     'Marker','o',...
+                     'MarkerFaceColor','k',...
+                     'MarkerEdgeColor','r',...
+                     'MarkerSize',circleSize,...
+                     'UserData',trackID,...
+                     'uicontextmenu',Figures.tree.contextMenuHandle);
         return;
     end
     
-    bHasPheno = 0;
-    if bDrawLabels
-        FaceColor = CellTracks(trackID).color.background;
-        EdgeColor = CellTracks(trackID).color.background;
-        TextColor = CellTracks(trackID).color.text;
-    else
-        FaceColor = 'w';
-        EdgeColor = 'k';
+    % Draw a phenotype box
+    if ( phenotype > 1 )
+        phenoColor = CellPhenotypes.colors(phenotype,:);
+        hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
+        set(hMarker, 'XData',x, 'YData',yMin,...
+                     'Marker','s',...
+                     'MarkerFaceColor',phenoColor,...
+                     'MarkerEdgeColor','w',...
+                     'MarkerSize',phenoScale*circleSize,...
+                     'UserData',trackID,...
+                     'uicontextmenu',Figures.tree.contextMenuHandle);
+    end
+    
+    if ( bDrawLabels )
+        hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
+        set(hMarker, 'XData',x, 'YData',yMin,...
+                     'Marker','o',...
+                     'MarkerFaceColor',CellTracks(trackID).color.background,...
+                     'MarkerEdgeColor',CellTracks(trackID).color.background,...
+                     'MarkerSize',circleSize,...
+                     'UserData',trackID,...
+                     'uicontextmenu',Figures.tree.contextMenuHandle);
+        return;
+    end
+    
+    if ( phenotype == 0 )
+        hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
+        set(hMarker, 'XData',x, 'YData',yMin,...
+                     'Marker','o',...
+                     'MarkerFaceColor','w',...
+                     'MarkerEdgeColor','k',...
+                     'MarkerSize',circleSize,...
+                     'UserData',trackID,...
+                     'uicontextmenu',Figures.tree.contextMenuHandle);
+    end
+    
+end
 
-        cPheno = [];
-        if (phenotype > 0)
-            cPheno = CellPhenotypes.colors(phenotype,:);
-        end
-        
-        if isempty(cPheno)
-            TextColor='k';
-        else
-            m = rgb2hsv(cPheno);
-            if m(1)>0.5
-                TextColor='w';
-            else
-                TextColor='k';
+function textColor = getTextColor(trackID, phenotype, bDrawLabels)
+    global CellTracks CellPhenotypes
+    
+    % Colors for dead cells
+    if ( phenotype == 1 )
+        textColor = 'r';
+        return;
+    end
+    
+    % Colors if track label colors are on
+    if ( bDrawLabels )
+        textColor = CellTracks(trackID).color.text;
+        return;
+    end
+    
+    textColor = 'k';
+    % If not drawing labels, but the track has a phenotype
+    if ( phenotype > 1 )
+        phenoColor = CellPhenotypes.colors(phenotype,:);
+        if ( ~isempty(phenoColor) )
+            m = rgb2hsv(phenoColor);
+            if ( m(1) > 0.5 )
+                textColor = 'w';
             end
         end
-    end
-    if ( phenotype > 1 )
-        if bDrawLabels
-            scaleMarker=1.5;
-        else
-            scaleMarker=1.2;
-        end;
-        
-        color = CellPhenotypes.colors(phenotype,:);
-        labelHandles = [labelHandles plot(xVal,yMin,'s',...
-            'MarkerFaceColor',  color,...
-            'MarkerEdgeColor',  'w',...
-            'MarkerSize',       scaleMarker*circleSize,...
-            'UserData',         trackID,...
-            'uicontextmenu',    Figures.tree.contextMenuHandle)];
-        bHasPheno = 1;
-    end
-    
-    yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
-    if ( ~isempty(yPhenos) )
-        plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
-    end
-    
-    if ~(bHasPheno && ~bDrawLabels)
-        labelHandles = [labelHandles plot(xVal,yMin,'o',...
-            'MarkerFaceColor',  FaceColor,...
-            'MarkerEdgeColor',  EdgeColor,...
-            'MarkerSize',       circleSize,...
-            'UserData',         trackID,...
-            'uicontextmenu',    Figures.tree.contextMenuHandle)];
-    end
-    labelHandles = [labelHandles text(xVal,yMin,num2str(trackID),...
-        'HorizontalAlignment',  'center',...
-        'FontSize',             FontSize,...
-        'color',                TextColor,...
-        'UserData',             trackID,...
-        'uicontextmenu',        Figures.tree.contextMenuHandle)];
-    
-else
-    yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
-    
-    plot([xVal xVal],[yMin yPhenos(end)],...
-        '-k','UserData',trackID);
-    plot([xVal xVal],[yPhenos(end) CellTracks(trackID).endTime+1],...
-        '--k','UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-    
-	plot(xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
-    
-    if ( bStructOnly )
         return;
     end
-    
-    labelHandles = [labelHandles plot(xVal,yMin,'o',...
-        'MarkerFaceColor',  'k',...
-        'MarkerEdgeColor',  'r',...
-        'MarkerSize',       circleSize,...
-        'UserData',         trackID,...
-        'uicontextmenu',    Figures.tree.contextMenuHandle)];
-    labelHandles = [labelHandles text(xVal,yMin,num2str(trackID),...
-        'HorizontalAlignment',  'center',...
-        'FontSize',             FontSize,...
-        'color',                'r',...
-        'UserData',             trackID,...
-        'uicontextmenu',        Figures.tree.contextMenuHandle)];
-end
 end
 
 function [xTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, trackHeights)
