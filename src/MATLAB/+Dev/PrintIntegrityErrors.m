@@ -1,16 +1,14 @@
 % PrintIntegrityErrors(errs, filename)
 % Prints integrity errors to filename (or stdout if no name specified)
 
-function PrintIntegrityErrors(errs, filename)
+function PrintIntegrityErrors(errs, fid)
 
     if ( isempty(errs) )
         return;
     end
 
-    if ( ~exist('filename', 'var') )
+    if ( ~exist('fid', 'var') )
         fid = 1;
-    else
-        fid = fopen(filename, 'w');
     end
     
     for i=1:length(errs)
