@@ -37,7 +37,7 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
     for t=tStart:tEnd
         checkTracks = setdiff(checkTracks, invalidPreserveTracks);
         
-        newPreserveTracks = fixupFrame(t, checkTracks);
+        newPreserveTracks = fixupFrame(t, checkTracks, tEnd);
         
         checkTracks = [checkTracks newPreserveTracks];
         [dump sortedIdx] = unique(checkTracks, 'first');
@@ -57,7 +57,7 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
         drawnow();
         
         % Make Movie code
-        saveMovieFrame(t, famID, outMovieDir);
+%         saveMovieFrame(t, famID, outMovieDir);
         
         tLast = t;
     end
@@ -90,7 +90,7 @@ function saveMovieFrame(t, famID, outdir)
     imwrite(imOut, fullfile(outdir,['_comb_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
 end
 
-function newPreserveTracks = fixupFrame(t, preserveTracks)
+function newPreserveTracks = fixupFrame(t, preserveTracks, tEnd)
     global CellTracks HashedCells
     bInTracks = (([CellTracks(preserveTracks).startTime] <= t) & ([CellTracks(preserveTracks).endTime] >= t));
     
@@ -117,7 +117,9 @@ function newPreserveTracks = fixupFrame(t, preserveTracks)
     
     % Use Dijkstra or just manually find best t -> (t+1) assignment, and
     % move hulls in frame t into the appropriate dropped tracks
-    newEdges = reassignNextHulls(t, droppedTracks, newEdges);
+    if ( t < tEnd )
+        newEdges = reassignNextHulls(t, droppedTracks, newEdges);
+    end
     
     % Do appropriate linking up of tracks from (t-1) -> t as found above
     newPreserveTracks = linkupEdges(newEdges, preserveTracks);
@@ -220,8 +222,18 @@ function newEdges = reassignNextHulls(t, droppedTracks, newEdges)
     end
     
     assignIdx = assignmentoptimal(forwardCosts);
-    if ( any(assignIdx == 0) )
-        error('Unable to assign all t->t+1 edges');
+    notAssigned = find(assignIdx == 0);
+    if ( ~isempty(notAssigned) )
+        % If all else fails assign arbitrarily
+        for i=1:length(notAssigned)
+            bInf = isinf(forwardCosts(notAssigned(i),:));
+            forwardCosts(notAssigned(i),bInf) = 1e10;
+        end
+        
+        assignIdx = assignmentoptimal(forwardCosts);
+        if ( any(assignIdx == 0) )
+            error('Unable to assign all t->t+1 edges');
+        end
     end
     
     for i=1:size(newEdges,1)
@@ -374,7 +386,15 @@ function newEdges = findBestReseg(t, curEdges)
         if ( minOverlap > 2.0 )
             [addedHull costMatrix nextHulls] = tryAddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls);
             if ( isempty(addedHull) )
-                continue;
+                if ( ~all(isinf(costMatrix(i,:))) )
+                    continue;
+                end
+                
+                [addedHull costMatrix nextHulls] = tryAddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls, 1);
+                
+                if ( isempty(addedHull) )
+                    continue;
+                end
             end
             
             bAddedHull(i) = 1;
@@ -391,7 +411,7 @@ function newEdges = findBestReseg(t, curEdges)
         end
         
         % TODO: Handle this case.
-        if ( isinf(desiredCosts(1)) )
+        if ( isinf(desiredCosts(1)) && ~any(i == missIdx) )
             error('Did not add hull but unable to find next hull to go to');
         end
         
@@ -492,9 +512,13 @@ function updateDijkstraGraph(t)
     mexDijkstra('updateGraph', costMatrix, updateHulls, nextHulls);
 end
 
-function [addedHull costMatrix nextHulls] = tryAddSegmentation(prevHull, costMatrix, checkHulls, nextHulls)
+function [addedHull costMatrix nextHulls] = tryAddSegmentation(prevHull, costMatrix, checkHulls, nextHulls, bAggressive)
     global CONSTANTS CellHulls HashedCells
 
+    if ( ~exist('bAggressive','var') )
+        bAggressive = 0;
+    end
+    
     addedHull = [];
     
     time = CellHulls(prevHull).time + 1;
@@ -507,7 +531,20 @@ function [addedHull costMatrix nextHulls] = tryAddSegmentation(prevHull, costMat
     newObj = Segmentation.PartialImageSegment(img, guessPoint, 200, 1.0, CellHulls(prevHull).indexPixels);
     
     if ( isempty(newObj) )
-        return;
+        if ( ~bAggressive )
+            return;
+        end
+        
+        for tryAlpha = 0.95:(-0.05):0.5
+            newObj = Segmentation.PartialImageSegment(img, guessPoint, 200, tryAlpha, CellHulls(prevHull).indexPixels);
+            if ( ~isempty(newObj) )
+                break;
+            end
+        end
+        
+        if ( isempty(newObj) )
+            return;
+        end
     end
     
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 0);
@@ -680,19 +717,20 @@ function [newSegs costMatrix nextHulls] = trySplitSegmentation(splitHull, numSpl
     splitIdx = find(nextHulls == splitHull,1,'first');
     [bHadMitosis mitIdx] = ismember(prevHulls, mitosisParents);
     
+    [bDump prevIdx] = ismember(prevHulls, checkHulls);
+    
     bAssignHullIdx = false(1,length(newHulls));
     bAssignHullIdx(1) = 1;
     if ( any(bHadMitosis) )
-        [bestMitCost bestMitIdx] = min(newCosts(mitIdx,:));
+        [bestMitCost bestMitIdx] = min(newCosts(prevIdx(bHadMitosis),:));
         
-        newCosts(mitIdx,:) = Inf;
-        newCosts(mitIdx,bestMitIdx) = 1;
+        newCosts(prevIdx(bHadMitosis),:) = Inf;
+        newCosts(prevIdx(bHadMitosis),bestMitIdx) = 1;
         
         bAssignHullIdx(1) = 0;
         bAssignHullIdx(bestMitIdx) = 1;
     end
     
-    [bDump prevIdx] = ismember(prevHulls, checkHulls);
     % Force a hungarian assignment for splits
     assignIdx = assignmentoptimal(newCosts(prevIdx,:));
     for i=1:length(assignIdx)
