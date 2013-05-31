@@ -25,8 +25,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha)
-    
+function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha, overlapPoints)
+
+    if ( ~exist('overlapPoints', 'var') )
+        overlapPoints = [];
+    end
+
     if ( length(subSize) < 2 )
         subSize = [subSize(1) subSize(1)];
     end
@@ -51,7 +55,18 @@ function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha)
     
     [objs features] = fixupFromSubimage(coordMin, img, subImg, objs, features);
     
-    bInHull = Hulls.CheckHullsContainsPoint(centerPt, objs);
+    if ( isempty(overlapPoints) )
+        bInHull = Hulls.CheckHullsContainsPoint(centerPt, objs);
+    else
+        bInHull = false(1,length(objs));
+        isectDist = ones(1,length(objs));
+        for i=1:length(objs)
+            isect = intersect(overlapPoints, objs(i).indPixels);
+            isectDist(i) = 1 - (length(isect) / min(length(overlapPoints),length(objs(i).indPixels)));
+        end
+        [minDist minIdx] = min(isectDist);
+        bInHull(minIdx) = (minDist < 1);
+    end
     
     hull = objs(find(bInHull,1));
     feature = features(find(bInHull,1));

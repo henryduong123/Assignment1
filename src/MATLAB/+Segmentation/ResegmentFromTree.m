@@ -1,5 +1,7 @@
-function ResegmentFromTree(rootTracks,preserveTracks)
+function segEdits = ResegmentFromTree(rootTracks,preserveTracks)
     global CellHulls HashedCells CellTracks CellFamilies ConnectedDist
+    
+    global Figures
     
     if ( ~exist('preserveTracks','var') )
         preserveTracks = [];
@@ -13,7 +15,17 @@ function ResegmentFromTree(rootTracks,preserveTracks)
         error('Attempt to preserve empty track');
     end
     
+    costMatrix = Tracker.GetCostMatrix();
+    mexDijkstra('initGraph', costMatrix);
+    
     invalidPreserveTracks = [];
+    
+    minAddDist = 2.0;
+    
+    famID = CellTracks(rootTracks(1)).familyID;
+    saveMovieFrame(1, famID, 'C:\Users\mwinter\Documents\Figures\isbi_movie\edited_reseg');
+    
+    segEdits = {};
     
     UI.Progressbar(0);
     for t=2:length(HashedCells)
@@ -40,7 +52,7 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             end
             
             dist = Tracker.GetConnectedDistance(prevHulls(i),bestNextHulls{i}(1));
-            if ( dist >= 1.0 )
+            if ( dist >= minAddDist )
                 bTryAdd(i) = 1;
             end
         end
@@ -57,6 +69,8 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             if ( addedHull == 0 )
                 continue;
             end
+            
+            segEdits = [segEdits;{t+1 [CellHulls(prevHulls(i)).centerOfMass(2) CellHulls(prevHulls(i)).centerOfMass(1)] '+'}];
 
             bAddedHull(i) = 1;
             newHulls = [newHulls addedHull];
@@ -76,16 +90,48 @@ function ResegmentFromTree(rootTracks,preserveTracks)
             
             newSplit = trySplitSegmentation(splitHulls(i),j);
             newHulls = [newHulls newSplit];
+            
+            if ( length(newSplit) > 1 )
+                segEdits = [segEdits;{t+1 [CellHulls(splitHulls(i)).centerOfMass(2) CellHulls(splitHulls(i)).centerOfMass(1)] 'x'}];
+            end
         end
         
-        updateTracking(prevHulls, newHulls, preserveTracks);
+        newPreserveTracks = updateTracking(prevHulls, newHulls, preserveTracks);
+        preserveTracks = [preserveTracks newPreserveTracks];
+        [dump sortedIdx] = unique(preserveTracks, 'first');
+        sortedIdx = sort(sortedIdx);
+        preserveTracks = preserveTracks(sortedIdx);
         
         bInvalidPreserveTracks = cellfun(@(x)(isempty(x)),{CellTracks(preserveTracks).startTime});
         invalidPreserveTracks = preserveTracks(bInvalidPreserveTracks);
         
+        % DEBUG
+        Figures.time = t;
+        validPreserveTracks = preserveTracks(~bInvalidPreserveTracks);
+        famID = CellTracks(validPreserveTracks(1)).familyID;
+        
+        % Make Movie code
+        saveMovieFrame(t, famID, 'C:\Users\mwinter\Documents\Figures\isbi_movie\edited_reseg');
+        
         UI.Progressbar(abs(t)/abs(length(HashedCells)));
     end
     UI.Progressbar(1);
+end
+
+function saveMovieFrame(t, famID, outdir)
+    global Figures CONSTANTS
+    
+    UI.DrawTree(famID);
+    UI.TimeChange(t);
+    drawnow();
+    
+    figure(Figures.cells.handle)
+    X = getframe();
+    imwrite(X.cdata, fullfile(outdir,['cells_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
+
+    figure(Figures.tree.handle)
+    X = getframe();
+    imwrite(X.cdata, fullfile(outdir,['tree_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
 end
 
 function [edgeList edgeTimes] = getTrackEdges(tStart, tracks)
@@ -131,7 +177,7 @@ function newHullID = tryAddSegmentation(prevHull)
     
     guessPoint = [CellHulls(prevHull).centerOfMass(2) CellHulls(prevHull).centerOfMass(1)];
     
-    [newObj newFeat] = Segmentation.PartialImageSegment(img, guessPoint, 200, 1.0);
+    [newObj newFeat] = Segmentation.PartialImageSegment(img, guessPoint, 200, 1.0, CellHulls(prevHull).indexPixels);
     
     if ( isempty(newObj) )
         return;
@@ -174,7 +220,19 @@ function newHullIDs = trySplitSegmentation(hullID, k)
     newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
 end
 
-function updateTracking(prevHulls, newHulls, preserveTracks)
+function updateDijkstraGraph(updateHulls, nextHulls)
+    if ( isempty(updateHulls) || isempty(nextHulls) )
+        return;
+    end
+    
+    [costMatrix bOutTracked bInTracked] = Tracker.GetCostSubmatrix(updateHulls, nextHulls);
+    fromHulls = updateHulls(bOutTracked);
+    toHulls = nextHulls(bInTracked);
+    
+    mexDijkstra('updateGraph', costMatrix, fromHulls, toHulls);
+end
+
+function newPreserveTracks = updateTracking(prevHulls, newHulls, preserveTracks)
     global CellHulls HashedCells Costs GraphEdits
     
     if ( isempty(newHulls) )
@@ -187,22 +245,23 @@ function updateTracking(prevHulls, newHulls, preserveTracks)
     % TODO: keep around long term graphedits for prevHulls?
     forwardEdits = find(any((GraphEdits(prevHulls,:) ~= 0),1));
     bLongEdits = ([CellHulls(forwardEdits).time] > (t+1));
-    Tracker.GraphEditsResetHulls(prevHulls(bLongEdits), 1, 0);
+    Tracker.GraphEditsResetHulls(forwardEdits(bLongEdits), 0, 1);
     
     Tracker.UpdateTrackingCosts(t, updateHulls, newHulls);
+    updateDijkstraGraph(updateHulls, newHulls);
     
     nextHulls = [HashedCells{t+1}.hullID];
     [costMatrix bOutTracked bInTracked] = Tracker.GetCostSubmatrix(prevHulls, nextHulls);
     fromHulls = prevHulls(bOutTracked);
     toHulls = nextHulls(bInTracked);
 
-    % TODO: Tree-preserving assignment code
-    reassignPreserveEdges(costMatrix, fromHulls, toHulls, preserveTracks);
+    % Tree-preserving assignment code
+    newPreserveTracks = reassignPreserveEdges(costMatrix, fromHulls, toHulls, preserveTracks);
     
     %TODO: go ahead and update tracking, but no need to reassign since we now
     % hit every frame that has valid tracks.
     
-    % Update Tracking to next frame?
+    % Update Tracking to next frame
     if ( (t+1) < length(HashedCells) )
         nextHulls = [HashedCells{t+2}.hullID];
         if ( isempty(nextHulls) || isempty(toHulls) )
@@ -210,17 +269,137 @@ function updateTracking(prevHulls, newHulls, preserveTracks)
         end
         
         Tracker.UpdateTrackingCosts(t+1, toHulls, nextHulls);
+        updateDijkstraGraph(toHulls, nextHulls);
     end
 end
 
-function [bAssign emptyTracks] = reassignPreserveEdges(costMatrix, fromHulls, toHulls, preserveTracks)
-    global CellHulls CellTracks Costs
+function bAccept = inPreserveTrack(startVert, endVert, acceptTracks)
+    bAccept = 0;
+    if ( ismember(Hulls.GetTrackID(endVert), acceptTracks) )
+        bAccept = 1;
+    end
     
+end
+
+function newPreserveTracks = reassignPreserveEdges(costMatrix, fromHulls, toHulls, preserveTracks)
+    global CellHulls CellTracks HashedHulls
+    
+    newPreserveTracks = [];
+    
+    fromTime = CellHulls(fromHulls(1)).time;
+    
+    preserveStarts = [CellTracks(preserveTracks).startTime];
+    preserveEnds = [CellTracks(preserveTracks).endTime];
+    inPreserveTracks = preserveTracks((preserveStarts <= fromTime+1) & (preserveEnds >= fromTime+1));
+%     preserveEdges = getPreserveEdges(fromHulls, preserveTracks);
+%     [chkHulls oldAssign] = getAssignedTracks(preserveEdges);
+
+    % TODO: Remove all preserve-tracks at t+1, get new track IDs, assign
+    % hulls to preserve-tracks after removing all current hulls (track list
+    % and hull list match, reconnect w/ children if necessary).
+    % After all that, run changelabel/add mitosis code to link edges.
+    droppedTracks = [];
+    for i=1:length(inPreserveTracks)
+        droppedTracks = union(droppedTracks,Families.RemoveFromTreePrune(inPreserveTracks(i), fromTime+1));
+    end
+    
+%     % Update tracking forward from split frame
+%     if ( fromTime < (length(HashedHulls)+1) )
+%         nextHulls = [HashedHulls{fromTime+2}.hullID];
+%         Tracker.UpdateTrackingCosts(t+1, toHulls, nextHulls);
+%         updateDijkstraGraph(toHulls, nextHulls);
+%     end
+%     
+%     % Guess best preserveTrack assignments using Dijkstra
+%     dijkstraCosts = Inf*ones(length(toHulls),length(droppedTracks));
+%     acceptFunc = @(startVert,endVert)(inPreserveTrack(startVert, endVert, droppedTracks));
+%     for i=1:length(toHulls)
+%         [paths pathCosts] = mexDijkstra('matlabExtend', toHulls(i), 10, acceptFunc);
+%         for j=1:length(paths)
+%             pathTrack = Hulls.GetTrackID(paths{j}(end));
+%             costIdx = find(pathTrack == droppedTracks);
+%             dijkstraCosts(i,costIdx) = min(dijkstraCosts(i,costIdx), pathCosts(j));
+%         end
+%     end
+%     
+%     % TODO: Assign using dijkstra if possible? Fall back otherwise?
+%     assignIdx = assignmentoptimal(dijkstraCosts);
+%     bValid = (assignIdx > 0);
+%     assignNextToTrack = zeros(1,length(toHulls));
+%     assignNextToTrack(bValid) = droppedTracks(assignIdx(bValid));
+    
+    % find t to t+1 assignments
+    [assignIdx assignOut] = findMinAssignment(costMatrix);
+    allEdges = [(fromHulls(assignIdx)') (toHulls(assignOut)')];
+    
+    [mitIdx mitOut] = findMitosisEdges(costMatrix, [(assignIdx') (assignOut')], length(inPreserveTracks));
+    mitEdges = [zeros(0,2); (fromHulls(mitIdx)') (toHulls(mitOut)')];
+    
+    allEdges = [allEdges; mitEdges];
+    
+%     if ( size(allEdges,1) <  length(inPreserveTracks) )
+%         error('Unable to find sufficient edges to preserve tree events');
+%     end
+    
+    % Assign all hulls to next frames
+    [bOnTrack trackIdx] = ismember(Hulls.GetTrackID(allEdges(:,2)), droppedTracks);
+    trackIdx(~bOnTrack) = setdiff(1:length(droppedTracks),trackIdx(bOnTrack));
+    assignToTrack = droppedTracks(trackIdx);
+    
+    relinkTracks = cell(length(assignToTrack), 1);
+    for i=1:length(assignToTrack)
+        curTrack = Hulls.GetTrackID(allEdges(i,2));
+        if ( curTrack == assignToTrack(i) )
+            continue;
+        end
+        
+        curHull = Tracks.GetHullID(fromTime+1, assignToTrack(i));
+        if ( curHull ~= 0 )
+            relinkTracks{i} = Tracks.RemoveHullFromTrack(curHull);
+            Families.NewCellFamily(curHull);
+        end
+        
+        oldDropped = Tracks.RemoveHullFromTrack(allEdges(i,2));
+        
+        assignIdx = find(curTrack == assignToTrack);
+        if ( ~isempty(assignIdx) )
+            relinkTracks{assignIdx} = oldDropped;
+        end
+        
+        Tracks.AddHullToTrack(allEdges(i,2), assignToTrack(i));
+    end
+    
+    for i=1:length(relinkTracks)
+        if ( isempty(relinkTracks{i}) )
+            continue;
+        end
+        
+        Families.ReconnectParentWithChildren(assignToTrack(i), relinkTracks{i});
+    end
+    
+    newPreserveTracks = [];
+    for i=1:size(allEdges,1)
+        parentTrackID = Hulls.GetTrackID(allEdges(i,1));
+        childTrackID = Hulls.GetTrackID(allEdges(i,2));
+        
+        childTime = CellTracks(childTrackID).startTime;
+        
+        parentHull = Tracks.GetHullID(childTime, parentTrackID);
+        if ( parentHull > 0 )
+            Families.AddToTree(childTrackID, parentTrackID);
+            newPreserveTracks = [newPreserveTracks CellTracks(parentTrackID).childrenTracks];
+        else
+            Tracks.ChangeLabel(childTrackID, parentTrackID, childTime);
+            newPreserveTracks = [newPreserveTracks parentTrackID];
+        end
+    end
+    
+    newPreserveTracks = setdiff(newPreserveTracks, preserveTracks);
+end
+
+function [assignIdx assignOut] = findMinAssignment(costMatrix)
     [minInCosts,bestIncoming] = min(costMatrix,[],1);
     [minOutCosts,bestOutgoing] = min(costMatrix,[],2);
-    
-    bAssign = false(size(costMatrix));
-    emptyTracks = [];
     
     if ( isempty(costMatrix) )
         return;
@@ -230,188 +409,59 @@ function [bAssign emptyTracks] = reassignPreserveEdges(costMatrix, fromHulls, to
     bMatched = (bestIncoming(bestOutgoing) == (1:length(bestOutgoing)));
     matchedIdx = find(bMatched);
     
-    preserveEdges = getPreserveEdges(fromHulls(matchedIdx), preserveTracks);
-    [chkHulls oldAssign] = getAssignedTracks(preserveEdges);
+    costMatrix(matchedIdx, :) = Inf;
+    costMatrix(:, bestOutgoing(matchedIdx)) = Inf;
     
-    edges = [(fromHulls(matchedIdx)') (toHulls(bestOutgoing(matchedIdx))')];
+    assignIdx = matchedIdx;
+    assignOut = bestOutgoing(matchedIdx);
     
-    % Ignore edges that are assigned the same as previously
-    bSame = ismember(edges, preserveEdges, 'rows');
-    edges = edges(~bSame,:);
-    
-    if ( isempty(edges) )
-        return;
-    end
-    
-    possibleTimeChange = Hulls.GetTrackID(edges(:,2));
-    
-    droppedTracks = [];
-    for i=1:size(edges,1)
-        latestDropped = Tracks.RemoveHullFromTrack(edges(i,2));
-        
-        if ( length(latestDropped) > 2 )
-            % TODO: deal with this
-            error('Dropped a single-frame track with parent and children');
-        end
-        
-        droppedTracks = [droppedTracks latestDropped];
-    end
-    
-    % Assign edges (fixup tree breaks as we go)
-    for i=1:size(edges,1)
-        assignIdx = find(chkHulls == edges(i,1));
-        if ( isempty(assignIdx) )
-            assignTrack = Hulls.GetTrackID(edges(i,1));
-        else
-            assignTrack = oldAssign{assignIdx};
-        end
-        
-        t = CellHulls(edges(i,2)).time;
-        assignTrack = assignTrack(1);
-        curHullID = Tracks.GetHullID(t, assignTrack);
-        
-        fixupTracks = [];
-        if ( curHullID > 0 )
-            fixupTracks = Tracks.RemoveHullFromTrack(curHullID);
-            Families.NewCellFamily(curHullID);
-        end
-        
-        errDropped = Tracks.AddHullToTrack(edges(i,2), assignTrack, []);
-        if ( ~isempty(errDropped) )
-            error('Added hull past mitosis causing tracks to drop from tree');
-        end
-        
-        parentTrack = Hulls.GetTrackID(edges(i,1));
-        if ( length(fixupTracks) > 2 )
-            bSibling = (fixupTracks ~= assignTrack) & ([CellTracks(fixupTracks).startTime] == CellHulls(edges(i,2)).time);
-            siblingTrack = fixupTracks(bSibling);
-            
-            if ( isempty(siblingTrack) )
-                error('Single hull removal unfixable, cannot find sibling');
-            end
-            
-            Families.ReconnectParentWithChildren(parentTrack,[assignTrack siblingTrack]);
-            parentTrack = assignTrack;
-        end
-        
-        if ( ~isempty(fixupTracks) )
-            Families.ReconnectParentWithChildren(parentTrack,fixupTracks);
-        end
-    end
-    
-    % Fix up and reconnect the preserve tracks that were dropped before
-    % reassignment
-    bPreserveDropped = ismember(droppedTracks, preserveTracks);
-    droppedTracks = droppedTracks(bPreserveDropped);
-    
-    if ( isempty(droppedTracks) )
-        return;
-    end
-    
-    % Find tracks that have lost their first hull and been dropped
-    bLostHull = ([CellTracks(possibleTimeChange).startTime] > [CellHulls(edges(:,2)).time]);
-    bNeedsHull = bLostHull & ismember(possibleTimeChange,droppedTracks);
-    
-    % Find the closest previous hull to add back to beginning of shortened
-    % track
-    needHullTracks = possibleTimeChange(bNeedsHull);
-    for i=1:length(needHullTracks)
-        nextHull = CellTracks(needHullTracks).hulls(1);
-        
-        prevHulls = find(Costs(:,nextHull) > 0);
-        bNotPreserved = ~ismember(Hulls.GetTrackID(prevHulls), preserveTracks);
-        prevHulls = prevHulls(bNotPreserved);
-        
-        [bestCost bestIdx] = min(Costs(prevHulls,nextHull));
-        if ( isempty(bestIdx) )
-            error('No hulls exist in previous frame to extend track back correctly');
-            continue;
-        end
-        
-        bestHull = prevHulls(bestIdx);
-        Tracks.RemoveHullFromTrack(bestHull);
-        Tracks.AddHullToTrack(bestHull, needHullTracks(i),[]);
-    end
-    
-    leafHulls = [];
-    for i=1:length(preserveTracks)
-        if ( isempty(CellTracks(preserveTracks(i)).startTime) )
-            continue;
-        end
-        
-        trackEnd = CellTracks(preserveTracks(i)).endTime;
-        if ( ~ismember(trackEnd,[t-1 t]) )
-            continue;
-        end
-        
-        leafHulls = [leafHulls Tracks.GetHullID(trackEnd, preserveTracks(i))];
-    end
-    
-    startTrackHulls = [];
-    for i=1:length(droppedTracks)
-        if ( isempty(CellTracks(droppedTracks(i)).startTime) )
-            continue;
-        end
-        
-        trackStart = CellTracks(droppedTracks(i)).startTime;
-        startTrackHulls = [startTrackHulls Tracks.GetHullID(trackStart, droppedTracks(i))];
-    end
-    
-    [costMatrix bLeaf bNext] = Tracker.GetCostSubmatrix(leafHulls, startTrackHulls);
-    leafHulls = leafHulls(bLeaf);
-    startTrackHulls = startTrackHulls(bNext);
-    
+    % Patch and assign as many fromHulls as possible.
     [minCost minIdx] = min(costMatrix(:));
     [minR minC] = ind2sub(size(costMatrix), minIdx);
-    
-    edgeAssign = cell(1,length(leafHulls));
-    while ( ~isinf(minCost) )
-        bCheckTime = (CellHulls(leafHulls(minR)).time == CellHulls(startTrackHulls(minC)).time - 1);
-        if ( ~bCheckTime )
-            costMatrix(minR,minC) = Inf;
-        elseif ( length(edgeAssign{minR}) < 2 )
-            edgeAssign{minR} = [edgeAssign{minR} minC];
-            costMatrix(:,minC) = Inf;
+    while ( (minCost < Inf) )
+        assignIdx = [assignIdx minR];
+        assignOut = [assignOut minC];
+        
+        costMatrix(minR, :) = Inf;
+        costMatrix(:, minC) = Inf;
+        
+        [minCost minIdx] = min(costMatrix(:));
+        [minR minC] = ind2sub(size(costMatrix), minIdx);
+    end
+end
 
-            if ( length(edgeAssign{minR}) == 2)
+function [mitIdx mitOut] = findMitosisEdges(costMatrix, localEdges, numOldEdges)
+
+    mitIdx = [];
+    mitOut = [];
+
+    needEdges = numOldEdges - size(localEdges,1);
+    
+    costMatrix(:,localEdges(:,2)) = Inf;
+    for i=1:needEdges
+        [minCost minIdx] = min(costMatrix(:));
+        [minR minC] = ind2sub(size(costMatrix), minIdx);
+        
+        if ( isinf(minCost) )
+            return;
+        end
+        
+        edgeCount = nnz(minR == localEdges(:,1));
+        if ( edgeCount < 2 )
+            costMatrix(:,minC) = Inf;
+            
+            mitIdx = [mitIdx minR];
+            mitOut = [mitOut minC];
+            
+            localEdges = [localEdges; minR minC];
+            
+            if ( edgeCount == 1 )
                 costMatrix(minR,:) = Inf;
             end
         else
             costMatrix(minR,:) = Inf;
         end
-        
-        [minCost minIdx] = min(costMatrix(:));
-        [minR minC] = ind2sub(size(costMatrix), minIdx);
-    end
-    
-    for i=1:length(edgeAssign)
-        if ( isempty(edgeAssign{i}) )
-            continue;
-        end
-        
-        if ( length(edgeAssign{i}) == 1 )
-            parentTrack = Hulls.GetTrackID(leafHulls(i));
-            childTrack = Hulls.GetTrackID(startTrackHulls(edgeAssign{i}));
-            
-            Tracks.ChangeTrackID(childTrack, parentTrack);
-        elseif ( length(edgeAssign{i}) == 2 )
-            parentTrack = Hulls.GetTrackID(leafHulls(i));
-            childTracks = Hulls.GetTrackID(startTrackHulls(edgeAssign{i}));
-            
-            Families.ReconnectParentWithChildren(parentTrack, childTracks);
-        end
-    end
-    
-    for i=1:length(droppedTracks)
-        if ( isempty(CellTracks(droppedTracks(i)).startTime) || isempty(CellTracks(droppedTracks(i)).parentTrack) )
-            emptyTracks = [emptyTracks droppedTracks(i)];
-        end
-    end
-    
-    % TODO: Handle this
-    if ( ~isempty(emptyTracks) )
-        error('Dropped preserve tracks');
-    end
+    end 
 end
 
 function [hulls tracks] = getAssignedTracks(edges)
