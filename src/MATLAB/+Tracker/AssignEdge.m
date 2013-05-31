@@ -25,11 +25,12 @@ function changedHulls = AssignEdge(trackHull, assignHull)
         return;
     end
     
-    % Check family locks
-    assignFamilyID = CellTracks(Hulls.GetTrackID(assignHull)).familyID;
-    trackFamilyID = CellTracks(Hulls.GetTrackID(trackHull)).familyID;
+    [bLocked bCanChange] = Tracks.CheckLockedChangeLabel(oldAssignTrack, track, assignTime);
+    if ( ~bCanChange )
+        return;
+    end
     
-    if ( CellFamilies(assignFamilyID).bLocked || CellFamilies(trackFamilyID).bLocked )
+    if ( any(bLocked) && dir < 0 )
         return;
     end
     
@@ -47,6 +48,10 @@ function changedHulls = AssignEdge(trackHull, assignHull)
         oldAssignTrack = Hulls.GetTrackID(assignHull);
     end
     
-    Tracks.ChangeLabel(oldAssignTrack, track, assignTime);
+    if ( any(bLocked) )
+        Tracks.LockedChangeLabel(oldAssignTrack, track, assignTime);
+    else
+        Tracks.ChangeLabel(oldAssignTrack, track, assignTime);
+    end
 end
 

@@ -32,6 +32,12 @@ function ContextChangeLabel(time,trackID)
     newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
     if(isempty(newTrackID)),return,end;
     newTrackID = str2double(newTrackID(1));
+    
+    if ( newTrackID > length(CellTracks) )
+        warn = sprintf('Track %d does not exist, use "Remove from Tree" instead.',newTrackID);
+        warndlg(warn);
+        return;
+    end
 
     if(isempty(CellTracks(newTrackID).hulls))
         warn = sprintf('Track %d does not exist, cannot change',newTrackID);
@@ -51,15 +57,34 @@ function ContextChangeLabel(time,trackID)
         return
     end
     
-    % TODO: If locked, verify this edit is "safe" otherwise ask before
-    % continuing
-
-    bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
-    if ( bErr )
-        return;
+    bOverride = 0;
+    [bLocked bCanChange] = Tracks.CheckLockedChangeLabel(trackID, newTrackID, time);
+    if ( any(bLocked) )
+        if ( ~bCanChange )
+            resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+            if ( strcmpi(resp,'Cancel') )
+                return;
+            end
+            
+            bOverride = 1;
+        else
+            bErr = Editor.ReplayableEditAction(@Editor.LockedChangeLabelAction, trackID, newTrackID, time);
+            if ( bErr )
+                return;
+            end
+            
+            Error.LogAction('LockedChangeLabel',trackID,newTrackID);
+        end
     end
-    
-    Error.LogAction('ChangeLabel',trackID,newTrackID);
+
+    if ( ~any(bLocked) || bOverride )
+        bErr = Editor.ReplayableEditAction(@Editor.ChangeLabelAction, trackID,newTrackID,time);
+        if ( bErr )
+            return;
+        end
+        
+        Error.LogAction('ChangeLabel',trackID,newTrackID);
+    end
 
     newTrackID = Hulls.GetTrackID(curHull);
     UI.DrawTree(CellTracks(newTrackID).familyID);

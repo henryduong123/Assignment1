@@ -26,22 +26,22 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
-bBreakLock = 0;
-trackFamily = CellTracks(trackID).familyID;
-siblingFamily = CellTracks(siblingTrack).familyID;
-if ( CellFamilies(trackFamily).bLocked || CellFamilies(siblingFamily).bLocked )
+bOverrideLock = 0;
+bLocked = Helper.CheckLocked([trackID siblingTrack]);
+if ( any(bLocked) )
     lockedList = [];
-    if ( CellFamilies(trackFamily).bLocked )
-        lockedList = CellFamilies(trackFamily).rootTrackID;
+    if ( bLocked(1) )
+        lockedList = CellFamilies(CellTracks(trackID).familyID).rootTrackID;
     end
-    if ( CellFamilies(siblingFamily).bLocked )
-        lockedList = [lockedList CellFamilies(siblingFamily).rootTrackID];
+    if ( bLocked(2) )
+        lockedList = [lockedList CellFamilies(CellTracks(siblingTrack).familyID).rootTrackID];
     end
     
-    resp = questdlg(['This edit will affect locked tree(s) ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Locked Tree');
-    if ( strcmpi(resp,'Yes') )
-        bBreakLock = 1;
+    resp = questdlg(['This edit will affect locked tree(s) ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+    if ( strcmpi(resp,'Cancel') )
+        return;
     end
+    bOverrideLock = 1;
 end
 leftChildTrack = [];
 
@@ -53,7 +53,6 @@ if(CellTracks(trackID).startTime==time)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
         parentTrack = str2double(answer(1));
-        parentFamily = CellTracks(parentTrack).familyID;
         
         if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
                 (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
@@ -63,14 +62,14 @@ if(CellTracks(trackID).startTime==time)
                 case 'Cancel'
                     return
             end
-        elseif ( ~bBreakLock && CellFamilies(parentFamily).bLocked )
-            resp = questdlg(['This edit will affect locked tree ' num2str(CellFamilies(parentFamily).rootTrackID) '. Do you wish to continue?'],...
-                'Warning: Locked Tree','Yes','No','Cance','Cancel');
-            if ( strcmpi(resp,'Yes') )
-                valid = 1;
-            elseif ( strcmpi(resp,'Cancel') )
+        elseif ( ~bOverrideLock && Helper.CheckLocked(parentTrack) )
+            rootTrack = CellFamilies(CellTracks(parentTrack).familyID).rootTrackID;
+            resp = questdlg(['This edit will affect locked tree(s) ' num2str(rootTrack) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+            if ( strcmpi(resp,'Cancel') )
                 return;
             end
+            
+            valid = 1;
         else
             valid = 1;
         end
