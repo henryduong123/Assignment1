@@ -32,6 +32,8 @@
 function droppedTracks = ChangeTrackID(currentTrack,desiredTrack,time)
 global CellTracks CellFamilies
 
+droppedTracks = [];
+
 if (isempty(currentTrack) || isempty(desiredTrack))
     error('Need both tracks, currentTrack: %d, desiredTrack: %d',currentTrack,desiredTrack);
 end
@@ -43,9 +45,6 @@ end
 if ( currentTrack == desiredTrack )
     return;
 end
-
-droppedTracks = [];
-currentParent = [];
 
 if(~exist('time','var'))
     time = CellTracks(currentTrack).startTime;
