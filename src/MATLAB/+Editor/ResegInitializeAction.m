@@ -16,6 +16,7 @@ function [historyAction bFinished] = ResegInitializeAction(preserveFamilies, tSt
     ResegState.preserveFamilies = preserveFamilies;
     ResegState.primaryTree = preserveFamilies(1);
     ResegState.currentTime = tStart;
+    ResegState.SegEdits = {};
     
     bFinished = Segmentation.ResegFromTreeInteractive();
     if ( bFinished )

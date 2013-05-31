@@ -1,5 +1,5 @@
 function newEdges = FindFrameReseg(t, curEdges)
-    global CellHulls HashedCells
+    global CellHulls HashedCells ResegState
     
     newEdges = [];
     
@@ -76,6 +76,8 @@ function newEdges = FindFrameReseg(t, curEdges)
                 end
             end
             
+            ResegState.SegEdits = [ResegState.SegEdits;{0} {addedHull}];
+            
             bAddedHull(i) = 1;
         end
     end
@@ -121,6 +123,9 @@ function newEdges = FindFrameReseg(t, curEdges)
         end
         
         [newSegs costMatrix nextHulls] = Segmentation.ResegFromTree.SplitSegmentation(nextHulls(splitIdx(i)), validSplitCount, validDesirers, mitosisParents, costMatrix, checkHulls, nextHulls);
+        if ( length(newSegs) > 1 )
+            ResegState.SegEdits = [ResegState.SegEdits;{nextHulls(splitIdx(i))} {newSegs}];
+        end
     end
     
     % TODO: assign mitosis edges first without bothering to change, can

@@ -1,20 +1,31 @@
 function newPreserveTracks = LinkupEdges(edges, preserveTracks)
     global CellTracks
     
-    newPreserveTracks = [];
+    targetParents = [];
+    relinkList = {};
+    
     for i=1:size(edges,1)
-        parentTrackID = Hulls.GetTrackID(edges(i,1));
-        childTrackID = Hulls.GetTrackID(edges(i,2));
-        
-        childTime = CellTracks(childTrackID).startTime;
-        
-        parentHull = Tracks.GetHullID(childTime, parentTrackID);
-        if ( parentHull > 0 )
-            Families.AddToTree(childTrackID, parentTrackID);
-            newPreserveTracks = [newPreserveTracks CellTracks(parentTrackID).childrenTracks];
+        targetIdx = find(targetParents == Hulls.GetTrackID(edges(i,1)));
+        if ( isempty(targetIdx) )
+            targetParents = [targetParents; Hulls.GetTrackID(edges(i,1))];
+            relinkList = [relinkList; {Hulls.GetTrackID(edges(i,2))}];
         else
-            Tracks.ChangeLabel(childTrackID, parentTrackID, childTime);
-            newPreserveTracks = [newPreserveTracks parentTrackID];
+            relinkList{targetIdx} = [relinkList{targetIdx} Hulls.GetTrackID(edges(i,2))];
+        end
+    end
+    
+    newPreserveTracks = [];
+    for i=1:length(targetParents)
+        parentTrack = targetParents(i);
+        childrenTracks = relinkList{i};
+        
+        childrenTimes = [CellTracks(childrenTracks).startTime];
+        if ( length(childrenTimes) > 1 )
+            Families.ReconnectParentWithChildren(parentTrack, childrenTracks);
+            newPreserveTracks = [newPreserveTracks childrenTracks];
+        else
+            Tracks.ChangeLabel(childrenTracks, parentTrack, childrenTimes);
+            newPreserveTracks = [newPreserveTracks parentTrack];
         end
     end
     

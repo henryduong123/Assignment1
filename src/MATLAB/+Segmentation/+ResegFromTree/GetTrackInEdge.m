@@ -8,7 +8,7 @@ function trackEdge = GetTrackInEdge(t, trackID)
     end
     
     prevHull = Helper.GetNearestTrackHull(trackID, t-1, -1);
-    nextHull = Helper.GetNearestTrackHull(trackID, t, 1);
+    nextHull = Helper.GetNearestTrackHull(trackID, t, +1);
     
     if ( prevHull == 0 )
         parentTrack = CellTracks(trackID).parentTrack;
