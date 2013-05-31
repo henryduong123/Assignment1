@@ -229,11 +229,17 @@ function updateDijkstraGraph(updateHulls, nextHulls)
     fromHulls = updateHulls(bOutTracked);
     toHulls = nextHulls(bInTracked);
     
+    if ( isempty(costMatrix) )
+        return;
+    end
+    
     mexDijkstra('updateGraph', costMatrix, fromHulls, toHulls);
 end
 
 function newPreserveTracks = updateTracking(prevHulls, newHulls, preserveTracks)
     global CellHulls HashedCells Costs GraphEdits
+    
+    newPreserveTracks = [];
     
     if ( isempty(newHulls) )
         return;
