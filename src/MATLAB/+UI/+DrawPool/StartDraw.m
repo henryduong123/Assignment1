@@ -7,12 +7,14 @@ function StartDraw(axHandle)
     end
     
     % Reset current usage counts for all pools
-    for i=1:size(curPools,1)
-        curPools{i,3}(1) = 0;
+    for i=1:size(curPools.pools,1)
+        curPools.pools{i,3}(1) = 0;
         
-        visHandles = curPools{i,2};
-        set(visHandles, 'Visible','off');
+        visHandles = curPools.pools{i,2};
+        set(visHandles, 'Visible','off', 'HitTest','off', 'HandleVisibility','off');
     end
+    
+    curPools.renderOrder = [];
     
     set(axHandle, 'UserData',curPools);
 end

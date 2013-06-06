@@ -6,7 +6,7 @@ function AddPool(axHandle, poolName, hObj, size)
     curPools = get(axHandle, 'UserData');
     
     if ( ~isempty(curPools) )
-        if ( ~iscell(curPools) )
+        if ( ~isstruct(curPools) )
             error('Malformed resource pool for this axis handle');
         end
         
@@ -14,6 +14,8 @@ function AddPool(axHandle, poolName, hObj, size)
         if ( nnz(bChkName) > 0 )
             error('Specified name is already in the resource pool');
         end
+    else
+        curPools = struct('pools',{{}}, 'renderOrder',{[]});
     end
     
     newHandles = [];
@@ -22,7 +24,7 @@ function AddPool(axHandle, poolName, hObj, size)
         set(newHandles(i), 'Visible','off', 'HandleVisibility','off');
     end
     
-    curPools = [curPools; {poolName} {newHandles} {[0 0]}];
+    curPools.pools = [curPools.pools; {poolName} {newHandles} {[0 0]}];
     
     set(axHandle, 'UserData',curPools);
 end

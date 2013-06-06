@@ -8,7 +8,7 @@ function bHasPool = HasPool(axHandle)
         return;
     end
     
-    if ( ~iscell(curPools) )
+    if ( ~iscell(curPools.pools) )
         return;
     end
     

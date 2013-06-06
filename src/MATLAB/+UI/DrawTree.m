@@ -52,7 +52,8 @@ if ( ~isfield(Figures.tree,'axesHandle') || isempty(Figures.tree.axesHandle) )
         'Position', [.06 .06 .90 .90],...
         'XColor',   'w',...
         'XTick',    [],...
-        'Box',      'off');
+        'Box',      'off',...
+        'DrawMode', 'fast');
 end
 
 if ( ~UI.DrawPool.HasPool(Figures.tree.axesHandle) )
@@ -86,9 +87,6 @@ figure(Figures.tree.handle);
 
 % title(overAxes, CONSTANTS.datasetName, 'Position',[0 0 1], 'HorizontalAlignment','left', 'Interpreter','none');
 
-% Clear non-pooled draw resources
-cla(Figures.tree.axesHandle)
-
 hold(Figures.tree.axesHandle, 'on');
 
 % build a map with the heights for each node in the tree rooted at trackID
@@ -101,6 +99,9 @@ xMin = min(xTracks(:,2));
 xMax = max(xTracks(:,2));
 
 UI.DrawPool.StartDraw(Figures.tree.axesHandle);
+
+% Clear non-pooled draw resources
+cla(Figures.tree.axesHandle)
 
 for i=1:size(xTracks,1)
     curTrack = xTracks(i,1);
@@ -120,7 +121,7 @@ end
 
 UI.DrawPool.FinishDraw(Figures.tree.axesHandle);
 
-set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1]);
+set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 length(HashedCells)]);
 % Figures.tree.axesHandle = overAxes;
 
 if ( CellFamilies(familyID).bLocked )
@@ -158,8 +159,10 @@ end
 
 hold(Figures.tree.axesHandle, 'off');
 
-if(~isempty(phenoHandles))
-    legend(Figures.tree.axesHandle, phenoHandles);
+if(isempty(phenoHandles))
+    legend(Figures.tree.axesHandle,'hide');
+else
+    legend(Figures.tree.axesHandle, phenoHandles, 'Location','NorthWest');
 end
 
 %let the user know that the drawing is done
@@ -255,6 +258,10 @@ function drawVerticalEdge(trackID, xVal)
                    'uicontextmenu',Figures.tree.contextMenuHandle);
     end
     
+    if ( bStructOnly )
+        return;
+    end
+    
     drawTrackLabel(xVal, trackID, phenotype, bDrawLabels);
 end
 
@@ -298,14 +305,17 @@ function drawTrackLabel(x, trackID, phenotype, bDrawLabels)
                      'MarkerSize',circleSize,...
                      'UserData',trackID,...
                      'uicontextmenu',Figures.tree.contextMenuHandle);
+        
+        UI.DrawPool.SetDrawOrder(Figures.tree.axesHandle, [hMarker hLabel]);
         return;
     end
     
     % Draw a phenotype box
+    hPheno = [];
     if ( phenotype > 1 )
         phenoColor = CellPhenotypes.colors(phenotype,:);
-        hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
-        set(hMarker, 'XData',x, 'YData',yMin,...
+        hPheno = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
+        set(hPheno, 'XData',x, 'YData',yMin,...
                      'Marker','s',...
                      'MarkerFaceColor',phenoColor,...
                      'MarkerEdgeColor','w',...
@@ -323,9 +333,13 @@ function drawTrackLabel(x, trackID, phenotype, bDrawLabels)
                      'MarkerSize',circleSize,...
                      'UserData',trackID,...
                      'uicontextmenu',Figures.tree.contextMenuHandle);
+        
+        
+        UI.DrawPool.SetDrawOrder(Figures.tree.axesHandle, [hPheno hMarker hLabel]);
         return;
     end
     
+    hMarker = [];
     if ( phenotype == 0 )
         hMarker = UI.DrawPool.GetHandle(Figures.tree.axesHandle, 'Markers');
         set(hMarker, 'XData',x, 'YData',yMin,...
@@ -337,6 +351,7 @@ function drawTrackLabel(x, trackID, phenotype, bDrawLabels)
                      'uicontextmenu',Figures.tree.contextMenuHandle);
     end
     
+    UI.DrawPool.SetDrawOrder(Figures.tree.axesHandle, [hPheno hMarker hLabel]);
 end
 
 function textColor = getTextColor(trackID, phenotype, bDrawLabels)
