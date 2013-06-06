@@ -78,3 +78,5 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     nextHulls = [nextHulls addedHull];
     costMatrix = [costMatrix chkCosts];
 end
+
+

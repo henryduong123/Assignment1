@@ -13,7 +13,9 @@ function newEdges = FindFrameReseg(t, curEdges)
     bLongEdge = ((t-tFrom) > 1);
     
 %     checkEdges = curEdges(~bLongEdge,:);
-    checkEdges = curEdges;
+    bReallyLongEdge = ((t-tFrom) > 5);
+    checkEdges = curEdges(~bReallyLongEdge,:);
+    bLongEdge = bLongEdge(~bReallyLongEdge);
     
     [checkHulls uniqueIdx] = unique(checkEdges(:,1));
     nextHulls = [HashedCells{t}.hullID];
@@ -62,24 +64,27 @@ function newEdges = FindFrameReseg(t, curEdges)
         
         overlapDist = Segmentation.ResegFromTree.GetLongOverlapDist(checkHulls(i), nextHulls);
         minOverlap = min(overlapDist);
-        if ( minOverlap > 2.0 )
-            [addedHull costMatrix nextHulls] = Segmentation.ResegFromTree.AddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls);
-            if ( isempty(addedHull) )
-                if ( ~all(isinf(costMatrix(i,:))) )
-                    continue;
-                end
-                
-                [addedHull costMatrix nextHulls] = Segmentation.ResegFromTree.AddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls, 1);
-                
-                if ( isempty(addedHull) )
-                    continue;
-                end
-            end
-            
-            ResegState.SegEdits = [ResegState.SegEdits;{0} {addedHull}];
-            
-            bAddedHull(i) = 1;
+        
+        if ( minOverlap < 2.0 )
+            continue;
         end
+        
+        [addedHull costMatrix nextHulls] = Segmentation.ResegFromTree.AddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls);
+        if ( isempty(addedHull) )
+            if ( ~all(isinf(costMatrix(i,:))) )
+                continue;
+            end
+
+            [addedHull costMatrix nextHulls] = Segmentation.ResegFromTree.AddSegmentation(checkHulls(i), costMatrix, checkHulls, nextHulls, 1);
+
+            if ( isempty(addedHull) )
+                continue;
+            end
+        end
+
+        ResegState.SegEdits = [ResegState.SegEdits;{0} {addedHull}];
+
+        bAddedHull(i) = 1;
     end
     
     % Find hulls we may need to split
@@ -91,10 +96,10 @@ function newEdges = FindFrameReseg(t, curEdges)
             continue;
         end
         
-        % TODO: Handle this case.
-        if ( isinf(desiredCosts(1)) && ~any(i == missIdx) )
-            error('Did not add hull but unable to find next hull to go to');
-        end
+%         % TODO: Handle this case.
+%         if ( isinf(desiredCosts(1)) && ~any(i == missIdx) )
+%             error('Did not add hull but unable to find next hull to go to');
+%         end
         
         desiredCellCount(desiredIdx(1)) = desiredCellCount(desiredIdx(1)) + 1;
         
@@ -113,7 +118,7 @@ function newEdges = FindFrameReseg(t, curEdges)
         validDesirers = [];
         
         % Only allow splits if cells are really close together
-        chkDist = zeros(desiredCellCount(splitIdx(i)));
+        chkDist = zeros(desiredCellCount(splitIdx(i)),1);
         for j=1:desiredCellCount(splitIdx(i))
             chkDist(j) = Segmentation.ResegFromTree.GetLongOverlapDist(desirers{splitIdx(i)}(j), nextHulls(splitIdx(i)));
             if ( chkDist(j) < 2.0 )

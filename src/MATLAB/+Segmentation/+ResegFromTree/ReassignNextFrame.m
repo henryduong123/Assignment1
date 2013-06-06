@@ -91,6 +91,14 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
     for i=1:size(newEdges,1)
         if ( newEdges(i,2) == 0 )
             newEdges(i,2) = termHulls(assignIdx(i));
+            
+            % If this  is a long edge connection don't take previous hulls
+            % from this track.
+            termTrack = Hulls.GetTrackID(newEdges(i,2));
+            if ( CellTracks(termTrack).hulls(1) ~= newEdges(i,2) )
+                Families.RemoveFromTreePrune(termTrack, CellHulls(newEdges(i,2)).time);
+            end
+            
             continue;
         end
         

@@ -1,5 +1,5 @@
 function dist = GetLongOverlapDist(fromHull, toHulls)
-    global CellHulls
+    global CellHulls CONSTANTS
     
     dist = Inf*ones(1,length(toHulls));
     
@@ -16,6 +16,8 @@ function dist = GetLongOverlapDist(fromHull, toHulls)
         end
         return;
     end
+    
+    tDist = abs(tNext-t);
     
     comDistSq = sum((ones(length(toHulls),1)*CellHulls(fromHull).centerOfMass - vertcat(CellHulls(toHulls).centerOfMass)).^2, 2);
     
