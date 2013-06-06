@@ -37,13 +37,21 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
             extendHull = newEdges(i,1);
         end
         
-        maxExt = maxT - CellHulls(extendHull).time + 1;
+%         maxExt = maxT - CellHulls(extendHull).time + 1;
+%         
+%         [endpaths endCosts] = mexDijkstra('matlabExtend', extendHull, maxExt, @(x,y)(any(y==termHulls)), 1, 0);
+%         lastHulls = cellfun(@(x)(x(end)), endpaths);
+%         [bFoundPath arrIdx] = ismember(termHulls, lastHulls);
+
+        curTrack = Hulls.GetTrackID(extendHull);
+        trackIdx = find(curTrack == droppedTracks, 1, 'first');
+        if ( ~isempty(trackIdx) )
+            forwardCosts(i,trackIdx) = 1;
+        else
+            forwardCosts(i,:) = 20;
+        end
         
-        [endpaths endCosts] = mexDijkstra('matlabExtend', extendHull, maxExt, @(x,y)(any(y==termHulls)), 1, 0);
-        lastHulls = cellfun(@(x)(x(end)), endpaths);
-        [bFoundPath arrIdx] = ismember(termHulls, lastHulls);
-        
-        forwardCosts(i,bFoundPath) = endCosts(arrIdx(bFoundPath));
+%         forwardCosts(i,bFoundPath) = endCosts(arrIdx(bFoundPath));
     end
     
     % Deal with mitosis events
