@@ -24,7 +24,7 @@ function LockedChangeLabel(currentTrack, desiredTrack, time)
     lockedTracks = [currentTrack desiredTrack];
     lockedTracks = lockedTracks(bLocked);
     
-    [nextHulls preserveTracks] = chopTracks(time+1, [currentTrack desiredTrack]);
+    [nextHulls preserveTracks] = chopTracks(time+1, lockedTracks);
     [droppedHulls oldTracks] = chopTracks(time, lockedTracks);
     
     bRemoveChanged = droppedHulls ~= changeHull;
