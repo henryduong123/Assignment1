@@ -10,9 +10,5 @@ function [historyAction bFinished] = ResegPlayAction(tStart)
     
     bFinished = Segmentation.ResegFromTreeInteractive();
     
-    if ( bFinished )
-        ResegState = [];
-    end
-    
     historyAction = '';
 end

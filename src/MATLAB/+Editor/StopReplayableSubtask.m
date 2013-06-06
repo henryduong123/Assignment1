@@ -1,4 +1,4 @@
-% historyAction = StopReplayableSubtask(taskLabel)
+% historyAction = StopReplayableSubtask(time, taskLabel)
 %
 % Stop a subtask, the tasklabel should match the task which was added, the
 % labels are only an error checking device.

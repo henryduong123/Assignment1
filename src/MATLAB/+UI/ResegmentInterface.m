@@ -27,17 +27,29 @@ function ResegmentInterface()
     
     hToolbar = addButtons();
     
+    tStart = max(Figures.time, 2);
+    bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, preserveFam, tStart);
+    if ( bErr )
+        delete(hToolbar);
+    end
+    
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'InteractiveResegTask');
     
-    [bErr bFinished] = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, preserveFam, 2);
-    if ( bErr || bFinished )
-        Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, Figures.time, 'InteractiveResegTask');
-        delete(hToolbar);
+    [bErr bFinished] = Editor.ReplayableEditAction(@Editor.ResegPlayAction, ResegState.currentTime);
+    if ( bFinished )
+        cleanupReseg(hToolbar);
     end
 end
 
+function cleanupReseg(hToolbar)
+    [bErr finishTime] = Editor.ReplayableEditAction(@Editor.ResegFinishAction);
+    Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, finishTime-1, 'InteractiveResegTask');
+    
+    delete(hToolbar);
+end
+
 function toggleReseg(src,evnt)
-    global Figures ResegState bResegPaused
+    global Figures HashedCells ResegState bResegPaused
     if ( isempty(ResegState) )
 %         delete(get(src,'Parent'));
         return;
@@ -46,38 +58,64 @@ function toggleReseg(src,evnt)
     playIm = imread('+UI\play.png');
     pauseIm = imread('+UI\pause.png');
     
+    hToolbar = get(src, 'Parent');
     if ( bResegPaused )
-        hToolbar = get(src, 'Parent');
-        hButtons = get(hToolbar, 'Children');
-        set(hButtons(3), 'Enable','off');
+        setPlayToolbarState(hToolbar);
         set(src,'CData',pauseIm, 'TooltipString','Pause Resegmentation');
         
         % Prepare to start playing resegmentation again, consolidate pause edits
         Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, ResegState.currentTime-1, 'PauseResegTask');
         [bErr bFinished] = Editor.ReplayableEditAction(@Editor.ResegPlayAction, ResegState.currentTime);
         if ( bFinished )
-            Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, Figures.time,'InteractiveResegTask');
-            delete(get(src,'Parent'));
+            cleanupReseg(hToolbar);
+            return;
         end
     else
         set(src,'CData',playIm, 'TooltipString','Continue Resegmentation');
         
-        hToolbar = get(src, 'Parent');
-        hButtons = get(hToolbar, 'Children');
-        if ( ~Editor.StackedHistory.CanUndo() )
-            set(hButtons(3), 'Enable','off');
-        else
-            set(hButtons(3), 'Enable','on');
-        end
-        
         % Pause resegmentation, make new subtask for edits while paused
         Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'PauseResegTask');
         bErr = Editor.ReplayableEditAction(@Editor.ResegPauseAction);
+        
+        setPausedToolbarState(hToolbar);
     end
 end
 
 function backupReseg(src,evnt)
     global Figures ResegState bResegPaused
+    if ( isempty(ResegState) || isempty(bResegPaused) )
+        return;
+    end
+    
+    if ( ~bResegPaused )
+        return;
+    end
+    
+    hToolbar = get(src, 'Parent');
+    
+    resegLevel = Editor.StackedHistory.GetDepth()-1;
+    if ( ~Editor.StackedHistory.CanUndo(resegLevel) )
+        setPausedToolbarState(hToolbar);
+        return;
+    end
+    
+    Editor.ReplayableEditAction(@Editor.DropReplayableSubtask, 'PauseResegTask');
+    Editor.ReplayableEditAction(@Editor.Top);
+    
+    bErr = Editor.ReplayableEditAction(@Editor.ResegBackAction);
+    
+    xlims = get(Figures.tree.axesHandle,'XLim');
+    hold(Figures.tree.axesHandle,'on');
+    plot(Figures.tree.axesHandle, [xlims(1), xlims(2)],[ResegState.currentTime-1, ResegState.currentTime-1], '-b');
+    hold(Figures.tree.axesHandle,'off');
+    
+    Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'PauseResegTask');
+    
+    setPausedToolbarState(hToolbar);
+end
+
+function forwardReseg(src,evnt)
+    global Figures HashedCells ResegState bResegPaused
     if ( isempty(ResegState) || isempty(bResegPaused) )
 %         delete(get(src,'Parent'));
         return;
@@ -87,17 +125,19 @@ function backupReseg(src,evnt)
         return;
     end
     
-    resegLevel = Editor.StackedHistory.GetDepth()-1;
-    if ( ~Editor.StackedHistory.CanUndo(resegLevel) )
+    hToolbar = get(src, 'Parent');
+    
+    if ( ResegState.currentTime == length(HashedCells) )
+        setPausedToolbarState(hToolbar);
         return;
     end
     
-    Editor.ReplayableEditAction(@Editor.DropReplayableSubtask, 'PauseResegTask');
-    Editor.ReplayableEditAction(@Editor.Top);
+    Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, ResegState.currentTime-1, 'PauseResegTask');
     
-    bErr = Editor.ReplayableEditAction(@Editor.ResegBackAction);
-    if ( ~Editor.StackedHistory.CanUndo() )
-        set(src, 'Enable','off');
+    [bErr bFinished] = Editor.ReplayableEditAction(@Editor.ResegForwardAction);
+    if ( bFinished )
+        cleanupReseg(hToolbar)
+        return;
     end
     
     xlims = get(Figures.tree.axesHandle,'XLim');
@@ -106,20 +146,47 @@ function backupReseg(src,evnt)
     hold(Figures.tree.axesHandle,'off');
     
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'PauseResegTask');
+    
+    setPausedToolbarState(hToolbar);
 end
 
 function finishReseg(src,evnt)
-    global Figures bResegPaused
+    global Figures ResegState bResegPaused
     
     if ( bResegPaused )
-        Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, Figures.time, 'PauseResegTask');
+        Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, ResegState.currentTime-1, 'PauseResegTask');
     end
     
-    Editor.ReplayableEditAction(@Editor.ResegFinishAction);
-    Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, Figures.time, 'InteractiveResegTask');
+    hToolbar = get(src,'Parent');
+    cleanupReseg(hToolbar)
+end
+
+function setPausedToolbarState(hToolbar)
+    global ResegState HashedCells
     
-%     set(Figures.cells.handle, 'Toolbar','figure');
-    delete(get(src,'Parent'));
+    hButtons = get(hToolbar, 'Children');
+    
+    % Set back state
+    resegLevel = Editor.StackedHistory.GetDepth()-1;
+    if ( ~Editor.StackedHistory.CanUndo(resegLevel) )
+        set(hButtons(4), 'Enable','off');
+    else
+        set(hButtons(4), 'Enable','on');
+    end
+
+    % Set forward state
+    if ( ResegState.currentTime == length(HashedCells) )
+        set(hButtons(2), 'Enable','off');
+    else
+        set(hButtons(2), 'Enable','on');
+    end
+end
+
+function setPlayToolbarState(hToolbar)
+    hButtons = get(hToolbar, 'Children');
+    
+    set(hButtons(4), 'Enable','off');
+    set(hButtons(2), 'Enable','off');
 end
 
 function hToolbar = addButtons()
@@ -131,7 +198,7 @@ function hToolbar = addButtons()
     backIm = imread('+UI\backFrame.png');
     playIm = imread('+UI\play.png');
     pauseIm = imread('+UI\pause.png');
-%     forwardIm = imread('+UI\forwardFrame.png');
+    forwardIm = imread('+UI\forwardFrame.png');
 %     revertIm = imread('+UI\revert.png');
     finishIm = imread('+UI\stop.png');
     
@@ -139,8 +206,9 @@ function hToolbar = addButtons()
     set(hpt, 'Enable','off');
     
     uipushtool(hToolbar, 'CData',pauseIm, 'ClickedCallback',@toggleReseg, 'TooltipString','Pause Resegmentation');
-%     uipushtool(hToolbar, 'CData',forwardIm, 'TooltipString','Forward 1 Frame');
+    hpt = uipushtool(hToolbar, 'CData',forwardIm, 'ClickedCallback',@forwardReseg, 'TooltipString','Forward 1 Frame');
+    set(hpt, 'Enable','off');
     
 %     uipushtool(hToolbar, 'CData',revertIm, 'ClickedCallback',@abortReseg, 'TooltipString','Revert all changes', 'Separator','on');
-    uipushtool(hToolbar, 'CData',finishIm, 'ClickedCallback',@finishReseg, 'TooltipString','Finish');
+    uipushtool(hToolbar, 'CData',finishIm, 'ClickedCallback',@finishReseg, 'TooltipString','Finish', 'Separator','on');
 end

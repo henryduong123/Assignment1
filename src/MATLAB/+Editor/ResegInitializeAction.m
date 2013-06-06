@@ -1,9 +1,9 @@
-% [historyAction bFinished] = ResegInitializeAction(preserveFamilies)
+% historyAction = ResegInitializeAction(preserveFamilies)
 % Edit Action:
 % 
-% Initialize resegmentation state and begin playing
+% Initialize resegmentation state
 
-function [historyAction bFinished] = ResegInitializeAction(preserveFamilies, tStart)
+function historyAction = ResegInitializeAction(preserveFamilies, tStart)
     global ResegState bResegPaused Figures
     
     xlims = get(Figures.tree.axesHandle,'XLim');
@@ -17,11 +17,6 @@ function [historyAction bFinished] = ResegInitializeAction(preserveFamilies, tSt
     ResegState.primaryTree = preserveFamilies(1);
     ResegState.currentTime = tStart;
     ResegState.SegEdits = {};
-    
-    bFinished = Segmentation.ResegFromTreeInteractive();
-    if ( bFinished )
-        ResegState = [];
-    end
     
     historyAction = '';
 end

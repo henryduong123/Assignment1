@@ -44,6 +44,11 @@ function bFinished = ResegFromTreeInteractive()
         % processed.
         drawnow();
         
+        % For forward frame-step
+        if ( t == tEnd )
+            break;
+        end
+        
         if ( isempty(ResegState) || isempty(bResegPaused) )
             return;
         end
