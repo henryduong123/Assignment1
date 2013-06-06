@@ -35,10 +35,15 @@ function trackIDs = TrackAddedHulls(newHulls, COM)
     
     [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughSplit(t, newHulls, COM);
     
-    % Ignore graph-edits to avoid reassigning them, this is necessary
+    [extendHulls, affectedHulls] = Tracker.GetCostClique(extendHulls, affectedHulls);
+    [costMatrix bFrom bTo] = Tracker.GetCostSubmatrix(extendHulls, affectedHulls);
+    extendHulls = extendHulls(bFrom);
+    affectedHulls = affectedHulls(bTo);
+    
+    % Ignore local graph-edits to avoid reassigning them, this is necessary
     % because ProcessNewborns will not be run immediately after this call.
-    bKeepFrom = ~any(GraphEdits(extendHulls,:) > 0,2);
-    bKeepTo = ~any(GraphEdits(:,affectedHulls) > 0,1);
+    bKeepFrom = ~any(GraphEdits(extendHulls,affectedHulls) > 0,2);
+    bKeepTo = ~any(GraphEdits(extendHulls,affectedHulls) > 0,1);
     
     extendHulls = extendHulls(bKeepFrom);
     affectedHulls = affectedHulls(bKeepTo);
