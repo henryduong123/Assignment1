@@ -17,6 +17,10 @@
 function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     global ReplayEditActions
     
+    if ( nargout(actPtr) < 1 )
+        error('All valid replayable actions must return at least a historyAction argument');
+    end
+    
     actCtx = getEditContext();
     
     startRandState = Helper.GetRandomState();
@@ -30,7 +34,11 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
         ReplayEditActions = [ReplayEditActions; newAct];
     end
     
-    varargout = cell(1,max(0,nargout-1));
+    % This is silly, but basically lets us push the error message down to
+    % the function that actually has fewer outputs than requested.
+    numArgs = max(nargout, nargout(actPtr));
+    
+    varargout = cell(1,max(0,numArgs-1));
     [bErr historyAction varargout{:}] = Editor.SafeExecuteAction(actPtr, varargin{:});
     
     ReplayEditActions(end).bErr = bErr;
