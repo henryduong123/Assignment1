@@ -3,11 +3,11 @@
 % 
 % Finish resegmentation action, (push history)
 
-function [historyAction finishTime] = ResegFinishAction()
+function [historyAction finishTime finalResegState] = ResegFinishAction()
     global ResegState bResegPaused
     
     resegEdits = ResegState.SegEdits;
-    save(['ResegEdits_' datestr(clock, 'yyyy-mm-dd_HHMM')], 'ResegState');
+    finalResegState = ResegState;
     
     finishTime = ResegState.currentTime;
     
