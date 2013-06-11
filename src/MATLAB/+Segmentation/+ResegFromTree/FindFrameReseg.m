@@ -127,6 +127,10 @@ function newEdges = FindFrameReseg(t, curEdges)
             end
         end
         
+        if ( isempty(validDesirers) )
+            continue;
+        end
+        
         [newSegs costMatrix nextHulls] = Segmentation.ResegFromTree.SplitSegmentation(nextHulls(splitIdx(i)), validSplitCount, validDesirers, mitosisParents, costMatrix, checkHulls, nextHulls);
         if ( length(newSegs) > 1 )
             ResegState.SegEdits = [ResegState.SegEdits;{nextHulls(splitIdx(i))} {newSegs}];
