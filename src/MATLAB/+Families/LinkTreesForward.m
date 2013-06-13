@@ -1,4 +1,4 @@
-function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
+function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks, stopTime)
     global CellHulls CellTracks HashedCells Costs
 
     assignedExtensions = 0;
@@ -7,12 +7,17 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     findTime = 0;
     extTime = 0;
     
+    if ( ~exist('stopTime','var') )
+        stopTime = length(HashedCells);
+    end
+    
     rootTracks = unique(getRootTracks(rootTracks));
     
     % Initialize mex routine with current cost-graph
     costMatrix = Tracker.GetCostMatrix();
     mexDijkstra('initGraph', costMatrix);
     
+    % Get all initial leaves for the root tracks
     leafHulls = getLeafHulls(rootTracks);
     tStart = CellHulls(leafHulls(1)).time;
     tEnd = length(HashedCells);
@@ -27,23 +32,33 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     cachedTracks = zeros(length(CellHulls),1);
     cachedTracks(hull2Track(1,:)) = hull2Track(2,:);
     
+    bValidTermHulls = allValidTerminals();
+    
+    leafGraphHandle = Families.LinkTreesForward.GetFamilyLeafCosts(stopTime);
+    
     extGraphSize = 0;
     extGraphR = zeros(2*nnz(Costs),1);
     extGraphC = zeros(2*nnz(Costs),1);
     extGraphCost = zeros(2*nnz(Costs),1);
     extGraphEnds = zeros(2*nnz(Costs),1);
     
+    bCheckLeaves = false(1,length(CellHulls));
+    
     chkFindTime = tic();
     UI.Progressbar(0);
     i = 1;
+    
     checkExtHulls = leafHulls;
+    bCheckLeaves(checkExtHulls) = 1;
     while ( i <= length(checkExtHulls) )
-        if ( CellHulls(checkExtHulls(i)).time >= tEnd )
+        curCheckHull = checkExtHulls(i);
+        
+        if ( CellHulls(curCheckHull).time >= tEnd )
             i = i + 1;
             continue;
         end
         
-        [pathExt pathCost] = mexDijkstra('checkExtension', checkExtHulls(i), maxFrameExt);
+        [pathExt pathCost] = mexDijkstra('checkExtension', curCheckHull, maxFrameExt);
         % [pathExt pathCost] = dijkstraSearch(checkExtHulls(i), costMatrix, @checkExtension, maxFrameExt);
         
         endHulls = zeros(1,length(pathExt));
@@ -56,18 +71,31 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
         extTracks = cachedTracks(extHulls);
         
         for j=1:length(extHulls)
-            nextLeaves = getLeafHulls(extTracks(j));
+%             nextLeaves = find(leafMatrix(extHulls(j),:));
+%             nextLeaves = getLeafHulls(extTracks(j));
+            [nextLeaves nextCosts] = mexGraph('edgesOut', leafGraphHandle, extHulls(j));
+            
+            if ( isempty(nextLeaves) )
+                nextLeaves = extHulls(j);
+                nextCosts = 0;
+            end
             
             extIdx = find(endHulls == extHulls(j));
             for k=1:length(extIdx)
                 for l = 1:length(nextLeaves)
-                    trackCost = calcTrackCost(costMatrix, extHulls(j),nextLeaves(l), maxFrameExt, cachedTracks);
+                    trackCost = nextCosts(l);
                     
+%                     if ( (nextLeaves(l) == extTracks(j)) )
+%                         trackCost = 1;
+%                     else
+%                         trackCost = leafMatrix(extHulls(j),nextLeaves(l));
+%                     end
+
                     extendCost = trackCost + pathCost(extIdx(k));
                     
                     extGraphSize = extGraphSize + 1;
                     
-                    extGraphR(extGraphSize) = checkExtHulls(i);
+                    extGraphR(extGraphSize) = curCheckHull;
                     extGraphC(extGraphSize) = nextLeaves(l);
                     extGraphCost(extGraphSize) = extendCost;
                     extGraphEnds(extGraphSize) = pathExt{extIdx(k)}(end);
@@ -76,7 +104,10 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
                 end
             end
             
-            checkExtHulls = [checkExtHulls setdiff(nextLeaves,checkExtHulls)];
+            addLeaves = nextLeaves(~bCheckLeaves(nextLeaves));
+            
+            checkExtHulls = [checkExtHulls addLeaves];
+            bCheckLeaves(addLeaves) = 1;
         end
         
         UI.Progressbar((i/length(checkExtHulls))/2);
@@ -84,10 +115,11 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
         i = i + 1;
     end
     
+    findTime = toc(chkFindTime);
+    
     extGraph = sparse(extGraphR(1:extGraphSize),extGraphC(1:extGraphSize),extGraphCost(1:extGraphSize), size(Costs,1),size(Costs,1));
 	extEnds = sparse(extGraphR(1:extGraphSize),extGraphC(1:extGraphSize),extGraphEnds(1:extGraphSize), size(Costs,1),size(Costs,1));
     
-    findTime = toc(chkFindTime);
     
     chkExtendTime = tic();
     
@@ -99,38 +131,31 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     
     mexDijkstra('initGraph', extGraph);
     
+    bTermHulls = ([CellHulls.time] >= stopTime);
+    
     leafHulls = leafHulls(srtidx);
     for i=1:length(leafHulls)
         % Only check best-to-end for now
-%         [endpaths endcosts] = dijkstraSearch(leafHulls(i), extGraph, @checkFullExt, Inf);
-        [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @checkFullExt);
+        [endpaths endcosts] = mexDijkstra('matlabExtend', leafHulls(i), Inf, @(startHull,endHull)(bTermHulls(endHull)));
         
         if ( isempty(endcosts) )
             continue;
         end
         
         [mincost minidx] = min(endcosts);
-        for j=1:(length(endpaths{minidx})-1)
+        for j=(length(endpaths{minidx})-1):-1:1
             startHull = endpaths{minidx}(j);
             finalHull = endpaths{minidx}(j+1);
             linkupHull = extEnds(startHull,finalHull);
             
             Tracker.AssignEdge(startHull, linkupHull);
-%             extGraph(:,finalHull) = 0;
-%             extGraph(startHull,:) = 0;
             
             mexDijkstra('removeEdges', [], finalHull);
             mexDijkstra('removeEdges', startHull, []);
             
-            [rmstart,rmend] = find(extEnds == linkupHull);
-            mexDijkstra('removeEdges', rmstart, rmend);
-%             for k=1:length(rmstart)
-%                 if ( rmstart(k) == startHull || rmend(k) == finalHull )
-%                     continue;
-%                 end
-%                 
-%                 extGraph(rmstart(k),rmend(k)) = 0;
-%             end
+            [nextVerts nextCosts] = mexGraph('edgesOut', leafGraphHandle, linkupHull);
+            [idxStart,idxEnds] = find(extEnds(:,nextVerts) == linkupHull);
+            mexDijkstra('removeEdges', idxStart, nextVerts(idxEnds));
         end
         
         assignedExtensions = assignedExtensions + length(endpaths{minidx}) - 1;
@@ -139,75 +164,10 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks)
     end
     
     UI.Progressbar(1);
+    
+    mexGraph('deleteGraph', leafGraphHandle);
 
     extTime = toc(chkExtendTime);
-end
-
-function cost = calcTrackCost(costMatrix, startHull, endHull, maxFrameExt, cachedTracks)
-    global CellHulls CellTracks
-    
-    cost = 0;
-    backHull = endHull;
-    while ( backHull ~= startHull )
-%         trackID = Hulls.GetTrackID(backHull);
-        trackID = cachedTracks(backHull);
-        curHash = CellHulls(backHull).time - CellTracks(trackID).startTime + 1;
-        nzHullIdx = find(CellTracks(trackID).hulls(1:(curHash-1)),1,'last');
-        nzHull = CellTracks(trackID).hulls(nzHullIdx);
-        if ( isempty(nzHullIdx) )
-            parentTrackID = CellTracks(trackID).parentTrack;
-            if ( ~isempty(parentTrackID) )
-                nzHullIdx = find(CellTracks(parentTrackID).hulls,1,'last');
-                nzHull = CellTracks(parentTrackID).hulls(nzHullIdx);
-            else
-                error('startHull is not in same family');
-            end
-        end
-%         nextCost = costMatrix(nzHull,backHull);
-        nextCost = mexDijkstra('edgeCost', nzHull, backHull);
-        if ( ~(nextCost) )
-            % Try to find shortest graph-path to here
-            [pathExt nextCost] = mexDijkstra('matlabExtend', nzHull, maxFrameExt, @(x,y)(y==backHull));
-%             [pathExt nextCost] = dijkstraSearch(nzHull, costMatrix, @(x,y)(y==backHull), maxFrameExt);
-            if ( isempty(nextCost) )
-%                 error(['cost(' num2str(nzHull) ',' num2str(backHull) ') is infinite within ' num2str(maxFrameExt) ' frames.']);
-                cost = Inf;
-                return;
-            end
-        end
-        cost = cost + nextCost;
-        
-        backHull = nzHull;
-    end
-end
-
-function bEnd = checkFullExt(startHull, endHull)
-    global CellHulls CellTracks HashedCells
-    bEnd = false;
-    
-    if ( CellHulls(endHull).time >= length(HashedCells) )
-        bEnd = true;
-        return
-    end
-end
-
-function bsame = dblcheck(ext, tstext, tstcost)
-    bsame = false;
-    if ( length(ext) ~= length(tstext) )
-        return;
-    end
-    
-    for i=1:length(ext)
-        if ( ~all(ext(i).path == tstext{i}) )
-            return;
-        end
-        
-        if ( ext(i).cost ~= tstcost(i) )
-            return;
-        end
-    end
-    
-    bsame = true;
 end
 
 function leafHulls = getLeafHulls(rootTracks)
@@ -252,101 +212,47 @@ function childTracks = getSubtreeTracks(rootTracks)
     end
 end
 
-function bGoodExt = checkExtension(startHull, endHull)
-    global CellTracks CellHulls
+function bValidTermHulls = allValidTerminals()
+    global CellFamilies CellTracks CellHulls GraphEdits
     
-    bGoodExt = false;
+    costMatrix = Tracker.GetCostMatrix();
     
-    trackID = Hulls.GetTrackID(endHull);
-    bGoodTime = (CellTracks(trackID).startTime == CellHulls(endHull).time);
-    if ( ~bGoodTime )
-        return;
-    end
+    bValidTermHulls = false(length(CellHulls),1);
     
-    parentID = CellTracks(trackID).parentTrack;
-    if ( ~isempty(parentID) )
-        nzParent = CellTracks(parentID).hulls(find(CellTracks(parentID).hulls,1,'last'));
-        [costMatrix bPathHulls bNextHulls] = Tracker.GetCostSubmatrix(nzParent, 1:length(CellHulls));
-        nxtHulls = find(bNextHulls);
-        [dump minidx] = min(costMatrix);
-        if ( nxtHulls(minidx) == endHull )
-            return;
+    for i=1:length(CellFamilies)
+        if ( isempty(CellFamilies(i).startTime) )
+            continue;
         end
-    end
-    
-    bGoodExt = true;
-end
-
-function [paths pathCosts] = dijkstraSearch(startHull, costGraph, acceptFunc, maxExt)
-    paths = {};
-    pathCosts = [];
-    
-    bestCosts = sparse([],[],[],1,size(costGraph,1),round(0.01*size(costGraph,1)));
-    bestPaths = cell(1,size(costGraph,1));
-    
-    bestPaths{startHull} = startHull;
-    
-    termHulls = [];
-    
-    trvList = [];
-    trvHull = startHull;
-    while ( true )
         
-        nextHulls = find(costGraph(trvHull,:));
-        nextPathCosts = costGraph(trvHull,nextHulls) + bestCosts(trvHull);
+        if ( CellFamilies(i).bLocked )
+            continue;
+        end
         
-%         % Don't even bother putting paths that are higher cost in the list
-%         bestChk = bestCosts(nextHulls);
-%         bestChk(bestChk == 0) = Inf;
-%         bKeepNext = (min([nextPathCosts;bestChk],[],1) == nextPathCosts);
-%         nextHulls = nextHulls(bKeepNext);
-%         nextPathCosts = nextPathCosts(bKeepNext);
-
-        trvList = [trvList; nextPathCosts' trvHull*ones(length(nextHulls),1) nextHulls'];
-        bestChk = full(bestCosts(trvList(:,3)));
-        bestChk(bestChk == 0) = Inf;
-        bKeepNext = (min([trvList(:,1)';bestChk],[],1) == trvList(:,1)');
-        trvList = trvList(bKeepNext,:);
+        % 1st hull on root track of family is always valid
+        rootHull = CellTracks(CellFamilies(i).rootTrackID).hulls(1);
+        bValidTermHulls(rootHull) = 1;
         
-%         trvList = sortrows([trvList; nextPathCosts' trvHull*ones(length(nextHulls),1) nextHulls'],1);
-        trvList = sortrows(trvList,1);
+        checkTracks = CellFamilies(i).tracks;
         
-        while ( size(trvList,1) > 0 )
-            if ( length(bestPaths{trvList(1,2)}) > maxExt )
-                trvList = trvList(2:end,:);
+        for j=1:length(checkTracks)
+            if ( isempty(CellTracks(checkTracks(j)).childrenTracks) )
                 continue;
             end
             
-            if ( (bestCosts(trvList(1,3))==0) )
-                bestCosts(trvList(1,3)) = trvList(1,1);
-                bestPaths{trvList(1,3)} = [bestPaths{trvList(1,2)} trvList(1,3)];
-            elseif ( (bestCosts(trvList(1,3)) > trvList(1,1)) )
-                error('This should never happen!');
-            end
-
-            % Is the next traversal a terminal node?
-            if ( acceptFunc(startHull, trvList(1,3)) )
-                termHulls = union(termHulls,trvList(1,3));
-                trvList = trvList(2:end,:);
+            childTracks = CellTracks(checkTracks(j)).childrenTracks;
+            
+            parentHull = CellTracks(checkTracks(j)).hulls(end);
+            childrenHulls = [CellTracks(childTracks(1)).hulls(1) CellTracks(childTracks(2)).hulls(1)];
+            
+            mitCosts = costMatrix(parentHull, childrenHulls);
+            [worseEdge, worseIdx] = max(mitCosts);
+            worseChild = childrenHulls(worseIdx);
+            if ( any(GraphEdits(:,worseChild) > 0) )
                 continue;
             end
             
-            break;
+            bValidTermHulls(worseChild) = 1;
         end
-        
-        if ( isempty(trvList) )
-            break;
-        end
-        
-        trvHull = trvList(1,3);
-        trvList = trvList(2:end,:);
-    end
-    
-    paths = cell(1,length(termHulls));
-    pathCosts = zeros(1,length(termHulls));
-    for i=1:length(termHulls)
-        paths{i} = bestPaths{termHulls(i)};
-        pathCosts(i) = bestCosts(termHulls(i));
     end
 end
 
