@@ -91,6 +91,11 @@ system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|'
 fprintf('Done (%f sec)\n\n', toc());
 
 tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexGraph.mexw' buildbits]);
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexGraph.sln"']);
+fprintf('Done (%f sec)\n\n', toc());
+
+tic();
 fprintf('\nVisual Studio Compiling: %s...\n', ['mexIntegrityCheck.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexIntegrityCheck.sln"']);
 fprintf('Done (%d sec)\n\n', toc());
@@ -119,6 +124,7 @@ fprintf('Done (%f sec)\n', toc());
 clear mex
 system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
 system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDijkstra.mexw' buildbits]);
+system(['copy ..\c\mexGraph\Release_' buildplatform '\mexGraph.dll .\mexGraph.mexw' buildbits]);
 system(['copy ..\c\mexIntegrityCheck\Release_' buildplatform '\mexIntegrityCheck.dll .\mexIntegrityCheck.mexw' buildbits]);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
