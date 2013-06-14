@@ -1,4 +1,4 @@
-function [iterations totalTime] = LinkTrees(families)
+function [iterations totalTime] = LinkTrees(families, stopTime)
     global CellFamilies CellTracks
     
     iterations = 0;
@@ -18,7 +18,7 @@ function [iterations totalTime] = LinkTrees(families)
     totalTime = 0;
     maxPushCount = 10;
     for i=1:maxPushCount
-    	[assignExt findTime extTime] = Families.LinkTreesForward(rootTrackIDs);
+    	[assignExt findTime extTime] = Families.LinkTreesForward(rootTrackIDs, stopTime);
 %         LogAction(['Tree inference step ' num2str(i)],[assignExt findTime extTime],[]);
         totalTime = totalTime + findTime + extTime;
         

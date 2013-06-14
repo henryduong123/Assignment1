@@ -418,7 +418,7 @@ function toggleTreeLock(src, evnt)
 end
 
 function treeInference(src, evt)
-    global Figures CellFamilies CellTracks
+    global Figures CellFamilies CellTracks HashedCells
     
     if ( CellFamilies(Figures.tree.familyID).bLocked )
         msgbox('Inference cannot be run on a locked tree.', 'Tree Locked', 'warn');
@@ -427,7 +427,18 @@ function treeInference(src, evt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    bErr = Editor.ReplayableEditAction(@Editor.TreeInference, Figures.tree.familyID);
+    stopText = inputdlg({'Enter inference stop time:'}, 'Stop time', 1, {num2str(length(HashedCells))});
+    if ( isempty(stopText) || isempty(stopText{1}) )
+        return;
+    end
+    
+    stopTime = str2double(stopText{1});
+    if ( stopTime < 2 || stopTime > length(HashedCells) )
+        msgbox('Invalid stop time.', 'Invalid time', 'warn');
+        return;
+    end
+    
+    bErr = Editor.ReplayableEditAction(@Editor.TreeInference, Figures.tree.familyID, stopTime);
     if ( bErr )
         return;
     end
