@@ -25,8 +25,12 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd)
     
     % Use Dijkstra or just manually find best t -> (t+1) assignment, and
     % move hulls in frame t into the appropriate dropped tracks
+    endTimes = [CellTracks(droppedTracks).endTime];
+    bReassign = (t < endTimes);
+    
+    reassignEdges = newEdges(bReassign,:);
     if ( t < tEnd )
-        newEdges = Segmentation.ResegFromTree.ReassignNextFrame(t, droppedTracks, newEdges);
+        newEdges(bReassign) = Segmentation.ResegFromTree.ReassignNextFrame(t, droppedTracks(bReassign), reassignEdges);
     end
     
     % Do appropriate linking up of tracks from (t-1) -> t as found above

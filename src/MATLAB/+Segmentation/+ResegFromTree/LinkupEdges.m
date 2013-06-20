@@ -5,6 +5,12 @@ function newPreserveTracks = LinkupEdges(edges, preserveTracks)
     relinkList = {};
     
     for i=1:size(edges,1)
+        
+        if ( edges(i,2) == 0 )
+%             error('Unable to reassign track with long or short edge, structure will be affected');
+            continue;
+        end
+        
         targetIdx = find(targetParents == Hulls.GetTrackID(edges(i,1)));
         if ( isempty(targetIdx) )
             targetParents = [targetParents; Hulls.GetTrackID(edges(i,1))];
