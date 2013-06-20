@@ -53,7 +53,7 @@ function trackIDs = TrackAddedHulls(newHulls, COM)
         return;
     end
     
-    changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, newHulls);
+    changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, newHulls, newHulls);
     
     if ( t+1 <= length(HashedCells) )
         nextHulls = [HashedCells{t+1}.hullID];

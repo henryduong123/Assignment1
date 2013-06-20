@@ -24,10 +24,16 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function changedHulls = ReassignTracks(costMatrix, extendHulls, affectedHulls, changedHulls)
+function changedHulls = ReassignTracks(costMatrix, extendHulls, affectedHulls, changedHulls, allowedChange)
     if ( ~exist('changedHulls','var') )
         changedHulls = [];
     end
+    
+    if ( ~exist('allowedChange','var') )
+        allowedChange = affectedHulls;
+    end
+    
+    bAllowedChange = ismember(affectedHulls, allowedChange);
     
     if ( isempty(extendHulls) || isempty(affectedHulls) )
         return;
@@ -47,7 +53,10 @@ function changedHulls = ReassignTracks(costMatrix, extendHulls, affectedHulls, c
         assignHull = affectedHulls(bestOutgoing(matchedIdx(i)));
         extHull = extendHulls(matchedIdx(i));
         
-%         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
+        if ( ~bAllowedChange(bestOutgoing(matchedIdx(i))) )
+            continue;
+        end
+        
         change = Tracker.AssignEdge(extHull, assignHull);
         changedHulls = [changedHulls change];
 	end
@@ -63,9 +72,10 @@ function changedHulls = ReassignTracks(costMatrix, extendHulls, affectedHulls, c
         assignHull = affectedHulls(c);
         extHull = extendHulls(r);
         
-%         change = assignHullToTrack(t, assignHull, extHull, bPropForward);
-        change = Tracker.AssignEdge(extHull, assignHull);
-        changedHulls = [changedHulls change];
+        if ( bAllowedChange(c) )
+            change = Tracker.AssignEdge(extHull, assignHull);
+            changedHulls = [changedHulls change];
+        end
         
         costMatrix(r,:) = Inf;
         costMatrix(:,c) = Inf;
