@@ -1,6 +1,10 @@
 function UpdateHematoFluor(t)
     global CellHulls HashedCells FluorData CellTracks HaveFluor
 
+    if isempty(FluorData)
+        return
+    end
+    
     hulls = [HashedCells{t}(:).hullID];
     for i=1:length(hulls)
         CellHulls(hulls(i)).greenInd = [];
