@@ -23,9 +23,16 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function LEVer()
+function LEVer(varargin)
 
 global Figures ReplayEditActions CONSTANTS
+
+if ( nargin > 0 )
+    if ( strcmpi(varargin{1}, '-v') )
+        UI.about;
+        return;
+    end
+end
 
 %if LEVer is already opened, save state just in case the User cancels the
 %open
