@@ -1,6 +1,8 @@
 function [textHandle, bgHandle] = DrawCellLabel(curAx, drawString, x, y, colorStruct)
     global Figures
     
+    bgHandle = [];
+    
     if ( ~Figures.cells.showInterior )
         bgHandle = plot(curAx, x, y, colorStruct.shape,...
                 'MarkerFaceColor',  colorStruct.back,...
