@@ -4,9 +4,30 @@
 % NLS 6/11/12 Created
 
 function FigureCellUp(src,evnt)
-global Figures CellTracks CellFamilies HashedCells
+global Figures CellTracks MitDragCoords
+
+if ( Helper.NonEmptyField(Figures.cells, 'dragElements') )
+    structfun(@(x)(delete(x)), Figures.cells.dragElements);
+    Figures.cells.dragElements = [];
+end
 
 set(Figures.cells.handle,'WindowButtonUpFcn','');
+set(Figures.cells.handle,'WindowButtonMotionFcn',@(src,evt)(1))
+
+if ( strcmpi(Figures.cells.editMode, 'mitosis') )
+    % Find new Mitosis cells and parent
+    dragDistSq = sum((MitDragCoords(:,1)-MitDragCoords(:,2)).^2);
+    if ( dragDistSq > (7)^2 )
+        addMitosisEvent(Figures.tree.familyID, Figures.time, MitDragCoords);
+        
+        UI.DrawTree(Figures.tree.familyID);
+        UI.DrawCells();
+    end
+    
+    clear global MitDragCoords;
+    return;
+end
+
 if(Figures.cells.downHullID == -1)
     return
 end
@@ -38,3 +59,37 @@ end
 
 UI.DrawCells();
 end
+
+function addMitosisEvent(treeID, time, dragCoords)
+    global CellTracks CellFamilies
+    % Find new Mitosis cells and parent
+    
+    if ( time < 2 )
+        msgbox('Cannot create mitosis event in first frame','Invalid Mitosis','warn');
+        return
+    end
+    
+    treeTracks = [CellFamilies(treeID).tracks];
+    bMidTracks = (([CellTracks(treeTracks).startTime] < time) & ([CellTracks(treeTracks).endTime] > time));
+    
+	checkTracks = treeTracks(bMidTracks);
+    if ( isempty(checkTracks) )
+        msgbox('No valid tracks to add a mitosis onto','Invalid Mitosis','warn');
+        return;
+    end
+    
+    startTimes = [CellTracks(checkTracks).startTime];
+    [minTime minIdx] = min(startTimes);
+
+    % TODO: make this deal with 
+%     % If a mitosis is specified RIGHT after another one, we have a problem
+%     if ( minTime == time-1 )
+%         mitHull = CellTracks(checkTracks(minIdx)).hulls(1);
+%         msgbox('No valid tracks to add a mitosis onto','Invalid Mitosis','warning');
+%         return;
+%     end
+    
+    Editor.ReplayableEditAction(@Editor.CreateMitosisAction, treeID, time, (dragCoords.'));
+    
+end
+

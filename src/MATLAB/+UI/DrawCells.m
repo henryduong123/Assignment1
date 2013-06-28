@@ -82,6 +82,14 @@ end
 
 bDrawLabels = isempty(Figures.tree.movingMitosis);
 
+drawHullFilter = [];
+if ( strcmpi(Figures.cells.editMode, 'mitosis') )
+    % Filter so we only draw family "mitosis" hulls when editing
+    bDrawLabels = 0;
+    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)),CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
+    drawHullFilter = [drawHullFilter{:}];
+end
+
 %draw labels if turned on
 Figures.cells.labelHandles = [];
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
@@ -96,6 +104,10 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             if(Figures.tree.movingMitosis ~= curTrackID)
                 continue;
             end
+        end
+        
+        if ( ~isempty(drawHullFilter) && ~any(curHullID == drawHullFilter ) )
+            continue;
         end
         
         if ( ~checkCOMLims(curHullID, xl, yl) )

@@ -6,7 +6,19 @@
 function FigureCellDown(src,evnt, labelID)
     global Figures
 
+    % Stop play as soon as click occurs
+    if(strcmp(Figures.advanceTimerHandle.Running,'on'))
+        UI.TogglePlay(src,evnt);
+    end
+    
     currentPoint = get(gca,'CurrentPoint');
+    if ( strcmpi(Figures.cells.editMode, 'mitosis') )
+        createMitosisDragLine(currentPoint);
+        set(Figures.cells.handle, 'WindowButtonMotionFcn', @UI.FigureCellDrag);
+        set(Figures.cells.handle,'WindowButtonUpFcn',@(src,evt) UI.FigureCellUp(src,evt));
+        return;
+    end
+    
     if (labelID == -1) %see if we are clicking a label rather than a cell
         Figures.cells.downHullID = Hulls.FindHull(currentPoint);
     else
@@ -36,6 +48,7 @@ function FigureCellDown(src,evnt, labelID)
         
         UI.ToggleCellSelection(Figures.cells.downHullID);
         
+        set(Figures.cells.handle, 'WindowButtonMotionFcn', @UI.FigureCellDrag);
         set(Figures.cells.handle,'WindowButtonUpFcn',@(src,evt) UI.FigureCellUp(src,evt));
     elseif(strcmp(selectionType,'extend'))
         if(Figures.cells.downHullID == -1)
@@ -44,7 +57,20 @@ function FigureCellDown(src,evnt, labelID)
             Editor.AddHull(2);
         end
     end
-    if(strcmp(Figures.advanceTimerHandle.Running,'on'))
-        UI.TogglePlay(src,evnt);
-    end
 end
+
+function createMitosisDragLine(currentPoint)
+    global Figures MitDragCoords
+    
+    MitDragCoords = [currentPoint(1,1:2).' currentPoint(1,1:2).'];
+    
+    if ( Helper.NonEmptyField(Figures.cells, 'dragElements') )
+        structfun(@(x)(delete(x)), Figures.cells.dragElements);
+        Figures.cells.dragElements = [];
+    end
+    
+    curAx = get(Figures.cells.handle, 'CurrentAxes');
+    
+    Figures.cells.dragElements.line = line(MitDragCoords(1,:), MitDragCoords(2,:), 'Parent',curAx, 'Color','r');
+end
+
