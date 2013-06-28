@@ -22,4 +22,6 @@ function PopStack(editTime)
     
     HistoryStack.stack(HistoryStack.level) = [];
     HistoryStack.level = HistoryStack.level - 1;
+    
+    Editor.StackedHistory.TopState();
 end
