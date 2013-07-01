@@ -55,6 +55,9 @@ for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
         id = length(CellHulls)+1;
         CellHulls(id).time = i;
         centerOfMass = fscanf(file,'(%f,%f)\n');
+        if length(centerOfMass) < 2
+            disp(['NULL CENTER OF MASS! file number = ' num2str(i) ' hull number = ' num2str(j)])
+        end
         CellHulls(id).centerOfMass = [centerOfMass(2) centerOfMass(1)];
         numOfpix = str2double(fgetl(file));
         [CellHulls(id).indexPixels, count] = fscanf(file,'%d,');
