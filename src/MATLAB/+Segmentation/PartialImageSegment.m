@@ -25,11 +25,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha, overlapPoints)
-
-    if ( ~exist('overlapPoints', 'var') )
-        overlapPoints = [];
-    end
+function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha)
 
     if ( length(subSize) < 2 )
         subSize = [subSize(1) subSize(1)];
@@ -51,30 +47,14 @@ function [hull feature] = PartialImageSegment(img, centerPt, subSize, alpha, ove
     % Build the subimage to be segmented
     subImg = img(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
     
-    [objs features] = Segmentation.FrameSegmentor(subImg, 1, alpha);
+    [objs objFeat] = Segmentation.FrameSegmentor(subImg, 1, alpha);
     
-    [objs features] = fixupFromSubimage(coordMin, img, subImg, objs, features);
-    
-    if ( isempty(overlapPoints) )
-        bInHull = Hulls.CheckHullsContainsPoint(centerPt, objs);
-    else
-        bInHull = false(1,length(objs));
-        isectDist = ones(1,length(objs));
-        for i=1:length(objs)
-            isect = intersect(overlapPoints, objs(i).indPixels);
-            isectDist(i) = 1 - (length(isect) / min(length(overlapPoints),length(objs(i).indPixels)));
-        end
-        [minDist minIdx] = min(isectDist);
-        bInHull(minIdx) = (minDist < 1);
-    end
-    
-    hull = objs(find(bInHull,1));
-    feature = features(find(bInHull,1));
+    [hulls features] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat);
 end
 
-function [newObjs newFeatures] = fixupFromSubimage(coordMin, img, subImg, objs, features)
+function [newObjs newFeatures] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat)
     newObjs = objs;
-    newFeatures = features;
+    newFeatures = objFeat;
     
     xoffset = coordMin(1)-1;
     yoffset = coordMin(2)-1;
@@ -88,10 +68,10 @@ function [newObjs newFeatures] = fixupFromSubimage(coordMin, img, subImg, objs, 
         newObjs(i).indTailPixels = makeGlobalPix(objs(i).indTailPixels, globSz, locSz, xoffset, yoffset);
         newObjs(i).imPixels = img(newObjs(i).indPixels);
         
-        newFeatures(i).polyPix = makeGlobalPix(features(i).polyPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).perimPix = makeGlobalPix(features(i).perimPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).igPix = makeGlobalPix(features(i).igPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).haloPix = makeGlobalPix(features(i).haloPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).polyPix = makeGlobalPix(objFeat(i).polyPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).perimPix = makeGlobalPix(objFeat(i).perimPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).igPix = makeGlobalPix(objFeat(i).igPix, globSz, locSz, xoffset, yoffset);
+        newFeatures(i).haloPix = makeGlobalPix(objFeat(i).haloPix, globSz, locSz, xoffset, yoffset);
     end
 end
 
