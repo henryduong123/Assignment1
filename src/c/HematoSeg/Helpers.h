@@ -6,5 +6,6 @@
 std::string pathCreate(std::string path);
 bool fileExists(const char* filename);
 bool isTiffFile(std::string filePath);
+void unlinkIfExists(const char *filename);
 
 #endif

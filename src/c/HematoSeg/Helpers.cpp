@@ -55,3 +55,9 @@ bool isTiffFile(std::string filePath)
 
 	return true;
 }
+
+void unlinkIfExists(const char *filename) {
+	if (fileExists(filename))
+		if (_unlink(filename) != 0)
+			perror(filename);
+}
