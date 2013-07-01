@@ -16,7 +16,7 @@ function PushTrackToFrame(trackID, frameTime)
     termHulls = [HashedCells{frameTime}.hullID];
     bLockedTerms = bLockedHulls(termHulls);
     
-    d = dijkstra_sp(costMatrix, startHull);
+    d = matlab_bgl.dijkstra_sp(costMatrix, startHull);
     
     dTerms = d(termHulls);
     [sortDist srtIdx] = sort(dTerms);
