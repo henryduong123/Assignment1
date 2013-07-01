@@ -50,16 +50,23 @@ int main(int argc, char * argv[])
 			outputfile += fileNames.cFileName;
 			outputfile += "_seg.txt";
 
+			std::string semaphorefile(".\\segmentationData\\");
+			semaphorefile += fileNames.cFileName;
+			semaphorefile += "_sem.txt";
+
 			if (isTiffFile(curfile) && !fileExists(outputfile.c_str()))
 			{
 				segData curImage;
 
 				curImage.imageFile = curfile;
 				curImage.outFile = outputfile;
+				curImage.semFile = semaphorefile;
 				curImage.imageAlpha = atof(argv[2]);
 				curImage.minSize = atoi(argv[3]);
 				curImage.eccentricity = atof(argv[4]);
 				pArguments.push_back(curImage);
+
+				unlinkIfExists(semaphorefile.c_str());
 			}
 
 		} while(FindNextFileA(handle,&fileNames));

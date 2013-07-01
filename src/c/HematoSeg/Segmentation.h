@@ -35,6 +35,7 @@ extern "C"{
 struct segData {
 	std::string imageFile;
 	std::string outFile;
+	std::string semFile;
 	float imageAlpha;
 	int minSize;
 	float eccentricity;

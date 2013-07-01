@@ -258,5 +258,10 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 	fclose(file);
 	printf("wrote %s\n",parameters->outFile.c_str());
 
+	// Now create an empty semaphore file to indicate we've finished this segmentation
+	file = fopen(parameters->semFile.c_str(),"w");
+	fclose(file);
+	printf("wrote %s\n",parameters->semFile.c_str());
+
 	return 0;
 }
