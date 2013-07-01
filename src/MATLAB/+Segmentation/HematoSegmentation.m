@@ -44,7 +44,8 @@ CellHulls = struct(...
 
 for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
     filename = ['.\segmentationData\' Helper.GetImageName(i) '_seg.txt'];
-    while (isempty(dir(filename)))
+    semname = ['.\segmentationData\' Helper.GetImageName(i) '_sem.txt'];
+    while (isempty(dir(semname)))
         pause(5);
     end
     file = fopen(filename,'rt');
