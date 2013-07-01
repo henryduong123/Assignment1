@@ -44,7 +44,6 @@ function HematoTracker()
 
     if (~isempty(FluorData))
         fprintf(1,'Computing intersections with fluorescence images...');
-        tic;
         for t=1:tmax
             hulls = [HashedCells{t}(:).hullID];
             greenInd = FluorData(t).greenInd;
@@ -57,7 +56,7 @@ function HematoTracker()
                 end
             end
         end
-        fprintf(1, 'Done, %f sec\n', toc);
+        fprintf('Done\n');
         
         Tracker.AddHematoFluor(0);
     end
