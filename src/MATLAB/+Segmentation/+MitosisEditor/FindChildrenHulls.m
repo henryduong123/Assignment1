@@ -23,6 +23,10 @@ function childHulls = FindChildrenHulls(linePoints, time)
         childHulls = Hulls.SetHullEntries(setHullIDs, newHulls);
     end
     
+    if ( any(childHulls == 0) )
+        error('Not all child hulls are valid!');
+    end
+    
     updateLocalTracking(childHulls, time);
 end
 
@@ -278,15 +282,31 @@ function updateLocalTracking(newHulls, hullTime)
     end
 end
 
-function hull = findHullContainsPoint(point, time)
+function hull = findHullContainsPoint(point, time, expandRadius)
     global CellHulls HashedCells
+    
+    if ( ~exist('expandRadius','var') )
+        expandRadius = 0;
+    end
+    
+    roundFudge = 0.7072; % sqrt(2)/2
     
     hull = 0;
     
     frameHulls = [HashedCells{time}.hullID];
-    bInHull = Hulls.CheckHullsContainsPoint(point, CellHulls(frameHulls));
     
-    chkHulls = frameHulls(bInHull);
+    bMayOverlap = discardByRadius(point, frameHulls, expandRadius+roundFudge);
+    chkHulls = frameHulls(bMayOverlap);
+    if ( isempty(chkHulls) )
+        return;
+    end
+    
+    bInHull = false(1,length(chkHulls));
+    for i=1:length(chkHulls)
+        bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, expandRadius+roundFudge, point);
+    end
+    
+    chkHulls = chkHulls(bInHull);
     if ( isempty(chkHulls) )
         return;
     end
@@ -295,4 +315,14 @@ function hull = findHullContainsPoint(point, time)
     [minDistSq minIdx] = min(distSq);
 
     hull = chkHulls(minIdx);
+end
+
+function bMayOverlap = discardByRadius(point, hullIDs, expandRadius)
+    global CellHulls
+    
+    radSq = arrayfun(@(x)(max((x.points(:,1)-x.centerOfMass(2)).^2) + max((x.points(:,2)-x.centerOfMass(1)).^2)), CellHulls(hullIDs));
+    distSq = arrayfun(@(x)((point(1)-x.centerOfMass(2)).^2 + (point(2)-x.centerOfMass(1)).^2), CellHulls(hullIDs));
+    
+    bMayOverlap = (distSq <= (radSq + expandRadius^2 + 2*expandRadius*sqrt(radSq)));
+    
 end
