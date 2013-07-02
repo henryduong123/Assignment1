@@ -81,7 +81,7 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
         forwardCosts(bestFromIdx,currentMitosis(i)) = 1;
     end
     
-    assignIdx = assignmentoptimal(forwardCosts);
+    assignIdx = assign.assignmentoptimal(forwardCosts);
     notAssigned = find(assignIdx == 0);
     if ( ~isempty(notAssigned) )
         % If all else fails assign arbitrarily
@@ -90,7 +90,7 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
             forwardCosts(notAssigned(i),bInf) = 1e10;
         end
         
-        assignIdx = assignmentoptimal(forwardCosts);
+        assignIdx = assign.assignmentoptimal(forwardCosts);
         if ( any(assignIdx == 0) )
             error('Unable to assign all t->t+1 edges');
         end

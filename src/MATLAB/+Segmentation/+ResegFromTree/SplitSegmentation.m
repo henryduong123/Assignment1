@@ -46,7 +46,7 @@ function [newSegs costMatrix nextHulls] = SplitSegmentation(splitHull, numSplit,
     end
     
     % Force a hungarian assignment for splits
-    assignIdx = assignmentoptimal(newCosts(prevIdx,:));
+    assignIdx = assign.assignmentoptimal(newCosts(prevIdx,:));
     for i=1:length(assignIdx)
         newCosts(prevIdx(i),:) = Inf;
         newCosts(prevIdx,assignIdx(i)) = Inf;
