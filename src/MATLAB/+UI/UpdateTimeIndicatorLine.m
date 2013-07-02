@@ -42,6 +42,6 @@ else
         'Tag',          'timeIndicatorLine',...
         'Parent',       Figures.tree.axesHandle);
 end
-uistack(Figures.tree.timeIndicatorLine, 'bottom');
+% uistack(Figures.tree.timeIndicatorLine, 'bottom');
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 end
