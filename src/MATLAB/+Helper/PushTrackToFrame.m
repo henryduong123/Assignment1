@@ -4,7 +4,7 @@ function PushTrackToFrame(trackID, frameTime)
     
     bLockedHulls = false(1,length(CellHulls));
     
-    bLockedFamilies = ([CellFamilies.bLocked] > 0);
+    bLockedFamilies = arrayfun(@(x)(x.bLocked > 0),CellFamilies);
     lockedTracks = [CellFamilies(bLockedFamilies).tracks];
     lockTrackHulls = [CellTracks(lockedTracks).hulls];
     nzHulls = lockTrackHulls(lockTrackHulls > 0);

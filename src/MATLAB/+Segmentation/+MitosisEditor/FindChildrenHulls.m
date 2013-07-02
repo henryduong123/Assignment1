@@ -101,6 +101,10 @@ function newHulls = addMergeSegmentations(childHulls, linePoints, time)
         
         newHulls(i) = mergeOverlapping(objs, chkPoint, time);
     end
+    
+    for i=1:length(childHulls)
+        newHulls(i) = findHullContainsPoint(linePoints(i,:), time);
+    end
 end
 
 % This function finds any hulls overlapping the chkPoint and returns it,
