@@ -28,6 +28,9 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
         forceParents = arrayfun(@(x)(CellTracks(x).hulls(1)), checkTracks);
     end
     
+    linePoints = clipToImage(linePoints);
+    
+    
     % Find or create hulls to define mitosis event
     childHulls = Segmentation.MitosisEditor.FindChildrenHulls(linePoints, time);
     parentHull = Segmentation.MitosisEditor.FindParentHull(childHulls, linePoints, time-1, forceParents);
@@ -64,3 +67,15 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     
     historyAction = 'Push';
 end
+
+function newPoints = clipToImage(linePoints)
+    global CONSTANTS
+    
+    newPoints = linePoints;
+    newPoints(:,1) = min(newPoints(:,1), repmat(CONSTANTS.imageSize(2),size(linePoints,1),1));
+    newPoints(:,2) = min(newPoints(:,2), repmat(CONSTANTS.imageSize(1),size(linePoints,1),1));
+    
+    newPoints(:,1) = max(newPoints(:,1), repmat(1,size(linePoints,1),1));
+    newPoints(:,2) = max(newPoints(:,2), repmat(1,size(linePoints,1),1));
+end
+
