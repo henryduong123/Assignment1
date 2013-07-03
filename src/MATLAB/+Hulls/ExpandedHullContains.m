@@ -10,7 +10,7 @@ function bInside = ExpandedHullContains(cvHull, expandRadius, pointList)
     planes = cvHull(2:end,:) - cvHull(1:(end-1),:);
     normPlanes = [-planes(:,2) planes(:,1)] ./ repmat(sqrt(sum(planes.^2, 2)), 1, 2);
     
-    if ( det([planes(1,:); planes(2,:)]) < 0 )
+    if ( det([planes(1,:); planes(2,:)]) > 0 )
         normPlanes = -normPlanes;
     end
     
