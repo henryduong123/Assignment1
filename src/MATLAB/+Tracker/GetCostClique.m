@@ -5,6 +5,13 @@ function [startHulls nextHulls] = GetCostClique(startHulls, nextHulls, tMax)
 %     costMatrix = Tracker.GetCostMatrix();
     costMatrix = Costs;
     
+    startHulls = [];
+    nextHulls = [];
+    
+    if ( isempty(nextHulls) )
+        return;
+    end
+    
     if ( ~exist('tMax','var') )
         tMax = 1;
     end

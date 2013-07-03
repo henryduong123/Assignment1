@@ -8,8 +8,9 @@ function childHulls = FindChildrenHulls(linePoints, time)
         newHulls = splitMitosisHull(childHulls(1), linePoints);
         if ( isempty(newHulls) )
             % TODO: Perhaps try to add a hull in this case
-            error('Unable to add or split for mitosis event.');
-            return;
+            newHulls = splitMitosisHull(childHulls(1), linePoints, 1);
+%             error('Unable to add or split for mitosis event.');
+%             return;
         end
 
         % Mark split hull pieces as user-edited.
@@ -30,8 +31,12 @@ function childHulls = FindChildrenHulls(linePoints, time)
     updateLocalTracking(childHulls, time);
 end
 
-function newHulls = splitMitosisHull(hullID, linePoints)
+function newHulls = splitMitosisHull(hullID, linePoints, bForcePoints)
     global CONSTANTS CellHulls
+    
+    if ( ~exist('bForcePoints','var') )
+        bForcePoints = false;
+    end
     
     k = 2;
     newHulls = [];
@@ -41,7 +46,14 @@ function newHulls = splitMitosisHull(hullID, linePoints)
     mitVec = mitVec / norm(mitVec);
     
     [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
-    [kIdx centers] = kmeans([c,r], k, 'start',linePoints, 'EmptyAction','drop');
+    
+    if ( bForcePoints )
+        distSq = ((c-linePoints(1,1)).^2 + (r-linePoints(1,2)).^2);
+        distSq = [distSq ((c-linePoints(2,1)).^2 + (r-linePoints(2,2)).^2)];
+        [minDist kIdx] = min(distSq,[],2);
+    else
+        [kIdx centers] = kmeans([c,r], k, 'start',linePoints, 'EmptyAction','drop');
+    end
     
     if ( any(isnan(kIdx)) )
         return;
@@ -218,8 +230,8 @@ function subtractHulls(hullID, subHullID)
 end
 
 function newHullID = addPointHullEntry(chkPoint, time)
-    x = round(chkPoint(1));
-    y = round(chkPoint(2));
+    x = max(round(chkPoint(1)), 1);
+    y = max(round(chkPoint(2)), 1);
     
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
