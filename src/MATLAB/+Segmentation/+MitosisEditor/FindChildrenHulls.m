@@ -307,7 +307,7 @@ function hull = findHullContainsPoint(point, time, expandRadius)
     
     frameHulls = [HashedCells{time}.hullID];
     
-    bMayOverlap = discardByRadius(point, frameHulls, expandRadius+roundFudge);
+    bMayOverlap = Hulls.RadiusContains(frameHulls, expandRadius+roundFudge, point);
     chkHulls = frameHulls(bMayOverlap);
     if ( isempty(chkHulls) )
         return;
@@ -327,14 +327,4 @@ function hull = findHullContainsPoint(point, time, expandRadius)
     [minDistSq minIdx] = min(distSq);
 
     hull = chkHulls(minIdx);
-end
-
-function bMayOverlap = discardByRadius(point, hullIDs, expandRadius)
-    global CellHulls
-    
-    radSq = arrayfun(@(x)(max((x.points(:,1)-x.centerOfMass(2)).^2) + max((x.points(:,2)-x.centerOfMass(1)).^2)), CellHulls(hullIDs));
-    distSq = arrayfun(@(x)((point(1)-x.centerOfMass(2)).^2 + (point(2)-x.centerOfMass(1)).^2), CellHulls(hullIDs));
-    
-    bMayOverlap = (distSq <= (radSq + expandRadius^2 + 2*expandRadius*sqrt(radSq)));
-    
 end

@@ -25,18 +25,82 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function hullID = FindHull(curPoint)
+function hullID = FindHull(time, curPoint)
+    global CONSTANTS CellHulls HashedCells
 
-global CONSTANTS CellHulls HashedCells Figures
-
-centerOfMasses = reshape([CellHulls([HashedCells{Figures.time}(:).hullID]).centerOfMass]',2,[])';
-distance = (curPoint(1)-centerOfMasses(:,2)).^2 + (curPoint(3)-centerOfMasses(:,1)).^2;
-[distance index] = min(distance);
-
-if (distance <= CONSTANTS.clickMargin)
-    hulls = [HashedCells{Figures.time}(:).hullID];
-    hullID = hulls(index);
-else
     hullID = -1;
+    
+    chkPoint = curPoint(1,1:2);
+    
+    frameHulls = [HashedCells{time}.hullID];
+    bMayOverlap = Hulls.RadiusContains(frameHulls, CONSTANTS.clickMargin, chkPoint);
+
+    chkHulls = frameHulls(bMayOverlap);
+
+    bInHull = false(1,length(chkHulls));
+    for i=1:length(chkHulls)
+        bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.clickMargin, chkPoint);
+    end
+    
+    if ( nnz(bInHull) == 0 )
+        return;
+    end
+    
+    if ( nnz(bInHull) > 1 )
+        chkHulls = chkHulls(bInHull);
+        distSq = getHullDistanceSq(chkHulls, chkPoint);
+        [minDist minIdx] = min(abs(distSq));
+        
+        hullID = chkHulls(minIdx);
+        return;
+    end
+    
+    hullID = chkHulls(bInHull);
 end
+
+function hullDistSq = getHullDistanceSq(hullIDs, point)
+    global CellHulls
+    
+    hullDistSq = zeros(1,length(hullIDs));
+    for i=1:length(hullIDs)
+        hullDistSq(i) = hullProjDist(CellHulls(hullIDs(i)).points, point);
+    end
+end
+
+function hullDistSq = hullProjDist(segPts, point)
+    numSeg = size(segPts,1);
+    
+    if ( numSeg == 0 )
+        hullDistSq = sum((point - segPts).^2, 2);
+        return;
+    end
+    
+    numSeg = numSeg-1;
+
+    planes = segPts(2:end,:) - segPts(1:(end-1),:);
+    planeLen = sqrt(sum(planes.^2, 2));
+    planes = planes ./ repmat(planeLen, 1, 2);
+    normPlanes = [-planes(:,2) planes(:,1)];
+    
+    if ( det([planes(1,:); planes(2,:)]) > 0 )
+        normPlanes = -normPlanes;
+    end
+    
+    locVec = repmat(point,numSeg,1) - segPts(1:(end-1),:);
+    
+    locX = sum(planes.*locVec, 2);
+    locY = sum(normPlanes.*locVec, 2);
+    
+    sgnMul = sign(locY);
+    bLeft = (locX < 0);
+    bRight = (locX > planeLen);
+    bMid = ~(bLeft | bRight);
+    
+    segDist = zeros(numSeg,1);
+    segDist(bLeft) = (locX(bLeft).^2 + locY(bLeft).^2);
+    segDist(bRight) = ((locX(bRight)-planeLen(bRight)).^2 + locY(bRight).^2);
+    segDist(bMid) = (locY(bMid).^2);
+    
+    [hullDistSq minIdx] = min(segDist,[],1);
+    hullDistSq = sign(locY(minIdx)) * hullDistSq;
 end

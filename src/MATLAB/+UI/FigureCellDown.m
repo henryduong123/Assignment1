@@ -20,7 +20,7 @@ function FigureCellDown(src,evnt, labelID)
     end
     
     if (labelID == -1) %see if we are clicking a label rather than a cell
-        Figures.cells.downHullID = Hulls.FindHull(currentPoint);
+        Figures.cells.downHullID = Hulls.FindHull(Figures.time, currentPoint);
     else
         Figures.cells.downHullID = labelID;    
     end
