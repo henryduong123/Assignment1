@@ -170,6 +170,10 @@ for i=1:length(fluorTimes)
     'linewidth', 1);
 end
 
+for i=1:size(xTracks,1)
+    drawFluorMarkers(xTracks(i,1), xTracks(i,2), 4*pdelta);
+end
+
 hold(Figures.tree.axesHandle, 'off');
 
 if(isempty(phenoHandles))
