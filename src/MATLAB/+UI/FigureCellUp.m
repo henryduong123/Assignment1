@@ -6,9 +6,12 @@
 function FigureCellUp(src,evnt)
 global Figures CellTracks MitDragCoords
 
+bWasDragging = false;
 if ( Helper.NonEmptyField(Figures.cells, 'dragElements') )
     structfun(@(x)(delete(x)), Figures.cells.dragElements);
     Figures.cells.dragElements = [];
+    
+    bWasDragging = true;
 end
 
 set(Figures.cells.handle,'WindowButtonUpFcn','');
@@ -32,7 +35,12 @@ if(Figures.cells.downHullID == -1)
     return
 end
 
-currentHullID = Hulls.FindHull(get(gca,'CurrentPoint'));
+if ( ~bWasDragging )
+    currentHullID = Figures.cells.downHullID;
+else
+    currentHullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
+end
+
 if ( currentHullID == -1 )
     currentHullID = Figures.cells.downHullID;
 end

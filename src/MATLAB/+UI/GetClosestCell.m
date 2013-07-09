@@ -24,7 +24,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [hullID trackID] = GetClosestCell(allowEmpty)
-hullID = Hulls.FindHull(get(gca,'CurrentPoint'));
+global Figures
+
+hullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
 if(0>=hullID)
     if (allowEmpty )
         hullID = [];

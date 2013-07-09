@@ -2,6 +2,11 @@
 function bCanUndo = CanUndo(stackEntry)
     global HistoryStack
     
+    bCanUndo = false;
+    if ( isempty(HistoryStack) )
+        return;
+    end
+    
     if ( ~exist('stackEntry','var') )
         stackEntry = HistoryStack.level;
     end

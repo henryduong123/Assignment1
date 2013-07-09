@@ -2,6 +2,11 @@
 function bCanRedo = CanRedo(stackEntry)
     global HistoryStack
     
+    bCanRedo = false;
+    if ( isempty(HistoryStack) )
+        return;
+    end
+    
     if ( ~exist('stackEntry','var') )
         stackEntry = HistoryStack.level;
     end
