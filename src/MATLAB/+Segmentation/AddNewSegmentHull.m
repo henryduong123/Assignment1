@@ -30,13 +30,23 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
     
-    [newObj newFeat] = Segmentation.PartialImageSegment(img, clickPt, 200, 1.0);
+    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, 1.0);
+    
+    % Aggressive add segmentation
+    if ( isempty(newObj) )
+        for tryAlpha = 1.25:(-0.05):0.5
+            [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, tryAlpha);
+            if ( ~isempty(newObj) )
+                break;
+            end
+        end
+    end
 
     newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
     newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
     
     if ( ~isempty(newObj) )
-        newObj = makeNonOverlapping(newObj, time, clickPt);
+        newObj = Segmentation.ForceDisjointSeg(newObj, time, clickPt);
     end
     
     if ( isempty(newObj) )
@@ -63,52 +73,3 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     
     newTrackID = Tracker.TrackAddedHulls(newHullID, newHull.centerOfMass);
 end
-
-%TODO: Maybe handle convex hull intersection instead of interior points as
-%the current method still allows considerable hull overlap in some cases.
-function newobj = makeNonOverlapping(obj, t, clickPt)
-    global CONSTANTS CellHulls HashedCells
-    
-    newobj = [];
-    
-    ccidxs = vertcat(CellHulls([HashedCells{t}.hullID]).indexPixels);
-    pix = obj.indPixels;
-    
-    bPickPix = ~ismember(pix, ccidxs);
-    
-    if ( all(bPickPix) )
-        newobj = obj;
-        return;
-    end
-    
-    bwimg = zeros(CONSTANTS.imageSize);
-    bwimg(pix(bPickPix)) = 1;
-    
-    CC = bwconncomp(bwimg,8);
-    if ( CC.NumObjects < 1 )
-        newobj = [];
-        return;
-    end
-    
-    for i=1:CC.NumObjects
-        [r c]=ind2sub(size(bwimg),CC.PixelIdxList{i});
-        try
-            ch = convhull(r,c);
-        catch errmsg
-            continue;
-        end
-        
-        if ( inpolygon(clickPt(1), clickPt(2), c(ch), r(ch)) )
-            bCCPix = ismember(pix, CC.PixelIdxList{i});
-            
-            newobj.indPixels = CC.PixelIdxList{i};
-            newobj.imPixels = obj.imPixels(bCCPix);
-            
-            newobj.points = [c(ch) r(ch)];
-%             newobj.COM = mean([r c]);
-            
-            break;
-        end
-    end
-end
-

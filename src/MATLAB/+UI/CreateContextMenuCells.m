@@ -218,6 +218,14 @@ function removeFromTree(src,evnt)
     if(isempty(trackID)),return,end
 
     oldParent = CellTracks(trackID).parentTrack;
+    
+    bLocked = Helper.CheckLocked(trackID);
+    if ( bLocked )
+        resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+        if ( strcmpi(resp,'Cancel') )
+            return;
+        end
+    end
 
     bErr = Editor.ReplayableEditAction(@Editor.ContextRemoveFromTree, trackID, Figures.time);
     if ( bErr )

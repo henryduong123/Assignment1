@@ -29,17 +29,9 @@ function [mergeObj, deleteCells] = CreateMergedCell(mergeCells)
     mergeObj = [];
     deleteCells = [];
     
-    ccM = calcConnDistM(mergeCells);
-    [S,C] = graphconncomp(sparse(ccM <= 5));
-    
-    largestC = 0;
-    szC = 0;
-    for i=1:S
-        if ( nnz(C==i) > szC )
-            largestC = i;
-            szC = nnz(C==i);
-        end
-    end
+    szC = length(mergeCells);
+    largestC = 1;
+    C = ones(1,length(mergeCells));
     
     if ( szC > 1 )
         deleteCells = mergeCells(C == largestC);

@@ -26,7 +26,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, hulls, hash, tracks)
+function [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(windowSize, t, tNext, trackHulls, avoidHulls, hulls, hash, tracks, connDist)
 
     costMatrix = [];
     trackedHulls = [];
@@ -79,7 +79,7 @@ function [costMatrix, trackedHulls, nextHulls] = GetTrackingCosts(windowSize, t,
         constraints{i+2} = setdiff([hash{tNext+i*dir}.hullID], avoidHulls);
     end
     
-    costMatrix = mexMAT(dir, windowSize, constraints, hulls, hash, tracks);
+    costMatrix = mexMAT(dir, windowSize, constraints, hulls, hash, tracks, connDist);
     
     [dump,backRowIdx] = sort(rowIdx);
     [dump,backColIdx] = sort(colIdx);

@@ -25,6 +25,30 @@
 
 totalTime = tic();
 
+% Try to set up git for the build, give a warning about checking the
+% fallback file if we can't find git.
+bFoundGit = Dev.SetupGit();
+if ( ~bFoundGit )
+    questionStr = sprintf('%s\n%s','Cannot find git you should verify the fallback file version info before building.','Are you sure you wish to continue with the build?');
+    result = questdlg(questionStr,'Build Warning','Yes','No','No');
+    if ( strcmpi(result,'No') )
+        return;
+    end
+end
+
+% Give a messagebox warning if there are uncommitted changes.
+% Note: even committed changes may not have been pushed to server.
+[status,result] = system('git status --porcelain');
+if ( status == 0 && (length(result) > 1) )
+    questionStr = sprintf('%s\n%s','There are uncommitted changes in your working directory','Are you sure you wish to continue with the build?');
+    result = questdlg(questionStr,'Build Warning','Yes','No','No');
+    if ( strcmpi(result,'No') )
+        return;
+    end
+end
+
+Dev.MakeVersion();
+
 vstoolroot = getenv('VS100COMNTOOLS');
 if ( isempty(vstoolroot) )
     error('Cannot compile MTC and mexMAT without Visual Studio 2010');
@@ -67,6 +91,11 @@ system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|'
 fprintf('Done (%f sec)\n\n', toc());
 
 tic();
+fprintf('\nVisual Studio Compiling: %s...\n', ['mexGraph.mexw' buildbits]);
+system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexGraph.sln"']);
+fprintf('Done (%f sec)\n\n', toc());
+
+tic();
 fprintf('\nVisual Studio Compiling: %s...\n', ['mexIntegrityCheck.mexw' buildbits]);
 system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexIntegrityCheck.sln"']);
 fprintf('Done (%d sec)\n\n', toc());
@@ -95,6 +124,7 @@ fprintf('Done (%f sec)\n', toc());
 clear mex
 system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
 system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDijkstra.mexw' buildbits]);
+system(['copy ..\c\mexGraph\Release_' buildplatform '\mexGraph.dll .\mexGraph.mexw' buildbits]);
 system(['copy ..\c\mexIntegrityCheck\Release_' buildplatform '\mexIntegrityCheck.dll .\mexIntegrityCheck.mexw' buildbits]);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
 system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
@@ -108,17 +138,17 @@ system(['copy "' mcrfile '" "' bindir '\"']);
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif
+!mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
-!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m
+!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
-!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m
+!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 fprintf('Done (%f sec)\n', toc());
 
 % tic();

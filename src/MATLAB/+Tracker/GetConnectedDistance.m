@@ -44,5 +44,5 @@ function dist = GetConnectedDistance(hull, nextHull)
         return;
     end
     
-    dist = 1000*ConnectedDist{firstHull}(ccIdx,2);
+    dist = ConnectedDist{firstHull}(ccIdx,2);
 end

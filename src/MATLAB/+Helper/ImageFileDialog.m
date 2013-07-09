@@ -2,7 +2,7 @@ function bOpened = ImageFileDialog()
 global CONSTANTS
 
 load('LEVerSettings.mat');
-% settings = rmfield(settings, ['imageFileFl'; 'imagePathFl']); % debugging
+
 if ~isfield(settings,'imagePathFl')
     settings.imagePathFl = settings.imagePath;
 end
@@ -13,16 +13,22 @@ imageFilter = [settings.imagePath '*.TIF'];
 bOpened = 0;
 
 while ( ~bOpened )  
-    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,'Open First Image in dataset: ');
+	dataSetString = '';
+    if ( isfield(CONSTANTS,'datasetName') )
+        dataSetString = CONSTANTS.datasetName;
+    end
+    
+    [settings.imageFile,settings.imagePath,filterIndexImage] = uigetfile(imageFilter,['Open First Image in Dataset (' dataSetString '): ' ]);
     if (filterIndexImage==0)
         return
     end
     
     [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile, 0);
+    
     answer = questdlg('Do you have fluorescence images?', 'Fluorescence?', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
         imageFilterFl = [settings.imagePathFl '*.TIF'];
-        [settings.imageFileFl,settings.imagePathFl,filterIndexImage] = uigetfile(imageFilterFl,'Open First Fluoresence Image in dataset: ');
+        [settings.imageFileFl,settings.imagePathFl,filterIndexImage] = uigetfile(imageFilterFl,['Open First Fluoresence Image in Dataset (' dataSetString '): ' ]);
         if (filterIndexImage==0)
             return
         end

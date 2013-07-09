@@ -36,158 +36,109 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function History(action)
-
-global CellFamilies CellTracks HashedCells CONSTANTS Figures CellHulls Costs GraphEdits CachedCostMatrix ConnectedDist CellPhenotypes SegmentationEdits
-% global test
-
-persistent hist;            %stack
-persistent current;         %points to the last state saved on the stack
-persistent bottom;          %points to the oldest or bottom most valid history
-persistent top;             %points to the youngest or top most valid history
-persistent saved;           %flag will be "empty" if only the original opened state is on the stack
-
-if (isempty(hist))
-    current = 0;
-    bottom = 0;
-    top = 0;
-    saved = 0;
-end
-
-switch action
-    case 'Saved'
-        saved = current;
-        setMenus();
-    case 'Push'   
-        current = Increment(current);
-        
-        if (current==bottom)
-            if (bottom==saved)
-                saved = 0;
+function History(action, varargin)
+    global Figures
+    
+    switch action
+        case 'Saved'
+            Editor.StackedHistory.SetSaved();
+            setMenus();
+        case 'Push'
+            % Push time context with edit
+            if ( isempty(varargin) || ~isnumeric(varargin{1}) )
+                varargin{1} = Figures.time;
             end
-            bottom = Increment(bottom);
-        end
-        
-        top = current;
-        
-        SetHistElement(current);
+            
+            Editor.StackedHistory.PushState(varargin{1});
+            setMenus();
+        case 'Undo'
+            if ( Editor.StackedHistory.CanUndo() )
+                if ( isempty(varargin) )
+                    varargin{1} = '';
+                end
+                jumpTime = Editor.StackedHistory.UndoState();
+                
+                if ( strcmpi(varargin{1},'Jump') )
+                    Figures.time = jumpTime;
+                end
 
-        setMenus();
-    case 'Undo'
-        if (current~=bottom)                    
-            current = Decrement(current);
-            
-            GetHistElement(current);
-            
-            %Update displays
-            UI.DrawTree(Figures.tree.familyID);
-            UI.DrawCells();
+                %Update displays
+                UI.DrawTree(Figures.tree.familyID);
+                UI.DrawCells();
+                UI.UpdateSegmentationEditsMenu();
+                UI.UpdatePhenotypeMenu();
+                Error.LogAction('Undo');
+            end
+            setMenus();
+        case 'Redo'
+            if ( Editor.StackedHistory.CanRedo() )
+                if ( isempty(varargin) )
+                    varargin{1} = '';
+                end
+                jumpTime = Editor.StackedHistory.RedoState();
+                
+                if ( strcmpi(varargin{1},'Jump') )
+                    Figures.time = jumpTime;
+                end
+                
+                %Update displays
+                UI.DrawTree(Figures.tree.familyID);
+                UI.DrawCells();
+                UI.UpdateSegmentationEditsMenu();
+                UI.UpdatePhenotypeMenu();
+                Error.LogAction('Redo');
+            end
+            setMenus();
+        case 'Top'
+            Editor.StackedHistory.TopState();
             UI.UpdateSegmentationEditsMenu();
             UI.UpdatePhenotypeMenu();
-            Error.LogAction('Undo');
-        end
-        setMenus();
-    case 'Redo'
-        if (top~=current)
-            %redo possible
-            current = Increment(current);
+        case 'Init'
+            Editor.StackedHistory.InitStack();
+            setMenus();
             
-            GetHistElement(current);
-            global Figures
-            %Update displays
-            UI.DrawTree(Figures.tree.familyID);
-            UI.DrawCells();
-            UI.UpdateSegmentationEditsMenu();
-            UI.UpdatePhenotypeMenu();
-            Error.LogAction('Redo');
-        end
-        setMenus();
-    case 'Top'
-        GetHistElement(current);
-        UI.UpdateSegmentationEditsMenu();
-        UI.UpdatePhenotypeMenu();
-    case 'Init'
-        current = 1;
-        bottom = 1;
-        top = 1;
-        saved = 1;
-        SetHistElement(current);
-        setMenus();
+        case 'PushStack'
+            Editor.StackedHistory.PushStack();
+            setMenus();
+        case 'PopStack'
+            Editor.StackedHistory.PopStack(varargin{:});
+            setMenus();
+        case 'DropStack'
+            Editor.StackedHistory.DropStack();
+            setMenus();
+    end
 end
 
-    function setMenus()
-        if (current==bottom)
-            set(Figures.cells.menuHandles.undoMenu,'Enable','off');
-            set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+function setMenus()
+    global Figures CONSTANTS
+
+    if ( Editor.StackedHistory.CanUndo() )
+        set(Figures.cells.menuHandles.undoMenu,'Enable','on');
+        set(Figures.tree.menuHandles.undoMenu,'Enable','on');
+    else
+        set(Figures.cells.menuHandles.undoMenu,'Enable','off');
+        set(Figures.tree.menuHandles.undoMenu,'Enable','off');
+    end
+
+    if ( Editor.StackedHistory.CanRedo() )
+        set(Figures.cells.menuHandles.redoMenu,'Enable','on');
+        set(Figures.tree.menuHandles.redoMenu,'Enable','on');
+    else
+        set(Figures.cells.menuHandles.redoMenu,'Enable','off');
+        set(Figures.tree.menuHandles.redoMenu,'Enable','off');
+    end
+
+    if (isfield(Figures.cells,'menuHandles') && isfield(Figures.cells.menuHandles,'saveMenu'))
+        if ( Editor.StackedHistory.IsSaved() )
+            set(Figures.cells.menuHandles.saveMenu,'Enable','off');
+            set(Figures.tree.menuHandles.saveMenu,'Enable','off');
+            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
+            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
         else
-            set(Figures.cells.menuHandles.undoMenu,'Enable','on');
-            set(Figures.tree.menuHandles.undoMenu,'Enable','on');
-        end
-        
-        if (current==top)
-            set(Figures.cells.menuHandles.redoMenu,'Enable','off');
-            set(Figures.tree.menuHandles.redoMenu,'Enable','off');
-        else
-            set(Figures.cells.menuHandles.redoMenu,'Enable','on');
-            set(Figures.tree.menuHandles.redoMenu,'Enable','on');
-        end
-        
-        if (isfield(Figures.cells,'menuHandles') && isfield(Figures.cells.menuHandles,'saveMenu'))
-            if (saved==current)
-                set(Figures.cells.menuHandles.saveMenu,'Enable','off');
-                set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-                set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
-                set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
-            else
-                set(Figures.cells.menuHandles.saveMenu,'Enable','on');
-                set(Figures.tree.menuHandles.saveMenu,'Enable','on');
-                set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
-                set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
-            end
-        end
-    end %setMenu
-
-    function SetHistElement(index)
-        hist(index).CellFamilies = CellFamilies;
-        hist(index).CellTracks = CellTracks;
-        hist(index).HashedCells = HashedCells;
-        hist(index).CellHulls = CellHulls;
-        hist(index).Costs = Costs;
-        hist(index).GraphEdits = GraphEdits;
-        hist(index).CachedCostMatrix = CachedCostMatrix;
-        hist(index).ConnectedDist = ConnectedDist;
-        hist(index).Figures.tree.familyID = Figures.tree.familyID;
-        hist(index).CellPhenotypes = CellPhenotypes;
-        hist(index).SegmentationEdits = SegmentationEdits;
-    end
-
-    function GetHistElement(index)
-        CellFamilies = hist(index).CellFamilies;
-        CellTracks = hist(index).CellTracks;
-        HashedCells = hist(index).HashedCells;
-        CellHulls = hist(index).CellHulls;
-        Costs = hist(index).Costs;
-        GraphEdits = hist(index).GraphEdits;
-        CachedCostMatrix = hist(index).CachedCostMatrix;
-        ConnectedDist = hist(index).ConnectedDist;
-        Figures.tree.familyID = hist(index).Figures.tree.familyID;
-        CellPhenotypes = hist(index).CellPhenotypes;
-        SegmentationEdits = hist(index).SegmentationEdits;
-    end
-
-    function index = Increment(index)
-        index = index+1;
-        if (index > CONSTANTS.historySize)
-            index = 1;
+            set(Figures.cells.menuHandles.saveMenu,'Enable','on');
+            set(Figures.tree.menuHandles.saveMenu,'Enable','on');
+            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
+            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
         end
     end
-
-    function index = Decrement(index)
-        index = index-1;
-        if (index == 0 )
-            index = CONSTANTS.historySize;
-        end
-    end
-
-%test = [test; [current,bottom,top,saved]];
-end
+end %setMenu

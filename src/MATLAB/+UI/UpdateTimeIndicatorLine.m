@@ -30,7 +30,8 @@ global Figures
 
 if(ishandle(Figures.tree.timeIndicatorLine))
     set(Figures.tree.timeIndicatorLine,...
-        'YData',        [Figures.time Figures.time]);
+        'YData',        [Figures.time Figures.time],...
+        'XData',        get(Figures.tree.axesHandle,'XLim'));
 else
     Figures.tree.timeIndicatorLine = line(...
         get(Figures.tree.axesHandle,'XLim'),...
@@ -41,6 +42,6 @@ else
         'Tag',          'timeIndicatorLine',...
         'Parent',       Figures.tree.axesHandle);
 end
-uistack(Figures.tree.timeIndicatorLine, 'bottom');
+% uistack(Figures.tree.timeIndicatorLine, 'bottom');
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 end

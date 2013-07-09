@@ -25,6 +25,8 @@ public:
 		return numEdges;
 	}
 
+	void updateEdges(const mxArray* costs, const mxArray* fromHulls, const mxArray* toHulls);
+
 	int getOutEdgeLength(mwIndex startVert);
 	tEdgeIterator getOutEdgeIter(mwIndex startVert);
 

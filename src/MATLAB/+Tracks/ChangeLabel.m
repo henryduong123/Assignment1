@@ -6,17 +6,14 @@
 
 % ChangeLog:
 % EW 6/7/12 created
-function droppedTracks = ChangeLabel(currentTrack, desiredTrack, time)
+function [droppedTracks bErr] = ChangeLabel(currentTrack, desiredTrack, time)
 global CellTracks
 
+bErr = 1;
 droppedTracks = [];
 
 if (~exist('time','var'))
     time = CellTracks(currentTrack).startTime;
-end
-
-if (time<CellTracks(desiredTrack).startTime)
-    return
 end
 
 children = CellTracks(currentTrack).childrenTracks;
@@ -29,4 +26,6 @@ if(length(intersect(droppedTracks,children))==2)
     Families.ReconnectParentWithChildren(desiredTrack,children);
     droppedTracks = setdiff(droppedTracks,children);
 end
+
+bErr = 0;
 end

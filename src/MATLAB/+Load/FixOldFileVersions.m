@@ -29,16 +29,17 @@ function bNeedsUpdate = FixOldFileVersions()
 
     bNeedsUpdate = 0;
     
-    % Cannot fix this without resegmentation so give a warning if CellFeatures doesn't exist yet
-%     if ( isempty(CellFeatures) )
-%         msgbox('Data being loaded was generated with an older version of LEVer, some features may be disabled', 'Compatibility Warning','warn');
-%     end
-    
     emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
     if ( ~isempty(emptyHash) )
         for i=1:length(emptyHash)
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
+    end
+    
+    % Add color field to phenotype structure as of ver 7.2
+    if ( ~isfield(CellPhenotypes,'colors') )
+        CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
+        CellPhenotypes.colors(1,:) = [0 0 0];
     end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
@@ -53,6 +54,16 @@ function bNeedsUpdate = FixOldFileVersions()
     if ( ~isfield(CellHulls, 'userEdited') )
         Load.AddUserEditedField();
         bNeedsUpdate = 1;
+    end
+    
+    % Remove HashedCells.editedFlag field as of ver 7.0
+    if ( ~isempty(HashedCells) )
+        for t=1:length(HashedCells)
+            if ( isfield(HashedCells{t}, 'editedFlag') )
+                HashedCells{t} = rmfield(HashedCells{t}, 'editedFlag');
+                bNeedsUpdate = 1;
+            end
+        end
     end
     
     if ( isempty(GraphEdits) )
@@ -86,17 +97,57 @@ function bNeedsUpdate = FixOldFileVersions()
 %         bNeedsUpdate = 1;
 %     end
     
+    % Add in random state to replayable action context
+    if ( ~isempty(ReplayEditActions) && ~isfield(ReplayEditActions,'randState') )
+        randFcns = {'Editor.LearnFromEdits','Editor.SplitCell'};
+        oldReplayEditActions = ReplayEditActions;
+        
+        ReplayEditActions = struct('funcName',{}, 'funcPtr',{}, 'args',{}, 'ret',{}, ...
+                    'histAct',{}, 'bErr',{}, 'randState',{}, 'ctx',{}, 'chkHash',{});
+        
+        for i=1:length(oldReplayEditActions)
+            funcName = oldReplayEditActions(i).funcName;
+            randState = [];
+            args = oldReplayEditActions(i).args;
+            if ( any(strcmp(funcName,randFcns)) )
+                randState = oldReplayEditActions(i).args{end};
+                args = oldReplayEditActions(i).args(1:end-1);
+            end
+            
+            ReplayEditActions = [ReplayEditActions; setOrderedStructure(ReplayEditActions, oldReplayEditActions(i))];
+            ReplayEditActions(end).args = args;
+            ReplayEditActions(end).randState = randState;
+        end
+        
+        bNeedsUpdate = 1;
+    end
+    
     % Add bLockedField if necessary
     if ( ~isfield(CellFamilies, 'bLocked') )
         Load.AddLockedField();
         bNeedsUpdate = 1;
     end
     
+    % Get rid of timer handle in Log
     for i=1:length(Log)
         if(isfield(Log(i),'figures'))
             if(isfield(Log(i).figures,'advanceTimerHandle'))
                 Log(i).figures.advanceTimerHandle = [];
             end
+        end
+    end
+end
+
+% Output a structure entry with fields same as outStruct and any fields
+% with the same name copied from inStruct (all others empty)
+function newStruct = setOrderedStructure(outStruct, inStruct)
+    outFields = fieldnames(outStruct);
+    newStruct = struct();
+    for i=1:length(outFields)
+        if ( isfield(inStruct,outFields(i)) )
+            newStruct(1).(outFields{i}) = inStruct.(outFields{i});
+        else
+            newStruct(1).(outFields{i}) = [];
         end
     end
 end

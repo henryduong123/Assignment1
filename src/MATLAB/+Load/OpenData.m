@@ -29,8 +29,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function opened = OpenData()
-global Figures Colors CONSTANTS softwareVersion
+global Figures Colors CONSTANTS
 
+softwareVersion = Helper.GetVersion();
 if(isempty(Figures))
     fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
 end
@@ -127,7 +128,7 @@ switch answer
                     load([settings.matFilePath settings.matFile]);
                     fprintf('\nFile open.\n\n');
                 catch exception
-                    errordlg(['Unable to open data: ' exception.msgString]);
+                    errordlg(['Unable to open data: ' exception.message]);
                     return
                 end
             end

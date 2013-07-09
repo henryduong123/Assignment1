@@ -30,16 +30,15 @@ function GraphEditRemoveEdge(trackID, time)
     global CellTracks CellFamilies GraphEdits CachedCostMatrix
     
     nextHull = Helper.GetNearestTrackHull(trackID, time, 1);
+    if ( nextHull == 0 )
+        return;
+    end
     
     possibleFamilyParents = [];
     familyID = CellTracks(trackID).familyID;
     for i=1:length(CellFamilies(familyID).tracks)
         checkTrack = CellFamilies(familyID).tracks(i);
         possibleFamilyParents = [possibleFamilyParents Helper.GetNearestTrackHull(checkTrack, time-1, -1)];
-    end
-    
-    if ( nextHull == 0 )
-        return;
     end
     
     nzParentHulls = possibleFamilyParents(possibleFamilyParents > 0);

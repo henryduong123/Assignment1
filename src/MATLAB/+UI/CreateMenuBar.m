@@ -130,6 +130,20 @@ uimenu(...
     'Enable',           'on',...
     'Accelerator',      'i');
 
+resegMenu = uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Resegment from tree',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @resegmentation,...
+    'Enable',           'on');
+
+mitosisMenu = uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Identify tree mitoses',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @mitosisEditor,...
+    'Enable',           'on');
+
 lockMenu = uimenu(...
     'Parent',           editMenu,...
     'Label',            'Lock Tree',...
@@ -143,11 +157,25 @@ lockMenu = uimenu(...
 
 labelsMenu = uimenu(...
     'Parent',           viewMenu,...
-    'Label',            'Show Labels',...
+    'Label',            'Show Cell Labels',...
     'HandleVisibility', 'callback',...
     'Callback',         @toggleLabels,...
     'Checked',          'on',...
     'Accelerator',      'l');
+
+treeColorMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Color Tree',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleTreeColors,...
+    'Checked',          'on');
+
+structOnlyMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Draw Only Structure (faster)',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleOnlyStructure,...
+    'Checked',          'off');
 
 treeLabelsOn = uimenu(...
     'Parent',           viewMenu,...
@@ -230,6 +258,8 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.imageMenu = imageMenu;
     Figures.cells.menuHandles.fluorMenu = fluorMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
+    Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
+    Figures.cells.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
 else
     Figures.tree.menuHandles.saveMenu = saveMenu;
@@ -242,6 +272,8 @@ else
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.fluorMenu = fluorMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
+    Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
+    Figures.tree.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
 end
 end
@@ -288,13 +320,35 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'), 'on'))
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'off');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'off');
     UI.DrawCells();
-    UI.DrawTree(Figures.tree.familyID);
 else
     set(Figures.cells.menuHandles.labelsMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.labelsMenu, 'Checked', 'on');
     UI.DrawCells();
+end
+end
+
+function toggleTreeColors(src,evnt)
+    global Figures
+    if(strcmp(get(Figures.cells.menuHandles.treeColorMenu, 'Checked'), 'on'))
+        set(Figures.cells.menuHandles.treeColorMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.treeColorMenu, 'Checked', 'off');
+    else
+        set(Figures.cells.menuHandles.treeColorMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.treeColorMenu, 'Checked', 'on');
+    end
     UI.DrawTree(Figures.tree.familyID);
 end
+
+function toggleOnlyStructure(src,evnt)
+    global Figures
+    if(strcmp(get(Figures.cells.menuHandles.structOnlyMenu, 'Checked'), 'on'))
+        set(Figures.cells.menuHandles.structOnlyMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.structOnlyMenu, 'Checked', 'off');
+    else
+        set(Figures.cells.menuHandles.structOnlyMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.structOnlyMenu, 'Checked', 'on');
+    end
+    UI.DrawTree(Figures.tree.familyID);
 end
 
 function toggleTreeLabels(src,evnt)
@@ -392,7 +446,7 @@ function toggleTreeLock(src, evnt)
 end
 
 function treeInference(src, evt)
-    global Figures CellFamilies CellTracks
+    global Figures CellFamilies CellTracks HashedCells
     
     if ( CellFamilies(Figures.tree.familyID).bLocked )
         msgbox('Inference cannot be run on a locked tree.', 'Tree Locked', 'warn');
@@ -401,7 +455,18 @@ function treeInference(src, evt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    bErr = Editor.ReplayableEditAction(@Editor.TreeInference, Figures.tree.familyID);
+    stopText = inputdlg({'Enter inference stop time:'}, 'Stop time', 1, {num2str(length(HashedCells))});
+    if ( isempty(stopText) || isempty(stopText{1}) )
+        return;
+    end
+    
+    stopTime = str2double(stopText{1});
+    if ( stopTime < 2 || stopTime > length(HashedCells) )
+        msgbox('Invalid stop time.', 'Invalid time', 'warn');
+        return;
+    end
+    
+    bErr = Editor.ReplayableEditAction(@Editor.TreeInference, Figures.tree.familyID, stopTime);
     if ( bErr )
         return;
     end
@@ -416,3 +481,12 @@ function treeInference(src, evt)
     UI.DrawTree(currentFamilyID);
     UI.DrawCells();
 end
+
+function resegmentation(src,evnt)
+    UI.ResegmentInterface();
+end
+
+function mitosisEditor(src, evnt)
+    UI.MitosisEditInterface();
+end
+

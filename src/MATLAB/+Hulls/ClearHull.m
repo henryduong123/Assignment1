@@ -4,7 +4,12 @@
 % ChangeLog:
 % EW 6/8/12 created
 function ClearHull( hullID )
-global CellHulls GraphEdits CachedCostMatrix
+global CellHulls CellPhenotypes GraphEdits CachedCostMatrix
+
+bHullPhenotype = (CellPhenotypes.hullPhenoSet(1,:) == hullID);
+if ( nnz(bHullPhenotype) > 0 )
+    CellPhenotypes.hullPhenoSet = CellPhenotypes.hullPhenoSet(:,~bHullPhenotype);
+end
 
 CellHulls(hullID).time = [];
 CellHulls(hullID).points = [];

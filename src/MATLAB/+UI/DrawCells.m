@@ -87,26 +87,15 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
     set(im,'Visible','off');
 end
 
-% imageAlpha = 0.95;
-% 
-% levels = struct('haloLevel',{[]}, 'igLevel',{[]});
-% levels.haloLevel = graythresh(img);
-% level=imageAlpha*levels.haloLevel;
-% bwHalo=im2bw(img,level);
-% 
-% se=strel('square',3);
-% gd=imdilate(img,se);
-% ge=imerode(img,se);
-% ig=gd-ge;
-% levels.igLevel = graythresh(ig);
-% lig=levels.igLevel;
-% bwig=im2bw(ig,lig);
-% 
-% [r c] = find(bwig);
-% plot(curAx, c,r, '.b');
-% 
-% [r c] = find(bwHalo);
-% plot(curAx, c,r, '.y');
+bDrawLabels = isempty(Figures.tree.movingMitosis);
+
+drawHullFilter = [];
+if ( strcmpi(Figures.cells.editMode, 'mitosis') )
+    % Filter so we only draw family "mitosis" hulls when editing
+    bDrawLabels = 0;
+    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)),CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
+    drawHullFilter = [drawHullFilter{:}];
+end
 
 % draw fluor background for this cell
 if(haveFluor && strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on'))
@@ -130,8 +119,13 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             end
         end
         
-        xLabelCorner = max(CellHulls(curHullID).points(:,1));
-        yLabelCorner = max(CellHulls(curHullID).points(:,2));
+        if ( ~isempty(drawHullFilter) && ~any(curHullID == drawHullFilter ) )
+            continue;
+        end
+        
+        if ( ~checkCOMLims(curHullID, xl, yl) )
+            continue;
+        end
         
         if(Figures.cells.showInterior)
             drawString = [num2str(curTrackID) ' / ' num2str(curHullID)];
@@ -139,63 +133,30 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             drawString = num2str(curTrackID);
         end
         
-        [fontSize shapeSize] = UI.GetFontShapeSizes(length(drawString));
-        
-        %if the cell is on the current tree
-        if(Figures.tree.familyID == CellTracks(curTrackID).familyID)
-            backgroundColor = CellTracks(curTrackID).color.background;
-            edgeColor = CellTracks(curTrackID).color.background;
-            textColor = CellTracks(curTrackID).color.text;
-            fontWeight = 'bold';
-            shape = 'o';
-        elseif(strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on'))
-            %if the cell is not on the current tree
-            backgroundColor = CellTracks(curTrackID).color.backgroundDark;
-            edgeColor = CellTracks(curTrackID).color.backgroundDark;
-            textColor = CellTracks(curTrackID).color.text * 0.5;
-            fontWeight = 'normal';
-            shape = 'square';
-            fontSize = fontSize * 0.9;
-        else
-            backgroundColor = [0.5 0.5 0.5];
-            edgeColor = [0.5 0.5 0.5];
-            textColor = [0.5 0.5 0.5];
-            fontWeight = 'normal';
-            shape = 'square';
-            fontSize = fontSize *0.1;
-        end
-        
-        %see if the cell is dead
-        if(~isempty(Tracks.GetTimeOfDeath(curTrackID)))
-            backgroundColor = 'k';
-            edgeColor = 'r';
-            textColor = 'r';
-        end
-        
         %draw connection to sibling 
         if(strcmp(get(Figures.cells.menuHandles.siblingsMenu, 'Checked'),'on') ||...
             CellTracks(curTrackID).startTime == Figures.time)
             %draw if the hull was part of a mitosis on this frame
             %if the cell is on the current tree or already drawn
-            if(Figures.tree.familyID == CellTracks(curTrackID).familyID && isempty(find(siblingsAlreadyDrawn==curTrackID, 1)))
-                siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curAx, curTrackID,curHullID)];
+            if( Figures.tree.familyID == CellTracks(curTrackID).familyID && ~any(siblingsAlreadyDrawn==curTrackID) )
+                siblingsAlreadyDrawn = [siblingsAlreadyDrawn drawSiblingsLine(curAx, curTrackID, curHullID)];
             end
         end
         
+        % I'm not sure if I still need these lines
         drawWidth = 2;
         drawStyle = '-';
         if ( any(Figures.cells.selectedHulls == curHullID) )
             drawWidth = 2.5;
             drawStyle = '--';
         end
+        % end of not sure
         
-        if ( ~checkCOMLims(curHullID, xl, yl) )
-            continue;
-        end
-          
+        colorStruct = UI.GetCellDrawProps(curTrackID, curHullID, drawString);
+        
         if(Figures.cells.showInterior)
             [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
-            plot(curAx, c, r, '.', 'Color',edgeColor);
+            plot(curAx, c, r, '.', 'Color',colorStruct.edge);
         end
         
         %flor marker exists
@@ -211,44 +172,30 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         %draw outline
         plot(curAx, CellHulls(curHullID).points(:,1),...
             CellHulls(curHullID).points(:,2),...
-            'Color',            edgeColor,...
+            'Color',            colorStruct.edge,...
             'UserData',         curTrackID,...
             'uicontextmenu',    Figures.cells.contextMenuHandle,...
             'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
-            'LineStyle',        drawStyle,...
-            'LineWidth',        drawWidth);
+            'LineStyle',        colorStruct.edgeStyle,...
+            'LineWidth',        colorStruct.edgeWidth);
         
         %draw label
-        if(isempty(Figures.tree.movingMitosis))%don't draw labels if dragging a mitosis
+        if( bDrawLabels )%don't draw labels if dragging a mitosis
             if (Figures.tree.familyID == CellTracks(curTrackID).familyID ||...
                     strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on'))
-                labelBGColor = edgeColor;
-                if ( ~Figures.cells.showInterior )
-                    labelBGColor = 'none';
-                    
-                    labelHandle = plot(curAx, xLabelCorner,...
-                        yLabelCorner,...
-                        shape,              ...
-                        'MarkerFaceColor',  backgroundColor,...
-                        'MarkerEdgeColor',  edgeColor,...
-                        'MarkerSize',       shapeSize,...
-                        'UserData',         curTrackID,...
-                        'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
-                        'uicontextmenu',    Figures.cells.contextMenuHandle);
-                end
                 
-                labelTextHandle = text(xLabelCorner,          ...
-                    yLabelCorner,           ...
-                    drawString,...
-                    'Parent',               curAx,...
-                    'Color',                textColor,...
-                    'BackgroundColor',      labelBGColor,...
-                    'FontWeight',           fontWeight,...
-                    'FontSize',             fontSize,...
-                    'HorizontalAlignment',  'center',...
-                    'UserData',             curTrackID,...
+                xLabelCorner = max(CellHulls(curHullID).points(:,1));
+                yLabelCorner = max(CellHulls(curHullID).points(:,2));
+                
+                [textHandle, bgHandle] = UI.DrawCellLabel(curAx, drawString, xLabelCorner, yLabelCorner, colorStruct);
+                
+                set(textHandle, 'UserData',curTrackID,...
+                    'ButtonDownFcn', (@(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
+                    'uicontextmenu', Figures.cells.contextMenuHandle);
+                
+                set(bgHandle, 'UserData',curTrackID,...
                     'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
-                    'uicontextmenu',        Figures.cells.contextMenuHandle);
+                    'uicontextmenu', Figures.cells.contextMenuHandle);
             end
         end
     end

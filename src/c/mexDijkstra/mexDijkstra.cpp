@@ -271,7 +271,7 @@ void buildOutputPaths(mxArray* cellPaths, mxArray* arrayCost)
 }
 
 // Functions
-int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle, int dir = 1)
+int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArray* matFuncHandle, int dir = 1, bool bStopAtTerminals = true)
 {
 	gAcceptedPaths.clear();
 	for ( mwSize i=0; i < numVerts; ++i )
@@ -293,8 +293,12 @@ int dijkstraSearch(int startVert, mwSize maxExtent, mwSize numVerts, const mxArr
 		if ( (curVert != startVert) && checkAcceptPath(startVert, curVert, maxExtent, matFuncHandle) )
 		{
 			gAcceptedPaths.push_back(curVert);
-			curVert = popNextVert(costQueue, maxExtent);
-			continue;
+
+			if ( bStopAtTerminals )
+			{
+				curVert = popNextVert(costQueue, maxExtent);
+				continue;
+			}
 		}
 
 		double curCost = gPathCosts[MATLAB_IDX(curVert)];
@@ -366,6 +370,37 @@ void mexCmd_initGraph(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 	gPathBack.resize(gCostGraph->getNumVerts());
 }
 
+void mexCmd_updateGraph(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+	if ( nlhs > 0 )
+		mexErrMsgTxt("updateGraph: Expect no output arguments.");
+
+	if ( !gCostGraph )
+		mexErrMsgTxt("updateGraph: Cost graph must first be initialized. Run \"initGraph\" command.");
+
+	if ( nrhs < 2 || !mxIsClass(prhs[1], "double") )
+		mexErrMsgTxt("updateGraph: Expected double cost matrix as second parameter.");
+
+	mwSize m = mxGetM(prhs[1]);
+	mwSize n = mxGetN(prhs[1]);
+
+	if ( m < 1 || n < 1 )
+		mexErrMsgTxt("updateGraph: Expected non-empty cost matrix as second parameter.");
+
+	if ( nrhs < 3 || !mxIsClass(prhs[2], "double") || mxGetNumberOfElements(prhs[2]) != m )
+		mexErrMsgTxt("updateGraph: Expected fromHulls list as third parameter.");
+
+	if ( nrhs < 4 || !mxIsClass(prhs[3], "double") || mxGetNumberOfElements(prhs[3]) != n )
+		mexErrMsgTxt("updateGraph: Expected fromHulls list as fourth parameter.");
+
+	gCostGraph->updateEdges(prhs[1], prhs[2], prhs[3]);
+
+	gbTraversed.resize(gCostGraph->getNumVerts());
+	gPathCosts.resize(gCostGraph->getNumVerts());
+	gPathLengths.resize(gCostGraph->getNumVerts());
+	gPathBack.resize(gCostGraph->getNumVerts());
+}
+
 void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
 	if ( nlhs != 2 )
@@ -387,6 +422,12 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	if ( nrhs == 4 )
 		dir = ((int) mxGetScalar(prhs[3]));
 
+	bool bStopAtTerms = true;
+	if ( nrhs == 5 && !mxIsClass(prhs[3], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar bStopAtTerminals for fifth parameter.");
+	if ( nrhs == 5 )
+		bStopAtTerms = ((bool) mxGetScalar(prhs[4]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -399,7 +440,7 @@ void mexCmd_checkExtension(int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	mwSize maxExt = ((mwSize) mxGetScalar(prhs[2]));
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL, dir);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), NULL, dir, bStopAtTerms);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
@@ -432,6 +473,12 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	if ( nrhs == 5 )
 		dir = ((int) mxGetScalar(prhs[4]));
 
+	bool bStopAtTerms = true;
+	if ( nrhs == 6 && !mxIsClass(prhs[5], "double") )
+		mexErrMsgTxt("matlabExtend: Expected scalar bStopAtTerminals for sixth parameter.");
+	if ( nrhs == 6 )
+		bStopAtTerms = ((bool) mxGetScalar(prhs[5]));
+
 	//
 	gCellHulls = mexGetVariablePtr("global", "CellHulls");
 	gCellTracks = mexGetVariablePtr("global", "CellTracks");
@@ -446,7 +493,7 @@ void mexCmd_matlabExtend(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	const mxArray* acceptFuncHandle = prhs[3];
 
 	//
-	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle, dir);
+	int numPaths = dijkstraSearch(startVert, maxExt, gCostGraph->getNumVerts(), acceptFuncHandle, dir, bStopAtTerms);
 
 	plhs[0] = mxCreateCellMatrix(1, numPaths);
 	plhs[1] = mxCreateNumericMatrix(1, numPaths, mxDOUBLE_CLASS, mxREAL);
@@ -710,6 +757,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	{
 		CALL_COMMAND(initGraph);
 	}
+	else if ( IS_COMMAND(commandStr, updateGraph) )
+	{
+		CALL_COMMAND(updateGraph);
+	}
 	else if ( IS_COMMAND(commandStr, checkExtension) )
 	{
 		CALL_COMMAND(checkExtension);
@@ -748,6 +799,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		mexPrintf("Invalid Command String: \"%s\"\n\n", commandStr);
 		mexPrintf("Supported Commands:\n");
 		mexPrintf("\t initGraph(costMatrix) - Initialize the mex routines with a sparse matrix costMatrix.\n");
+		mexPrintf("\t updateGraph(costMatrix, fromHulls, toHulls) - Update internal cost edges using costMatrix and from/to hulls lists");
 		mexPrintf("\t checkExtension(startVert, maxLength, direction = 1) - Find suitable extensions out to maxLength from startVert. Optionally search backwards (direction < 0).\n");
 		mexPrintf("\t matlabExtend(startVert, maxLength, acceptFunc, direction = 1) - Find suitable extensions using matlab acceptFunc(startIdx,endIdx) as acceptance criterion. Optionally search backwards (direction < 0).\n");
 		mexPrintf("\t removeEdges(startVertList, endVertList) - Remove all edges in list.\n");

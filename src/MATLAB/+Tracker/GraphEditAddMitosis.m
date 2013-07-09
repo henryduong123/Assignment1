@@ -25,22 +25,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function GraphEditAddMitosis(trackID, siblingTrackID, time)
-    global CellTracks GraphEdits Costs CachedCostMatrix
+    global GraphEdits Costs CachedCostMatrix
     
-    parentHash = time - CellTracks(trackID).startTime;
-    siblingHash = time - CellTracks(siblingTrackID).startTime + 1;
+    parentHull = Helper.GetNearestTrackHull(trackID, time-1, 0);
     
-    if ( parentHash < 1 || parentHash+1 > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    if ( siblingHash < 1 || siblingHash > length(CellTracks(trackID).hulls) )
-        return;
-    end
-    
-    parentHull = CellTracks(trackID).hulls(parentHash);
-    childHull = CellTracks(trackID).hulls(parentHash+1);
-    
-    siblingHull = CellTracks(siblingTrackID).hulls(siblingHash);
+    childHull = Helper.GetNearestTrackHull(trackID, time, 0);
+    siblingHull = Helper.GetNearestTrackHull(siblingTrackID, time, 0);
     
     if ( parentHull == 0 || childHull == 0 || siblingHull == 0 )
         return;

@@ -294,12 +294,8 @@ function splits = findSplits(costMatrix, checkHulls, nextHulls)
         % Only split using overlapping cells
         bValidWants = true(size(wants));
         for k=1:length(wants)
-            if ( isempty(ConnectedDist{checkHulls(wants(k))}) )
-                continue;
-            end
-            
-            ccidx = find(ConnectedDist{checkHulls(wants(k))}(:,1) == nextHulls(i));
-            if ( isempty(ccidx) || ConnectedDist{checkHulls(wants(k))}(ccidx,2) >= 1.0 )
+            dist = Tracker.GetConnectedDistance(checkHulls(wants(k)),nextHulls(i));
+            if ( dist >= 1.0 )
                 bValidWants(k) = 0;
             end
         end

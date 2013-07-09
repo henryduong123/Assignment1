@@ -58,18 +58,42 @@ global CellTracks
 object = get(gco);
 if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
     %clicked on a node
-    if(isempty(CellTracks(object.UserData).parentTrack))
+    curTrack = object.UserData;
+    bLocked = Helper.CheckLocked(curTrack);
+    
+    if(isempty(CellTracks(curTrack).parentTrack))
         msgbox('No Mitosis to Remove','Unable to Remove Mitosis','error');
         return
     end
+    
+    if ( bLocked )
+        resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+        if ( strcmpi(resp,'Cancel') )
+            return;
+        end
+    end
+    
     choice = object.UserData;
 elseif(object.YData(1)==object.YData(2))
     %clicked on a horizontal line
-    choice = questdlg('Which Side to Keep?','Merge With Parent',...
-        num2str(CellTracks(object.UserData).childrenTracks(1)),...
-        num2str(CellTracks(object.UserData).childrenTracks(2)),'Cancel','Cancel');
+    curTrack = object.UserData;
+    bLocked = Helper.CheckLocked(curTrack);
     
-    if(strcmpi(choice,'Cancel')), return, end
+    if ( bLocked )
+        resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+        if ( strcmpi(resp,'Cancel') )
+            return;
+        end
+    end
+    
+    choice = questdlg('Which Side to Keep?','Merge With Parent',...
+        num2str(CellTracks(curTrack).childrenTracks(1)),...
+        num2str(CellTracks(curTrack).childrenTracks(2)),'Cancel','Cancel');
+    
+    if(strcmpi(choice,'Cancel'))
+        return
+    end
+    
     choice = str2double(choice);
 else
     %clicked on a vertical line

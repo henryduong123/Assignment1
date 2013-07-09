@@ -17,10 +17,16 @@
 function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     global ReplayEditActions
     
+    if ( nargout(actPtr) < 1 )
+        error('All valid replayable actions must return at least a historyAction argument');
+    end
+    
     actCtx = getEditContext();
     
-    newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin},...
-                    'ret',{{}}, 'histAct',{''}, 'bErr',{0}, 'ctx',{actCtx}, 'chkHash',{{}});
+    startRandState = Helper.GetRandomState();
+    
+    newAct = struct('funcName',{func2str(actPtr)}, 'funcPtr',{actPtr}, 'args',{varargin}, 'ret',{{}}, ...
+                    'histAct',{''}, 'bErr',{0}, 'randState',{[]}, 'ctx',{actCtx}, 'chkHash',{{}});
 	
     if ( isempty(ReplayEditActions) )
         ReplayEditActions = newAct;
@@ -28,17 +34,36 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
         ReplayEditActions = [ReplayEditActions; newAct];
     end
     
-    varargout = cell(1,max(0,nargout-1));
+    % This is silly, but basically lets us push the error message down to
+    % the function that actually has fewer outputs than requested.
+    numArgs = max(nargout, nargout(actPtr));
+    
+    varargout = cell(1,max(0,numArgs-1));
     [bErr historyAction varargout{:}] = Editor.SafeExecuteAction(actPtr, varargin{:});
     
     ReplayEditActions(end).bErr = bErr;
     if ( ~bErr )
+        % Only bother to save random state if it's changed (rand was used)
+        endRandState = Helper.GetRandomState();
+        if ( ~isequal(endRandState, startRandState) )
+            ReplayEditActions(end).randState = startRandState;
+        end
+        
         ReplayEditActions(end).ret = varargout;
         if ( ~isempty(historyAction) )
-            Editor.History(historyAction);
+            % Allow history action/arg pairs if necessary
+            if ( isstruct(historyAction) )
+                Editor.History(historyAction.action, historyAction.arg);
+            else
+                Editor.History(historyAction);
+            end
+            
             ReplayEditActions(end).histAct = historyAction;
         end
 %         ReplayEditActions(end).chkHash = Dev.GetCoreHashList();
+    else
+        % Always save on errors, just in case
+        ReplayEditActions(end).randState = startRandState;
     end
 end
 

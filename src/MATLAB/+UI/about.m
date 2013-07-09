@@ -63,12 +63,14 @@ if exist('LEVER_logo.tif','file')
 else
     im=255*ones(339,608);
 end
-imagesc(im)    
-global softwareVersion
+imagesc(im)
+softwareVersion = Helper.GetVersion();
+buildNumber = Helper.GetVersion('buildString');
+cDate = clock();
 if ( ~isempty(softwareVersion) )
-    set(handles.text1,'string',{['LEVER : ' softwareVersion] ; [] ; ['(c) 2012']  });
+    set(handles.text1,'string',{['LEVER: ' softwareVersion] ; [' ' buildNumber ' '] ;[] ; ['(c) ' num2str(cDate(1))]  });
 else
-    set(handles.text1,'string',{['LEVER : (version unknown)' ] ; [] ; ['(c) 2012']  });
+    set(handles.text1,'string',{['LEVER: (version unknown)' ] ; []; [] ; ['(c) ' num2str(cDate(1))]  });
 end    
     
 % UIWAIT makes about wait for user response (see UIRESUME)

@@ -46,12 +46,12 @@ gmoptions = statset('Display','off', 'MaxIter',400);
 
 switch CONSTANTS.cellType
     case 'Adult'
-        if(exist('bKmeansInit', 'var') && bKmeansInit)
+        if(bKmeansInit)
             %initialize GMM using kmeans result instead of randomly
             % ~10x faster but ocassionally poor results - used for interactivity
             [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
             start = struct('mu', {centers}, 'Sigma', {repmat(eye(2,2), [1 1 k])},'PComponents',{(ones(1,k)/k)});
-            obj = gmdistribution.fit([c,r], k, 'Start', start, 'Options',gmoptions);
+            obj = gmdistribution.fit([c,r], k, 'Start',start, 'Options',gmoptions);
         else
             obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
         end

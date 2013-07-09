@@ -54,8 +54,12 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         system('mkdir .\segmentationData');
     end
     
-    dirName = fileparts(CONSTANTS.rootImageFolder);
+    [dirName chkFile] = fileparts(CONSTANTS.rootImageFolder);
+    if ( ~isempty(chkFile) )
+        dirName = fullfile(dirName, chkFile);
+    end
     rootFluorFolder=CONSTANTS.rootFluorFolder(1:end-1);
+
     for i=1:numProcessors
          system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
             num2str(numberOfImages) ' ' CONSTANTS.cellType ' ' ...
@@ -90,7 +94,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
         % Collect segmentation error logs into one place
         errlog = fopen([datasetName '_seg_error.log'], 'w');
         for i=1:length(bSegFileExists)
-            if ( bSegFileExists )
+            if ( bSegFileExists(i) )
                 continue;
             end
             fprintf(errlog, '----------------------------------\n');

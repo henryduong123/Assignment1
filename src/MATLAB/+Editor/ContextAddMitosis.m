@@ -3,7 +3,7 @@
 % ChangeLog:
 % EW 6/8/12 created
 function ContextAddMitosis(trackID, siblingTrack, time)
-global CellTracks Figures
+global CellTracks CellFamilies Figures
 
 if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
     msgbox([num2str(siblingTrack) ' is not a valid cell'],'Not a valid cell','error');
@@ -26,6 +26,23 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
+bOverrideLock = 0;
+bLocked = Helper.CheckLocked([trackID siblingTrack]);
+if ( any(bLocked) )
+    lockedList = [];
+    if ( bLocked(1) )
+        lockedList = CellFamilies(CellTracks(trackID).familyID).rootTrackID;
+    end
+    if ( bLocked(2) )
+        lockedList = [lockedList CellFamilies(CellTracks(siblingTrack).familyID).rootTrackID];
+    end
+    
+    resp = questdlg(['This edit will affect locked tree(s) ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+    if ( strcmpi(resp,'Cancel') )
+        return;
+    end
+    bOverrideLock = 1;
+end
 leftChildTrack = [];
 
 % if both tracks are starting on this frame see who the parent should be
@@ -45,6 +62,14 @@ if(CellTracks(trackID).startTime==time)
                 case 'Cancel'
                     return
             end
+        elseif ( ~bOverrideLock && Helper.CheckLocked(parentTrack) )
+            rootTrack = CellFamilies(CellTracks(parentTrack).familyID).rootTrackID;
+            resp = questdlg(['This edit will affect locked tree(s) ' num2str(rootTrack) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
+            if ( strcmpi(resp,'Cancel') )
+                return;
+            end
+            
+            valid = 1;
         else
             valid = 1;
         end

@@ -61,7 +61,7 @@ set(Figures.cells.handle,...
     'KeyPressFcn',          @figureKeyPress,...
     'Menu',                 'none',...
     'ToolBar',              'figure',...
-    'BusyAction',           'cancel',...
+    'BusyAction',           'queue',...
     'Interruptible',        'off',...
     'CloseRequestFcn',      @UI.CloseFigure,...
     'NumberTitle',          'off',...
@@ -73,6 +73,7 @@ addlistener(Figures.cells.handle, 'WindowKeyRelease', @figureKeyRelease);
     Figures.tree.movingMitosis = [];
 
 Figures.cells.showInterior = false;
+Figures.cells.editMode = 'normal';
     
 Figures.cells.timeLabel = uicontrol(Figures.cells.handle,...
     'Style','text',...
@@ -364,6 +365,7 @@ function deleteSelectedCells()
         return;
     end
 
+    UI.ClearCellSelection();
     Error.LogAction(['Removed selected cells [' num2str(Figures.cells.selectedHulls) ']'],Figures.cells.selectedHulls);
 
     %if the whole family disappears with this change, pick a diffrent family to display
@@ -393,6 +395,8 @@ function mergeSelectedCells()
         return;
     end
     
+    
+    UI.ClearCellSelection();
     Error.LogAction('Merged cells', [deletedCells replaceCell], replaceCell);
 
     UI.DrawTree(Figures.tree.familyID);
@@ -404,10 +408,7 @@ function learnFromEdits(src,evnt)
     
     currentHull = CellTracks(CellFamilies(Figures.tree.familyID).rootTrackID).hulls(1);
     
-    globStream = RandStream.getGlobalStream();
-    randState = globStream.State;
-    
-    bErr = Editor.ReplayableEditAction(@Editor.LearnFromEdits, randState);
+    bErr = Editor.ReplayableEditAction(@Editor.LearnFromEdits);
     if ( bErr )
         return;
     end

@@ -74,14 +74,14 @@ else
     row = [row ','];
 end
 if(~isempty(newValue))
-    row = [row num2str(newValue) '\n'];
+    row = sprintf('%s%s\n',row,num2str(newValue));
 else
-    row = [row '\n'];
+    row = sprintf('%s\n', row);
 end
 
 if (~exist(logFile,'file'))
     %add headers
-    row = ['Date,Time,User,,Action,Frame,Old Value,New Value,\n' row];
+    row = sprintf('Date,Time,User,,Action,Frame,Old Value,New Value,\n%s',row);
     if(~isempty(Log))
         row = reconstructLog(row);
     end
@@ -122,18 +122,37 @@ function row = reconstructLog(row)
 global Log
 
 for i=1:length(Log)
-    row = [row [num2str(Log(i).time(1)) '/' num2str(Log(i).time(2)) '/' num2str(Log(i).time(3))] ','...
+    newRowString = [[num2str(Log(i).time(1)) '/' num2str(Log(i).time(2)) '/' num2str(Log(i).time(3))] ','...
         [num2str(Log(i).time(4)) ':' num2str(Log(i).time(5)) ':' num2str(round(Log(i).time(6)))] ',' Log(i).user ',,'...
         Log(i).action ',' num2str(Log(i).figures.time) ','];
+    
+    % This attempts to fix any character codes above 255, which generally
+    % means that there's a Log Action which doesn't use num2str to convert
+    % an ID to a string before concatenating.
+    num2StrError = find(double(newRowString) > 255);
+    if ( ~isempty(num2StrError) )
+        cellStart = 1;
+        cellStr = {};
+        for k=1:length(num2StrError)
+            cellStr = [cellStr {newRowString(cellStart:(num2StrError(k)-1))}];
+            cellStr = [cellStr {num2str(double(newRowString(num2StrError(k))))}];
+            cellStart = num2StrError(k)+1;
+        end
+        cellStr = [cellStr {newRowString(cellStart:end)}];
+        newRowString = [cellStr{:}];
+    end
+    
+    row = [row newRowString];
+    
     if(~isempty(Log(i).oldValue))
         row = [row num2str(Log(i).oldValue) ','];
     else
         row = [row ','];
     end
     if(~isempty(Log(i).newValue))
-        row = [row num2str(Log(i).newValue) '\n'];
+        row = sprintf('%s%s\n',row,num2str(Log(i).newValue));
     else
-        row = [row '\n'];
+        row = sprintf('%s\n',row);
     end
 end
 end
