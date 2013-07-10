@@ -69,6 +69,10 @@ function verInfo = MakeVersion(bTransientUpdate)
     end
     
     if ( ~bTransientUpdate )
+        if ( ~bFoundGit )
+            error('Unable to use git to build version string for build.');
+        end
+        
         % Concatenate the template function lines into one giant string
         templateString = [];
         for i=1:length(funcString)
@@ -84,18 +88,16 @@ function verInfo = MakeVersion(bTransientUpdate)
         fprintf(fid, templateString, verInfo.majorVersion, verInfo.minorVersion, verInfo.branchName, verInfo.buildNumber, verInfo.buildMachine);
 
         fclose(fid);
-    end
-    
-    % Update fallback file if we used git to retrieve version info.
-    if ( bFoundGit )
+        
+        % Update fallback file if we used git to retrieve version info.
         fid = fopen(fallbackFile, 'wt');
         if ( fid < 0 )
             return;
         end
-        
+
         fprintf(fid, '%s\n', verTag);
         fprintf(fid, '%s\n', branchName);
-        
+
         fclose(fid);
     end
 end
