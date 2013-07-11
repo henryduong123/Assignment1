@@ -1,3 +1,6 @@
+% AddHematoFluor.m - Compute intersections between the cell hulls and the
+% fluorescence frames.
+
 function AddHematoFluor(addToHistory)
     global CONSTANTS CellHulls HashedCells ConnectedDist FluorData CellTracks HaveFluor
 

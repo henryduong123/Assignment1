@@ -1,3 +1,6 @@
+% UpdateHematoFluor.m - reset fluorescence info after a cell has been
+% edited
+
 function UpdateHematoFluor(t)
     global CellHulls HashedCells FluorData CellTracks HaveFluor
 
