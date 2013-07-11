@@ -15,15 +15,9 @@ function AddHematoFluor(addToHistory)
     end
     
     for t=1:tmax
-        if (t == 961)
-            t = 961;
-        end
         hulls = [HashedCells{t}(:).hullID];
         greenInd = FluorData(t).greenInd;
         for i=1:length(hulls)
-            if (i == 22)
-                i = 22;
-            end
             inter = intersect(CellHulls(hulls(i)).indexPixels, greenInd);
             if (isempty(inter))
                 CellHulls(hulls(i)).greenInd = [];
@@ -35,9 +29,6 @@ function AddHematoFluor(addToHistory)
     
     flTimes = find(HaveFluor);
     for i=1:length(CellTracks)
-        if (i == 18075)
-            i = 18075;
-        end
         times = CellTracks(i).startTime:CellTracks(i).endTime;
         CellTracks(i).markerTimes = intersect(times,flTimes);
         if(~isempty(CellTracks(i).markerTimes))

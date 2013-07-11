@@ -27,12 +27,6 @@ function UpdateHematoFluor(t)
     
     flTimes = find(HaveFluor);
     for i=1:length(CellTracks)
-        if (i == 18386)
-            i = 18386;
-        end
-        if (i == 23505)
-            i = 23505;
-        end
         if (isempty(CellTracks(i).startTime) || isempty(CellTracks(i).endTime))
             continue;
         end
