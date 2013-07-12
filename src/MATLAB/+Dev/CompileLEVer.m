@@ -136,32 +136,38 @@ system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe ' b
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);
 
+[depToolboxes depExternal toolboxFuncs externalFuncs] = GetExternalDependencies();
+if ( ~isempty(depExternal) )
+    fprintf('ERROR: Some local functions have external dependencies\n');
+    for i=1:length(depExternal)
+        fprintf('[%d]  %s\n', i, depExternal);
+    end
+    
+    error('External dependecies cannot be packaged in a MATLAB executable');
+end
+
 toolboxAddCommand = '';
-depToolboxes = Dev.GetToolboxDependencies();
 if ( ~isempty(depToolboxes) )
     toolboxAddCommand = '-N';
     for i=1:length(depToolboxes)
-        toolboxAddCommand = [toolboxAddCommand ' -p ' depToolboxes{i}];
+        toolboxAddCommand = [toolboxAddCommand ' -p ' toolboxdir(depToolboxes{i})];
     end
 end
 
 
-
-
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-% !mcc -R -startmsg -m LEVer.m -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
 system(['mcc -v -R -startmsg -m LEVer.m ' toolboxAddCommand ' -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
-!mcc -R -startmsg -m Segmentor.m -a +Segmentation\*FrameSegmentor.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
+system(['mcc -R -startmsg -m Segmentor.m ' toolboxAddCommand ' -a +Segmentation\*FrameSegmentor.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
 fprintf('Done (%f sec)\n', toc());
 
 tic();
 fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
-!mcc -R -startmsg -m LEVER_SegAndTrackFolders.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m
+system(['mcc -R -startmsg -m LEVER_SegAndTrackFolders.m ' toolboxAddCommand ' -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
 fprintf('Done (%f sec)\n', toc());
 
 % tic();
