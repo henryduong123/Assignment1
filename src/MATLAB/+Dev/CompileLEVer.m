@@ -136,21 +136,21 @@ system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe ' b
 mcrfile = mcrinstaller();
 system(['copy "' mcrfile '" "' bindir '\"']);
 
-[depToolboxes depExternal toolboxFuncs externalFuncs] = GetExternalDependencies();
-if ( ~isempty(depExternal) )
-    fprintf('ERROR: Some local functions have external dependencies\n');
-    for i=1:length(depExternal)
-        fprintf('[%d]  %s\n', i, depExternal);
-    end
-    
-    error('External dependecies cannot be packaged in a MATLAB executable');
-end
+[toolboxStruct externalStruct] = Dev.GetExternalDependencies();
+% if ( ~isempty(externalStruct.deps) )
+%     fprintf('ERROR: Some local functions have external dependencies\n');
+%     for i=1:length(externalStruct.deps)
+%         fprintf('[%d]  %s\n', i, externalStruct.deps{i});
+%     end
+%     
+%     error('External dependecies cannot be packaged in a MATLAB executable');
+% end
 
 toolboxAddCommand = '';
-if ( ~isempty(depToolboxes) )
+if ( ~isempty(toolboxStruct.deps) )
     toolboxAddCommand = '-N';
-    for i=1:length(depToolboxes)
-        toolboxAddCommand = [toolboxAddCommand ' -p ' toolboxdir(depToolboxes{i})];
+    for i=1:length(toolboxStruct.deps)
+        toolboxAddCommand = [toolboxAddCommand ' -p "' toolboxdir(toolboxStruct.deps{i}) '"'];
     end
 end
 

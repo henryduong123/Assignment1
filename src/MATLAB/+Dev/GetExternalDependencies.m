@@ -1,4 +1,4 @@
-function [toolboxes externalDeps toolboxFuncs externalFuncs] = GetExternalDependencies(chkPath)
+function [toolboxStruct externalStruct squashNames squashGraph] = GetExternalDependencies(chkPath)
     if ( ~exist('chkPath', 'var') )
         chkPath = pwd();
     end
@@ -6,13 +6,15 @@ function [toolboxes externalDeps toolboxFuncs externalFuncs] = GetExternalDepend
     [localNames localFileNames] = getLocalNames(chkPath);
     [fullNames calledFrom] = recursiveGetDeps(localFileNames);
     
-    bIsLocal = cellfun(@(x)(any(strcmpi(x,localFileNames))), fullNames);
+    bIsLocal = cellfun(@(x)(~isempty(strfind(x,chkPath))), fullNames);
     localNodeList = find(bIsLocal);
     
     [toolboxes toolboxMap] = getMatlabToolboxes(fullNames);
+    toolboxFuncs = arrayfun(@(x)(fullNames(toolboxMap == x)), 1:length(toolboxes), 'UniformOutput',0);
     
     bIsMatlab = (toolboxMap > 0);
     [externalDeps externalMap] = getOtherDeps(fullNames, bIsMatlab, bIsLocal);
+    externalFuncs = arrayfun(@(x)(fullNames(externalMap == x)), 1:length(externalDeps), 'UniformOutput',0);
     
 %     toolboxMap(externalMap > 0) = externalMap(externalMap > 0) + length(toolboxes);
 %     toolboxes = [toolboxes; externalDeps];
@@ -24,10 +26,13 @@ function [toolboxes externalDeps toolboxFuncs externalFuncs] = GetExternalDepend
     callGraph = fullGraph(bIsCalled,bIsCalled);
     callToolboxMap = toolboxMap(bIsCalled);
     
-%     [squashNames squashGraph squashMap] = squashToolboxNodes(calledNames, callGraph, toolboxes, callToolboxMap);
+    [squashNames squashGraph squashMap] = squashToolboxNodes(calledNames, callGraph, toolboxes, callToolboxMap);
     
     usedToolboxes = unique(callToolboxMap(callToolboxMap>0));
     toolboxes = toolboxes(usedToolboxes);
+    
+    toolboxStruct = struct('deps', {toolboxes}, 'funcs', {toolboxFuncs});
+    externalStruct = struct('deps', {externalDeps}, 'funcs', {externalFuncs});
 end
 
 function [toolboxes toolboxMap] = getMatlabToolboxes(funcNames)
@@ -79,12 +84,16 @@ function [externalDeps externalMap] = getOtherDeps(funcNames, bIsMatlab, bIsLoca
         [tokenNodes tokenRemains] = strtok(tokenRemains, tokenDelims);
         
         bEmpty = cellfun(@(x)(isempty(x)), tokenNodes);
-        bEmptyLeaf = cellfun(@(x)(isempty(x)), tokenRemains);
         
         tokenNodes = tokenNodes(~bEmpty);
         tokenRemains = tokenRemains(~bEmpty);
         
+        nextPred = nextPred(~bEmpty);
+        nodeMap = nodeMap(~bEmpty);
+        
         [newNodes ia ic] = unique(tokenNodes);
+        
+        bEmptyLeaf = cellfun(@(x)(isempty(x)), tokenRemains);
         bNewLeaves = bEmptyLeaf(ia);
         
         pred = [pred; nextPred(ia)];
@@ -98,7 +107,6 @@ function [externalDeps externalMap] = getOtherDeps(funcNames, bIsMatlab, bIsLoca
         sharedPred(nodeMap(bUpdateShared)) = leafPreds(setPred(bUpdateShared));
         
         nextPred = ic + length(pathNodes);
-        nodeMap = nodeMap(~bEmpty);
         
         bLeaves = [bLeaves; bNewLeaves];
         pathNodes = [pathNodes; newNodes];
