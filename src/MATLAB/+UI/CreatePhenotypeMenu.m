@@ -21,9 +21,14 @@ end
 % Whenever we right-click on a cell this puts a check mark next to active
 % phenotype, if any.
 function updatePhenoCheck(src, evnt)
-    global CellPhenotypes
+    global CellPhenotypes Figures
     
-    [hullID trackID] = UI.GetClosestCell(0);
+    hullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
+    if ( hullID <= 0 )
+        return;
+    end
+    
+    trackID = Hulls.GetTrackID(hullID);
     if(isempty(trackID))
         return
     end
