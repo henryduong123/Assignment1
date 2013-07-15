@@ -3,6 +3,10 @@
 
 function CreateFluorescenceMenu()
     global Figures FluorTypes
+
+    if ~Helper.HaveFluor()
+        return
+    end
     
     FluorMenu = uimenu(Figures.cells.contextMenuHandle,...
         'Label',        'Fluorescence',...
@@ -19,6 +23,10 @@ end
 
 function updateFluorCheck(src, evnt)
     global Figures FluorTypes CellTracks
+    
+    if ~Helper.HaveFluor()
+        return
+    end
     
     [hullID trackID] = UI.GetClosestCell(0);
     if(isempty(trackID))

@@ -96,7 +96,11 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Separator',    'on');
 
 UI.CreatePhenotypeMenu();
-UI.CreateFluorescenceMenu();
+
+if Helper.HaveFluor()
+    UI.CreateFluorescenceMenu();
+end
+
 end
 
 %% Callback functions
