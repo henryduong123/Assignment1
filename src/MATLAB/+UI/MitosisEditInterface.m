@@ -4,11 +4,10 @@ function MitosisEditInterface()
     Figures.cells.editMode = 'mitosis';
     
     editTree = Figures.tree.familyID;
-    rootTrack = CellFamilies(editTree).rootTrackID;
     
     % Order matters here, we want the Init action to be part of the subtask
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'MitosisEditTask');
-    Editor.ReplayableEditAction(@Editor.MitosisEditInitializeAction, rootTrack, length(HashedCells));
+    Editor.ReplayableEditAction(@Editor.MitosisEditInitializeAction, editTree, length(HashedCells));
     
     UI.DrawTree(editTree);
     UI.DrawCells();

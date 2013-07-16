@@ -149,7 +149,7 @@ function newEdges = FindFrameReseg(t, curEdges)
     bValidMatched = ((bestInIdx(bestOutIdx) == 1:size(costMatrix,1)) & (~isinf(bestOutgoing)));
     matchedIdx = find(bValidMatched);
     
-    newEdges = [];
+    newEdges = zeros(0,2);
     
     % Create the edge list
     for i=1:length(matchedIdx)

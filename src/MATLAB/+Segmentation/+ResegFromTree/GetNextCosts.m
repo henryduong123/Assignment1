@@ -4,8 +4,15 @@ function costMatrix = GetNextCosts(t, checkHulls, nextHulls)
     bValidFrom = ([CellHulls(checkHulls).time] == t);
     bValidTo = ([CellHulls(nextHulls).time] == t+1);
     
+    currentHulls = unique(checkHulls(bValidFrom));
+    
+    if ( isempty(currentHulls) )
+        costMatrix = zeros(0,length(nextHulls));
+        return;
+    end
+    
     avoidHulls = setdiff([HashedCells{t+1}.hullID], nextHulls(bValidTo));
-    [costs fromHulls toHulls] = Tracker.GetTrackingCosts(4, t, t+1, unique(checkHulls(bValidFrom)), avoidHulls, CellHulls, HashedCells, CellTracks, ConnectedDist);
+    [costs fromHulls toHulls] = Tracker.GetTrackingCosts(4, t, t+1, currentHulls, avoidHulls, CellHulls, HashedCells, CellTracks, ConnectedDist);
     
     costs(costs == 0) = Inf;
     [bFromHulls checkIdx] = ismember(checkHulls, fromHulls);
