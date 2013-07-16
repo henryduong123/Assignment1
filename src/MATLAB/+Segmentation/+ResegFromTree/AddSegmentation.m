@@ -33,7 +33,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
         end
     end
     
-    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 0);
+    newHull = Helper.MakeEmptyStruct(CellHulls);
     
     newHull.time = time;
     newHull.points = newObj.points;
