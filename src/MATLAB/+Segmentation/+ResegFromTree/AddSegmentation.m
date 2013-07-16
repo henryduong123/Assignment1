@@ -1,5 +1,5 @@
 function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix, checkHulls, nextHulls, bAggressive)
-    global CONSTANTS CellHulls HashedCells
+    global CONSTANTS CellHulls HashedCells FluorData HaveFluor
 
     if ( ~exist('bAggressive','var') )
         bAggressive = 0;
@@ -57,6 +57,15 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     newHull.imagePixels = newObj.imPixels;
     
     newHull.points = [c(ch),r(ch)];
+    
+    % Check if newHull has a fluorescence marker
+    if Helper.HaveFluor() && HaveFluor(time)
+        greenInd = FluorData(time).greenInd;
+        inter = intersect(newHull.indexPixels, greenInd);
+        if (~isempty(inter))
+            newHull.greenInd = 1;
+        end
+    end
     
     % Use temporary hull to verify cost (not on a track yet)
     chkIdx = find(checkHulls == prevHull);
