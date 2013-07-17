@@ -66,28 +66,3 @@ function tLast = ResegFromTree(rootTracks, tStart, tEnd)
 %     saveMovieFrame(1, famID, outMovieDir);
 end
 
-function saveMovieFrame(t, famID, outdir)
-    global Figures CONSTANTS
-    
-    UI.DrawTree(famID);
-    UI.TimeChange(t);
-    drawnow();
-    
-    if ( ~exist(outdir, 'dir') )
-        recmkdir(outdir);
-    end
-    
-    figure(Figures.cells.handle)
-    XCells = getframe();
-    imwrite(XCells.cdata, fullfile(outdir,['cells_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
-
-    figure(Figures.tree.handle)
-    XTree = getframe();
-    imwrite(XTree.cdata, fullfile(outdir,['tree_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
-    
-    frameSize = [size(XCells.cdata); size(XTree.cdata)];
-    outSize = max(frameSize,[],1);
-    imOut = [imresize(XCells.cdata, outSize(1:2)) imresize(XTree.cdata, outSize(1:2))];
-    imwrite(imOut, fullfile(outdir,['_comb_' CONSTANTS.datasetName num2str(t, '%04d') '.tif']), 'tiff');
-end
-

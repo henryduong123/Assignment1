@@ -1,4 +1,4 @@
-function [toolboxStruct externalStruct squashNames squashGraph] = GetExternalDependencies(chkPath)
+function [toolboxStruct externalStruct calledNames callGraph] = GetExternalDependencies(chkPath)
     if ( ~exist('chkPath', 'var') )
         chkPath = pwd();
     end
@@ -10,33 +10,41 @@ function [toolboxStruct externalStruct squashNames squashGraph] = GetExternalDep
     localNodeList = find(bIsLocal);
     
     [toolboxes toolboxMap] = getMatlabToolboxes(fullNames);
-    toolboxFuncs = arrayfun(@(x)(fullNames(toolboxMap == x)), 1:length(toolboxes), 'UniformOutput',0);
+    toolboxFuncs = transpose(arrayfun(@(x)(fullNames(toolboxMap == x)), 1:length(toolboxes), 'UniformOutput',0));
     
     bIsMatlab = (toolboxMap > 0);
     [externalDeps externalMap] = getOtherDeps(fullNames, bIsMatlab, bIsLocal);
-    externalFuncs = arrayfun(@(x)(fullNames(externalMap == x)), 1:length(externalDeps), 'UniformOutput',0);
-    
-%     toolboxMap(externalMap > 0) = externalMap(externalMap > 0) + length(toolboxes);
-%     toolboxes = [toolboxes; externalDeps];
+    externalFuncs = transpose(arrayfun(@(x)(fullNames(externalMap == x)), 1:length(externalDeps), 'UniformOutput',0));
     
     fullGraph = createCallGraph(calledFrom);
     bIsCalled = findCalledNodes(localNodeList, fullGraph);
     
-    calledNames = fullNames(bIsCalled);
-    callGraph = fullGraph(bIsCalled,bIsCalled);
+    toolboxCallers = getToolboxCallers(localNodeList, toolboxes, toolboxMap, fullGraph, fullNames);
+    externalCallers = getToolboxCallers(localNodeList, externalDeps, externalMap, fullGraph, fullNames);
+    
+%     calledNames = fullNames(bIsCalled);
+%     callGraph = fullGraph(bIsCalled,bIsCalled);
     callToolboxMap = toolboxMap(bIsCalled);
+    callExternalMap = externalMap(bIsCalled);
     
-    [squashNames squashGraph squashMap] = squashToolboxNodes(calledNames, callGraph, toolboxes, callToolboxMap);
+%     [squashNames squashGraph squashMap] = squashToolboxNodes(calledNames, callGraph, toolboxes, callToolboxMap);
     
-    usedToolboxes = unique(callToolboxMap(callToolboxMap>0));
-    toolboxes = toolboxes(usedToolboxes);
+%     usedToolboxes = unique(callToolboxMap(callToolboxMap>0));
+%     toolboxes = toolboxes(usedToolboxes);
+%     toolboxFuncs = toolboxFuncs(usedToolboxes);
+%     toolboxCallers = toolboxCallers(usedToolboxes);
     
-    toolboxStruct = struct('deps', {toolboxes}, 'funcs', {toolboxFuncs});
-    externalStruct = struct('deps', {externalDeps}, 'funcs', {externalFuncs});
+    usedExternal = unique(callExternalMap(callExternalMap>0));
+    externalDeps = externalDeps(usedExternal);
+    externalFuncs = externalFuncs(usedExternal);
+    externalCallers = externalCallers(usedExternal);
+    
+    toolboxStruct = struct('deps', {toolboxes}, 'funcs', {toolboxFuncs}, 'callers',{toolboxCallers});
+    externalStruct = struct('deps', {externalDeps}, 'funcs', {externalFuncs}, 'callers',{externalCallers});
 end
 
 function [toolboxes toolboxMap] = getMatlabToolboxes(funcNames)
-    bIsMatlab = cellfun(@(x)(~isempty(strfind(x,matlabroot))), funcNames);
+    bIsMatlab = strncmpi(matlabroot, funcNames, length(matlabroot));
     matlabIdx = find(bIsMatlab);
     matlabNames = funcNames(bIsMatlab);
     
@@ -127,6 +135,22 @@ function [externalDeps externalMap] = getOtherDeps(funcNames, bIsMatlab, bIsLoca
     externalMap(bExternal) = ic;
 end
 
+function toolboxCallers = getToolboxCallers(localNodes, toolboxes, toolboxMap, fullGraph, fullNames)
+    toolboxCallers = cell(length(toolboxes),1);
+    for i=1:length(toolboxes)
+        bInToolbox = (toolboxMap == i);
+        [callerIdx funcIdx] = find(fullGraph(:,bInToolbox));
+        toolboxCallers{i} = cell(max(funcIdx),1);
+        for j=1:length(funcIdx)
+            if ( ~ismember(callerIdx(j),localNodes) )
+                continue;
+            end
+            
+            toolboxCallers{i}{funcIdx(j)} = [toolboxCallers{i}{funcIdx(j)}; fullNames(callerIdx(j))];
+        end
+    end
+end
+
 function callGraph = createCallGraph(calledFrom)
     numEdges = cellfun(@(x)(length(x)), calledFrom);
     calledIdx = arrayfun(@(x,y)(y*ones(1,x)), numEdges, ((1:length(calledFrom)).'), 'UniformOutput',0);
@@ -137,12 +161,12 @@ function callGraph = createCallGraph(calledFrom)
     callGraph = sparse(iIdx,jIdx, ones(1,sum(numEdges)), length(calledFrom),length(calledFrom), sum(numEdges));
 end
 
-function bIsCalled = findCalledNodes(localFuncNames, callGraph)
+function bIsCalled = findCalledNodes(localFuncIdx, callGraph)
     bIsCalled = false(size(callGraph,1),1);
-    bIsCalled(localFuncNames) = 1;
+    bIsCalled(localFuncIdx) = 1;
     
-    for i=1:length(localFuncNames)
-        [d pred] = dijkstra_sp(callGraph, localFuncNames(i));
+    for i=1:length(localFuncIdx)
+        [d pred] = matlab_bgl.dijkstra_sp(callGraph, localFuncIdx(i));
         
         bHasPath = ~isinf(d);
         bIsCalled = (bIsCalled | bHasPath);
@@ -170,13 +194,17 @@ function [squashNames squashGraph squashMap] = squashToolboxNodes(funcNames, cal
     end
 end
 
-function [deplist calledFrom] = recursiveGetDeps(checkNames, deplist, calledFrom)
+function [deplist calledFrom] = recursiveGetDeps(checkNames, bFollowToolboxes, deplist, calledFrom)
     if ( ~exist('calledFrom','var') )
         calledFrom = {};
     end
     
     if ( ~exist('deplist','var') )
         deplist = {};
+    end
+    
+    if ( ~exist('bFollowToolboxes','var') )
+        bFollowToolboxes = 0;
     end
     
     if ( isempty(checkNames) )
@@ -186,13 +214,19 @@ function [deplist calledFrom] = recursiveGetDeps(checkNames, deplist, calledFrom
     % Get single-link dependencies
     try
         [newdeps, builtins, classes, prob_files, prob_sym, eval_strings, newCalledFrom, java_classes] = depfun(checkNames, '-toponly', '-quiet');
-    catch
+    catch excp
         newdeps = cell(0,1);
         newCalledFrom = cell(0,1);
     end
     [deplist calledFrom newEntries] = mergeLists(deplist, calledFrom, newdeps, newCalledFrom);
     
-    [deplist calledFrom] = recursiveGetDeps(newEntries, deplist, calledFrom);
+    % Remove any matlab toolbox entries from being recursively followed
+    if ( ~bFollowToolboxes )
+        bIsToolbox = strncmpi(matlabroot, newEntries, length(matlabroot));
+        newEntries = newEntries(~bIsToolbox);
+    end
+    
+    [deplist calledFrom] = recursiveGetDeps(newEntries, bFollowToolboxes, deplist, calledFrom);
     
 end
 

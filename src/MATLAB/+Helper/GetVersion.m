@@ -17,8 +17,11 @@ function version = GetVersion(command)
         command = 'string';
     end
     
+    cleanBranch  = strrep(verInfo.branchName, '/', '_');
+    cleanBranch  = strrep(cleanBranch, '\', '_');
+    
     if ( strcmpi(command, 'string') || strcmpi(command, 'versionString') )
-        version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) ' ' verInfo.branchName];
+        version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) ' ' cleanBranch];
         return;
     end
     
@@ -28,7 +31,7 @@ function version = GetVersion(command)
     end
     
     if ( strcmpi(command, 'fullString') )
-        version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) '.' verInfo.buildNumber '/' verInfo.buildMachine ' ' verInfo.branchName];
+        version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) '.' verInfo.buildNumber '/' verInfo.buildMachine ' ' cleanBranch];
         return;
     end
     
@@ -39,6 +42,11 @@ function version = GetVersion(command)
     
     if ( strcmpi(command, 'minor') )
         version = verInfo.minorVersion;
+        return;
+    end
+    
+    if ( strcmpi(command, 'file') )
+        version = [num2str(verInfo.majorVersion) num2str(verInfo.minorVersion) '_' cleanBranch];
         return;
     end
     

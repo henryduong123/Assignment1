@@ -23,166 +23,178 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-totalTime = tic();
+function CompileLEVer()
+    totalTime = tic();
 
-% Try to set up git for the build, give a warning about checking the
-% fallback file if we can't find git.
-bFoundGit = Dev.SetupGit();
-if ( ~bFoundGit )
-    questionStr = sprintf('%s\n%s','Cannot find git you should verify the fallback file version info before building.','Are you sure you wish to continue with the build?');
-    result = questdlg(questionStr,'Build Warning','Yes','No','No');
-    if ( strcmpi(result,'No') )
-        return;
+    % Try to set up git for the build, give a warning about checking the
+    % fallback file if we can't find git.
+    bFoundGit = Dev.SetupGit();
+    if ( ~bFoundGit )
+        questionStr = sprintf('%s\n%s','Cannot find git you should verify the fallback file version info before building.','Are you sure you wish to continue with the build?');
+        result = questdlg(questionStr,'Build Warning','Yes','No','No');
+        if ( strcmpi(result,'No') )
+            return;
+        end
     end
-end
 
-% Give a messagebox warning if there are uncommitted changes.
-% Note: even committed changes may not have been pushed to server.
-[status,result] = system('git status --porcelain');
-if ( status == 0 && (length(result) > 1) )
-    questionStr = sprintf('%s\n%s','There are uncommitted changes in your working directory','Are you sure you wish to continue with the build?');
-    result = questdlg(questionStr,'Build Warning','Yes','No','No');
-    if ( strcmpi(result,'No') )
-        return;
+    % Give a messagebox warning if there are uncommitted changes.
+    % Note: even committed changes may not have been pushed to server.
+    [status,result] = system('git status --porcelain');
+    if ( status == 0 && (length(result) > 1) )
+        questionStr = sprintf('%s\n%s','There are uncommitted changes in your working directory','Are you sure you wish to continue with the build?');
+        result = questdlg(questionStr,'Build Warning','Yes','No','No');
+        if ( strcmpi(result,'No') )
+            return;
+        end
     end
-end
 
-Dev.MakeVersion();
+    Dev.MakeVersion();
 
-vstoolroot = getenv('VS100COMNTOOLS');
-if ( isempty(vstoolroot) )
-    error('Cannot compile MTC and mexMAT without Visual Studio 2010');
-end
-
-comparch = computer('arch');
-if ( strcmpi(comparch,'win64') )
-    buildbits = '64';
-    buildenv = fullfile(vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat');
-    buildplatform = 'x64';
-    bindir = '..\..\bin64';
-elseif ( strcmpi(comparch,'win32') )
-    buildbits = '32';
-    buildenv = fullfile(vstoolroot,'..','..','vc','bin','vcvars32.bat');
-    buildplatform = 'win32';
+    [vsStruct comparch] = setupCompileTools();
+    
     bindir = '..\..\bin';
-else
-    error('Only windows 32/64-bit builds are currently supported');
-end
-
-if ( ~exist(bindir,'dir') )
-    mkdir(bindir);
-end
-
-system(['"' buildenv '"' ]);
-
-tic();
-fprintf('Visual Studio Compiling: %s...\n', 'MTC.exe');
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\MTC.sln"']);
-fprintf('Done (%f sec)\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexMAT.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexMAT.sln"']);
-fprintf('Done (%f sec)\n\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexDijkstra.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexDijkstra.sln"']);
-fprintf('Done (%f sec)\n\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexGraph.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexGraph.sln"']);
-fprintf('Done (%f sec)\n\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexIntegrityCheck.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexIntegrityCheck.sln"']);
-fprintf('Done (%d sec)\n\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexHashData.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexHashData.sln"']);
-fprintf('Done (%d sec)\n\n', toc());
-
-tic();
-fprintf('\nVisual Studio Compiling: %s...\n', ['mexCCDistance.mexw' buildbits]);
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\mexCCDistance.sln"']);
-fprintf('Done (%f sec)\n\n', toc());
-
-tic();
-fprintf('Visual Studio Compiling: %s...\n', 'HematoSeg.exe');
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\HematoSeg.sln"']);
-fprintf('Done (%f sec)\n', toc());
-
-tic();
-fprintf('Visual Studio Compiling: %s...\n', 'GrayScaleCrop.exe');
-system(['"' fullfile(vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' buildplatform '" "..\c\GrayScaleCrop.sln"']);
-fprintf('Done (%f sec)\n', toc());
-
-% clears out mex cache so src/*.mexw(32/64) can be overwritten
-clear mex
-system(['copy ..\c\mexMAT\Release_' buildplatform '\mexMAT.dll .\mexMAT.mexw' buildbits]);
-system(['copy ..\c\mexDijkstra\Release_' buildplatform '\mexDijkstra.dll .\mexDijkstra.mexw' buildbits]);
-system(['copy ..\c\mexGraph\Release_' buildplatform '\mexGraph.dll .\mexGraph.mexw' buildbits]);
-system(['copy ..\c\mexIntegrityCheck\Release_' buildplatform '\mexIntegrityCheck.dll .\mexIntegrityCheck.mexw' buildbits]);
-system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe .\']);
-system(['copy ..\c\MTC\Release_' buildplatform '\MTC.exe ' bindir]);
-system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe .\']);
-system(['copy ..\c\HematoSeg\Release_' buildplatform '\HematoSeg.exe ' bindir]);
-system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe .\']);
-system(['copy ..\c\GrayScaleCrop\Release_' buildplatform '\GrayScaleCrop.exe ' bindir]);
-
-mcrfile = mcrinstaller();
-system(['copy "' mcrfile '" "' bindir '\"']);
-
-[toolboxStruct externalStruct] = Dev.GetExternalDependencies();
-% if ( ~isempty(externalStruct.deps) )
-%     fprintf('ERROR: Some local functions have external dependencies\n');
-%     for i=1:length(externalStruct.deps)
-%         fprintf('[%d]  %s\n', i, externalStruct.deps{i});
-%     end
-%     
-%     error('External dependecies cannot be packaged in a MATLAB executable');
-% end
-
-toolboxAddCommand = '';
-if ( ~isempty(toolboxStruct.deps) )
-    toolboxAddCommand = '-N';
-    for i=1:length(toolboxStruct.deps)
-        toolboxAddCommand = [toolboxAddCommand ' -p "' toolboxdir(toolboxStruct.deps{i}) '"'];
+    if ( strcmpi(comparch,'win64') )
+        bindir = '..\..\bin64';
     end
+
+    if ( ~exist(bindir,'dir') )
+        mkdir(bindir);
+    end
+    
+    compileMEX('mexMAT', vsStruct);
+    compileMEX('mexDijkstra', vsStruct);
+    compileMEX('mexGraph', vsStruct);
+    compileMEX('mexIntegrityCheck', vsStruct);
+    compileMEX('mexHashData', vsStruct);
+    compileMEX('mexCCDistance', vsStruct);
+    
+    compileEXE('MTC', vsStruct, bindir);
+    compileEXE('HematoSeg', vsStruct, bindir);
+    compileEXE('GrayScaleCrop', vsStruct, bindir);
+
+    [toolboxStruct externalStruct] = Dev.GetExternalDependencies();
+    if ( ~isempty(externalStruct.deps) )
+        fprintf('ERROR: Some local functions have external dependencies\n');
+        for i=1:length(externalStruct.deps)
+            fprintf('[%d]  %s\n', i, externalStruct.deps{i});
+            for j=1:length(externalStruct.funcs{i})
+                if ( ~isempty(externalStruct.callers{i}{j}) )
+                    for k=1:length(externalStruct.callers{i}{j})
+                        localName = Dev.GetLocalName(externalStruct.callers{i}{j}{k});
+                        fprintf('    %s calls: %s\n', localName, externalStruct.funcs{i}{j});
+                    end
+                end
+            end
+            fprintf('------\n');
+        end
+        
+        error('External dependencies cannot be packaged in a MATLAB executable');
+    end
+    
+    compileMATLAB('LEVer', bindir, {}, toolboxStruct.deps);
+    compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
+    compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
+    
+    fprintf('\n');
+    
+%     mcrfile = mcrinstaller();
+%     system(['copy "' mcrfile '" "' fullfile(bindir,'.') '"']);
+    
+    verSuffix = Helper.GetVersion('file');
+    zip(fullfile(bindir,['LEVer' verSuffix '.zip']), {'*.exe', '*.bat'}, bindir);
+    
+    toc(totalTime)
 end
 
+function [vsStruct comparch] = setupCompileTools()
+    vsStruct.vstoolroot = getenv('VS100COMNTOOLS');
+    if ( isempty(vsStruct.vstoolroot) )
+        error('Cannot compile MTC and mexMAT without Visual Studio 2010');
+    end
 
-tic();
-fprintf('\nMATLAB Compiling: %s...\n', 'LEVer');
-system(['mcc -v -R -startmsg -m LEVer.m ' toolboxAddCommand ' -a LEVER_logo.tif -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
-fprintf('Done (%f sec)\n', toc());
-
-tic();
-fprintf('\nMATLAB Compiling: %s...\n', 'Segmentor');
-system(['mcc -R -startmsg -m Segmentor.m ' toolboxAddCommand ' -a +Segmentation\*FrameSegmentor.m -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
-fprintf('Done (%f sec)\n', toc());
-
-tic();
-fprintf('\nMATLAB Compiling: %s...\n', 'LEVER_SegAndTrackFolders');
-system(['mcc -R -startmsg -m LEVER_SegAndTrackFolders.m ' toolboxAddCommand ' -a +Helper\GetVersion.m -a +Helper\VersionInfo.m']);
-fprintf('Done (%f sec)\n', toc());
-
-% tic();
-% fprintf('\nMATLAB Compiling: %s...\n', 'LinkTreeFolders');
-% mcc -R -startmsg -m LinkTreeFolders.m
-% fprintf('Done (%d sec)\n', toc());
-
-fprintf('\n');
-
-system(['copy LEVer.exe ' fullfile(bindir,'.')]);
-system(['copy Segmentor.exe ' fullfile(bindir,'.')]);
-system(['copy LEVER_SegAndTrackFolders.exe ' fullfile(bindir,'.')]);
-system(['copy LinkTreeFolders.exe ' fullfile(bindir,'.')]);
-
-if(isempty(dir('.\MTC.exe')) || isempty(dir(fullfile(bindir,'MTC.exe'))))
-    warndlg('Make sure that MTC.exe is in the same dir as LEVer.exe and LEVer MATLAB src code');
+    comparch = computer('arch');
+    if ( strcmpi(comparch,'win64') )
+        vsStruct.buildbits = '64';
+        vsStruct.buildenv = fullfile(vsStruct.vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat');
+        vsStruct.buildplatform = 'x64';
+    elseif ( strcmpi(comparch,'win32') )
+        vsStruct.buildbits = '32';
+        vsStruct.buildenv = fullfile(vsStruct.vstoolroot,'..','..','vc','bin','vcvars32.bat');
+        vsStruct.buildplatform = 'win32';
+    else
+        error('Only windows 32/64-bit builds are currently supported');
+    end
+    
+    system(['"' vsStruct.buildenv '"' ]);
+    clear mex;
 end
-toc(totalTime)
+
+function compileMEX(projectName, vsStruct)
+    compileTime = tic();
+    fprintf('\nVisual Studio Compiling: %s...\n', [projectName '.mexw' vsStruct.buildbits]);
+    
+    projectRoot = fullfile('..','c',projectName);
+    
+    result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
+    if ( result ~= 0 )
+        error('MEX compile failed.');
+    end
+    
+    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.dll']) ' ' fullfile('.', [projectName '.mexw' vsStruct.buildbits])]);
+    fprintf('Done (%f sec)\n\n', toc(compileTime));
+end
+
+function compileEXE(projectName, vsStruct, bindir)
+    compileTime = tic();
+    fprintf('\nVisual Studio Compiling: %s...\n', [projectName '.exe']);
+    
+    projectRoot = fullfile('..','c',projectName);
+    
+    result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
+    if ( result ~= 0 )
+%         error('EXE compile failed.');
+    end
+    
+    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.exe']) ' ' fullfile('.', [projectName '.exe'])]);
+    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.exe']) ' ' fullfile(bindir,'.')]);
+    
+    fprintf('Done (%f sec)\n\n', toc(compileTime));
+end
+
+function compileMATLAB(projectName, bindir, extrasList, toolboxList)
+    compileTime = tic();
+    if ( ~exist('extrasList','var') )
+        extrasList = {};
+    end
+    extrasList = vertcat({'LEVER_logo.tif';
+                          '+Segmentation\*FrameSegmentor.m';
+                          '+Helper\GetVersion.m';
+                          '+Helper\VersionInfo.m'}, extrasList);
+    
+	extraCommand = '';
+    if ( ~isempty(extrasList) )
+        extraElems = cellfun(@(x)([' -a ' x]),extrasList, 'UniformOutput',0);
+        extraCommand = [extraElems{:}];
+    end
+    
+    if ( ~exist('toolboxList','var') )
+        toolboxList = {};
+    end
+    
+    toolboxAddCommand = '';
+    if ( ~isempty(toolboxList) )
+        toolboxElems = cellfun(@(x)([' -p "' x '"']), toolboxList, 'UniformOutput',0);
+        toolboxAddCommand = ['-N' toolboxElems{:}];
+    end
+    
+    fprintf('\nMATLAB Compiling: %s...\n', projectName);
+    result = system(['mcc -v -R -startmsg -m ' projectName '.m ' toolboxAddCommand extraCommand]);
+    if ( result ~= 0 )
+        error('MATLAB compile failed.');
+    end
+    
+    system(['copy ' projectName '.exe ' fullfile(bindir,'.')]);
+    
+    fprintf('Done (%f sec)\n', toc(compileTime));
+end
+
