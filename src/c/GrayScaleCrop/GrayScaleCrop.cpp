@@ -129,6 +129,15 @@ DWORD WINAPI crop(LPVOID paramaters)
 	return 0;
 }
 
+// is region r1 bigger than region r2?
+bool compRegionAreas(CharImageType::RegionType r1, CharImageType::RegionType r2)
+{
+	CharImageType::SizeType s1 = r1.GetSize();
+	CharImageType::SizeType s2 = r2.GetSize();
+
+	return ((s1[0] * s1[1]) > (s2[0] * s2[1]));
+}
+
 //#pragma optimize("",off)
 CharImageType::RegionType findRegion( std::string curfile ) 
 {
@@ -143,6 +152,7 @@ CharImageType::RegionType findRegion( std::string curfile )
 	CharImageType::RegionType region;
 	CharImageType::IndexType index;
 	CharImageType::SizeType	size;
+	std::vector<CharImageType::RegionType> sortedRegions;
 
 	index.Fill(0);
 	size.Fill(0);
@@ -186,7 +196,13 @@ CharImageType::RegionType findRegion( std::string curfile )
 
 	std::vector<CharPixelType> labels = labelGeometryImageFilter->GetLabels();
 
-	region = labelGeometryImageFilter->GetRegion(1);
+	// find the second biggest region and use that to crop the image
+	// (the biggest region always seems to be the entire image)
+	for (size_t i = 0; i < labels.size(); i++)
+		sortedRegions.push_back(labelGeometryImageFilter->GetRegion(labels[i]));
+
+	nth_element(sortedRegions.begin(), sortedRegions.begin() + 1, sortedRegions.end(), compRegionAreas);
+	region = sortedRegions[1];
 
 	index = region.GetIndex();
 	size = region.GetSize();
