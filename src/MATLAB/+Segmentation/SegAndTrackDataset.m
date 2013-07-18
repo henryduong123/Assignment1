@@ -66,7 +66,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
             num2str(imageAlpha) ' "' dirName '" ' CONSTANTS.imageNamePattern  ...
             ' "' rootFluorFolder '" ' CONSTANTS.fluorNamePattern ' && exit']);
         %use line below instead of the 3 lines above for non-parallel or to debug
-%         Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern);
+        % Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern,rootFluorFolder, CONSTANTS.fluorNamePattern);
     end
 
     bSegFileExists = false(1,numProcessors);
