@@ -61,6 +61,9 @@ while ( ~bOpened )
     Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
     if (exist('fluorDataset'))
         Load.AddConstant('rootFluorFolder', settings.imagePathFl, 1);
+    else
+        Load.AddConstant('rootFluorFolder', '', 1);
+        Load.AddConstant('fluorNamePattern', '', 1);
     end
     
     bOpened = 1;
