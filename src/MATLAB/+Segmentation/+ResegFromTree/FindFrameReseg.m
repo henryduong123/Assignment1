@@ -96,13 +96,11 @@ function newEdges = FindFrameReseg(t, curEdges)
             continue;
         end
         
-%         % TODO: Handle this case.
-%         if ( isinf(desiredCosts(1)) && ~any(i == missIdx) )
-%             error('Did not add hull but unable to find next hull to go to');
-%         end
+        if ( isinf(desiredCosts(1)) )
+            continue;
+        end
         
         desiredCellCount(desiredIdx(1)) = desiredCellCount(desiredIdx(1)) + 1;
-        
         desirers{desiredIdx(1)} = [desirers{desiredIdx(1)} checkHulls(i)];
         
         if ( ismember(checkHulls(i),mitosisParents) )

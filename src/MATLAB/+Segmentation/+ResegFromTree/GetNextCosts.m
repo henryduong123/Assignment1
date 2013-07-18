@@ -7,7 +7,7 @@ function costMatrix = GetNextCosts(t, checkHulls, nextHulls)
     currentHulls = unique(checkHulls(bValidFrom));
     
     if ( isempty(currentHulls) )
-        costMatrix = zeros(0,length(nextHulls));
+        costMatrix = Inf*ones(length(checkHulls),length(nextHulls));
         return;
     end
     

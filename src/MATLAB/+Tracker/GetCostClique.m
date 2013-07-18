@@ -5,9 +5,6 @@ function [startHulls nextHulls] = GetCostClique(startHulls, nextHulls, tMax)
 %     costMatrix = Tracker.GetCostMatrix();
     costMatrix = Costs;
     
-    startHulls = [];
-    nextHulls = [];
-    
     if ( isempty(nextHulls) )
         return;
     end
@@ -31,10 +28,14 @@ function [startHulls nextHulls] = GetCostClique(startHulls, nextHulls, tMax)
         
         % Add new next hulls
         newNext = getNextHulls(costMatrix, startHulls);
-        addNext = setdiff(newPrev,[startHulls nextHulls]);
+        addNext = setdiff(newNext,[startHulls nextHulls]);
         
         bKeep = (abs([CellHulls(addNext).time] - tPrev) <= tMax);
         addNext = addNext(bKeep);
+        
+        if ( isempty(addNext) )
+            break;
+        end
         
         nextHulls = [nextHulls addNext];
     end
