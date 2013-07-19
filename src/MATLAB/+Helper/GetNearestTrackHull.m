@@ -30,18 +30,25 @@ function [hull hullTime] = GetNearestTrackHull(trackID, time, searchDir)
     end
     
     hull = CellTracks(trackID).hulls(hash);
-    if ( hull == 0 )
-        if ( searchDir >= 0 )
-            hidx = find(CellTracks(trackID).hulls(hash:end), 1, 'first') + (hash - 1);
-        else
-            hidx = find(CellTracks(trackID).hulls(1:hash), 1, 'last');
-        end
-        
-        if ( isempty(hidx) )
-            return;
-        end
-        
-        hull = CellTracks(trackID).hulls(hidx);
+    if ( hull > 0 )
         hullTime = CellHulls(hull).time;
+        return;
     end
+    
+    if ( searchDir == 0 )
+        return;
+    end
+    
+    if ( searchDir > 0 )
+        hidx = find(CellTracks(trackID).hulls(hash:end), 1, 'first') + (hash - 1);
+    else
+        hidx = find(CellTracks(trackID).hulls(1:hash), 1, 'last');
+    end
+
+    if ( isempty(hidx) )
+        return;
+    end
+
+    hull = CellTracks(trackID).hulls(hidx);
+    hullTime = CellHulls(hull).time;
 end
