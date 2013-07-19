@@ -128,12 +128,34 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = 1;
     end
     
+    % Make sure that CellHulls userEdited, deleted, greenInd
+    % are all "logical". Also, CellFamilies.bLocked
+    CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
+    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked');
+    
     % Get rid of timer handle in Log
     for i=1:length(Log)
         if(isfield(Log(i),'figures'))
             if(isfield(Log(i).figures,'advanceTimerHandle'))
                 Log(i).figures.advanceTimerHandle = [];
             end
+        end
+    end
+end
+
+function outStruct = forceLogicalFields(inStruct, varargin)
+    validFields = cell(0,0);
+    
+    for i=1:length(varargin)
+        if ( isfield(inStruct,varargin{i}) )
+            validFields = [validFields; {varargin{i}}];
+        end
+    end
+    
+    outStruct = inStruct;
+    for i=1:length(inStruct)
+        for j=1:length(validFields)
+            outStruct(i).(validFields{j}) = (outStruct(i).(validFields{j}) ~= 0);
         end
     end
 end
