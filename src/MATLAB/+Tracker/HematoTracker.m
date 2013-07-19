@@ -7,11 +7,12 @@ function HematoTracker()
     tmax = max([CellHulls.time]);
     HashedCells = cell(1,tmax);
     for t=1:tmax
-        HashedCells{t} = struct('hullID',{}, 'trackID',{});
+        HashedCells{t} = Helper.MakeEmptyStruct(HashedCells);
     end
     
     for i=1:length(CellHulls)
-        HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
+        newEntry = Helper.MakeInitStruct(HashedCells, struct('hullID',{i}, 'trackID',{0}));
+        HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} newEntry];
     end
     
     ConnectedDist = [];

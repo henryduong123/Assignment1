@@ -68,7 +68,8 @@ end
 
 connComps = cell(1,k);
 
-nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', bUserEdit);
+nh = Helper.MakeEmptyStruct(CellHulls);
+nh.userEdited = bUserEdit;
 for i=1:k
     bIdxPix = (kIdx == i);
     

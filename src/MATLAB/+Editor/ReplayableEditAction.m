@@ -31,7 +31,7 @@ function [bErr varargout] = ReplayableEditAction(actPtr, varargin)
     if ( isempty(ReplayEditActions) )
         ReplayEditActions = newAct;
     else
-        ReplayEditActions = [ReplayEditActions; newAct];
+        ReplayEditActions = [ReplayEditActions; Helper.MakeInitStruct(ReplayEditActions,newAct)];
     end
     
     % This is silly, but basically lets us push the error message down to

@@ -47,7 +47,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
 
     connComps = cell(1,k);
 
-    nh = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 0);
+    nh = Helper.MakeEmptyStruct(CellHulls);
     for i=1:k
         bIdxPix = (kIdx == i);
 

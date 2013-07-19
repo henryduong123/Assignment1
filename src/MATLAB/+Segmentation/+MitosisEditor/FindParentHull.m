@@ -98,9 +98,9 @@ function newHullID = addHullEntry(obj, time)
 end
 
 function newHull = createNewHullStruct(x,y, imagePixels, time)
-    global CONSTANTS
+    global CONSTANTS CellHulls
     
-    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 0);
+    newHull = Helper.MakeEmptyStruct(CellHulls);
 
     idxPix = sub2ind(CONSTANTS.imageSize, y,x);
     

@@ -114,7 +114,7 @@ function bNeedsUpdate = FixOldFileVersions()
                 args = oldReplayEditActions(i).args(1:end-1);
             end
             
-            ReplayEditActions = [ReplayEditActions; setOrderedStructure(ReplayEditActions, oldReplayEditActions(i))];
+            ReplayEditActions = [ReplayEditActions; Helper.MakeInitStruct(ReplayEditActions, oldReplayEditActions(i))];
             ReplayEditActions(end).args = args;
             ReplayEditActions(end).randState = randState;
         end
@@ -134,20 +134,6 @@ function bNeedsUpdate = FixOldFileVersions()
             if(isfield(Log(i).figures,'advanceTimerHandle'))
                 Log(i).figures.advanceTimerHandle = [];
             end
-        end
-    end
-end
-
-% Output a structure entry with fields same as outStruct and any fields
-% with the same name copied from inStruct (all others empty)
-function newStruct = setOrderedStructure(outStruct, inStruct)
-    outFields = fieldnames(outStruct);
-    newStruct = struct();
-    for i=1:length(outFields)
-        if ( isfield(inStruct,outFields(i)) )
-            newStruct(1).(outFields{i}) = inStruct.(outFields{i});
-        else
-            newStruct(1).(outFields{i}) = [];
         end
     end
 end

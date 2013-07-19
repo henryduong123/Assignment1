@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newTrackID = AddNewSegmentHull(clickPt, time)
-    global CONSTANTS
+    global CONSTANTS CellHulls
 
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
@@ -42,8 +42,8 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         end
     end
 
-    newHull = struct('time', [], 'points', [], 'centerOfMass', [], 'indexPixels', [], 'imagePixels', [], 'deleted', 0, 'userEdited', 1);
-    newFeature = struct('darkRatio',{0}, 'haloRatio',{0}, 'igRatio',{0}, 'darkIntRatio',{0}, 'brightInterior',{1}, 'polyPix',{[]}, 'perimPix',{[]}, 'igPix',{[]}, 'haloPix',{[]});
+    newHull = Helper.MakeEmptyStruct(CellHulls);
+    newHull.userEdited = 1;
     
     if ( ~isempty(newObj) )
         newObj = Segmentation.ForceDisjointSeg(newObj, time, clickPt);
@@ -56,8 +56,6 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
         newHull.imagePixels = img(newHull.indexPixels);
-        
-        newFeature.polyPix = newHull.indexPixels;
     else
         newHull.time = time;
         newHull.points = newObj.points;
@@ -65,8 +63,6 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         newHull.centerOfMass = mean([r c]);
         newHull.indexPixels = newObj.indPixels;
         newHull.imagePixels = newObj.imPixels;
-        
-        newFeature = newFeat;
     end
     
     newHullID = Hulls.SetHullEntries(0, newHull);
