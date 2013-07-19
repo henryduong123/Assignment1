@@ -1,6 +1,6 @@
 function typeParams = GetCellTypeParameters(cellType)
-    typeParams = struct('name',{[]}, 'segParams',{[]}, 'trackParams',{[]}, 'leverParams',{[]});
-    cellTypes = Load.GetSupportedCellTypes(typeParams);
+    typeParams = [];
+    cellTypes = Load.GetSupportedCellTypes();
     
     typeNames = {cellTypes.name};
     idx = find(strcmpi(typeNames, cellType));

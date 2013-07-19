@@ -1,6 +1,6 @@
-function SupportedTypes = GetSupportedCellTypes(templateStruct)
+function SupportedTypes = GetSupportedCellTypes()
 
-    SupportedTypes = Helper.MakeEmptyStruct(templateStruct);
+    SupportedTypes = struct('name',{[]}, 'segParams',{[]}, 'trackParams',{[]}, 'leverParams',{[]});
     
     SupportedTypes(1).name = 'Adult';
     SupportedTypes(1).segParams = struct('imageAlpha',{1.5});
