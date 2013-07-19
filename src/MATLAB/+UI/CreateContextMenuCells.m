@@ -45,11 +45,6 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
 
-uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Correct Submarine',...
-    'CallBack',     @correctSubmarine,...
-    'Separator',    'on');
-
 addHullMenu = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Number of Cells',...
     'Separator',    'on');
@@ -136,15 +131,6 @@ global Figures
 if(isempty(trackID)),return,end
 
 Editor.ContextChangeLabel(Figures.time,trackID);
-end
-
-function correctSubmarine(src,evnt)
-global Figures
-
-[hullID trackID] = UI.GetClosestCell(0);
-if(isempty(trackID)),return,end
-
-Editor.ContextCorrectSubmarine(Figures.time,trackID);
 end
 
 function addHull(src, evt, numhulls)
