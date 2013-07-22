@@ -26,7 +26,7 @@
 
 function newHulls  = ResegmentHull(hull, k, bUserEdit, bKmeansInit)
 
-global CONSTANTS
+global CONSTANTS CellHulls
 
 newHulls = [];
 
