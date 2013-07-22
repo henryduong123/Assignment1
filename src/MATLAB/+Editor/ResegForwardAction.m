@@ -1,14 +1,12 @@
-% [historyAction bFinished] = ResegForwardAction(tStart)
+% historyAction = ResegForwardAction(tStart)
 % Edit Action:
 % 
 % Single forward reseg (from pause)
 
-function [historyAction bFinished] = ResegForwardAction()
-    global ResegState bResegPaused
+function historyAction = ResegForwardAction()
+    global bResegPaused
     
     bResegPaused = 1;
-    
-    bFinished = Segmentation.ResegFromTreeInteractive();
     
     historyAction = '';
 end

@@ -25,7 +25,7 @@
 
 function DrawTree(familyID)
 
-global CellFamilies CellTracks HashedCells Figures CellPhenotypes FluorData HaveFluor
+global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState FluorData HaveFluor
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
@@ -155,6 +155,13 @@ for i=1:length(hasPhenos)
     phenoHandles = [phenoHandles hPheno];
     
     set(hPheno,'DisplayName',CellPhenotypes.descriptions{hasPhenos(i)});
+end
+
+% Draw the "edit" line if reseg is running
+if ( ~isempty(ResegState) )
+    treeXlims = get(Figures.tree.axesHandle,'XLim');
+    resegTime = max(ResegState.currentTime-1,1);
+    plot(Figures.tree.axesHandle, [treeXlims(1), treeXlims(2)],[resegTime, resegTime], '-b');
 end
 
 % draw ticks to indicate which times have fluorescence
