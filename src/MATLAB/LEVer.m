@@ -24,33 +24,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function LEVer(varargin)
-
-global Figures ReplayEditActions CONSTANTS
-
 if ( nargin > 0 )
     if ( strcmpi(varargin{1}, '-v') )
         UI.about;
         return;
+    elseif ( strcmpi(varargin{1}, '-d') )
+        Helper.SetDebug(~isdeployed());
     end
 end
 
-%if LEVer is already opened, save state just in case the User cancels the
-%open
-previousOpened = 0;
-if(~isempty(Figures))
-    previousOpened = 1;
+if ( ~isdeployed )
+    dbstop if error
 end
 
-if(Load.OpenData())
+if( Load.OpenData() )
     Editor.ReplayableEditAction(@Editor.InitHistory);
-elseif(previousOpened)
-    try
-        Editor.History('Top');
-        %UI.InitializeFigures();
-        temp = load(CONSTANTS.matFullFile,'ReplayEditActions');
-        ReplayEditActions = temp.ReplayEditActions;
-    catch err
-    end
 end
 
 end
