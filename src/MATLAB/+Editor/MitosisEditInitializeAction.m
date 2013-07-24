@@ -9,7 +9,7 @@ function historyAction = MitosisEditInitializeAction(treeID, endTime)
     rootTrack = CellFamilies(treeID).rootTrackID;
     
     if ( ~CellFamilies(treeID).bLocked )
-        Helper.PushTrackToFrame(rootTrack, endTime);
+        Helper.DropSubtree(rootTrack);
     end
     
     CellFamilies(treeID).bLocked = 1;

@@ -4,8 +4,8 @@
 % with the same name copied from inStruct (all others empty)
 
 function newStruct = MakeInitStruct(templateStruct, initStruct)
-    if ( isempty(templateStruct) || isempty(fieldnames(templateStruct)) )
-        error('Non-empty template structure required');
+    if ( isempty(fieldnames(templateStruct)) )
+        error('Template structure must have at least one field');
     end
 
     outFields = fieldnames(templateStruct);
