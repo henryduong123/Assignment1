@@ -13,6 +13,8 @@ function newEdges = FindFrameReseg(t, curEdges)
     bLongEdge = ((t-tFrom) > 1);
     
 %     checkEdges = curEdges(~bLongEdge,:);
+    % bReallyLongEdge determines when we stop looking for hulls for this
+    % track.
     bReallyLongEdge = ((t-tFrom) > 5);
     checkEdges = curEdges(~bReallyLongEdge,:);
     bLongEdge = bLongEdge(~bReallyLongEdge);
@@ -27,6 +29,8 @@ function newEdges = FindFrameReseg(t, curEdges)
     costMatrix = Segmentation.ResegFromTree.GetNextCosts(t-1, checkHulls, nextHulls);
     
     % TODO: Do I need to handle erroneous missed mitoses?
+    % Get costs for existing hulls in frame t back more than t-1 for
+    % tracks without hulls in t-1,...
     missIdx = find(bLongEdge(uniqueIdx));
     for i=1:length(missIdx)
         extendHull = checkHulls(missIdx(i));
@@ -58,6 +62,7 @@ function newEdges = FindFrameReseg(t, curEdges)
             continue;
         end
         
+        % Old guys can't add
         if ( any(i == missIdx) )
             continue
         end
