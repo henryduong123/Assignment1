@@ -59,7 +59,7 @@ object = get(gco);
 if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
     %clicked on a node
     curTrack = object.UserData;
-    bLocked = Helper.CheckLocked(curTrack);
+    bLocked = Helper.CheckTreeLocked(curTrack);
     
     if(isempty(CellTracks(curTrack).parentTrack))
         msgbox('No Mitosis to Remove','Unable to Remove Mitosis','error');
@@ -77,7 +77,7 @@ if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
 elseif(object.YData(1)==object.YData(2))
     %clicked on a horizontal line
     curTrack = object.UserData;
-    bLocked = Helper.CheckLocked(curTrack);
+    bLocked = Helper.CheckTreeLocked(curTrack);
     
     if ( bLocked )
         resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');

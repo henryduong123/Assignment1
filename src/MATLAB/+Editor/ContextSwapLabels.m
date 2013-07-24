@@ -8,7 +8,7 @@ function historyAction = ContextSwapLabels(trackA, trackB, time)
     Tracker.GraphEditSetEdge(trackA, trackB, time);
     Tracker.GraphEditSetEdge(trackB, trackA, time);
     
-    bLocked = Helper.CheckLocked([trackA trackB]);
+    bLocked = Helper.CheckTreeLocked([trackA trackB]);
     if ( any(bLocked) )
         Tracks.LockedSwapLabels(trackA, trackB, time);
     else

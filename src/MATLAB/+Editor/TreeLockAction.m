@@ -11,7 +11,7 @@ function historyAction = TreeLockAction(familyID)
     end
     
     bIsLocked = CellFamilies(familyID).bLocked;
-    CellFamilies(familyID).bLocked = ~bIsLocked;
+    Helper.SetTreeLocked(familyID, ~bIsLocked);
     
     historyAction = 'Push';
 end

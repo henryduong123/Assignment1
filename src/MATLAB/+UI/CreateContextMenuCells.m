@@ -209,7 +209,7 @@ function removeFromTree(src,evnt)
 
     oldParent = CellTracks(trackID).parentTrack;
     
-    bLocked = Helper.CheckLocked(trackID);
+    bLocked = Helper.CheckTreeLocked(trackID);
     if ( bLocked )
         resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
         if ( strcmpi(resp,'Cancel') )

@@ -53,7 +53,7 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     end
     
     childTrack = Hulls.GetTrackID(childHulls(2));
-    if ( Helper.CheckLocked(childTrack) )
+    if ( Helper.CheckTreeLocked(childTrack) )
         error('Not yet implemented: Locked "addMitosis"');
     else
         Families.AddMitosis(childTrack, balancedTrack, time);
