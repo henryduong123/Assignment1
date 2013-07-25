@@ -67,7 +67,10 @@ function bFinished = runReseg(hToolbar)
         UI.DrawCells();
         
         if ( bErr )
-            pauseReseg(hToolbar);
+            if ( ~bResegPaused )
+                pauseReseg(hToolbar);
+            end
+            
             return;
         end
         
