@@ -15,7 +15,7 @@ function childHulls = FindChildrenHulls(linePoints, time)
 
         % Mark split hull pieces as user-edited.
         for i=1:length(newHulls)
-            newHulls(i).userEdited = 1;
+            newHulls(i).userEdited = true;
         end
 
         setHullIDs = zeros(1,length(newHulls));

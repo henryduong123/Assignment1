@@ -63,8 +63,8 @@ parfor i=1:length(objHulls)
     cellHulls(i).centerOfMass    =  objHulls(i).COM;
     cellHulls(i).indexPixels     =  objHulls(i).indPixels;
     cellHulls(i).imagePixels     =  objHulls(i).imPixels;
-    cellHulls(i).deleted         =  0;
-    cellHulls(i).userEdited      =  0;
+    cellHulls(i).deleted         =  false;
+    cellHulls(i).userEdited      =  false;
     
     connDist{i} = updateConnectedDistance(objHulls(i), objHulls, objHulls(i).DarkConnectedHulls);
 end

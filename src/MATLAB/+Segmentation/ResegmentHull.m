@@ -69,7 +69,7 @@ end
 connComps = cell(1,k);
 
 nh = Helper.MakeEmptyStruct(CellHulls);
-nh.userEdited = bUserEdit;
+nh.userEdited = forceLogical(bUserEdit);
 for i=1:k
     bIdxPix = (kIdx == i);
     
@@ -109,4 +109,7 @@ newHulls = newHulls(sortIdx);
 connComps = connComps(sortIdx);
 end
 
+function bValue = forceLogical(value)
+    bValue = (value ~= 0);
+end
 

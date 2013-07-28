@@ -63,8 +63,8 @@ for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
         numOfpix = str2double(fgetl(file));
         [CellHulls(id).indexPixels, count] = fscanf(file,'%d,');
         CellHulls(id).imagePixels = zeros(count,1);
-        CellHulls(id).deleted = 0;
-        CellHulls(id).userEdited = 0;
+        CellHulls(id).deleted = false;
+        CellHulls(id).userEdited = false;
         if(count~=numOfpix)
             error('nope');
         end

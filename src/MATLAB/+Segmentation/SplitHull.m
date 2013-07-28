@@ -39,7 +39,7 @@ function newTrackIDs = SplitHull(hullID, k)
     
     % Mark split hull pieces as user-edited.
     for i=1:length(newHulls)
-        newHulls(i).userEdited = 1;
+        newHulls(i).userEdited = true;
     end
 
     % Drop old graphedits on a manual split

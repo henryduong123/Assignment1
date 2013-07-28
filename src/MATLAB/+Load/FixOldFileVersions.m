@@ -155,7 +155,11 @@ function outStruct = forceLogicalFields(inStruct, varargin)
     outStruct = inStruct;
     for i=1:length(inStruct)
         for j=1:length(validFields)
-            outStruct(i).(validFields{j}) = (outStruct(i).(validFields{j}) ~= 0);
+            if ( isempty(outStruct(i).(validFields{j})) )
+                outStruct(i).(validFields{j}) = false;
+            else
+                outStruct(i).(validFields{j}) = (outStruct(i).(validFields{j}) ~= 0);
+            end
         end
     end
 end

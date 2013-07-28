@@ -43,7 +43,7 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     end
 
     newHull = Helper.MakeEmptyStruct(CellHulls);
-    newHull.userEdited = 1;
+    newHull.userEdited = true;
     
     if ( ~isempty(newObj) )
         newObj = Segmentation.ForceDisjointSeg(newObj, time, clickPt);
