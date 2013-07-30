@@ -3,7 +3,7 @@ function trackEdge = GetTrackInEdge(t, trackID)
     
     trackEdge = [];
     
-    if ( CellTracks(trackID).startTime > t || CellTracks(trackID).endTime < t )
+    if ( CellTracks(trackID).startTime > t )
         return;
     end
     
@@ -19,9 +19,9 @@ function trackEdge = GetTrackInEdge(t, trackID)
         prevHull = CellTracks(parentTrack).hulls(end);
     end
     
-    if ( nextHull == 0 )
-        return;
-    end
+%     if ( nextHull == 0 )
+%         return;
+%     end
     
     trackEdge = [prevHull nextHull];
 end

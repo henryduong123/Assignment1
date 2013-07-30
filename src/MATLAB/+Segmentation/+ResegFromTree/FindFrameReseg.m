@@ -1,14 +1,13 @@
 function newEdges = FindFrameReseg(t, curEdges)
     global CellHulls HashedCells ResegState
     
-    newEdges = [];
+    newEdges = zeros(0,2);
     
     if ( isempty(curEdges) )
         return;
     end
     
     tFrom = [CellHulls(curEdges(:,1)).time];
-    tTo = [CellHulls(curEdges(:,2)).time];
     
     bLongEdge = ((t-tFrom) > 1);
     
@@ -43,12 +42,16 @@ function newEdges = FindFrameReseg(t, curEdges)
         costMatrix(missIdx(i),bFoundPath) = endCosts(arrIdx(bFoundPath));
     end
 
-    % TODO: handle this better in the case of a not completely edited tree.
     % Force-keep mitosis edges
+    % TODO: handle this better in the case of a not completely edited tree.
     for i=1:length(mitosisParents)
         mitChkIdx = find(checkHulls == mitosisParents(i),1,'first');
         childHulls = checkEdges((checkEdges(:,1) == mitosisParents(i)), 2);
-        [bDump childIdx] = ismember(childHulls, nextHulls);
+        
+        [bFoundHulls childIdx] = ismember(childHulls, nextHulls);
+        if ( ~all(bFoundHulls) )
+            error(['Malformed mitosis event in frame ' num2str(t)]);
+        end
 
         costMatrix(mitChkIdx,:) = Inf*ones(1,size(costMatrix,2));
         costMatrix(mitChkIdx,childIdx) = 1;
@@ -152,8 +155,6 @@ function newEdges = FindFrameReseg(t, curEdges)
     bValidMatched = ((bestInIdx(bestOutIdx) == 1:size(costMatrix,1)) & (~isinf(bestOutgoing)));
     matchedIdx = find(bValidMatched);
     
-    newEdges = zeros(0,2);
-    
     % Create the edge list
     for i=1:length(matchedIdx)
         chkIdx = matchedIdx(i);
@@ -200,5 +201,14 @@ function newEdges = FindFrameReseg(t, curEdges)
     end
     
     newEdges = [newEdges; shareEdges];
+    
+    % Return newEdges in same order as curEdges
+    [sortedNew, srtNewIdx] = sort(newEdges(:,1));
+    [sortedOld, srtOldIdx] = sort(curEdges(:,1));
+    if ( sortedNew ~= sortedOld )
+        error('Unmatched edge in newEdges list');
+    end
+    
+    newEdges(srtOldIdx,:) = newEdges(srtNewIdx,:);
     
 end

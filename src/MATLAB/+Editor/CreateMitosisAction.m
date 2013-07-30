@@ -12,7 +12,7 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     
     treeTracks = [CellFamilies(treeID).tracks];
     
-    bInTracks = Helper.CheckInTracks(time, treeTracks);
+    bInTracks = Helper.CheckInTracks(time, treeTracks, 0, 0);
 	checkTracks = treeTracks(bInTracks);
     if ( isempty(checkTracks) )
         error('No valid tracks to add a mitosis onto');
