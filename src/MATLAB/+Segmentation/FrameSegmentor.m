@@ -1,4 +1,6 @@
 function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
+    global CONSTANTS
+    
     objs = [];
     features = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});
@@ -260,44 +262,46 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
     end
     
     % hemato submarines
-%    [sharpImg blurImg bw] = michelContrastEnhance(1-im);
-    [bw] = Segmentation.Michel(1-im, [3 3]);
-    
-    [centers, radii, metric] = imfindcircles(bw, [10 20], 'Sensitivity', 0.9);
-    [r c] = find(bw >= 0);
-    for i=1:length(radii)
-        % find the pixels inside the circle
-        dist = ((c - centers(i,1)).^2 + (r - centers(i,2)).^2);
-        pix = find(dist <= radii(i)^2);
-        [r1 c1] = ind2sub(size(im), pix);
+    if strcmp(CONSTANTS.cellType, 'Hemato')
+%        [sharpImg blurImg bw] = michelContrastEnhance(1-im);
+        [bw] = Segmentation.Michel(1-im, [3 3]);
         
-        % find the convex hull of the circle
-        ch = convhull(c1, r1);
-
-        no = [];
-        no.t = t;
-        no.points = [c(ch), r(ch)];
-        no.ID = -1;
-        no.indPixels = pix;
-        no.indTailPixels  = [];
-        no.BrightInterior=1;
-        no.Eccentricity=0;
-        no.imPixels=im(pix);
-        
-        nf = [];
-        nf.darkRatio = 0;
-        nf.haloRatio = 0;
-        nf.igRatio = 0;
-        nf.darkIntRatio = 0;
-        nf.brightInterior = 1;
-        
-        nf.polyPix = [];
-        nf.perimPix = [];
-        nf.igPix = [];
-        nf.haloPix = [];
-        
-        objs=[objs no];
-        features = [features nf];
+        [centers, radii, metric] = imfindcircles(bw, [10 20], 'Sensitivity', 0.9);
+        [r c] = find(bw >= 0);
+        for i=1:length(radii)
+            % find the pixels inside the circle
+            dist = ((c - centers(i,1)).^2 + (r - centers(i,2)).^2);
+            pix = find(dist <= radii(i)^2);
+            [r1 c1] = ind2sub(size(im), pix);
+            
+            % find the convex hull of the circle
+            ch = convhull(c1, r1);
+            
+            no = [];
+            no.t = t;
+            no.points = [c(ch), r(ch)];
+            no.ID = -1;
+            no.indPixels = pix;
+            no.indTailPixels  = [];
+            no.BrightInterior=1;
+            no.Eccentricity=0;
+            no.imPixels=im(pix);
+            
+            nf = [];
+            nf.darkRatio = 0;
+            nf.haloRatio = 0;
+            nf.igRatio = 0;
+            nf.darkIntRatio = 0;
+            nf.brightInterior = 1;
+            
+            nf.polyPix = [];
+            nf.perimPix = [];
+            nf.igPix = [];
+            nf.haloPix = [];
+            
+            objs=[objs no];
+            features = [features nf];
+        end
     end
 end
 
