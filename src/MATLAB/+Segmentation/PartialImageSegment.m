@@ -25,7 +25,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha)
+function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, time)
     global CONSTANTS
 
     if ( length(subSize) < 2 )

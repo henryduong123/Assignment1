@@ -14,7 +14,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     
     guessPoint = [CellHulls(prevHull).centerOfMass(2) CellHulls(prevHull).centerOfMass(1)];
     
-    newObj = Segmentation.FindNewSegmentation(img, guessPoint, 200, 1.0, CellHulls(prevHull).indexPixels);
+    newObj = Segmentation.FindNewSegmentation(img, guessPoint, 200, 1.0, CellHulls(prevHull).indexPixels, time);
     
     if ( isempty(newObj) )
         if ( ~bAggressive )
@@ -22,7 +22,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
         end
         
         for tryAlpha = 0.95:(-0.05):0.5
-            newObj = Segmentation.FindNewSegmentation(img, guessPoint, 200, tryAlpha, CellHulls(prevHull).indexPixels);
+            newObj = Segmentation.FindNewSegmentation(img, guessPoint, 200, tryAlpha, CellHulls(prevHull).indexPixels, time);
             if ( ~isempty(newObj) )
                 break;
             end

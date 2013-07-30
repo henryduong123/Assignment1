@@ -279,7 +279,7 @@ function objs = partialSegObjs(chkPoint, time)
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
 
-    objs = Segmentation.PartialImageSegment(img, chkPoint, 200, 1.0);
+    objs = Segmentation.PartialImageSegment(img, chkPoint, 200, 1.0, time);
 end
 
 function updateLocalTracking(newHulls, hullTime)

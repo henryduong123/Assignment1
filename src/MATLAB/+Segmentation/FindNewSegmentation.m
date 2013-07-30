@@ -1,10 +1,10 @@
 
-function [hull feature] = FindNewSegmentation(img, centerPt, subSize, alpha, overlapPoints)
+function [hull feature] = FindNewSegmentation(img, centerPt, subSize, alpha, overlapPoints, time)
     if ( ~exist('overlapPoints', 'var') )
         overlapPoints = [];
     end
     
-    [objs features] = Segmentation.PartialImageSegment(img, centerPt, subSize, alpha);
+    [objs features] = Segmentation.PartialImageSegment(img, centerPt, subSize, alpha, time);
     
     if ( isempty(overlapPoints) )
         bInHull = Hulls.CheckHullsContainsPoint(centerPt, objs);

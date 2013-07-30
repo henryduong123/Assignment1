@@ -57,7 +57,7 @@ function parentHull = addParentHull(midpoint, time, mitosisPoints)
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
     
-    objs = Segmentation.PartialImageSegment(img, midpoint, 200, 1.0);
+    objs = Segmentation.PartialImageSegment(img, midpoint, 200, 1.0, time);
     
     pointCounts = zeros(1,length(objs));
     for i=1:length(objs)

@@ -30,12 +30,12 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
     
-    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, 1.0);
+    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, 1.0, [], time);
     
     % Aggressive add segmentation
     if ( isempty(newObj) )
         for tryAlpha = 1.25:(-0.05):0.5
-            [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, tryAlpha);
+            [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, tryAlpha, [], time);
             if ( ~isempty(newObj) )
                 break;
             end
