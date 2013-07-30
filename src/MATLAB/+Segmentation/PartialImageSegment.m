@@ -26,6 +26,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha)
+    global CONSTANTS
 
     if ( length(subSize) < 2 )
         subSize = [subSize(1) subSize(1)];
@@ -48,6 +49,12 @@ function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha)
     subImg = img(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
     
     [objs objFeat] = Segmentation.FrameSegmentor(subImg, 1, alpha);
+    
+    if strcmp(CONSTANTS.cellType, 'Hemato')
+        [hemObjs, hemObjFeat] = Segmentation.HematoSubmarineFrameSegmentor(subImg, 1);
+        objs = [objs hemObjs];
+        objFeat = [objFeat hemObjFeat];
+    end
     
     [hulls features] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat);
 end
