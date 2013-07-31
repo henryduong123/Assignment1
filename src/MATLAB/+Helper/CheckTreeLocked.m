@@ -1,9 +1,9 @@
-% bLocked = CheckLocked(tracks)
+% bLocked = CheckTreeLocked(tracks)
 %
 % Check if tracks are on locked families, return list bLocked with boolean
 % indicator per track.
 
-function bLocked = CheckLocked(tracks)
+function bLocked = CheckTreeLocked(tracks)
     global CellTracks CellFamilies
     
     famIDs = [CellTracks(tracks).familyID];

@@ -78,9 +78,9 @@ function addMitosisEvent(treeID, time, dragCoords)
     end
     
     treeTracks = [CellFamilies(treeID).tracks];
-    bMidTracks = (([CellTracks(treeTracks).startTime] < time) & ([CellTracks(treeTracks).endTime] > time));
     
-	checkTracks = treeTracks(bMidTracks);
+    bInTracks = Helper.CheckInTracks(time, treeTracks, 0, 0);
+	checkTracks = treeTracks(bInTracks);
     if ( isempty(checkTracks) )
         msgbox('No valid tracks to add a mitosis onto','Invalid Mitosis','warn');
         return;

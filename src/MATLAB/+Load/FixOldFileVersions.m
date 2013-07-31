@@ -133,6 +133,10 @@ function bNeedsUpdate = FixOldFileVersions()
     CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
     CellFamilies = forceLogicalFields(CellFamilies, 'bLocked');
     
+    bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);
+    CellHulls(bEmptyHulls).deleted = true;
+    CellHulls(bEmptyHulls).userEdited = false;
+    
     % Get rid of timer handle in Log
     for i=1:length(Log)
         if(isfield(Log(i),'figures'))
@@ -155,7 +159,11 @@ function outStruct = forceLogicalFields(inStruct, varargin)
     outStruct = inStruct;
     for i=1:length(inStruct)
         for j=1:length(validFields)
-            outStruct(i).(validFields{j}) = (outStruct(i).(validFields{j}) ~= 0);
+            if ( isempty(outStruct(i).(validFields{j})) )
+                outStruct(i).(validFields{j}) = false;
+            else
+                outStruct(i).(validFields{j}) = (outStruct(i).(validFields{j}) ~= 0);
+            end
         end
     end
 end

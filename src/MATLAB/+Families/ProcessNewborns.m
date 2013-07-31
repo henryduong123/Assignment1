@@ -183,8 +183,7 @@ for i=1:size
     parentTrackID = Hulls.GetTrackID(parentHullID);
     
     if(isempty(parentTrackID))
-        Error.ErrorHandling(['GetTrackID(' num2str(parentHullID) ') -- while in ProcessNewborns'],dbstack);
-        return
+        error(['Hull has ' num2str(parentHullID) ' empty track ID']);
     end
     
     % Don't try to add mitosis for track that ends before childtrack

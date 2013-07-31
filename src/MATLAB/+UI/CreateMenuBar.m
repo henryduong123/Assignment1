@@ -281,7 +281,19 @@ end
 %% Callback functions
 
 function openFile(src,evnt)
-LEVer();
+    global ReplayEditActions
+    if ( Load.OpenData() )
+        Editor.ReplayableEditAction(@Editor.InitHistory);
+        return
+    end
+    
+    try
+        Editor.History('Top');
+        
+        temp = load(CONSTANTS.matFullFile,'ReplayEditActions');
+        ReplayEditActions = temp.ReplayEditActions;
+    catch mexcp
+    end
 end
 
 function saveFile(src,evnt)

@@ -14,7 +14,7 @@ function [newSegs costMatrix nextHulls] = SplitSegmentation(splitHull, numSplit,
     end
     
     for i=1:length(newHulls)
-        newHulls(i).userEdited = 0;
+        newHulls(i).userEdited = false;
     end
     
     % TODO: fixup incoming graphedits

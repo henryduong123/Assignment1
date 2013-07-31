@@ -46,7 +46,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     replaceCell = min(deleteCells);
     deleteCells = setdiff(deleteCells,replaceCell);
     
-    mergeObj.userEdited = 0;
+    mergeObj.userEdited = false;
     Hulls.SetHullEntries(replaceCell, mergeObj);
     
     for i=1:length(deleteCells)

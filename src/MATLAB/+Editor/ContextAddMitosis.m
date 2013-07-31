@@ -27,7 +27,7 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
 end
 
 bOverrideLock = 0;
-bLocked = Helper.CheckLocked([trackID siblingTrack]);
+bLocked = Helper.CheckTreeLocked([trackID siblingTrack]);
 if ( any(bLocked) )
     lockedList = [];
     if ( bLocked(1) )
@@ -62,7 +62,7 @@ if(CellTracks(trackID).startTime==time)
                 case 'Cancel'
                     return
             end
-        elseif ( ~bOverrideLock && Helper.CheckLocked(parentTrack) )
+        elseif ( ~bOverrideLock && Helper.CheckTreeLocked(parentTrack) )
             rootTrack = CellFamilies(CellTracks(parentTrack).familyID).rootTrackID;
             resp = questdlg(['This edit will affect locked tree(s) ' num2str(rootTrack) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
             if ( strcmpi(resp,'Cancel') )

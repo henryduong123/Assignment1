@@ -48,8 +48,8 @@ function [mergeObj, deleteCells] = CreateMergedCell(mergeCells)
         
         mergeObj.points = [c(ch) r(ch)];
         mergeObj.centerOfMass = mean([r c]);
-        mergeObj.deleted = 0;
-        mergeObj.userEdited = 0;
+        mergeObj.deleted = false;
+        mergeObj.userEdited = false;
     end
 end
 

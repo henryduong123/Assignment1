@@ -11,9 +11,9 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     end
     
     treeTracks = [CellFamilies(treeID).tracks];
-    bMidTracks = (([CellTracks(treeTracks).startTime] < time) & ([CellTracks(treeTracks).endTime] > time));
     
-	checkTracks = treeTracks(bMidTracks);
+    bInTracks = Helper.CheckInTracks(time, treeTracks, 0, 0);
+	checkTracks = treeTracks(bInTracks);
     if ( isempty(checkTracks) )
         error('No valid tracks to add a mitosis onto');
     end
@@ -39,21 +39,30 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     
 %     bLeafTrack = arrayfun(@(x)(isempty(x.childrenTracks)), CellTracks(treeTracks));
 %     leafTracks = treeTracks(bLeafTrack);
+
+    Helper.SetTreeLocked(treeID, 0);
     
     % NOTE: This just makes the tree as balanced as possible, it is probably not correct
     balancedTrack = checkTracks(minIdx);
     parentTrack = Hulls.GetTrackID(parentHull);
+    
+    % TODO: Don't change things up if parentTrack is already complete and on
+    % the correct family
+    if ( CellTracks(parentTrack).familyID == treeID )
+        balancedTrack = parentTrack;
+    end
+    
     if ( balancedTrack ~= parentTrack )
-        Tracks.LockedChangeLabel(parentTrack, balancedTrack, time-1);
+        attemptLockedChangeLabel(parentTrack, balancedTrack, time-1);
     end
     
     childTrack = Hulls.GetTrackID(childHulls(1));
     if ( balancedTrack ~= childTrack )
-        Tracks.LockedChangeLabel(childTrack, balancedTrack, time);
+        attemptLockedChangeLabel(childTrack, balancedTrack, time);
     end
     
     childTrack = Hulls.GetTrackID(childHulls(2));
-    if ( Helper.CheckLocked(childTrack) )
+    if ( Helper.CheckTreeLocked(childTrack) )
         error('Not yet implemented: Locked "addMitosis"');
     else
         Families.AddMitosis(childTrack, balancedTrack, time);
@@ -61,11 +70,23 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     
     % TODO: Make this respect the endTime from start of state
     if ( time < length(HashedCells) )
-        childTrack = Hulls.GetTrackID(childHulls(2));
-        Helper.PushTrackToFrame(childTrack, length(HashedCells));
+        for i=1:2
+            childTrack = Hulls.GetTrackID(childHulls(i));
+            Helper.DropSubtree(childTrack);
+        end
     end
     
+    Helper.SetTreeLocked(treeID, 1);
+    
     historyAction = 'Push';
+end
+
+function attemptLockedChangeLabel(changeTrack, desiredTrack, time)
+    if ( Helper.CheckTreeLocked(changeTrack) )
+        Tracks.LockedChangeLabel(changeTrack, desiredTrack, time);
+    else
+        Tracks.ChangeLabel(changeTrack, desiredTrack, time);
+    end
 end
 
 function newPoints = clipToImage(linePoints)

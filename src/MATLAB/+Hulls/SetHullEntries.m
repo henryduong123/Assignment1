@@ -25,14 +25,7 @@ function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs)
             hullID = length(CellHulls) + 1;
         end
         
-        CellHulls(hullID).time = setObjs(i).time;
-        CellHulls(hullID).points = setObjs(i).points;
-        CellHulls(hullID).indexPixels = setObjs(i).indexPixels;
-        CellHulls(hullID).imagePixels = setObjs(i).imagePixels;
-        CellHulls(hullID).centerOfMass = setObjs(i).centerOfMass;
-        CellHulls(hullID).deleted = setObjs(i).deleted;
-        CellHulls(hullID).userEdited = setObjs(i).userEdited;
-        
+        CellHulls(hullID) = Helper.MakeInitStruct(CellHulls, setObjs(i));
         newHulls = [newHulls hullID];
         
         if ( setHullIDs(i) > 0 )

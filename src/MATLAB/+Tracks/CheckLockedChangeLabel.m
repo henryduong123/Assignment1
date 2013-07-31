@@ -7,7 +7,7 @@ function [bLocked bCanChange] = CheckLockedChangeLabel(currentTrack, desiredTrac
     global CellTracks
     
     bCanChange = 1;
-    bLocked = Helper.CheckLocked([currentTrack desiredTrack]);
+    bLocked = Helper.CheckTreeLocked([currentTrack desiredTrack]);
     
     % Current track is on locked tree
     if ( bLocked(1) )
