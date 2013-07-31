@@ -46,7 +46,7 @@ function UpdateHematoFluor(t)
                 if (hullID <= 0)
                     CellTracks(i).markerTimes(2,j) = wasGreen;
                     continue;
-                elseif (~isempty(CellHulls(hullID).greenInd))
+                else
                     inter = intersect(FluorData(t2).greenInd,CellHulls(hullID).indexPixels);
                     if (length(inter)>length(CellHulls(hullID).indexPixels)*0.3)
                         CellTracks(i).markerTimes(2,j) = 1;
