@@ -242,6 +242,7 @@ function setPausedToolbarState(hToolbar)
     
     set(hButtons(3), 'Enable','on');
     set(hButtons(1), 'Enable','on');
+    drawnow();
 end
 
 function setPlayToolbarState(hToolbar)
@@ -255,12 +256,14 @@ function setPlayToolbarState(hToolbar)
     
     set(hButtons(3), 'Enable','on');
     set(hButtons(1), 'Enable','on');
+    drawnow();
 end
 
 function setProcessingToolbarState(hToolbar)
     hButtons = get(hToolbar, 'Children');
     
     set(hButtons, 'Enable','off');
+    drawnow();
 end
 
 function hToolbar = addButtons()
@@ -294,4 +297,5 @@ function hToolbar = addButtons()
     toolHandles = [toolHandles; hpt];
     
     set(hToolbar, 'UserData',toolHandles);
+    drawnow();
 end
