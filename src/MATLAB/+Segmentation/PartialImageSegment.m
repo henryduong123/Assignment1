@@ -26,7 +26,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, time)
-    global CONSTANTS
+    global CONSTANTS HaveFluor FluorData
 
     if ( length(subSize) < 2 )
         subSize = [subSize(1) subSize(1)];
@@ -54,6 +54,16 @@ function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, t
         [hemObjs, hemObjFeat] = Segmentation.HematoSubmarineFrameSegmentor(subImg, 1);
         objs = [objs hemObjs];
         objFeat = [objFeat hemObjFeat];
+    end
+    
+    if Helper.HaveFluor() && HaveFluor(time)
+        greenInd = FluorData(time).greenInd;
+        flImg = zeros(size(img));
+        flImg(greenInd) = 1;
+        subImg = flImg(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
+        [flObjs, flObjFeat] = Segmentation.FluorHulls(subImg, 1);
+        objs = [objs flObjs];
+        objFeat = [objFeat flObjFeat];
     end
     
     [hulls features] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat);
