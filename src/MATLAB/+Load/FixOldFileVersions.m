@@ -134,8 +134,11 @@ function bNeedsUpdate = FixOldFileVersions()
     CellFamilies = forceLogicalFields(CellFamilies, 'bLocked');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);
-    CellHulls(bEmptyHulls).deleted = true;
-    CellHulls(bEmptyHulls).userEdited = false;
+    emptyIdx = find(bEmptyHulls);
+    for i=1:length(emptyIdx)
+        CellHulls(emptyIdx(i)).deleted = true;
+        CellHulls(emptyIdx(i)).userEdited = false;
+    end
     
     % Get rid of timer handle in Log
     for i=1:length(Log)
