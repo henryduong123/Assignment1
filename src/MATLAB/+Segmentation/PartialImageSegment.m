@@ -50,20 +50,22 @@ function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, t
     
     [objs objFeat] = Segmentation.FrameSegmentor(subImg, 1, alpha);
     
-    if strcmp(CONSTANTS.cellType, 'Hemato')
-        [hemObjs, hemObjFeat] = Segmentation.HematoSubmarineFrameSegmentor(subImg, 1);
-        objs = [objs hemObjs];
-        objFeat = [objFeat hemObjFeat];
-    end
-    
-    if Helper.HaveFluor() && HaveFluor(time)
-        greenInd = FluorData(time).greenInd;
-        flImg = zeros(size(img));
-        flImg(greenInd) = 1;
-        subImg = flImg(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
-        [flObjs, flObjFeat] = Segmentation.FluorHulls(subImg, 1);
-        objs = [objs flObjs];
-        objFeat = [objFeat flObjFeat];
+    if alpha == 1 % hack to keep from running this slow code multiple times
+        if strcmp(CONSTANTS.cellType, 'Hemato')
+            [hemObjs, hemObjFeat] = Segmentation.HematoSubmarineFrameSegmentor(subImg, 1);
+            objs = [objs hemObjs];
+            objFeat = [objFeat hemObjFeat];
+        end
+        
+        if Helper.HaveFluor() && HaveFluor(time)
+            greenInd = FluorData(time).greenInd;
+            flImg = zeros(size(img));
+            flImg(greenInd) = 1;
+            subImg = flImg(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
+            [flObjs, flObjFeat] = Segmentation.FluorHulls(subImg, 1);
+            objs = [objs flObjs];
+            objFeat = [objFeat flObjFeat];
+        end
     end
     
     [hulls features] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat);
