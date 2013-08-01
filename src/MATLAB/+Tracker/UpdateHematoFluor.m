@@ -1,11 +1,15 @@
 % UpdateHematoFluor.m - reset fluorescence info after a cell has been
 % edited
 
-function UpdateHematoFluor(t)
+function UpdateHematoFluor(t, editedTrack)
     global CellHulls HashedCells FluorData CellTracks HaveFluor
 
     if isempty(FluorData)
         return
+    end
+    
+    if ~exist('editedTrack')
+        editedTrack = 0;
     end
     
     hulls = [HashedCells{t}(:).hullID];
@@ -34,7 +38,9 @@ function UpdateHematoFluor(t)
             continue;
         end
         if (t < CellTracks(i).startTime || t > CellTracks(i).endTime)
-            continue;
+            if i ~= editedTrack
+                continue;
+            end
         end
         times = CellTracks(i).startTime:CellTracks(i).endTime;
         CellTracks(i).markerTimes = intersect(times,flTimes);

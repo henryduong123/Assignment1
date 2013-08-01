@@ -87,7 +87,7 @@ end
 Error.LogAction(['Added ' num2str(siblingTrack) ' as sibling to ' num2str(trackID) ' at time t=' num2str(time)]);
 
 Figures.tree.familyID = CellTracks(trackID).familyID;
-Tracker.UpdateHematoFluor(time);
+Tracker.UpdateHematoFluor(time, trackID);
 UI.DrawTree(Figures.tree.familyID);
 UI.DrawCells();
 end
