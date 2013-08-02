@@ -32,8 +32,6 @@ function DrawCells()
 
 global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData
 
-if(isempty(CellFamilies(Figures.tree.familyID).tracks)),return,end
-
 % figure(Figures.cells.handle);
 if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);

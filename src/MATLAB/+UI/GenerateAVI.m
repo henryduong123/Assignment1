@@ -27,12 +27,39 @@ function GenerateAVI(src, evt)
 
 global Figures CONSTANTS HashedCells
 
+defaultPath = fileparts(CONSTANTS.matFullFile);
+defaultFile = [CONSTANTS.datasetName '.mp4'];
+
+[movieFile, moviePath] = uiputfile('*.mp4', 'Save Movie', fullfile(defaultPath, defaultFile));
+if ( movieFile == 0 )
+    return;
+end
+
+movieFile = fullfile(moviePath, movieFile);
+
+endAns = inputdlg('Enter stop frame for movie:', 'Movie end time', 1, {num2str(length(HashedCells))});
+if ( isempty(endAns) )
+    return;
+end
+
+nframes = str2double(endAns);
+nframes = max(nframes, 20);
+nframes = min(nframes, length(HashedCells));
+
 tic
 
-nframes = length(HashedCells);
+oldDrawOffTree = get(Figures.cells.menuHandles.treeLabelsOn, 'Checked');
+oldTreePos = get(Figures.tree.handle, 'Position');
+oldCellPos = get(Figures.cells.handle, 'Position');
+
+set(Figures.cells.menuHandles.treeLabelsOn, 'Checked','off');
+UI.DrawTree(Figures.tree.familyID, nframes);
+
+movieDims = [1920 1080];
 
 xLim = get(get(Figures.cells.handle, 'CurrentAxes'),'XLim');
 yLim = get(get(Figures.cells.handle, 'CurrentAxes'),'YLim');
+
 mp=get(0,'monitorpositions');
 idxPrimaryMonitor = find(mp(:,1)==1 & mp(:,2)==1);
 if isempty(idxPrimaryMonitor)
@@ -41,54 +68,55 @@ if isempty(idxPrimaryMonitor)
     return;
 end
 
-mp=mp(idxPrimaryMonitor,:);
+mp = mp(idxPrimaryMonitor,:);
 
-if mp(3)<960 || mp(4)<1080
-    fprintf(1,'monitor resolution too low for 1080p video');
-    Error.LogAction('GenerateAVI: monitor resolution too low for 1080p video',0,0);
+if ( mp(3)<(movieDims(1)/2) || mp(4)<movieDims(2) )
+    fprintf(1,'monitor resolution too low for %d by %d video', movieDims(1), movieDims(2));
+    Error.LogAction('GenerateAVI: monitor resolution too low for %d by %d video',0,0);
 end
     
-set(Figures.cells.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);   
-set(Figures.tree.handle,'outerposition',[mp(3)-960 mp(4)-1080  960 1080]);
+set(Figures.cells.handle,'position',[mp(3)-(movieDims(1)/2) mp(4)-movieDims(2)  (movieDims(1)/2) movieDims(2)]);   
+set(Figures.tree.handle,'position',[mp(3)-(movieDims(1)/2) mp(4)-movieDims(2)  (movieDims(1)/2) movieDims(2)]);
 
-% Split movie into approximately 1GB chunks
-mvsize = 2*1920*1080*nframes;
-mvsplits = ceil(mvsize / (2^30));
+vidObj = VideoWriter(movieFile, 'MPEG-4');
+vidObj.Quality = 100;
+vidObj.FrameRate = 20;
+open(vidObj);
 
-tStarts = round(((0:mvsplits)/mvsplits)*nframes) + 1;
+tStart = 1;
+tEnd = nframes;
 
-for i=1:mvsplits
-    outfile =  [ CONSTANTS.datasetName '_uncomp' num2str(i,'%02d') '.avi'];
-    aviobj = avifile(outfile,'compression','none');
-    
-    tStart = tStarts(i);
-    tEnd = tStarts(i+1)-1;
+for t=tStart:tEnd
+    UI.TimeChange(t);
+    UI.Progressbar(t/nframes);
 
-    for t=tStart:tEnd
-        UI.TimeChange(t);
-        UI.Progressbar(t/nframes);
+    figure(Figures.cells.handle)
 
-        figure(Figures.cells.handle)
+    X=getframe();
+    i1=X.cdata;
 
-        X=getframe();
-        i1=X.cdata;
+    figure(Figures.tree.handle)
+    X=getframe();
+    i2=X.cdata;
 
-        figure(Figures.tree.handle)
-        X=getframe();
-        i2=X.cdata;
+    dim = [movieDims(2) (movieDims(1)/2)];
 
-        dim = [1080 960];
+    i1 = imresize(i1, [dim(1) dim(2)]);
+    i2 = imresize(i2, [dim(1) dim(2)]);
 
-        i1 = imresize(i1,[dim(1) dim(2)]);
-        i2 = imresize(i2,[dim(1) dim(2)]);
-
-        icomp=[i1 i2];
-        fr = im2frame(icomp);
-        aviobj = addframe(aviobj,fr);
-    end
-
-    aviobj = close(aviobj);
+    icomp=[i1 i2];
+    fr = im2frame(icomp);
+    writeVideo(vidObj, fr);
 end
+
+close(vidObj);
+
+set(Figures.cells.menuHandles.treeLabelsOn, 'Checked',oldDrawOffTree);
+
+set(Figures.tree.handle, 'Position',oldTreePos);
+set(Figures.cells.handle, 'Position',oldCellPos);
+
+UI.DrawTree(Figures.tree.familyID);
 
 tElapsed = toc;
 Error.LogAction('GenerateAVI: elapsed time',tElapsed,0);

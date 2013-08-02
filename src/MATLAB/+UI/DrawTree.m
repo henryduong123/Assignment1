@@ -23,9 +23,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function DrawTree(familyID)
+function DrawTree(familyID, endTime)
 
 global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState FluorData HaveFluor
+
+if ( ~exist('endTime','var') )
+    endTime = length(HashedCells);
+end
 
 if ( ~exist('familyID','var') || isempty(familyID) )
     Families.FindLargestTree();
@@ -48,7 +52,7 @@ if ( ~isfield(Figures.tree,'axesHandle') || isempty(Figures.tree.axesHandle) )
     
     set(Figures.tree.axesHandle,...
         'YDir',     'reverse',...
-        'YLim',     [-25 length(HashedCells)],...
+        'YLim',     [-25 endTime],...
         'Position', [.06 .06 .90 .90],...
         'XColor',   'w',...
         'XTick',    [],...
@@ -121,7 +125,7 @@ end
 
 UI.DrawPool.FinishDraw(Figures.tree.axesHandle);
 
-set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 length(HashedCells)]);
+set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 endTime]);
 % Figures.tree.axesHandle = overAxes;
 
 if ( CellFamilies(familyID).bLocked )
