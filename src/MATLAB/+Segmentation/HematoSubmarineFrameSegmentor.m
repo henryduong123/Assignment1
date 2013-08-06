@@ -5,8 +5,8 @@ function [objs features] = HematoSubmarineFrameSegmentor(im, t)
     features = [];
     % hemato submarines
     if strcmp(CONSTANTS.cellType, 'Hemato')
-%        [sharpImg blurImg bw] = michelContrastEnhance(1-im);
-        [bw] = Segmentation.Michel(1-im, [3 3]);
+        [sharpImg blurImg bw] = michelContrastEnhance(1-im);
+%        [bw] = Segmentation.Michel(1-im, [3 3]);
         
         [centers, radii, metric] = imfindcircles(bw, [10 20], 'Sensitivity', 0.9);
         [r c] = find(bw >= 0);
