@@ -9,7 +9,16 @@ function [objs features] = FluorHulls(im, t)
         [r c] = find(L==n);
         pix = find(L == n);
         
-        ch = convhull(c, r);
+        % If convhull throws an exception, it's almost certainly either
+        % because we passed in too few points, or the points are
+        % collinear. Since we wouldn't want to use them anyway, we'll
+        % just ignore those.
+        try
+            ch = convhull(c, r);
+        catch e
+            continue;
+        end
+        
         no = [];
         no.t = t;
         no.points = [c(ch), r(ch)];
