@@ -127,7 +127,8 @@ function newEdges = FindFrameReseg(t, curEdges)
         chkDist = zeros(desiredCellCount(splitIdx(i)),1);
         for j=1:desiredCellCount(splitIdx(i))
             chkDist(j) = Segmentation.ResegFromTree.GetLongOverlapDist(desirers{splitIdx(i)}(j), nextHulls(splitIdx(i)));
-            if ( chkDist(j) < 2.0 )
+            bIsMitParent = any(desirers{splitIdx(i)}(j) == mitosisParents);
+            if ( chkDist(j) < 2.0 || bIsMitParent )
                 validSplitCount = validSplitCount + 1;
                 validDesirers = [validDesirers desirers{splitIdx(i)}(j)];
             end

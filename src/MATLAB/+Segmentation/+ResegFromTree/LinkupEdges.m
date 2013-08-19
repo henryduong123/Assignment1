@@ -26,7 +26,11 @@ function newPreserveTracks = LinkupEdges(edges, preserveTracks)
         childrenTracks = relinkList{i};
         
         childrenTimes = [CellTracks(childrenTracks).startTime];
-        if ( length(childrenTimes) > 1 )
+        if ( length(childrenTracks) ~= length(childrenTimes) )
+            error('Empty-track in relink list');
+        end
+        
+        if ( length(childrenTracks) > 1 )
             Families.ReconnectParentWithChildren(parentTrack, childrenTracks);
             newPreserveTracks = [newPreserveTracks childrenTracks];
         else
