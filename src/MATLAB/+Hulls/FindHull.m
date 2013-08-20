@@ -70,7 +70,11 @@ end
 function hullDistSq = hullProjDist(segPts, point)
     numSeg = size(segPts,1);
     
-    if ( numSeg == 0 )
+    if ( isempty(segPts) )
+        error('Empty segmentation unsupported');
+    end
+    
+    if ( numSeg == 1 )
         hullDistSq = sum((point - segPts).^2, 2);
         return;
     end
