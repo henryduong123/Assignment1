@@ -29,8 +29,14 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
 
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
+ 
+    if strcmp(CONSTANTS.cellType, 'Hemato')
+        subSize = 100;
+    else
+        subSize = 200;
+    end
     
-    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, 1.0, [], time);
+    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, subSize, 1.0, [], time);
     
     % Aggressive add segmentation
     if ( isempty(newObj) )
