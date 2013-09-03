@@ -26,6 +26,24 @@
 function FindLargestTree(src,evnt)
 global CellFamilies Figures
 
+if ( isfield(CellFamilies, 'bLocked') )
+    lockedTrees = find([CellFamilies.bLocked] ~= 0);
+    if ( ~isempty(lockedTrees) )
+        maxLockedTree = lockedTrees(1);
+        for i=2:length(lockedTrees)
+            if ( length(CellFamilies(maxLockedTree).tracks) < length(CellFamilies(lockedTrees(i)).tracks) )
+                maxLockedTree = lockedTrees(i);
+            end
+        end
+
+        Figures.tree.familyID = maxLockedTree;
+        UI.DrawTree(maxLockedTree);
+        UI.DrawCells();
+
+        return;
+    end
+end
+
 maxID = 1;
 for i=2:length(CellFamilies)
     if(length(CellFamilies(maxID).tracks) < length(CellFamilies(i).tracks))
