@@ -1,7 +1,7 @@
 function trackEdge = GetTrackInEdge(t, trackID)
     global CellTracks
     
-    trackEdge = [];
+    trackEdge = zeros(1,2);
     
     if ( CellTracks(trackID).startTime > t )
         return;
@@ -18,10 +18,6 @@ function trackEdge = GetTrackInEdge(t, trackID)
         
         prevHull = CellTracks(parentTrack).hulls(end);
     end
-    
-%     if ( nextHull == 0 )
-%         return;
-%     end
     
     trackEdge = [prevHull nextHull];
 end

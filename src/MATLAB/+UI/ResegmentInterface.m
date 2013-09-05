@@ -60,7 +60,10 @@ function bFinished = runReseg(hToolbar)
     setPlayToolbarState(hToolbar);
     
     for t=tStart:tEnd
-        bErr = Editor.ReplayableEditAction(@Editor.ResegFrameAction, t, tMax);
+        xl = xlim(Figures.cells.axesHandle);
+        yl = ylim(Figures.cells.axesHandle);
+        
+        bErr = Editor.ReplayableEditAction(@Editor.ResegFrameAction, t, tMax, [xl;yl]);
         
         Figures.time = t;
         UI.DrawTree(ResegState.primaryTree);

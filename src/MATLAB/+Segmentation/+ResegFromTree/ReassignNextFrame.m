@@ -65,20 +65,29 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
             error('Badly defined mitosis event, parent hull not followed by two child hulls');
         end
         
-        totalCosts = Inf*ones(size(newEdges,1),1);
-        bRealHullIdx = (newEdges(:,2) ~= 0);
+        % Use current mitosis parent if it was taken by an edge
+        curMitHull = CellTracks(droppedTracks(currentMitosis(i))).hulls(end);
+        bestAttachIdx = find(newEdges(:,2) == curMitHull);
+        if ( isempty(bestAttachIdx) )
+            totalCosts = Inf*ones(size(newEdges,1),1);
+            bRealHullIdx = (newEdges(:,2) ~= 0);
+
+            mitCosts = Segmentation.ResegFromTree.GetNextCosts(t,newEdges(bRealHullIdx,2), [leftHull rightHull]);
+            totalCosts(bRealHullIdx) = sum(mitCosts,2);
+
+            [minCost bestAttachIdx] = min(totalCosts);
+            if ( isinf(minCost) )
+                bestAttachIdx = [];
+            end
+        end
         
-        mitCosts = Segmentation.ResegFromTree.GetNextCosts(t,newEdges(bRealHullIdx,2), [leftHull rightHull]);
-        totalCosts(bRealHullIdx) = sum(mitCosts,2);
-        
-        [minCost bestFromIdx] = min(totalCosts);
-        if ( isinf(minCost) )
+        if ( isempty(bestAttachIdx) )
             error('There is no hull in frame t from which to build the mitosis event');
         end
         
-        forwardCosts(bestFromIdx,:) = Inf;
+        forwardCosts(bestAttachIdx,:) = Inf;
         forwardCosts(:,currentMitosis(i)) = Inf;
-        forwardCosts(bestFromIdx,currentMitosis(i)) = 1;
+        forwardCosts(bestAttachIdx,currentMitosis(i)) = 1;
     end
     
     assignIdx = assign.assignmentoptimal(forwardCosts);
@@ -153,3 +162,6 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
         Families.ReconnectParentWithChildren(assignToTrack(i), relinkTracks{i});
     end
 end
+
+
+

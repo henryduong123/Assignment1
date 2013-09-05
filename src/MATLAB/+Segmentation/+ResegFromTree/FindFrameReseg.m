@@ -1,7 +1,8 @@
-function newEdges = FindFrameReseg(t, curEdges)
+function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
     global CellHulls HashedCells ResegState
     
     newEdges = zeros(0,2);
+    curEdges = curEdges(~bIgnoreEdges,:);
     
     if ( isempty(curEdges) )
         return;
@@ -11,7 +12,6 @@ function newEdges = FindFrameReseg(t, curEdges)
     
     bLongEdge = ((t-tFrom) > 1);
     
-%     checkEdges = curEdges(~bLongEdge,:);
     % bReallyLongEdge determines when we stop looking for hulls for this
     % track.
     bReallyLongEdge = ((t-tFrom) > 5);
