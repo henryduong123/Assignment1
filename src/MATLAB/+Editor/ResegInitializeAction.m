@@ -3,7 +3,7 @@
 % 
 % Initialize resegmentation state
 
-function historyAction = ResegInitializeAction(preserveFamilies, tStart)
+function historyAction = ResegInitializeAction(hToolbar, preserveFamilies, tStart)
     global ResegState bResegPaused Figures
     
     xlims = get(Figures.tree.axesHandle,'XLim');
@@ -11,12 +11,13 @@ function historyAction = ResegInitializeAction(preserveFamilies, tStart)
     plot(Figures.tree.axesHandle, [xlims(1), xlims(2)],[tStart, tStart], '-b');
     hold(Figures.tree.axesHandle,'off');
     
-    bResegPaused = 0;
+    bResegPaused = false;
     ResegState = [];
     ResegState.preserveFamilies = preserveFamilies;
     ResegState.primaryTree = preserveFamilies(1);
     ResegState.currentTime = tStart;
     ResegState.SegEdits = {};
+    ResegState.toolbar = hToolbar;
     
     historyAction = '';
 end

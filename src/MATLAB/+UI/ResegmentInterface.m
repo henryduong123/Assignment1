@@ -1,5 +1,5 @@
 function ResegmentInterface()
-    global Figures CellFamilies CellTracks ResegState bResegPaused
+    global Figures CellFamilies CellTracks ResegState bResegPaused bResegTransition
     
     if ( ~isempty(ResegState) )
         return;
@@ -15,19 +15,23 @@ function ResegmentInterface()
         return;
     end
     
-    checkCells = str2num(cellStr{1});
+    checkCells = str2num(cellStr{1}); %#ok<ST2NM>
     if ( isempty(checkCells) )
         warndlg('List incorrectly formatted, please enter cell IDs separated by spaces');
         return;
     end
     
-    bResegPaused = 0;
+    bResegTransition = false;
+    bResegPaused = false;
     preserveFam = [CellTracks(checkCells).familyID];
     
     hToolbar = addButtons();
     
+    set(Figures.cells.handle, 'BusyAction','queue', 'Interruptible','on');
+    set(Figures.tree.handle, 'BusyAction','queue', 'Interruptible','on');
+    
     tStart = max(Figures.time, 2);
-    bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, preserveFam, tStart);
+    bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, hToolbar, preserveFam, tStart);
     if ( bErr )
         delete(hToolbar);
     end
@@ -103,14 +107,19 @@ function bFinished = runReseg(hToolbar)
 end
 
 function cleanupReseg(hToolbar)
+    global Figures
+    
     [bErr finishTime] = Editor.ReplayableEditAction(@Editor.ResegFinishAction);
     Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, finishTime-1, 'InteractiveResegTask');
+    
+    set(Figures.cells.handle, 'BusyAction','cancel', 'Interruptible','off');
+    set(Figures.tree.handle, 'BusyAction','cancel', 'Interruptible','off');
     
     delete(hToolbar);
 end
 
 function playReseg(hToolbar)
-    global ResegState bResegPaused
+    global ResegState
     
     setProcessingToolbarState(hToolbar);
 
@@ -135,8 +144,12 @@ function pauseReseg(hToolbar)
 end
 
 function toggleReseg(src,evnt)
-    global ResegState bResegPaused
+    global ResegState bResegPaused bResegTransition
     if ( isempty(ResegState) )
+        return;
+    end
+    
+    if ( isempty(bResegTransition) || bResegTransition )
         return;
     end
     
@@ -149,7 +162,7 @@ function toggleReseg(src,evnt)
 end
 
 function backupReseg(src,evnt)
-    global Figures ResegState bResegPaused
+    global Figures ResegState bResegPaused bResegTransition
     if ( isempty(ResegState) || isempty(bResegPaused) )
         return;
     end
@@ -177,7 +190,7 @@ function backupReseg(src,evnt)
 end
 
 function forwardReseg(src,evnt)
-    global Figures HashedCells ResegState bResegPaused
+    global Figures HashedCells ResegState bResegPaused bResegTransition
     if ( isempty(ResegState) || isempty(bResegPaused) )
 %         delete(get(src,'Parent'));
         return;
@@ -210,7 +223,7 @@ function forwardReseg(src,evnt)
 end
 
 function finishReseg(src,evnt)
-    global Figures ResegState bResegPaused
+    global Figures ResegState bResegPaused bResegTransition
     
     if ( bResegPaused )
         Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, ResegState.currentTime-1, 'PauseResegTask');
@@ -221,7 +234,7 @@ function finishReseg(src,evnt)
 end
 
 function setPausedToolbarState(hToolbar)
-    global ResegState HashedCells
+    global ResegState HashedCells bResegTransition
     
     hButtons = get(hToolbar, 'Children');
     
@@ -245,10 +258,15 @@ function setPausedToolbarState(hToolbar)
     
     set(hButtons(3), 'Enable','on');
     set(hButtons(1), 'Enable','on');
+    
+    bResegTransition = false;
+    
     drawnow();
 end
 
 function setPlayToolbarState(hToolbar)
+    global bResegTransition
+    
     hButtons = get(hToolbar, 'Children');
     
     pauseIm = imread('+UI\pause.png');
@@ -259,18 +277,28 @@ function setPlayToolbarState(hToolbar)
     
     set(hButtons(3), 'Enable','on');
     set(hButtons(1), 'Enable','on');
+    
+    bResegTransition = false;
+    
     drawnow();
 end
 
 function setProcessingToolbarState(hToolbar)
+	global bResegTransition
+
     hButtons = get(hToolbar, 'Children');
     
     set(hButtons, 'Enable','off');
+    
+    bResegTransition = true;
+    
     drawnow();
 end
 
 function hToolbar = addButtons()
-    global Figures
+    global Figures bResegTransition
+    
+    bResegTransition = false;
     
 %     set(Figures.cells.handle, 'Toolbar','none');
     
@@ -284,18 +312,18 @@ function hToolbar = addButtons()
     
     toolHandles = [];
     
-    hpt = uipushtool(hToolbar, 'CData',backIm, 'ClickedCallback',@backupReseg, 'TooltipString','Undo 1 Frame');
+    hpt = uipushtool(hToolbar, 'CData',backIm, 'ClickedCallback',@backupReseg, 'TooltipString','Undo 1 Frame', 'Interruptible','off', 'BusyAction','cancel');
     set(hpt, 'Enable','off');
     toolHandles = [toolHandles; hpt];
     
     hpt = uipushtool(hToolbar, 'CData',pauseIm, 'ClickedCallback',@toggleReseg, 'TooltipString','Pause Resegmentation');
     toolHandles = [toolHandles; hpt];
     
-    hpt = uipushtool(hToolbar, 'CData',forwardIm, 'ClickedCallback',@forwardReseg, 'TooltipString','Forward 1 Frame');
+    hpt = uipushtool(hToolbar, 'CData',forwardIm, 'ClickedCallback',@forwardReseg, 'TooltipString','Forward 1 Frame', 'Interruptible','off', 'BusyAction','cancel');
     set(hpt, 'Enable','off');
     toolHandles = [toolHandles; hpt];
     
-%     uipushtool(hToolbar, 'CData',revertIm, 'ClickedCallback',@abortReseg, 'TooltipString','Revert all changes', 'Separator','on');
+%     uipushtool(hToolbar, 'CData',revertIm, 'ClickedCallback',@abortReseg, 'TooltipString','Revert all changes', 'Separator','on', 'Interruptible','off');
     hpt = uipushtool(hToolbar, 'CData',finishIm, 'ClickedCallback',@finishReseg, 'TooltipString','Finish', 'Separator','on');
     toolHandles = [toolHandles; hpt];
     

@@ -159,7 +159,7 @@ UI.TimeChange(time);
 end
 
 function figureKeyPress(src,evnt)
-global Figures CellFamilies
+global Figures CellFamilies ResegState
 
 if strcmp(evnt.Key,'downarrow') || strcmp(evnt.Key,'rightarrow')
     time = Figures.time + 1;
@@ -174,7 +174,15 @@ elseif  strcmp(evnt.Key,'pageup')
     time = Figures.time - 5;
     UI.TimeChange(time);
 elseif strcmp(evnt.Key,'space')
-    UI.TogglePlay(src,evnt);
+    if ( ~isempty(ResegState) )
+        % Toggle reseg playing
+        buttonHandles = get(ResegState.toolbar, 'UserData');
+        toggleFunc = get(buttonHandles(2), 'ClickedCallback');
+        toggleFunc(buttonHandles(2), []);
+    else
+        % standard movie playing
+        UI.TogglePlay(src,evnt);
+    end
  elseif ( strcmp(evnt.Key,'control') )
      if(~Figures.controlDown)
          %prevent this from getting reset when moving the mouse

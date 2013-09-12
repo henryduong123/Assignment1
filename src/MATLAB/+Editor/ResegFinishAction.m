@@ -11,10 +11,14 @@ function [historyAction finishTime finalResegState] = ResegFinishAction()
     
     finishTime = ResegState.currentTime;
     
+    finalTree = ResegState.primaryTree;
+    
     bResegPaused = [];
     ResegState = [];
     
     disp(['Finished Resegmentation: ' num2str(size(resegEdits,1)) ' automatic edits']);
+    
+    UI.DrawTree(finalTree);
     
     historyAction = '';
 end

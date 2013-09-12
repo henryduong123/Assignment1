@@ -6,7 +6,7 @@
 function historyAction = ResegPlayAction(tStart)
     global bResegPaused
     
-    bResegPaused = 0;
+    bResegPaused = false;
     
     historyAction = '';
 end

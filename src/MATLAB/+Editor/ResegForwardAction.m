@@ -6,7 +6,7 @@
 function historyAction = ResegForwardAction()
     global bResegPaused
     
-    bResegPaused = 1;
+    bResegPaused = true;
     
     historyAction = '';
 end
