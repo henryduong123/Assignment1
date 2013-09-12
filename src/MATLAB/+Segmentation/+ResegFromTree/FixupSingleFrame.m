@@ -1,6 +1,8 @@
 function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     global CellTracks HashedCells
     
+    newPreserveTracks = preserveTracks;
+    
     bInTracks = Helper.CheckInTracks(t, preserveTracks);
     if ( nnz(bInTracks) == 0 )
         return;
