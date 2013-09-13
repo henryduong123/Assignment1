@@ -91,9 +91,14 @@ function CompileLEVer()
         error('External dependencies cannot be packaged in a MATLAB executable');
     end
     
+    % temporarily remove any startup scripts that would normally be run by matlabrc
+    enableStartupScripts(false);
+    
     compileMATLAB('LEVer', bindir, {}, toolboxStruct.deps);
     compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
     compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
+    
+    enableStartupScripts(true);
     
     fprintf('\n');
     
@@ -196,5 +201,46 @@ function compileMATLAB(projectName, bindir, extrasList, toolboxList)
     system(['copy ' projectName '.exe ' fullfile(bindir,'.')]);
     
     fprintf('Done (%f sec)\n', toc(compileTime));
+end
+
+function enableStartupScripts(bEnable)
+    searchPrefix = '';
+    renamePrefix = 'disabled_';
+    if ( bEnable )
+        searchPrefix = 'disabled_';
+        renamePrefix = '';
+    end
+    
+    searchName = [searchPrefix 'startup.m'];
+    newName = [renamePrefix 'startup.m'];
+    
+    startupScripts = findFilesInPath(searchName, userpath);
+    for i=1:length(startupScripts)
+        scriptPath = fileparts(startupScripts{i});
+        movefile(startupScripts{i}, fullfile(scriptPath,newName));
+    end
+end
+
+function fullNames = findFilesInPath(filename, searchPaths)
+    fullNames = {};
+    
+    chkPaths = [];
+    while ( ~isempty(searchPaths) )
+        [newPath remainder] = strtok(searchPaths, pathsep);
+        if ( isempty(newPath) )
+            searchPaths = remainder;
+            continue;
+        end
+        
+        chkPaths = [chkPaths; {newPath}];
+        searchPaths = remainder;
+    end
+    
+    for i=1:length(chkPaths)
+        chkFullPath = fullfile(chkPaths{i}, filename);
+        if ( exist(chkFullPath, 'file') )
+            fullNames = [fullNames; {chkFullPath}];
+        end
+    end
 end
 
