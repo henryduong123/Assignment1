@@ -26,30 +26,13 @@ if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=t
     return
 end
 
-bOverrideLock = 0;
-bLocked = Helper.CheckTreeLocked([trackID siblingTrack]);
-if ( any(bLocked) )
-    lockedList = [];
-    if ( bLocked(1) )
-        lockedList = CellFamilies(CellTracks(trackID).familyID).rootTrackID;
-    end
-    if ( bLocked(2) )
-        lockedList = [lockedList CellFamilies(CellTracks(siblingTrack).familyID).rootTrackID];
-    end
-    
-    resp = questdlg(['This edit will affect locked tree(s) ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
-    if ( strcmpi(resp,'Cancel') )
-        return;
-    end
-    bOverrideLock = 1;
-end
 leftChildTrack = [];
 
 % if both tracks are starting on this frame see who the parent should be
 % and then merge the track with the parent
 if(CellTracks(trackID).startTime==time)
-    valid = 0;
-    while(~valid)
+    bValid = false;
+    while(~bValid)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
         parentTrack = str2double(answer(1));
@@ -58,20 +41,11 @@ if(CellTracks(trackID).startTime==time)
                 (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
             choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
                 'Not a valid parent','Enter a different parent','Cancel','Cancel');
-            switch choice
-                case 'Cancel'
-                    return
+            if ( strcmpi(choice,'Cancel') )
+                return
             end
-        elseif ( ~bOverrideLock && Helper.CheckTreeLocked(parentTrack) )
-            rootTrack = CellFamilies(CellTracks(parentTrack).familyID).rootTrackID;
-            resp = questdlg(['This edit will affect locked tree(s) ' num2str(rootTrack) '. Do you wish to continue?'], 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
-            if ( strcmpi(resp,'Cancel') )
-                return;
-            end
-            
-            valid = 1;
         else
-            valid = 1;
+            bValid = true;
         end
     end
     
@@ -79,7 +53,36 @@ if(CellTracks(trackID).startTime==time)
     trackID = parentTrack;
 end
 
-bErr = Editor.ReplayableEditAction(@Editor.AddMitosisAction, trackID,leftChildTrack,siblingTrack,time);
+bOverrideLock = false;
+
+[bParentLock bChildrenLock bCanAdd] = Families.CheckLockedAddMitosis(trackID, leftChildTrack, siblingTrack, time);
+bAffectsLocked = [bParentLock bChildrenLock];
+if ( ~bCanAdd )
+    lockedTracks = [trackID siblingTrack leftChildTrack];
+    lockedTracks = lockedTracks(bAffectsLocked);
+
+    lockedList = unique([CellTracks(lockedTracks).rootTrackID]);
+
+    resp = questdlg(['This edit may add or remove multiple unintended mitosis events from the locked tree(s): ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Breaking Locked Tree', 'Continue', 'Cancel', 'Cancel');
+    if ( strcmpi(resp,'Cancel') )
+        return;
+    end
+
+    bOverrideLock = true;
+end
+
+% if ( ~bOverrideLock && any([bParentLock bChildrenLock]) )
+%     resp = questdlg(['This edit will affect locked tree: ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Editing Locked Tree', 'Continue', 'Cancel', 'Cancel');
+%     if ( strcmpi(resp,'Cancel') )
+%         return;
+%     end
+% end
+
+if ( ~bOverrideLock && any(bAffectsLocked) )
+    bErr = Editor.ReplayableEditAction(@Editor.LockedAddMitosisAction, trackID,leftChildTrack,siblingTrack,time);
+else
+    bErr = Editor.ReplayableEditAction(@Editor.AddMitosisAction, trackID,leftChildTrack,siblingTrack,time);
+end
 if ( bErr )
     return;
 end
