@@ -61,16 +61,35 @@ function CompileLEVer()
         mkdir(bindir);
     end
     
-    compileMEX('mexMAT', vsStruct);
-    compileMEX('mexDijkstra', vsStruct);
-    compileMEX('mexGraph', vsStruct);
-    compileMEX('mexIntegrityCheck', vsStruct);
-    compileMEX('mexHashData', vsStruct);
-    compileMEX('mexCCDistance', vsStruct);
+    outputFiles = {};
     
-    compileEXE('MTC', vsStruct, bindir);
-    compileEXE('HematoSeg', vsStruct, bindir);
-    compileEXE('GrayScaleCrop', vsStruct, bindir);
+    newOutput = compileMEX('mexMAT', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMEX('mexDijkstra', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMEX('mexGraph', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMEX('mexIntegrityCheck', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMEX('mexHashData', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMEX('mexCCDistance', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    
+    newOutput = compileEXE('MTC', vsStruct, bindir);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileEXE('HematoSeg', vsStruct, bindir);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileEXE('GrayScaleCrop', vsStruct, bindir);
+    outputFiles = [outputFiles; {newOutput}];
 
     [toolboxStruct externalStruct] = Dev.GetExternalDependencies();
     if ( ~isempty(externalStruct.deps) )
@@ -88,15 +107,26 @@ function CompileLEVer()
             fprintf('------\n');
         end
         
-        error('External dependencies cannot be packaged in a MATLAB executable');
+%         error('External dependencies cannot be packaged in a MATLAB executable');
+        questionStr = sprintf('%s\n%s','Possible external dependencies were found in project, you should verify all these functions are local before continuing the build.','Are you sure you wish to continue?');
+        result = questdlg(questionStr,'External Dependency Warning','Continue','Cancel','Cancel');
+        if ( strcmpi(result,'Cancel') )
+            return;
+        end
     end
     
     % temporarily remove any startup scripts that would normally be run by matlabrc
     enableStartupScripts(false);
     
-    compileMATLAB('LEVer', bindir, {}, toolboxStruct.deps);
-    compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
-    compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
+    newOutput = compileMATLAB('LEVer', bindir, {}, toolboxStruct.deps);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
+    outputFiles = [outputFiles; {newOutput}];
+    
+    newOutput = compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
+    outputFiles = [outputFiles; {newOutput}];
+    
     
     enableStartupScripts(true);
     
@@ -105,8 +135,11 @@ function CompileLEVer()
 %     mcrfile = mcrinstaller();
 %     system(['copy "' mcrfile '" "' fullfile(bindir,'.') '"']);
     
+    bIsEXE = cellfun(@(x)(~isempty(x)), strfind(lower(outputFiles), '.exe'));
+    exeOutputs = outputFiles(bIsEXE);
+    
     verSuffix = Helper.GetVersion('file');
-    zip(fullfile(bindir,['LEVer' verSuffix '.zip']), {'*.exe', '*.bat'}, bindir);
+    zip(fullfile(bindir,['LEVer' verSuffix '.zip']), [exeOutputs; {'*.bat'}], bindir);
     
     toc(totalTime)
 end
@@ -134,30 +167,32 @@ function [vsStruct comparch] = setupCompileTools()
     clear mex;
 end
 
-function compileMEX(projectName, vsStruct)
+function outputFile = compileMEX(projectName, vsStruct)
     compileTime = tic();
-    fprintf('\nVisual Studio Compiling: %s...\n', [projectName '.mexw' vsStruct.buildbits]);
+    outputFile = [projectName '.mexw' vsStruct.buildbits];
+    fprintf('\nVisual Studio Compiling: %s...\n', outputFile);
     
     projectRoot = fullfile('..','c',projectName);
     
     result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
     if ( result ~= 0 )
-        error('MEX compile failed.');
+        error([projectName ': MEX compile failed.']);
     end
     
     system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.dll']) ' ' fullfile('.', [projectName '.mexw' vsStruct.buildbits])]);
     fprintf('Done (%f sec)\n\n', toc(compileTime));
 end
 
-function compileEXE(projectName, vsStruct, bindir)
+function outputFile = compileEXE(projectName, vsStruct, bindir)
     compileTime = tic();
-    fprintf('\nVisual Studio Compiling: %s...\n', [projectName '.exe']);
+    outputFile = [projectName '.exe'];
+    fprintf('\nVisual Studio Compiling: %s...\n', outputFile);
     
     projectRoot = fullfile('..','c',projectName);
     
     result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
     if ( result ~= 0 )
-%         error('EXE compile failed.');
+        error([projectName ': EXE compile failed.']);
     end
     
     system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.exe']) ' ' fullfile('.', [projectName '.exe'])]);
@@ -166,8 +201,11 @@ function compileEXE(projectName, vsStruct, bindir)
     fprintf('Done (%f sec)\n\n', toc(compileTime));
 end
 
-function compileMATLAB(projectName, bindir, extrasList, toolboxList)
+function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList)
     compileTime = tic();
+    
+    outputFile = [projectName '.exe'];
+    
     if ( ~exist('extrasList','var') )
         extrasList = {};
     end
@@ -192,10 +230,10 @@ function compileMATLAB(projectName, bindir, extrasList, toolboxList)
         toolboxAddCommand = ['-N' toolboxElems{:}];
     end
     
-    fprintf('\nMATLAB Compiling: %s...\n', projectName);
+    fprintf('\nMATLAB Compiling: %s...\n', outputFile);
     result = system(['mcc -v -R -startmsg -m ' projectName '.m ' toolboxAddCommand extraCommand]);
     if ( result ~= 0 )
-        error('MATLAB compile failed.');
+        error([projectName ': MATLAB compile failed.']);
     end
     
     system(['copy ' projectName '.exe ' fullfile(bindir,'.')]);
