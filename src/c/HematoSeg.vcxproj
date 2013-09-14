@@ -122,7 +122,7 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Program Files\ITK\include\ITK-4.0;C:\Program Files\qhull\include\libqhull;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%ITK_DIR%\include\ITK-4.0;%QHULL_DIR%\include\libqhull;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
@@ -131,7 +131,7 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>C:\Program Files\ITK\lib\debug;C:\Program Files\MATLAB\R2011b\extern\lib\win64\microsoft;C:\Program Files\qhull\lib\debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%ITK_DIR%\lib\debug;C:\Program Files\MATLAB\R2011b\extern\lib\win64\microsoft;%QHULL_DIR%\lib\debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>ITKStatistics-4.0.lib;itkzlib-4.0.lib;itksys-4.0.lib;itkvnl-4.0.lib;itkvnl_algo-4.0.lib;ITKVNLInstantiation-4.0.lib;itkv3p_netlib-4.0.lib;ITKMetaIO-4.0.lib;ITKIOMeta-4.0.lib;ITKIOImageBase-4.0.lib;ITKIOTIFF-4.0.lib;itktiff-4.0.lib;itkjpeg-4.0.lib;ITKCommon-4.0.lib;ITKLabelMap-4.0.lib;qhullcpp.lib;qhullstatic.lib;qhull6.lib;qhullstatic_p.lib;shlwapi.lib;winmm.lib;Advapi32.lib;User32.lib;Gdi32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -172,7 +172,7 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Program Files\ITK\include\ITK-4.0;C:\Program Files\qhull\include\libqhull;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%ITK_DIR%\include\ITK-4.0;%QHULL_DIR%\include\libqhull;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
@@ -183,7 +183,7 @@ copy /Y $(OutDir)$(ProjectName).pdb ..\..\bin
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>C:\Program Files\ITK\lib\release;C:\Program Files\MATLAB\R2011b\extern\lib\win64\microsoft;C:\Program Files\qhull\lib\release;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%ITK_DIR%\lib\release;C:\Program Files\MATLAB\R2011b\extern\lib\win64\microsoft;%QHULL_DIR%\lib\release</AdditionalLibraryDirectories>
       <AdditionalDependencies>ITKStatistics-4.0.lib;itkzlib-4.0.lib;itksys-4.0.lib;itkvnl-4.0.lib;itkvnl_algo-4.0.lib;ITKVNLInstantiation-4.0.lib;itkv3p_netlib-4.0.lib;ITKMetaIO-4.0.lib;ITKIOMeta-4.0.lib;ITKIOImageBase-4.0.lib;ITKIOTIFF-4.0.lib;itktiff-4.0.lib;itkjpeg-4.0.lib;ITKCommon-4.0.lib;ITKLabelMap-4.0.lib;qhullcpp.lib;qhullstatic.lib;qhull6.lib;qhullstatic_p.lib;shlwapi.lib;winmm.lib;Advapi32.lib;User32.lib;Gdi32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
