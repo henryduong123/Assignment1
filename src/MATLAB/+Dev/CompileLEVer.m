@@ -118,7 +118,8 @@ function CompileLEVer()
     % temporarily remove any startup scripts that would normally be run by matlabrc
     enableStartupScripts(false);
     
-    newOutput = compileMATLAB('LEVer', bindir, {}, toolboxStruct.deps);
+    addImgs = {'+UI\backFrame.png'; '+UI\forwardFrame.png'; '+UI\pause.png';'+UI\play.png';'+UI\stop.png'};
+    newOutput = compileMATLAB('LEVer', bindir, addImgs, toolboxStruct.deps);
     outputFiles = [outputFiles; {newOutput}];
     
     newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
