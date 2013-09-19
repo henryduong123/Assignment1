@@ -126,22 +126,37 @@ function bIgnoreEdges = getIgnoreEdges(t, edges, viewLims)
 end
 
 function bInLims = checkCOMLims(hullID, viewLims)
-    global CellHulls
-    
-    if ( isempty(hullID) || hullID == 0 )
-        bInLims = false;
-        return;
-    end
+    global CONSTANTS CellHulls
     
     lenX = viewLims(1,2)-viewLims(1,1);
     lenY = viewLims(2,2)-viewLims(2,1);
     
-    padInX = 0.05*lenX;
-    padInY = 0.05*lenY;
+    padXLeft = 0;
+    padXRight = 0;
+    padYTop = 0;
+    padYBottom = 0;
+    
+    padScale = 0.05;
+    
+    if ( viewLims(1,1) >= 6 )
+        padXLeft = padScale*lenX;
+    end
+    
+    if ( viewLims(1,2) <= (CONSTANTS.imageSize(2)-5) )
+        padXRight = padScale*lenX;
+    end
+    
+    if ( viewLims(2,1) >= 6 )
+        padYTop = padScale*lenY;
+    end
+    
+    if ( viewLims(2,2) <= (CONSTANTS.imageSize(1)-5) )
+        padYBottom = padScale*lenY;
+    end
     
     hull = CellHulls(hullID);
-    bInX = ((hull.centerOfMass(2)>(viewLims(1,1)+padInX)) && (hull.centerOfMass(2)<(viewLims(1,2)-padInX)));
-    bInY = ((hull.centerOfMass(1)>(viewLims(2,1)+padInY)) && (hull.centerOfMass(1)<(viewLims(2,2)-padInY)));
+    bInX = ((hull.centerOfMass(2)>(viewLims(1,1)+padXLeft)) && (hull.centerOfMass(2)<(viewLims(1,2)-padXRight)));
+    bInY = ((hull.centerOfMass(1)>(viewLims(2,1)+padYTop)) && (hull.centerOfMass(1)<(viewLims(2,2)-padYBottom)));
     
     bInLims = (bInX & bInY);
 end
