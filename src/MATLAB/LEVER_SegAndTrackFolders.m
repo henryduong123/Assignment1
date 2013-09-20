@@ -16,6 +16,10 @@ softwareVersion = Helper.GetVersion();
 cellType = Load.QueryCellType();
 Load.AddConstant('cellType',cellType,1);
 
+% Just disable fluorescence for now
+Load.AddConstant('rootFluorFolder', '.\', 1);
+Load.AddConstant('fluorNamePattern', '.', 1);
+
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if(~directory_name),return,end
 
