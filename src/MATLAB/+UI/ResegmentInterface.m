@@ -184,6 +184,11 @@ function backupReseg(src,evnt)
     
     bErr = Editor.ReplayableEditAction(@Editor.ResegBackAction);
     
+    curTime = Figures.time;
+    if ( curTime > 1 )
+        UI.TimeChange(curTime-1);
+    end
+    
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'PauseResegTask');
     
     setPausedToolbarState(hToolbar);
