@@ -1,17 +1,24 @@
 % Ignore edges on tracks that end with phenotype markings or are currently
 % outside view limits
-function bIgnoreEdges = CheckIgnoreTracks(t, trackIDs, viewLims)
+function [bIgnoreEdges bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
     global CellHulls
     
     bIgnoreEdges = false(length(trackIDs),1);
+    bLongEdges = false(length(trackIDs),1);
     
     for i=1:length(trackIDs)
         curTrackID = trackIDs(i);
         
         prevHullID = Helper.GetNearestTrackHull(curTrackID, t-1, -1);
-        if ( (prevHullID ~= 0) && ~checkCOMLims(prevHullID, viewLims) )
-            bIgnoreEdges(i) = true;
-            continue;
+        if ( (prevHullID ~= 0) )
+            if ( (t - CellHulls(prevHullID).time) > 5 )
+                bLongEdges(i) = true;
+            end
+            
+            if ( ~checkCOMLims(prevHullID, viewLims) )
+                bIgnoreEdges(i) = true;
+                continue;
+            end
         end
         
         [phenotypes phenoHullIDs] = Tracks.GetAllTrackPhenotypes(curTrackID);

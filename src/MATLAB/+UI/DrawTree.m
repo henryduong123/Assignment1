@@ -188,8 +188,8 @@ if ( ~isempty(ResegState) )
 
     inXTracks = xTracks(((xStarts <= resegTime) & (xEnds >= resegTime)),:);
 
-    bIgnored = Segmentation.ResegFromTree.CheckIgnoreTracks(resegTime, inXTracks(:,1), viewLims);
-    xResegLoc = inXTracks(~bIgnored,2);
+    [bIgnored bLong] = Segmentation.ResegFromTree.CheckIgnoreTracks(resegTime, inXTracks(:,1), viewLims);
+    xResegLoc = inXTracks(~(bIgnored|bLong),2);
     
     indicatorList = [];
     for i=1:length(xResegLoc)
