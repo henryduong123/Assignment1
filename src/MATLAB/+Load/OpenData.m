@@ -150,11 +150,6 @@ switch answer
                 return
             end
             
-            errors = mexIntegrityCheck();
-            if ( ~isempty(errors) )
-                warndlg('There were database inconsistencies.  LEVer might not behave properly!');
-                Dev.PrintIntegrityErrors(errors);
-            end
             goodLoad = 1;
         end
         
@@ -174,6 +169,13 @@ switch answer
         
     otherwise
         return
+end
+
+% Check this at the end of load now for new and old data alike
+errors = mexIntegrityCheck();
+if ( ~isempty(errors) )
+    warndlg('There were database inconsistencies.  LEVer might not behave properly!');
+    Dev.PrintIntegrityErrors(errors);
 end
 
 % Initialized cached costs here if necessary (placed after fix old file versions for compatibility)
