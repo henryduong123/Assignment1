@@ -25,12 +25,26 @@
 
 function CloseFigure(varargin)
 
-global Figures
+global Figures ResegState
+
 if(isempty(Figures))
     set(gcf,'CloseRequestFcn','remove');
     delete(gcf);
     return
 end
+
+if ( ~isempty(ResegState) )
+    choice = questdlg('You must stop resegmentation before exiting, would you like to stop now?','Closing','Ok','Cancel','Cancel');
+    if ( strcmpi(choice, 'Cancel') )
+        return;
+    end
+    
+    % Toggle reseg playing
+    buttonHandles = get(ResegState.toolbar, 'UserData');
+    toggleFunc = get(buttonHandles(4), 'ClickedCallback');
+    toggleFunc(buttonHandles(4), []);
+end
+
 if(strcmp(get(Figures.cells.menuHandles.saveMenu,'Enable'),'on'))
     choice = questdlg('Save current edits before closing?','Closing','Yes','No','Cancel','Cancel');
     switch choice
