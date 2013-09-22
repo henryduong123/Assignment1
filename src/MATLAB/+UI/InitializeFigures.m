@@ -114,6 +114,7 @@ UI.CreateContextMenuTree();
 
 %initially the first family will be drawn and time will be set to 1
 Figures.tree.timeIndicatorLine = [];
+Figures.tree.resegIndicators = [];
 
 Figures.tree.timeLabel = uicontrol(Figures.tree.handle,...
     'Style','text',...

@@ -26,7 +26,7 @@
 
 function TimeChange(time)
 
-global Figures HashedCells
+global Figures HashedCells ResegState
 
 if(time > length(HashedCells))
     Figures.time = length(HashedCells);
@@ -42,4 +42,7 @@ set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 UI.UpdateTimeIndicatorLine();
 UI.DrawCells();
+
+UI.UpdateResegIndicators();
+
 end

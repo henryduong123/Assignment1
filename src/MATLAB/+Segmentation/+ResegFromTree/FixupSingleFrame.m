@@ -12,7 +12,7 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     
     % Disconnect all tracks (t-1) -> t.
     [droppedTracks oldEdges] = chopTracks(t, inPreserveTracks);
-    bIgnoreEdges = getIgnoreEdges(t, oldEdges, viewLims);
+    bIgnoreEdges = Segmentation.ResegFromTree.CheckIgnoreTracks(t, inPreserveTracks, viewLims);
     
     % Find best (t-1) -> t assignment (adding/splitting hulls)
     newEdges = Segmentation.ResegFromTree.FindFrameReseg(t, oldEdges, bIgnoreEdges);
@@ -90,75 +90,6 @@ function [droppedTracks edges] = chopTracks(t, tracks)
 %     end
     
     droppedTracks(bDropped) = choppedTracks(srtIdx(bDropped));
-end
-
-% Ignore edges on tracks that end with phenotype markings or are currently
-% outside view limits
-function bIgnoreEdges = getIgnoreEdges(t, edges, viewLims)
-    global CellHulls
-    
-    bIgnoreEdges = false(size(edges,1),1);
-    for i=1:size(edges,1)
-        prevHullID = edges(i,1);
-        if ( (prevHullID ~= 0) && ~checkCOMLims(prevHullID, viewLims) )
-            bIgnoreEdges(i) = true;
-            continue;
-        end
-        
-        trackID = Hulls.GetTrackID(edges(i,1));
-        [phenotypes phenoHullIDs] = Tracks.GetAllTrackPhenotypes(trackID);
-        if ( isempty(phenotypes) )
-            continue;
-        end
-        
-        phenoHullID = phenoHullIDs(end);
-        phenoTime = CellHulls(phenoHullID).time;
-        if ( t <= phenoTime )
-            continue;
-        end
-        
-        if ( prevHullID ~= phenoHullID )
-            continue;
-        end
-        
-        bIgnoreEdges(i) = true;
-    end
-end
-
-function bInLims = checkCOMLims(hullID, viewLims)
-    global CONSTANTS CellHulls
-    
-    lenX = viewLims(1,2)-viewLims(1,1);
-    lenY = viewLims(2,2)-viewLims(2,1);
-    
-    padXLeft = 0;
-    padXRight = 0;
-    padYTop = 0;
-    padYBottom = 0;
-    
-    padScale = 0.05;
-    
-    if ( viewLims(1,1) >= 6 )
-        padXLeft = padScale*lenX;
-    end
-    
-    if ( viewLims(1,2) <= (CONSTANTS.imageSize(2)-5) )
-        padXRight = padScale*lenX;
-    end
-    
-    if ( viewLims(2,1) >= 6 )
-        padYTop = padScale*lenY;
-    end
-    
-    if ( viewLims(2,2) <= (CONSTANTS.imageSize(1)-5) )
-        padYBottom = padScale*lenY;
-    end
-    
-    hull = CellHulls(hullID);
-    bInX = ((hull.centerOfMass(2)>(viewLims(1,1)+padXLeft)) && (hull.centerOfMass(2)<(viewLims(1,2)-padXRight)));
-    bInY = ((hull.centerOfMass(1)>(viewLims(2,1)+padYTop)) && (hull.centerOfMass(1)<(viewLims(2,2)-padYBottom)));
-    
-    bInLims = (bInX & bInY);
 end
 
 function fixedEdges = fixupConflictingEdges(t, bIgnored, newEdges, oldEdges, droppedTracks)

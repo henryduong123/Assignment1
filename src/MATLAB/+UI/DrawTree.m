@@ -83,7 +83,7 @@ end
 
 Figures.tree.familyID = familyID;
 
-trackID = CellFamilies(familyID).tracks(1);
+rootTrackID = CellFamilies(familyID).rootTrackID;
 
 figure(Figures.tree.handle);
 
@@ -95,9 +95,9 @@ hold(Figures.tree.axesHandle, 'on');
 
 % build a map with the heights for each node in the tree rooted at trackID
 trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
-computeTrackHeights(trackID, trackHeights);
+computeTrackHeights(rootTrackID, trackHeights);
 
-[xTracks bFamHasPheno] = simpleTraverseTree(trackID, 0, trackHeights);
+[xTracks bFamHasPheno] = simpleTraverseTree(rootTrackID, 0, trackHeights);
 
 xMin = min(xTracks(:,2));
 xMax = max(xTracks(:,2));
@@ -161,13 +161,6 @@ for i=1:length(hasPhenos)
     set(hPheno,'DisplayName',CellPhenotypes.descriptions{hasPhenos(i)});
 end
 
-% Draw the "edit" line if reseg is running
-if ( ~isempty(ResegState) )
-    treeXlims = get(Figures.tree.axesHandle,'XLim');
-    resegTime = max(ResegState.currentTime-1,1);
-    plot(Figures.tree.axesHandle, [treeXlims(1), treeXlims(2)],[resegTime, resegTime], '-b');
-end
-
 % draw ticks to indicate which times have fluorescence
 fluorTimes = find(HaveFluor);
 pdelta = pixelDelta;
@@ -179,6 +172,33 @@ for i=1:length(fluorTimes)
     line([x_lim(2)-10*pdelta x_lim(2)], [fluorTimes(i) fluorTimes(i)],...
     'color', 'green',...
     'linewidth', 1);
+end
+
+% Draw the "edit" line, and current resegable cirlces,if reseg is running
+if ( ~isempty(ResegState) )
+    treeXlims = get(Figures.tree.axesHandle,'XLim');
+    resegTime = max(ResegState.currentTime-1,1);
+
+    plot(Figures.tree.axesHandle, [treeXlims(1), treeXlims(2)],[resegTime, resegTime], '-b');
+
+    viewLims = [xlim(Figures.cells.axesHandle); ylim(Figures.cells.axesHandle)];
+
+    xStarts = [CellTracks(xTracks(:,1)).startTime];
+    xEnds = [CellTracks(xTracks(:,1)).endTime];
+
+    inXTracks = xTracks(((xStarts <= resegTime) & (xEnds >= resegTime)),:);
+
+    bIgnored = Segmentation.ResegFromTree.CheckIgnoreTracks(resegTime, inXTracks(:,1), viewLims);
+    xResegLoc = inXTracks(~bIgnored,2);
+    
+    indicatorList = [];
+    for i=1:length(xResegLoc)
+        indicatorList = [indicatorList plot(xResegLoc(i),resegTime, '.b', 'MarkerSize',12)];
+    end
+
+    Figures.tree.resegIndicators = indicatorList;
+    
+    UI.UpdateResegIndicators();
 end
 
 for i=1:size(xTracks,1)
