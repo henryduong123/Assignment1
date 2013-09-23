@@ -131,7 +131,7 @@ if ( strcmpi(showResegStatus, 'on') )
     end
 
     pdelta = pixelDelta(Figures.tree.axesHandle);
-    padLeft = min(minSpacing/3, 10*pdelta);
+    padLeft = min(minSpacing/3, 4*pdelta);
     for i=1:size(xTracks,1)
         drawResegInfo(xTracks(i,1), xTracks(i,2)-padLeft);
     end
