@@ -24,9 +24,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SaveLEVerState(filename)
-    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor
+    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks
     
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-        'FluorData', 'HaveFluor');
+        'FluorData', 'HaveFluor', 'ResegLinks');
 end
