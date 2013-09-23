@@ -23,7 +23,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function CompileLEVer()
+function CompileLEVer(forceVersion)
     totalTime = tic();
 
     % Try to set up git for the build, give a warning about checking the
@@ -48,7 +48,11 @@ function CompileLEVer()
         end
     end
 
-    Dev.MakeVersion();
+    if ( ~exist('forceVersion', 'var') )
+        Dev.MakeVersion();
+    else
+        Dev.MakeVersion(0, forceVersion);
+    end
 
     [vsStruct comparch] = setupCompileTools();
     

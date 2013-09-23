@@ -46,7 +46,9 @@ function version = GetVersion(command)
     end
     
     if ( strcmpi(command, 'file') )
-        version = [num2str(verInfo.majorVersion) num2str(verInfo.minorVersion) '_' cleanBranch];
+        minorStr = num2str(verInfo.minorVersion);
+        minorStr = strrep(minorStr, '.', '_');
+        version = [num2str(verInfo.majorVersion) minorStr '_' cleanBranch];
         return;
     end
     

@@ -1,6 +1,6 @@
 
 
-function verInfo = MakeVersion(bTransientUpdate)
+function verInfo = MakeVersion(bTransientUpdate, forceVersion)
 
     funcString = {
         '%% versionInfo = VersionInfo()'
@@ -21,6 +21,10 @@ function verInfo = MakeVersion(bTransientUpdate)
         bTransientUpdate = 0;
     end
     
+    if ( ~exist('forceVersion', 'var') )
+        forceVersion = [];
+    end
+    
     verInfo = struct(...
                 'majorVersion',{0},...
                 'minorVersion',{0},...
@@ -38,16 +42,23 @@ function verInfo = MakeVersion(bTransientUpdate)
     
     [verTag branchName] = gitVersionAndBranch(bFoundGit, fallbackFile);
     
+    if ( ~isempty(forceVersion) && ischar(forceVersion) )
+        verTag = ['v' forceVersion];
+    end
+    
     % Get version info from git tag
     if ( ~isempty(verTag) )
         verTag = strtrim(verTag);
-        numTok = regexp(verTag, '[Vv]([0-9]+)[.]([0-9]+).*', 'tokens', 'once');
+        numTok = regexp(verTag, '[Vv]([0-9]+)[.]([0-9]+(?:[.][0-9])?).*', 'tokens', 'once');
         if ( length(numTok) >= 2 )
             verInfo.majorVersion = str2double(numTok{1});
             verInfo.minorVersion = str2double(numTok{2});
-            
-            verInfo.minorVersion = verInfo.minorVersion + 1;
         end
+    end
+    
+    % Increment version if we're getting it from tag/fallback
+    if ( isempty(forceVersion) )
+        verInfo.minorVersion = verInfo.minorVersion + 1;
     end
     
     % Try to get a branch name
