@@ -123,6 +123,17 @@ end
 %     debugDrawGraphEdits(familyID, xTracks);
 % end
 
+showResegStatus = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
+if ( strcmpi(showResegStatus, 'on') )
+    minSpacing = abs(min(diff(xTracks(:,2))));
+
+    pdelta = pixelDelta(Figures.tree.axesHandle);
+    padLeft = min(minSpacing/3, 10*pdelta);
+    for i=1:size(xTracks,1)
+        drawResegInfo(xTracks(i,1), xTracks(i,2)-padLeft);
+    end
+end
+
 UI.DrawPool.FinishDraw(Figures.tree.axesHandle);
 
 set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 endTime]);
@@ -163,7 +174,7 @@ end
 
 % draw ticks to indicate which times have fluorescence
 fluorTimes = find(HaveFluor);
-pdelta = pixelDelta;
+pdelta = pixelDelta(Figures.tree.axesHandle);
 x_lim = xlim;
 % xlim = get(Figures.tree.axesHandle,'XLim');
 % tickLen = (xlim(2) - xlim(1)) * 0.01;
@@ -245,6 +256,28 @@ global Figures mitosisMotionListener mitosisMouseUpListener CellTracks
     mexDijkstra('initGraph', Tracker.GetCostMatrix());
     
     Figures.tree.dragging = src;
+end
+
+function drawResegInfo(trackID, xVal)
+    global Figures CellTracks CellHulls ResegLinks
+    
+    hulls = CellTracks(trackID).hulls;
+    nzHulls = hulls(hulls ~= 0);
+    
+    bHasResegLink = any((ResegLinks(:,nzHulls) ~= 0),1);
+    if ( nnz(bHasResegLink) == 0 )
+        return;
+    end
+    
+    [linkHulls,nextIdx] = find(ResegLinks(:,nzHulls(bHasResegLink)) ~= 0);
+    nextHulls = nzHulls(bHasResegLink);
+    
+    nextTimes = [CellHulls(nextHulls).time];
+    linkTimes = [CellHulls(linkHulls).time];
+    
+    for i=1:length(nextTimes)
+        plot(Figures.tree.axesHandle, [xVal xVal], [nextTimes(i) linkTimes(i)], '-r');
+    end
 end
 
 function hLine = drawHorizontalEdge(xMin,xMax,y,trackID)
@@ -594,13 +627,13 @@ end
 end
 
 % how far is 1 pixel in normalized units?
-function delta = pixelDelta()
+function delta = pixelDelta(axHandle)
 
-x_lim = xlim;
-set(gca, 'units', 'pixels');
-pos = get(gca, 'position');
+x_lim = xlim(axHandle);
+set(axHandle, 'units', 'pixels');
+pos = get(axHandle, 'position');
 delta = x_lim(2) / pos(3);
-set(gca, 'units', 'normalized');
+set(axHandle, 'units', 'normalized');
 
 end
 

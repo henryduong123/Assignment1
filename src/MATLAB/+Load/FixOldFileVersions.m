@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions()
-    global CellHulls CellFamilies HashedCells ConnectedDist GraphEdits Costs CellPhenotypes CellTracks ReplayEditActions Log
+    global CellHulls CellFamilies HashedCells ConnectedDist GraphEdits ResegLinks Costs CellPhenotypes CellTracks ReplayEditActions Log
 
     bNeedsUpdate = 0;
     
@@ -68,6 +68,11 @@ function bNeedsUpdate = FixOldFileVersions()
     
     if ( isempty(GraphEdits) )
         GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
+        bNeedsUpdate = 1;
+    end
+    
+    if ( isempty(ResegLinks) )
+        ResegLinks = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
         bNeedsUpdate = 1;
     end
 

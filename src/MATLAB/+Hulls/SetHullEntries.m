@@ -6,7 +6,7 @@
 % NOTE: This does not automatically update tracking information for hulls
 
 function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs)
-    global CellHulls Costs GraphEdits CachedCostMatrix
+    global CellHulls Costs GraphEdits ResegLinks CachedCostMatrix
     
     newHulls = [];
     newFamilies = [];
@@ -44,6 +44,7 @@ function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs)
     if (  addCosts > 0 )
         Costs = [Costs zeros(size(Costs,1),addCosts); zeros(addCosts,size(Costs,1)+addCosts)];
         GraphEdits = [GraphEdits zeros(size(GraphEdits,1),addCosts); zeros(addCosts,size(GraphEdits,1)+addCosts)];
+        ResegLinks = [ResegLinks zeros(size(ResegLinks,1),addCosts); zeros(addCosts,size(ResegLinks,1)+addCosts)];
         CachedCostMatrix = [CachedCostMatrix zeros(size(CachedCostMatrix,1),addCosts); zeros(addCosts,size(CachedCostMatrix,1)+addCosts)];
     end
     

@@ -14,6 +14,9 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     [droppedTracks oldEdges] = chopTracks(t, inPreserveTracks);
     bIgnoreEdges = Segmentation.ResegFromTree.CheckIgnoreTracks(t, inPreserveTracks, viewLims);
     
+    % This attempts to keep track of what we think we've correctly resegmented
+    clearEdgeResegInfo(oldEdges(~bIgnoreEdges,:));
+    
     % Find best (t-1) -> t assignment (adding/splitting hulls)
     newEdges = Segmentation.ResegFromTree.FindFrameReseg(t, oldEdges, bIgnoreEdges);
     
@@ -58,6 +61,9 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     % Do appropriate linking up of tracks from (t-1) -> t as found above
     newPreserveTracks = Segmentation.ResegFromTree.LinkupEdges(allEdges, preserveTracks);
     
+    % This attempts to keep track of what we think we've correctly resegmented
+    setEdgeResegInfo([newEdges; extendEdges]);
+    
     if ( t < length(HashedCells) )
         Tracker.UpdateTrackingCosts(t, tHulls, [HashedCells{t+1}.hullID]);
     end
@@ -90,6 +96,27 @@ function [droppedTracks edges] = chopTracks(t, tracks)
 %     end
     
     droppedTracks(bDropped) = choppedTracks(srtIdx(bDropped));
+end
+
+function setEdgeResegInfo(edges)
+    global CellTracks ResegLinks
+    
+    bValidEdges = all(edges ~= 0, 2);
+    validEdges = edges(bValidEdges,:);
+    
+    trackIDs = Hulls.GetTrackID(validEdges(:,1));
+    familyIDs = [CellTracks(trackIDs).familyID];
+    
+    for i=1:size(validEdges,1)
+        ResegLinks(validEdges(i,1),validEdges(i,2)) = familyIDs(i);
+    end
+end
+
+function clearEdgeResegInfo(edges)
+    global ResegLinks
+    
+    nzNextHulls = edges((edges(:,2) ~= 0),2);
+    ResegLinks(:,nzNextHulls) = 0;
 end
 
 function fixedEdges = fixupConflictingEdges(t, bIgnored, newEdges, oldEdges, droppedTracks)

@@ -26,11 +26,12 @@
 
 function ConvertTrackingData(objHulls,gConnect)
 
-global Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log CONSTANTS
+global Costs GraphEdits ResegLinks CellHulls CellFamilies CellTracks HashedCells CellPhenotypes ConnectedDist Log CONSTANTS
 
 %ensure that the globals are empty
 Costs = [];
 GraphEdits = [];
+ResegLinks = [];
 CellHulls = [];
 CellFamilies = [];
 CellTracks = [];
@@ -41,6 +42,7 @@ Log = [];
 
 Costs = gConnect;
 GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
+ResegLinks = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
 
 connDist = cell(1,length(objHulls));
 

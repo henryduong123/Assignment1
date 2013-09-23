@@ -207,6 +207,13 @@ fluorMenu = uimenu(...
     'Callback',         @toggleFluor,...
     'Checked',          'on');
 
+resegStatusMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Reseg Status',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleResegStatus,...
+    'Checked',          'off');
+
 playMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Play',...
@@ -257,6 +264,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
     Figures.cells.menuHandles.fluorMenu = fluorMenu;
+    Figures.cells.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
     Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
     Figures.cells.menuHandles.structOnlyMenu = structOnlyMenu;
@@ -271,6 +279,7 @@ else
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.fluorMenu = fluorMenu;
+    Figures.tree.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
     Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
     Figures.tree.menuHandles.structOnlyMenu = structOnlyMenu;
@@ -415,6 +424,20 @@ else
     set(Figures.tree.menuHandles.fluorMenu, 'Checked', 'on');
     UI.DrawCells();
 end
+end
+
+function toggleResegStatus(src, evt)
+    global Figures
+    menuChecked = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
+    if ( strcmp(menuChecked, 'on') )
+        set(Figures.cells.menuHandles.resegStatusMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.resegStatusMenu, 'Checked', 'off');
+        UI.DrawTree(Figures.tree.familyID);
+    else
+        set(Figures.cells.menuHandles.resegStatusMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.resegStatusMenu, 'Checked', 'on');
+        UI.DrawTree(Figures.tree.familyID);
+    end
 end
 
 function timeJump(src,evnt)
