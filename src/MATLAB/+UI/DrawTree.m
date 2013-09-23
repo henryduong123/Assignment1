@@ -126,6 +126,9 @@ end
 showResegStatus = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
 if ( strcmpi(showResegStatus, 'on') )
     minSpacing = abs(min(diff(xTracks(:,2))));
+    if ( isempty(minSpacing) )
+        minSpacing = 1;
+    end
 
     pdelta = pixelDelta(Figures.tree.axesHandle);
     padLeft = min(minSpacing/3, 10*pdelta);
