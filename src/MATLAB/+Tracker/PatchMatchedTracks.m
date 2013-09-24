@@ -29,8 +29,11 @@
 function PatchMatchedTracks()
     global CellFamilies CellTracks CellHulls
     
+    bLockedFamilies = [CellFamilies.bLocked];
+    unlockedFamilies = CellFamilies(~bLockedFamilies);
+    
     % Get root hulls of all families
-    checkHulls = arrayfun(@getRootHullID, CellFamilies, 'UniformOutput',0);
+    checkHulls = arrayfun(@getRootHullID, unlockedFamilies, 'UniformOutput',0);
     checkHulls = [checkHulls{:}];
     
     % Check possible attachments in order of time
@@ -40,8 +43,8 @@ function PatchMatchedTracks()
     costMatrix = Tracker.GetCostMatrix();
     
     leafHulls = [];
-    for i=1:length(CellFamilies)
-        checkTracks = CellFamilies(i).tracks;
+    for i=1:length(unlockedFamilies)
+        checkTracks = unlockedFamilies(i).tracks;
         for j=1:length(checkTracks)
             if ( ~isempty(CellTracks(checkTracks(j)).childrenTracks) )
                 continue;

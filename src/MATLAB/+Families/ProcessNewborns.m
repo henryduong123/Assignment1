@@ -157,6 +157,8 @@ for i=1:size
         elseif ( CellFamilies(CellTracks(parentTrackID).familyID).bLocked )
             % Don't let locked families be possible parent candidates
             parentCosts(j) = Inf;
+        elseif ( Helper.CheckTreeLocked(parentTrackID) )
+            parentCosts(j) = Inf;
         else
             siblingHullIndex = CellHulls(childHullID).time - CellTracks(parentTrackID).startTime + 1;
             % ASSERT ( siblingHullIndex > 0 && <= length(hulls)
