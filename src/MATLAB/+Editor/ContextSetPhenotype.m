@@ -16,7 +16,6 @@ function historyAction = ContextSetPhenotype(hullID, phenotype, bActive)
     end
 
     Tracks.SetPhenotype(hullID, phenotype, bActive);
-    Families.ProcessNewborns();
     
     historyAction = 'Push';
 end

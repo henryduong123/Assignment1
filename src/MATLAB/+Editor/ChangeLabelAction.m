@@ -9,7 +9,5 @@ function historyAction = ChangeLabelAction(trackID, newTrackID, time)
     Tracker.GraphEditSetEdge(newTrackID,trackID,time,true);
     Tracks.ChangeLabel(trackID,newTrackID,time);
     
-    Families.ProcessNewborns();
-    
     historyAction = 'Push';
 end

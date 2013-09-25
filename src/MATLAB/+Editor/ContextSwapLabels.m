@@ -13,7 +13,6 @@ function historyAction = ContextSwapLabels(trackA, trackB, time)
         Tracks.LockedSwapLabels(trackA, trackB, time);
     else
         Tracks.SwapLabels(trackA, trackB, time);
-        Families.ProcessNewborns();
     end
     
     historyAction = 'Push';

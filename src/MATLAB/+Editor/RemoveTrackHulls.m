@@ -44,7 +44,5 @@ function [historyAction droppedTracks] = RemoveTrackHulls(trackID)
         droppedTracks = [droppedTracks Hulls.RemoveHull(hulls(i))];
     end
     
-    Families.ProcessNewborns();
-    
     historyAction = 'Push';
 end

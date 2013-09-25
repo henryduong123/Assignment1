@@ -18,7 +18,6 @@ function [historyAction deletedCells replaceCell] = MergeCells(selectedHulls)
     SegmentationEdits.changedHulls = [];
     
     UI.UpdateSegmentationEditsMenu();
-    Families.ProcessNewborns();
     
     historyAction = 'Push';
 end

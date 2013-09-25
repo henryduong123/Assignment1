@@ -36,8 +36,6 @@ end
 Tracker.GraphEditRemoveEdge(trackID, time);
 droppedTracks = Families.RemoveFromTree(trackID, time);
 
-Families.ProcessNewborns();
-
 historyAction = 'Push';
 
 end
