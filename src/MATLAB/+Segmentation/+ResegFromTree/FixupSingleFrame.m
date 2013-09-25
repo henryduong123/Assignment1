@@ -36,9 +36,12 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     Segmentation.ResegFromTree.UpdateDijkstraGraph(t-1);
     Segmentation.ResegFromTree.UpdateDijkstraGraph(t);
     
-    % Avoid reassignment on tracks that don't exist after current frame.
-    % Ignore edges that didn't have a future before for reassignment
-    bReassign = false(size(allEdges,1),1);
+    % Tear-off any desired tracks that aren't droppedTracks
+    if ( nnz(bExtendEdges) > 0 )
+        allEdges = extendLeavesForward(allEdges, bExtendEdges, droppedTracks);
+    end
+    extendEdges = allEdges(bExtendEdges,:);
+    
     bChkReassign = ~bExtendEdges;
     checkTracks = droppedTracks(bChkReassign);
     
@@ -46,16 +49,13 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     % move hulls in frame t into the appropriate dropped tracks
     bLeaf = arrayfun(@(x)(isempty(CellTracks(x).childrenTracks)), checkTracks);
     bPastEnd = arrayfun(@(x)(t+1 > CellTracks(x).endTime), checkTracks);
+    
+    bReassign = false(size(allEdges,1),1);
     bReassign(bChkReassign) = (~bLeaf | ~bPastEnd);
     
     reassignEdges = allEdges(bReassign,:);
     if ( (t < tEnd) && ~isempty(reassignEdges) )
         allEdges(bReassign,:) = Segmentation.ResegFromTree.ReassignNextFrame(t, droppedTracks(bReassign), reassignEdges);
-    end
-    
-    extendEdges = allEdges(bExtendEdges,:);
-    if ( any(bExtendEdges) )
-        extendLeavesForward(extendEdges, droppedTracks)
     end
     
     % Do appropriate linking up of tracks from (t-1) -> t as found above
@@ -147,21 +147,37 @@ function fixedEdges = fixupConflictingEdges(t, bIgnored, newEdges, oldEdges, dro
     end
 end
 
-function extendLeavesForward(extendEdges, droppedTracks)
-    for i=1:size(extendEdges,1)
-        pushHull = extendEdges(i,2);
+% Figure out which tracks are being "extended" past their end
+function edges = extendLeavesForward(edges, bExtendEdges, droppedTracks)
+
+    extendIdx = find(bExtendEdges);
+    for i=1:length(extendIdx)
+        pushHull = edges(extendIdx(i),2);
         if ( pushHull == 0 )
             continue;
         end
 
-        % Don't do anything if the push hull is on a dropped track
+        % Swap with a non-extended edge if we won a dropped track
         pushTrack = Hulls.GetTrackID(pushHull);
-        if ( any(droppedTracks == pushTrack) )
-            continue;
-        end
+        trackIdx = find((droppedTracks == pushTrack), 1, 'first');
+        if ( ~isempty(trackIdx) )
+            curTrack = droppedTracks(extendIdx(i));
+            if ( curTrack ~= 0 )
+                error('Swapping into non-zero extend track!');
+            end
+            
+            swapEdge = edges(trackIdx, :);
+            edges(trackIdx,:) = edges(extendIdx(i),:);
+            edges(extendIdx(i),:) = swapEdge;
 
+            pushHull = edges(extendIdx(i),2);
+            if ( pushHull == 0 )
+                continue;
+            end
+        end
+        
         % Tear hull off of its track and make a new one for it.
         Tracks.RemoveHullFromTrack(pushHull);
-        Families.NewCellFamily(pushHull);
+        newFam = Families.NewCellFamily(pushHull);
     end
 end

@@ -28,7 +28,8 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
     
     % Handle the case that only mitosis event options exist on
     if ( isempty(maxT) )
-        maxT = max(horzcat(CellHulls(newEdges(:,2)).time) + 5);
+        nextHulls = newEdges((newEdges(:,2) ~= 0),2);
+        maxT = max(horzcat(CellHulls(nextHulls).time) + 5);
     end
     
     for i=1:size(newEdges,1)
@@ -154,6 +155,7 @@ function newEdges = ReassignNextFrame(t, droppedTracks, newEdges)
         Tracks.AddHullToTrack(newEdges(i,2), assignToTrack(i));
     end
     
+    % Relink children tracks dropped during reassignment
     for i=1:length(relinkTracks)
         if ( isempty(relinkTracks{i}) )
             continue;
