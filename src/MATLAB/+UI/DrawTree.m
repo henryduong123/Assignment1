@@ -319,6 +319,11 @@ function drawVerticalEdge(trackID, xVal)
                    'Color','k', 'UserData',trackID,...
                    'LineStyle','-',...
                    'uicontextmenu',Figures.tree.contextMenuHandle);
+        
+        if ( phenotype > 0 )
+            yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
+            plot(Figures.tree.axesHandle, xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
+        end
 
     else
         yPhenos = Tracks.GetTrackPhenoypeTimes(trackID);
@@ -340,6 +345,8 @@ function drawVerticalEdge(trackID, xVal)
                    'Color','k', 'UserData',trackID,...
                    'LineStyle','--',...
                    'uicontextmenu',Figures.tree.contextMenuHandle);
+        
+        plot(Figures.tree.axesHandle, xVal*ones(size(yPhenos)),yPhenos,'rx','UserData',trackID);
     end
     
     if ( bStructOnly )
