@@ -29,6 +29,10 @@ function [userEditCount resegEditCount userEditList resegEditList] = CountResegE
         if ( strcmpi(ReplayEditActions(i).funcName,'Editor.ResegFinishAction') )
             bInReseg = 0;
             
+            if ( isempty(ReplayEditActions(i).ret) )
+                continue;
+            end
+            
             numEdits = length(ReplayEditActions(i).ret{2}.SegEdits);
             
             totalReseg = totalReseg + numEdits;
