@@ -7,6 +7,10 @@ function UpdateDijkstraGraph(t)
     
     updateHulls = [HashedCells{t}.hullID];
     nextHulls = [HashedCells{t+1}.hullID];
+    
+    if ( isempty(updateHulls) || isempty(nextHulls) )
+        return;
+    end
 
     costMatrix = Segmentation.ResegFromTree.GetNextCosts(t, updateHulls, nextHulls);
     if ( isempty(costMatrix) )
