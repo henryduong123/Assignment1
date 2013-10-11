@@ -100,10 +100,6 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
     desirers = cell(length(nextHulls),1);
     for i=1:length(checkHulls)
         [desiredCosts desiredIdx] = sort(costMatrix(i,:));
-        if ( bAddedHull(i) )
-            continue;
-        end
-        
         if ( isinf(desiredCosts(1)) )
             continue;
         end
