@@ -1,9 +1,10 @@
 function RebuildTrackingData(objTracks, gConnect)
-    global CONSTANTS Costs GraphEdits CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
+    global CONSTANTS Costs GraphEdits ResegLinks CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
 
     %ensure that the globals are empty
     Costs = gConnect;
     GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
+    ResegLinks = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
     
     CellFamilies = [];
     CellTracks = [];
