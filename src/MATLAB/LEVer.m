@@ -33,10 +33,6 @@ if ( nargin > 0 )
     end
 end
 
-if ( ~isdeployed )
-    dbstop if error
-end
-
 if( Load.OpenData() )
     Editor.ReplayableEditAction(@Editor.InitHistory);
 end

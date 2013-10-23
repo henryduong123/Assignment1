@@ -15,6 +15,10 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         oldMeans(i,:) = mean([c r],1);
     end
     
+    if ( length(hull.indexPixels) > 2 )
+        return;
+    end
+    
     [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     if ( strcmpi(CONSTANTS.cellType,'Adult') )
         % Cheat and initially cluster about equiprobably

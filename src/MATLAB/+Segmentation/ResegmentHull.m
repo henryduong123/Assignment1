@@ -56,6 +56,9 @@ switch CONSTANTS.cellType
             obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
         end
         kIdx = cluster(obj, [c,r]);
+    case 'Embryonic'
+        obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
+        kIdx = cluster(obj, [c,r]);
     case 'Hemato'
         [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
     otherwise
