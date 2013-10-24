@@ -4,7 +4,7 @@ global CONSTANTS FluorData HaveFluor
 
 % one of these per frame
 FluorData = struct(...
-    'greenInd',         {}...
+    'greenInd',         []...
 );
 
 HaveFluor = zeros(1,length(dir([CONSTANTS.rootImageFolder '\*.tif'])));
@@ -16,7 +16,7 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
     for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
         filename = Helper.GetFullFluorPath(i);
         if (isempty(dir(filename)))
-            FluorData(i).greenInd = {};
+            FluorData(i).greenInd = [];
             continue;
         end
         HaveFluor(i) = 1;
@@ -29,7 +29,7 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
         if wPct < 0.1
             FluorData(i).greenInd = w;
         else
-            FluorData(i).greenInd = {};
+            FluorData(i).greenInd = [];
         end
     end
         

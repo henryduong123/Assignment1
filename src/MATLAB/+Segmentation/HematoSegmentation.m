@@ -87,7 +87,7 @@ end
 
 % one of these per frame
 FluorData = struct(...
-    'greenInd',         {}...
+    'greenInd',         []...
 );
 
 HaveFluor = zeros(1,length(dir([CONSTANTS.rootImageFolder '\*.tif'])));
@@ -96,10 +96,12 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
     % rather than hard-wire the interval between fluor images, we'll loop
     % over each possible one from the phase images and see if we have a
     % corresponding fluor image
+
+    se = strel('disk', 3);
     for i=1:length(dir([CONSTANTS.rootImageFolder '\*.tif']))
         filename = Helper.GetFullFluorPath(i);
         if (isempty(dir(filename)))
-            FluorData(i).greenInd = {};
+            FluorData(i).greenInd = [];
             continue;
         end
         HaveFluor(i) = 1;
@@ -107,7 +109,8 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
         % find all the fluorescence pixels in the image
         fluor = Helper.LoadIntensityImage(filename);
         [bw] = Segmentation.Michel(fluor, [3 3]);
-        
+        % bw = imopen(bw, se);
+
         % some early fluor frames are so faint that Michel oversegments
         % them
         w = find(bw);
@@ -115,7 +118,7 @@ if (isfield(CONSTANTS, 'rootFluorFolder'))
         if wPct < 0.1
             FluorData(i).greenInd = w;
         else
-            FluorData(i).greenInd = {};
+            FluorData(i).greenInd = [];
         end
     end
         
