@@ -60,7 +60,9 @@ function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, t
         if Helper.HaveFluor() && HaveFluor(time)
             greenInd = FluorData(time).greenInd;
             flImg = zeros(size(img));
-            flImg(greenInd) = 1;
+            if ~isempty(greenInd)
+                flImg(greenInd) = 1;
+            end
             subImg = flImg(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
             [flObjs, flObjFeat] = Segmentation.FluorHulls(subImg, 1);
             objs = [objs flObjs];
