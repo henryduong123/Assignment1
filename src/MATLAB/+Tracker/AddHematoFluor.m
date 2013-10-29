@@ -7,7 +7,11 @@ function AddHematoFluor(addToHistory)
     tmax = max([CellHulls.time]);
 
     for t=1:tmax
-        hulls = [HashedCells{t}(:).hullID];
+        if isempty(HashedCells{t})
+            hulls = [];
+        else
+            hulls = [HashedCells{t}(:).hullID];
+        end
         for i=1:length(hulls)
             CellHulls(hulls(i)).greenInd = [];
         end
@@ -18,7 +22,11 @@ function AddHematoFluor(addToHistory)
     end
     
     for t=1:tmax
-        hulls = [HashedCells{t}(:).hullID];
+        if isempty(HashedCells{t})
+            hulls = [];
+        else
+            hulls = [HashedCells{t}(:).hullID];
+        end
         greenInd = FluorData(t).greenInd;
         for i=1:length(hulls)
             inter = intersect(CellHulls(hulls(i)).indexPixels, greenInd);

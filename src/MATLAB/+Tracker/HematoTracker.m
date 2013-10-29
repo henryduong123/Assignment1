@@ -45,7 +45,11 @@ function HematoTracker()
     if (~isempty(FluorData))
         fprintf(1,'Computing intersections with fluorescence images...');
         for t=1:tmax
-            hulls = [HashedCells{t}(:).hullID];
+            if isempty(HashedCells{t})
+                hulls = [];
+            else
+                hulls = [HashedCells{t}(:).hullID];
+            end
             greenInd = FluorData(t).greenInd;
             for i=1:length(hulls)
                 inter = intersect(CellHulls(hulls(i)).indexPixels, greenInd);
