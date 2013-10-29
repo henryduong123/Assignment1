@@ -59,8 +59,6 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     end
     
     changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, replaceCell);
-    
-    t = propagateMerge(replaceCell, changedHulls, nextMergeCells);
 
     if ( t < length(HashedCells) )
         checkHulls = [HashedCells{t}.hullID];
@@ -72,69 +70,6 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         
         Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, []);
     end
-end
-
-function tLast = propagateMerge(mergedHull, trackHulls, nextMergeCells)
-    global CellHulls HashedCells
-
-    tStart = CellHulls(mergedHull).time;
-    tEnd = length(HashedCells)-1;
-    
-    propHulls = getPropagationCells(tStart+1, nextMergeCells);
-    
-    UI.Progressbar(0);
-    
-    idx = 1;
-    tLast = tStart;
-    for t=tStart:tEnd
-        tLast = t;
-        
-        UI.Progressbar((t-tStart) / (tEnd-tStart));
-        
-        if ( isempty(mergedHull) )
-            UI.Progressbar(1);
-            return;
-        end
-        
-        checkHulls = [HashedCells{t}.hullID];
-        nextHulls = [HashedCells{t+1}.hullID];
-
-        Tracker.UpdateTrackingCosts(t, trackHulls, nextHulls);
-        
-        [checkHulls,nextHulls] = Tracker.CheckGraphEdits(1, checkHulls, nextHulls);
-        
-        [costMatrix, bExtendHulls, bAffectedHulls] = Tracker.GetCostSubmatrix(checkHulls, nextHulls);
-        extendHulls = checkHulls(bExtendHulls);
-        affectedHulls = nextHulls(bAffectedHulls);
-        
-        bMhIdx = (extendHulls == mergedHull);
-        [mincost,mergeIdx] = min(costMatrix(bMhIdx,:));
-        
-        if ( isempty(mincost) || isinf(mincost) )
-            UI.Progressbar(1);
-            return;
-        end
-        
-        mergedHull = checkMergeHulls(t+1, costMatrix, extendHulls, affectedHulls, mergedHull, nextMergeCells);
-        
-        for i=1:length(propHulls)
-            if ( isempty(propHulls{i}) || (length(propHulls{i}) < idx) )
-                continue;
-            end
-            
-            nextMergeCells = [nextMergeCells propHulls{i}(idx)];
-        end
-        idx = idx + 1;
-        
-        nextHulls = [HashedCells{t+1}.hullID];
-        [costMatrix bExtendHulls bAffectedHulls] = Tracker.GetCostSubmatrix(checkHulls, nextHulls);
-        extendHulls = checkHulls(bExtendHulls);
-        affectedHulls = nextHulls(bAffectedHulls);
-
-        trackHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, mergedHull);
-    end
-    
-    UI.Progressbar(1);
 end
 
 function nextMergeCells = getNextMergeCells(t, mergeCells)
@@ -150,66 +85,5 @@ function nextMergeCells = getNextMergeCells(t, mergeCells)
         
         nextMergeCells = [nextMergeCells CellTracks(trackIDs(i)).hulls(hash)];
     end
-end
-
-function propHulls = getPropagationCells(t, mergeCells)
-    global CellTracks
-    
-    propHulls = cell(length(mergeCells),1);
-    trackIDs = [];
-    for i=1:length(mergeCells)
-        trackIDs = [trackIDs Hulls.GetTrackID(mergeCells(i))];
-    end
-    if (length(trackIDs)~=length(mergeCells))
-        error('trackID doesn''t exist');
-    end
-    for i=1:length(trackIDs)
-        hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
-        if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
-            continue;
-        end
-        
-        propHulls{i} = CellTracks(trackIDs(i)).hulls(hash:end);
-        zIdx = find((propHulls{i} == 0), 1, 'first');
-        if ( zIdx > 0 )
-            propHulls{i} = propHulls{i}(1:(zIdx-1));
-        end
-    end
-end
-
-function replaceIdx = checkMergeHulls(t, costMatrix, checkHulls, nextHulls, mergedHull, deleteHulls)
-    global CellHulls
-    
-    mergedIdx = find(checkHulls == mergedHull);
-    bDeleteHulls = ismember(nextHulls, deleteHulls);
-    [minIn,bestIn] = min(costMatrix,[],1);
-    
-    deleteHulls = nextHulls(bDeleteHulls);
-    nextMergeHulls = deleteHulls(bestIn(bDeleteHulls) == mergedIdx);
-    
-    bAllowMerge = (~[CellHulls(nextMergeHulls).userEdited]);
-    nextMergeHulls = nextMergeHulls(bAllowMerge);
-
-    replaceIdx = [];
-    
-    if ( length(nextMergeHulls) <= 1 )
-        return;
-    end
-    
-    [mergeObj, deleteCells] = Segmentation.CreateMergedCell(nextMergeHulls);
-    if ( isempty(mergeObj) || isempty(deleteCells) )
-        return;
-    end
-    
-    replaceIdx = min(nextMergeHulls);
-    deleteCells = setdiff(nextMergeHulls, replaceIdx);
-    
-    Hulls.SetHullEntries(replaceIdx, mergeObj);
-    
-    for i=1:length(deleteCells)
-        Hulls.RemoveHull(deleteCells(i));
-    end
-    
-    Tracker.TrackThroughMerge(t, replaceIdx);
 end
 

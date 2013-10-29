@@ -21,24 +21,9 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     
     [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     if ( strcmpi(CONSTANTS.cellType,'Adult') )
-        % Cheat and initially cluster about equiprobably
-        com = mean([c r],1);
-        oldCom = mean(oldMeans,1);
-        deltaCom = com - oldCom;
-        
-        distSq = zeros(length(r), k);
-%         startVar = ones(k,1);
-        for i=1:length(checkHullIDs)
-            oldMeans(i,:) = oldMeans(i,:) + deltaCom;
-%             dcomSq(i) = (com(1)-oldMeans(i,1)).^2 + (com(2)-oldMeans(i,2)).^2;
-            
-            distSq(:,i) = ((c-oldMeans(i,1)).^2 + (r-oldMeans(i,2)).^2);
-        end
-        
-        [minDist minIdx] = min(distSq,[],2);
-        gmoptions = statset('Display','off', 'MaxIter',400);
-        obj = gmdistribution.fit([c,r], k, 'Start',minIdx, 'Regularize',0.5 , 'Options',gmoptions);
-        kIdx = cluster(obj, [c,r]);
+        kIdx = gmmCluster([c,r], k, oldMeans);
+    elseif ( strcmpi(CONSTANTS.cellType,'Embryonic') )
+        kIdx = gmmCluster([c,r], k, oldMeans);
     elseif ( strcmpi(CONSTANTS.cellType,'Hemato') )
         [kIdx centers] = kmeans([c,r], k, 'start',oldMeans, 'EmptyAction','drop');
     else
@@ -91,3 +76,25 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     connComps = connComps(sortIdx);
     
 end
+
+function kIdx = gmmCluster(X, k, oldMeans)
+    % Cheat and initially cluster about equiprobably
+    com = mean(X,1);
+    oldCom = mean(oldMeans,1);
+    deltaCom = com - oldCom;
+
+    distSq = zeros(size(X,1), k);
+%     startVar = ones(k,1);
+    for i=1:length(checkHullIDs)
+        oldMeans(i,:) = oldMeans(i,:) + deltaCom;
+%         dcomSq(i) = (com(1)-oldMeans(i,1)).^2 + (com(2)-oldMeans(i,2)).^2;
+
+        distSq(:,i) = ((X(:,2)-oldMeans(i,1)).^2 + (X(:,1)-oldMeans(i,2)).^2);
+    end
+
+    [minDist minIdx] = min(distSq,[],2);
+    gmoptions = statset('Display','off', 'MaxIter',400);
+    obj = gmdistribution.fit(X, k, 'Start',minIdx, 'Regularize',0.5 , 'Options',gmoptions);
+    kIdx = cluster(obj, X);
+end
+
