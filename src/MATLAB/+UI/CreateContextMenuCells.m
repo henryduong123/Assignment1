@@ -44,6 +44,10 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Label',...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Switch Parent',...
+    'CallBack',     @switchParent,...
+    'Separator',    'on');
 
 addHullMenu = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Number of Cells',...
@@ -131,6 +135,15 @@ global Figures
 if(isempty(trackID)),return,end
 
 Editor.ContextChangeLabel(Figures.time,trackID);
+end
+
+function switchParent(src,evnt)
+global Figures
+% this will switch two cells from a tree
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+Editor.ContextSwitchParent(Figures.tree.familyID,Figures.time,trackID);
+UI.DrawTree(Figures.tree.familyID);
 end
 
 function addHull(src, evt, numhulls)
