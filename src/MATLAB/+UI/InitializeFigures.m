@@ -165,7 +165,7 @@ global Figures CellFamilies ResegState
 if strcmp(evnt.Key,'downarrow') || strcmp(evnt.Key,'rightarrow')
     time = Figures.time + 1;
     UI.TimeChange(time);
-elseif strcmp(evnt.Key,'uparrow') ||strcmp(evnt.Key,'leftarrow')
+elseif strcmp(evnt.Key,'uparrow') || strcmp(evnt.Key,'leftarrow')
     time = Figures.time - 1;
     UI.TimeChange(time);
 elseif  strcmp(evnt.Key,'pagedown')
@@ -182,7 +182,29 @@ elseif strcmp(evnt.Key,'space')
         toggleFunc(buttonHandles(2), []);
     else
         % standard movie playing
-        UI.TogglePlay(src,evnt);
+        UI.TogglePlay(src,evnt); 
+    end
+elseif strcmp(evnt.Key,'period')
+    if ( ~isempty(ResegState) )
+        % Reseg Forward 1 Frame
+        buttonHandles = get(ResegState.toolbar, 'UserData');
+        toggleFunc = get(buttonHandles(3), 'ClickedCallback');
+        toggleFunc(buttonHandles(3), []);
+    else
+        % step forward one frame
+        time = Figures.time + 1;
+        UI.TimeChange(time);
+    end
+elseif strcmp(evnt.Key,'comma')
+    if ( ~isempty(ResegState) )
+        % Reseg Backward 1 Frame
+        buttonHandles = get(ResegState.toolbar, 'UserData');
+        toggleFunc = get(buttonHandles(1), 'ClickedCallback');
+        toggleFunc(buttonHandles(1), []);
+    else
+        % step backward one frame
+        time = Figures.time - 1;
+        UI.TimeChange(time);
     end
  elseif ( strcmp(evnt.Key,'control') )
      if(~Figures.controlDown)
