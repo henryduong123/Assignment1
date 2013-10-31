@@ -1,18 +1,22 @@
-% historyAction = SwitchParent(Family ID, trackA, trackB, time)
+% historyAction = ChangeChildren(Family ID, trackA, trackB, time)
 % Edit Action:
-% Switches Parents
+% Switches Children
 % Toggles lock on familyID
 % Context Swap Labels 
 % Toggle lock on family ID
-
-function historyAction = SwitchParent(familyID,trackID,newTrackID, time)
- global CellFamilies
- global Figures
+% Maria Enokian
+function historyAction = ChangeChildren(familyID,trackID,newTrackID, time)
+% Initialized variables
+global CellFamilies  CellTracks  Figures
+trackID = CellTracks(trackID).parentTrack;
  trackA = trackID;
  trackB = newTrackID;
-    Tracker.GraphEditSetEdge(trackA, trackB, time);
-    Tracker.GraphEditSetEdge(trackB, trackA, time);
- % Unlock Tree Lock
+   Ntime = CellTracks(trackID).endTime; 
+    Tracker.GraphEditSetEdge(trackA, trackB, Ntime);
+    Tracker.GraphEditSetEdge(trackB, trackA, Ntime);
+  
+ % This will unlock the tree and if the cell family is locked it will
+ % unlock it but otherwise it will lock it.
     if ( isempty(CellFamilies(familyID).bLocked) )
         CellFamilies(familyID).bLocked = 0;
     end
@@ -20,13 +24,12 @@ function historyAction = SwitchParent(familyID,trackID,newTrackID, time)
     bIsLocked = CellFamilies(familyID).bLocked;
     Helper.SetTreeLocked(familyID, ~bIsLocked);
     % Swap two cells together 
-     
     
     bLocked = Helper.CheckTreeLocked([trackA trackB]);
     if ( any(bLocked) )
-        Tracks.LockedSwapLabels(trackA, trackB, time);
+        Tracks.LockedSwapLabels(trackA, trackB, Ntime);
     else
-        Tracks.SwapLabels(trackA, trackB, time);
+        Tracks.SwapLabels(trackA, trackB, Ntime);
     end
  % Relock Tree Lock    
     if ( isempty(CellFamilies(familyID).bLocked) )

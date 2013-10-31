@@ -45,8 +45,8 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
 uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Switch Parent',...
-    'CallBack',     @switchParent,...
+    'Label',        'Change Children',...
+    'CallBack',     @changeChildren,...
     'Separator',    'on');
 
 addHullMenu = uimenu(Figures.cells.contextMenuHandle,...
@@ -137,12 +137,13 @@ if(isempty(trackID)),return,end
 Editor.ContextChangeLabel(Figures.time,trackID);
 end
 
-function switchParent(src,evnt)
+function changeChildren(src,evnt)
 global Figures
-% this will switch two cells from a tree
+% Will Switch two nodes together followed by the children and the rest of
+% the tree.
 [hullID trackID] = UI.GetClosestCell(0);
 if(isempty(trackID)),return,end
-Editor.ContextSwitchParent(Figures.tree.familyID,Figures.time,trackID);
+Editor.ContextChangeChildren(Figures.tree.familyID,Figures.time,trackID);
 UI.DrawTree(Figures.tree.familyID);
 end
 
