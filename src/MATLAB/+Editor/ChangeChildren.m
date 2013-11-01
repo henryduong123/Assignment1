@@ -11,7 +11,7 @@ global CellFamilies  CellTracks  Figures
 trackID = CellTracks(trackID).parentTrack;
  trackA = trackID;
  trackB = newTrackID;
-   Ntime = CellTracks(trackID).endTime; 
+ Ntime = CellTracks(trackID).endTime; 
     Tracker.GraphEditSetEdge(trackA, trackB, Ntime);
     Tracker.GraphEditSetEdge(trackB, trackA, Ntime);
   
@@ -23,15 +23,15 @@ trackID = CellTracks(trackID).parentTrack;
     
     bIsLocked = CellFamilies(familyID).bLocked;
     Helper.SetTreeLocked(familyID, ~bIsLocked);
-    % Swap two cells together 
-    
+    % This will swap the two children together to correct the mitosis 
     bLocked = Helper.CheckTreeLocked([trackA trackB]);
     if ( any(bLocked) )
         Tracks.LockedSwapLabels(trackA, trackB, Ntime);
     else
         Tracks.SwapLabels(trackA, trackB, Ntime);
     end
- % Relock Tree Lock    
+ % This will unlock the tree and if the cell family is locked it will
+ % unlock it but otherwise it will lock it.   
     if ( isempty(CellFamilies(familyID).bLocked) )
     CellFamilies(familyID).bLocked = 0;
     end
