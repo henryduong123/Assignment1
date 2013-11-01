@@ -15,7 +15,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         oldMeans(i,:) = mean([c r],1);
     end
     
-    if ( length(hull.indexPixels) > 2 )
+    if ( length(hull.indexPixels) < 2 )
         return;
     end
     
@@ -85,11 +85,11 @@ function kIdx = gmmCluster(X, k, oldMeans)
 
     distSq = zeros(size(X,1), k);
 %     startVar = ones(k,1);
-    for i=1:length(checkHullIDs)
+    for i=1:size(oldMeans,1)
         oldMeans(i,:) = oldMeans(i,:) + deltaCom;
 %         dcomSq(i) = (com(1)-oldMeans(i,1)).^2 + (com(2)-oldMeans(i,2)).^2;
 
-        distSq(:,i) = ((X(:,2)-oldMeans(i,1)).^2 + (X(:,1)-oldMeans(i,2)).^2);
+        distSq(:,i) = ((X(:,1)-oldMeans(i,1)).^2 + (X(:,2)-oldMeans(i,2)).^2);
     end
 
     [minDist minIdx] = min(distSq,[],2);
