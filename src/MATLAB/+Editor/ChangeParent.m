@@ -1,11 +1,11 @@
-% historyAction = ChangeChildren(Family ID, trackA, trackB, time)
+% historyAction = ChangeParent(Family ID, trackA, trackB, time)
 % Edit Action:
-% Switches Children
+% Switches Parents
 % Toggles lock on familyID
 % Context Swap Labels 
 % Toggle lock on family ID
 % Maria Enokian
-function historyAction = ChangeChildren(familyID,trackID,newTrackID, time)
+function historyAction = ChangeParent(familyID,trackID,newTrackID, time)
 % Initialized variables
 global CellFamilies  CellTracks  Figures
 trackID = CellTracks(trackID).parentTrack;
@@ -23,7 +23,7 @@ trackID = CellTracks(trackID).parentTrack;
     
     bIsLocked = CellFamilies(familyID).bLocked;
     Helper.SetTreeLocked(familyID, ~bIsLocked);
-    % This will swap the two children together to correct the mitosis 
+    % This will swap the two Parents together to correct the mitosis 
     bLocked = Helper.CheckTreeLocked([trackA trackB]);
     if ( any(bLocked) )
         Tracks.LockedSwapLabels(trackA, trackB, Ntime);

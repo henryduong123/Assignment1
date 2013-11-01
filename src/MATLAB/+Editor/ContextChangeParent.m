@@ -1,12 +1,12 @@
-% ContextChangeChildren.m - Allows user to correct the parents during the
+% ContextChangeParent.m - Allows user to correct the parents during the
 % mitosis stage, and fix the tree.
 % Maria Enokian
-function ContextChangeChildren(familyID,time,trackID)
+function ContextChangeParent(familyID,time,trackID)
     global CellTracks
     global Figures
 
-    % This will prompt the user and ask for what child should be swapped.
-    newTrackID = inputdlg('Enter the node that needs to be swapped','Child Swap',1,{num2str(trackID)});
+    % This will prompt the user and ask for what Parent should be swapped.
+    newTrackID = inputdlg('Enter the node that needs to be swapped','Parent Swap',1,{num2str(trackID)});
     if(isempty(newTrackID)),return,end;
     newTrackID = str2double(newTrackID(1));
     % If there isn't a parent ID, will send error. Example: Root Node
@@ -23,7 +23,7 @@ function ContextChangeChildren(familyID,time,trackID)
     end
    % if the cell doesn't exist in the current frame it will send a warning.
     if(isempty(CellTracks(newTrackID).hulls))
-        warn = sprintf('Track %d does not exist, cannot switch children',newTrackID);
+        warn = sprintf('Track %d does not exist, cannot switch Parents',newTrackID);
         warndlg(warn);
         return
     end
@@ -42,20 +42,20 @@ function ContextChangeChildren(familyID,time,trackID)
     % if the cell does not exist untill later on in the tree it will send a
     % warning message.
     if ( time < CellTracks(newTrackID).startTime )
-        warn = sprintf('Cannot switch children from %d to %d, track %d does not exist until frame %d.',parentTrackID, newTrackID,newTrackID, CellTracks(newTrackID).startTime);
+        warn = sprintf('Cannot switch Parents from %d to %d, track %d does not exist until frame %d.',parentTrackID, newTrackID,newTrackID, CellTracks(newTrackID).startTime);
         warndlg(warn);
         return
     end
 
-        % if all the errors are good it will prompt the Editor.ChangeChildren
+        % if all the errors are good it will prompt the Editor.ChangeParents
         % function as a replayable action.
-        bErr = Editor.ReplayableEditAction(@Editor.ChangeChildren,familyID,trackID, newTrackID, time);
+        bErr = Editor.ReplayableEditAction(@Editor.ChangeParent,familyID,trackID, newTrackID, time);
         if ( bErr )
             return;
         end
         % if the swap is successful in the global Log stack it will display
-        % the words 'Children Swapped' in the action field
-        Error.LogAction('Children Swapped',parentTrackID,newTrackID);
+        % the words 'Parents Swapped' in the action field
+        Error.LogAction('Parents Swapped',parentTrackID,newTrackID);
 
 
     newTrackID = Hulls.GetTrackID(curHull);
