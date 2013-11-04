@@ -14,7 +14,16 @@ function historyAction = ContextSetPhenotype(hullID, phenotype, bActive)
     if ( ~bActive && phenotype == 1 )
         Tracks.StraightenTrack(trackID);
     end
-
+    % If the phenotype is being set to "ambiguous" then straighten children
+    % before setting the phenotype
+    if ( ~bActive && phenotype == 2 )
+        Tracks.StraightenTrack(trackID);
+    end
+        % If the phenotype is being set to "off screen" then straighten children
+    % before setting the phenotype
+    if ( ~bActive && phenotype == 3)
+        Tracks.StraightenTrack(trackID);
+    end
     Tracks.SetPhenotype(hullID, phenotype, bActive);
     
     historyAction = 'Push';
