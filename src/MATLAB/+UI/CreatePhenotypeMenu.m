@@ -12,7 +12,9 @@ function CreatePhenotypeMenu()
     % Initialize phenotype structure if necessary
     if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
         CellPhenotypes.descriptions={'died'};
-        CellPhenotypes.hullPhenoSet = zeros(2,0);
+        CellPhenotypes.descriptions={'ambiguous'};
+        CellPhenotypes.descriptions={'off screen'};
+        CellPhenotypes.hullPhenoSet = zeros(4,0);
     end
 
     UI.UpdatePhenotypeMenu(PhenoMenu);
