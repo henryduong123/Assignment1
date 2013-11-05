@@ -37,9 +37,12 @@ function bNeedsUpdate = FixOldFileVersions()
     end
     
     % Add color field to phenotype structure as of ver 7.2
+    
     if ( ~isfield(CellPhenotypes,'colors') )
         CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
         CellPhenotypes.colors(1,:) = [0 0 0];
+        CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
+        CellPhenotypes.colors(3,:) = [0 1 1];
     end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
