@@ -56,7 +56,7 @@ cellHulls = struct(...
     'deleted',          {},...
     'userEdited',       {});
 %Initialize Cell types
-CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{[0 0 0;.549 .28235 .6235;0 1 1]});
+CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{{[0 0 0;.549 .28235 .6235;0 1 1]}});
 
 %loop through the Hulls
 parfor i=1:length(objHulls)

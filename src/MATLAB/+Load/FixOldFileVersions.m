@@ -44,6 +44,29 @@ function bNeedsUpdate = FixOldFileVersions()
         CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
         CellPhenotypes.colors(3,:) = [0 1 1];
     end
+    if (isfield(CellPhenotypes,'descriptions'))
+        amb = false;
+        ofscr = false;
+        for i=1:length(CellPhenotypes.descriptions)
+
+            if (strcmpi(CellPhenotypes.descriptions{i},'ambiguous')||strcmpi(CellPhenotypes.descriptions{i},'ambig')||strcmpi(CellPhenotypes.descriptions{i},'unknown'))
+                CellPhenotypes.descriptions{i}= 'ambiguous';
+                amb = true;
+            elseif (strcmpi(CellPhenotypes.descriptions{i},'off screen')||strcmpi(CellPhenotypes.descriptions{i},'offscreen')||strcmpi(CellPhenotypes.descriptions{i},'leftscreen')||strcmpi(CellPhenotypes.descriptions{i},'left screen')||strcmpi(CellPhenotypes.descriptions{i},'left_screen')||strcmpi(CellPhenotypes.descriptions{i},'left-screen')||strcmpi(CellPhenotypes.descriptions{i},'left frame')||strcmpi(CellPhenotypes.descriptions{i},'left_frame')||strcmpi(CellPhenotypes.descriptions{i},'left-frame'))
+                CellPhenotypes.descriptions{i}= 'off screen';
+                ofscr = true;
+            end; 
+        end
+        if (~amb)
+            CellPhenotypes.descriptions(end+1) = {'ambiguous'};
+            CellPhenotypes.colors(end+1,:) = [.549 .28235 .6235];
+       
+        elseif (~ofscr)
+            CellPhenotypes.descriptions(end+1) = {'off screen'};
+            CellPhenotypes.colors(end+1,:) = [0 1 1];
+        end
+
+    end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
     if ( ~isfield(CellHulls, 'imagePixels') )
