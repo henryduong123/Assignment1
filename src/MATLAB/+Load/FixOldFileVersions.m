@@ -44,6 +44,8 @@ function bNeedsUpdate = FixOldFileVersions()
         CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
         CellPhenotypes.colors(3,:) = [0 1 1];
     end
+    % Will search older versions of the code for any variation of ambiguous
+    % or off screen and replace them with 'ambiguous' or 'off screen'
     if (isfield(CellPhenotypes,'descriptions'))
         amb = false;
         ofscr = false;
@@ -57,6 +59,8 @@ function bNeedsUpdate = FixOldFileVersions()
                 ofscr = true;
             end; 
         end
+        %if ambiguous or off screen isnt found in the old code it will add
+        %them with the colors.
         if (~amb)
             CellPhenotypes.descriptions(end+1) = {'ambiguous'};
             CellPhenotypes.colors(end+1,:) = [.549 .28235 .6235];
@@ -65,19 +69,7 @@ function bNeedsUpdate = FixOldFileVersions()
             CellPhenotypes.descriptions(end+1) = {'off screen'};
             CellPhenotypes.colors(end+1,:) = [0 1 1];
         end
-
-        if (~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
-            swap(CellPhenotypes.descriptions{2},CellPhenotypes.descriptions{i});
-        end
-        
-        if (amb)
-            y = CellPhenotypes.descriptions(2);
-            if(~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
-                CellPhenotypes.descriptions(i) = y;
-                CellPhenotypes.descriptions(2) = {'ambiguous'};
-            end
-            
-        end
+ 
         % These function below ensures that ambiguous and offscreen has the
         % is on the same area of the stack on ever run. Ambiguous is always
         % on the second line of the phenotype stack and off screen is in the
