@@ -41,8 +41,6 @@ function bNeedsUpdate = FixOldFileVersions()
     if ( ~isfield(CellPhenotypes,'colors') )
         CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
         CellPhenotypes.colors(1,:) = [0 0 0];
-        CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
-        CellPhenotypes.colors(3,:) = [0 1 1];
     end
     % Will search older versions of the code for any variation of ambiguous
     % or off screen and replace them with 'ambiguous' or 'off screen'
@@ -64,8 +62,8 @@ function bNeedsUpdate = FixOldFileVersions()
         if (~amb)
             CellPhenotypes.descriptions(end+1) = {'ambiguous'};
             CellPhenotypes.colors(end+1,:) = [.549 .28235 .6235];
-       
-        elseif (~ofscr)
+        end
+        if (~ofscr)
             CellPhenotypes.descriptions(end+1) = {'off screen'};
             CellPhenotypes.colors(end+1,:) = [0 1 1];
         end
@@ -74,42 +72,33 @@ function bNeedsUpdate = FixOldFileVersions()
         % is on the same area of the stack on ever run. Ambiguous is always
         % on the second line of the phenotype stack and off screen is in the
         % third line of the phenotype stack
-        if (amb)
-            y = CellPhenotypes.descriptions(2);
-            c = CellPhenotypes.colors(2,:);
-           i = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
-            Noffscreen = find(CellPhenotypes.hullPhenoSet(2,:) == i);
-            OffScreen = find(CellPhenotypes.hullPhenoSet(2,:) == 2);
+        
+            swapDescription = CellPhenotypes.descriptions(2);
+            swapColors = CellPhenotypes.colors(2,:);
+            i = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
+            ambigidx = find(CellPhenotypes.hullPhenoSet(2,:) == i);
+            nAmbigidx = find(CellPhenotypes.hullPhenoSet(2,:) == 2);
             if(~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
-                CellPhenotypes.descriptions(i) = y;
-                CellPhenotypes.colors(i,:) = c;
+                CellPhenotypes.descriptions(i) = swapDescription;
+                CellPhenotypes.colors(i,:) = swapColors;
                 CellPhenotypes.descriptions(2) = {'ambiguous'};
                 CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
-                CellPhenotypes.hullPhenoSet(2,Noffscreen)=2;
-                CellPhenotypes.hullPhenoSet(2,OffScreen)= i;
+                CellPhenotypes.hullPhenoSet(2,ambigidx)=2;
+                CellPhenotypes.hullPhenoSet(2,nAmbigidx)= i;
             end
-        end
-        
-        if (ofscr)
-            y = CellPhenotypes.descriptions(3);
-            c = CellPhenotypes.colors(3,:);
+            swapDescription = CellPhenotypes.descriptions(3);
+            swapColors = CellPhenotypes.colors(3,:);
             i = find(strcmpi('off screen',CellPhenotypes.descriptions));
-             Noffscreen = find(CellPhenotypes.hullPhenoSet(2,:) == NotOffscreen);
-             OffScreen = find(CellPhenotypes.hullPhenoSet(2,:) == 3);
+             offscreenidx = find(CellPhenotypes.hullPhenoSet(2,:) == i);
+             noffScreenidx = find(CellPhenotypes.hullPhenoSet(2,:) == 3);
             if(~(strcmp(CellPhenotypes.descriptions{3},'off screen')))
-                CellPhenotypes.descriptions(i) = y;
-                CellPhenotypes.colors(i,:) = c;
+                CellPhenotypes.descriptions(i) = swapDescription;
+                CellPhenotypes.colors(i,:) = swapColors;
                 CellPhenotypes.descriptions(3) = {'off screen'};
                 CellPhenotypes.colors(3,:) = [0 1 1];
-                CellPhenotypes.hullPhenoSet(2,Noffscreen)= 3;
-                CellPhenotypes.hullPhenoSet(2,OffScreen)= i;
-                
+                CellPhenotypes.hullPhenoSet(2,offscreenidx)= 3;
+                CellPhenotypes.hullPhenoSet(2,noffScreenidx)= i;
             end
-            
-        end
-
-
-
     end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
