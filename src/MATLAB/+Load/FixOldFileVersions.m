@@ -77,23 +77,23 @@ function bNeedsUpdate = FixOldFileVersions()
         if (amb)
             y = CellPhenotypes.descriptions(2);
             c = CellPhenotypes.colors(2,:);
-            NotOffscreen = CellPhenotypes.hullPhenoSet(2,:);
-            Noffscreen = find(CellPhenotypes.hullPhenoSet(2,:) == NotOffscreen);
+           i = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
+            Noffscreen = find(CellPhenotypes.hullPhenoSet(2,:) == i);
             OffScreen = find(CellPhenotypes.hullPhenoSet(2,:) == 2);
             if(~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
                 CellPhenotypes.descriptions(i) = y;
                 CellPhenotypes.colors(i,:) = c;
                 CellPhenotypes.descriptions(2) = {'ambiguous'};
                 CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
-                CellPhenotypes.hullPhenoSet(2,Noffscreen)= NotOffscreen;
-                CellPhenotypes.hullPhenoSet(2,OffScreen)= 2;
+                CellPhenotypes.hullPhenoSet(2,Noffscreen)=2;
+                CellPhenotypes.hullPhenoSet(2,OffScreen)= i;
             end
         end
         
         if (ofscr)
             y = CellPhenotypes.descriptions(3);
             c = CellPhenotypes.colors(3,:);
-            NotOffscreen = CellPhenotypes.hullPhenoSet(2,:);
+            i = find(strcmpi('off screen',CellPhenotypes.descriptions));
              Noffscreen = find(CellPhenotypes.hullPhenoSet(2,:) == NotOffscreen);
              OffScreen = find(CellPhenotypes.hullPhenoSet(2,:) == 3);
             if(~(strcmp(CellPhenotypes.descriptions{3},'off screen')))
@@ -101,8 +101,8 @@ function bNeedsUpdate = FixOldFileVersions()
                 CellPhenotypes.colors(i,:) = c;
                 CellPhenotypes.descriptions(3) = {'off screen'};
                 CellPhenotypes.colors(3,:) = [0 1 1];
-                CellPhenotypes.hullPhenoSet(2,Noffscreen)= NotOffscreen;
-                CellPhenotypes.hullPhenoSet(2,OffScreen)= 3;
+                CellPhenotypes.hullPhenoSet(2,Noffscreen)= 3;
+                CellPhenotypes.hullPhenoSet(2,OffScreen)= i;
                 
             end
             
