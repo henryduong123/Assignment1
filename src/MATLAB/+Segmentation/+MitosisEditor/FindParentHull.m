@@ -24,9 +24,10 @@ function parentHull = FindParentHull(childHulls, linePoints, time, forceParents)
     
     mitosisPoints = vertcat(CellHulls(childHulls).points);
     mitosisCVIdx = 1:size(mitosisPoints,1);
-    try
-        mitosisCVIdx = convhull(mitosisPoints(:,1), mitosisPoints(:,2));
-    catch err
+    
+    chkMitosisCVIdx = Helper.ConvexHull(mitosisPoints(:,1), mitosisPoints(:,2));
+    if ( ~isempty(chkMitosisCVIdx) )
+        mitosisCVIdx = chkMitosisCVIdx;
     end
     
     mitosisPoints = mitosisPoints(mitosisCVIdx,:);
@@ -109,15 +110,10 @@ function newHull = createNewHullStruct(x,y, imagePixels, time)
     newHull.centerOfMass = mean([y x], 1);
     newHull.time = time;
     
-    if ( length(x) > 1 )
-        try
-            chIdx = convhull(x, y);
-        catch excp
-            newHull = [];
-            return;
-        end
-    else
-        chIdx = 1;
+    chIdx = Helper.ConvexHull(x,y);
+    if ( isempty(chIdx) )
+        newHull = [];
+        return;
     end
 
     newHull.points = [x(chIdx) y(chIdx)];

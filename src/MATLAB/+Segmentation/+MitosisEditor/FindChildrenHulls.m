@@ -202,9 +202,8 @@ function outHullID = mergeHullValues(hullID, mergeStruct)
     
     [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
-    try
-        cvIdx = convhull(c,r);
-    catch excp
+    cvIdx = Helper.ConvexHull(c,r);
+    if ( isempty(cvIdx) )
         return;
     end
     
@@ -220,9 +219,8 @@ function subtractHulls(hullID, subHullID)
     
     [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
-    try
-        cvIdx = convhull(c,r);
-    catch excp
+    cvIdx = Helper.ConvexHull(c,r);
+    if ( isempty(cvIdx) )
         return;
     end
     
@@ -261,15 +259,10 @@ function newHull = createNewHullStruct(x,y, imagePixels, time)
     newHull.centerOfMass = mean([y x], 1);
     newHull.time = time;
     
-    if ( length(x) > 1 )
-        try
-            chIdx = convhull(x, y);
-        catch excp
-            newHull = [];
-            return;
-        end
-    else
-        chIdx = 1;
+    chIdx = Helper.ConvexHull(c,r);
+    if ( isempty(chIdx) )
+        newHull = [];
+        return;
     end
 
     newHull.points = [x(chIdx) y(chIdx)];

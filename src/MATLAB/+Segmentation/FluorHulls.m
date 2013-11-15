@@ -13,9 +13,8 @@ function [objs features] = FluorHulls(im, t)
         % because we passed in too few points, or the points are
         % collinear. Since we wouldn't want to use them anyway, we'll
         % just ignore those.
-        try
-            ch = convhull(c, r);
-        catch e
+        ch = Helper.ConvexHull(c,r);
+        if ( isempty(ch) )
             continue;
         end
         

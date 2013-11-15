@@ -88,7 +88,6 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
         HaloRat = length(find(p & bwHalo)) / length(find(p));
         
         [r c] = ind2sub(size(im),pix);
-        ch = convhull(r,c);
         
         bwDarkInterior = bwDarkCenters & bwPoly;
         DarkRat = length(find(bwDarkInterior)) / length(find(bwPoly));
@@ -125,7 +124,7 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
             continue
         end
         
-        ch=convhull(r,c);
+        ch = Helper.ConvexHull(c,r);
         
         % one last check for parasites
         if length(find(bwDark(pix)))/length(pix)< 0.4
@@ -221,7 +220,8 @@ function [objs features levels] = FrameSegmentor(im, t, imageAlpha)
     for i=1:length(idx)
         pix=find(Ligm==idx(i));
         [r c]=ind2sub(size(im),pix);
-        ch=convhull(r,c);
+        
+        ch = Helper.ConvexHull(c,r);
         
         bwPoly = poly2mask(c(ch),r(ch),size(im,1),size(im,2));
         if ~isempty(find(bwCellFG &bwPoly, 1)),continue,end

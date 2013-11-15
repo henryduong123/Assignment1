@@ -26,7 +26,11 @@ function [objs features levels] = WehiFrameSegmentor(im, t, imageAlpha)
         if length(r) < 15
             continue
         end
-        ch = convhull(c, r);
+        
+        ch = Helper.ConvexHull(c,r);
+        if ( isempty(ch) )
+            continue;
+        end
         
         no = [];
         no.t = t;
