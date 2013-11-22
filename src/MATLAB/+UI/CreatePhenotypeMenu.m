@@ -11,9 +11,10 @@ function CreatePhenotypeMenu()
     
     % Initialize phenotype structure if necessary
     if isempty(CellPhenotypes) || ~isfield(CellPhenotypes,'descriptions')
-        CellPhenotypes.descriptions={'died'};
+        CellPhenotypes.descriptions={'died' 'ambiguous'  'off screen' };
         CellPhenotypes.hullPhenoSet = zeros(2,0);
     end
+    
 
     UI.UpdatePhenotypeMenu(PhenoMenu);
 end
@@ -47,7 +48,7 @@ function updatePhenoCheck(src, evnt)
     
     childLabels = get(phenoChildren, 'Label');
     checkedIdx = find(strcmpi(CellPhenotypes.descriptions(trackPheno), childLabels),1);
-
+    
     % Children are ordered when added in UpdatePhenotypeMenu, so can just
     % use the ordering to choose the check child.
     set(phenoChildren(checkedIdx), 'checked','on');

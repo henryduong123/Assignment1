@@ -129,7 +129,7 @@ function wehi_segment(img)
     end
     if bestCount > 0
         [r c] = find(L==bestN);
-        ch = convhull(c,r);
+        ch = Helper.ConvexHull(c,r);
         plot(c(ch), r(ch), '-g');
     end
     

@@ -28,9 +28,8 @@ function newObj = ForceDisjointSeg(obj, time, centerPt)
     
     for i=1:CC.NumObjects
         [r c]=ind2sub(size(bwimg),CC.PixelIdxList{i});
-        try
-            ch = convhull(r,c);
-        catch errmsg
+        ch = Helper.ConvexHull(c,r);
+        if ( isempty(ch) )
             continue;
         end
         

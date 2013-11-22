@@ -44,6 +44,10 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Label',...
     'CallBack',     @changeLabel,...
     'Separator',    'on');
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Change Parents',... % will display Swap Parent in the right click menu
+    'CallBack',     @changeParent,... % route the code to the changeParent function further down the code
+    'Separator',    'on'); % will add separator
 
 addHullMenu = uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Change Number of Cells',...
@@ -131,6 +135,16 @@ global Figures
 if(isempty(trackID)),return,end
 
 Editor.ContextChangeLabel(Figures.time,trackID);
+end
+
+function changeParent(src,evnt)
+global Figures
+% Will Switch two parents together followed by the children and the rest of
+% the tree.
+[hullID trackID] = UI.GetClosestCell(0);
+if(isempty(trackID)),return,end
+Editor.ContextChangeParent(Figures.tree.familyID,Figures.time,trackID);
+UI.DrawTree(Figures.tree.familyID);
 end
 
 function addHull(src, evt, numhulls)

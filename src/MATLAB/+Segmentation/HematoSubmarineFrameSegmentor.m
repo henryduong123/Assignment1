@@ -17,7 +17,7 @@ function [objs features] = HematoSubmarineFrameSegmentor(im, t)
             [r1 c1] = ind2sub(size(im), pix);
             
             % find the convex hull of the circle
-            ch = convhull(c1, r1);
+            ch = Helper.ConvexHull(c1, r1);
             
             no = [];
             no.t = t;

@@ -57,9 +57,8 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         nh.centerOfMass = mean([hy hx]);
         nh.time = hull.time;
 
-        try
-            chIdx = convhull(hx, hy);
-        catch excp
+        chIdx = Helper.ConvexHull(hx,hy);
+        if ( isempty(chIdx) )
             newHulls = [];
             return;
         end

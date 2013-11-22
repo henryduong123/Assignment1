@@ -50,7 +50,11 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     newObj.indPixels = objPix;
     [r c] = ind2sub(CONSTANTS.imageSize, objPix);
     
-    ch = convhull(r,c);
+    ch = Helper.ConvexHull(c,r);
+    if ( isempty(ch) )
+        newHull = [];
+        return;
+    end
     
     newHull.centerOfMass = mean([r c]);
     newHull.indexPixels = newObj.indPixels;

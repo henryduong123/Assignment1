@@ -75,10 +75,11 @@ end
 
 for i=1:length(CellHulls)
     [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(i).indexPixels);
-    try
-        ch = convhull(r,c);
-    catch exception
+    
+    ch = Helper.ConvexHull(c,r);
+    if ( isempty(ch) )
         disp(i);
+        continue;
     end
     CellHulls(i).points = [c(ch) r(ch)];
 end
