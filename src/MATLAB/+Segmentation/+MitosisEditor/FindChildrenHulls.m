@@ -259,7 +259,7 @@ function newHull = createNewHullStruct(x,y, imagePixels, time)
     newHull.centerOfMass = mean([y x], 1);
     newHull.time = time;
     
-    chIdx = Helper.ConvexHull(c,r);
+    chIdx = Helper.ConvexHull(x,y);
     if ( isempty(chIdx) )
         newHull = [];
         return;
