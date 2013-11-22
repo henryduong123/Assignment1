@@ -161,11 +161,22 @@ switch answer
 
         if ( bUpdated )
             Load.AddConstant('version',softwareVersion,1);
-            Helper.SaveLEVerState(CONSTANTS.matFullFile);
+            prompt = questdlg('There is a new update available! Would you like to save the file?', ... 
+                                'Save...', ... 
+                                'Yes','No','No'); 
+                                % Handle response 
+                                switch prompt 
+                                case 'Yes' 
+                                UI.SaveDataAs();
+                                case 'No'
+                                Helper.SaveLEVerState(CONSTANTS.matFullFile);
+                                    otherwise
+                                        warndlg('Success This has been updated');
+                                end 
         end
         
-        UI.InitializeFigures();
-        opened = 1;
+         UI.InitializeFigures();
+         opened = 1;
         
     otherwise
         return

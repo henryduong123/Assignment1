@@ -247,12 +247,17 @@ helpMenu = uimenu(...
     'Parent',           handle,...
     'Label',            'Help',...
     'HandleVisibility', 'callback');
-
+ 
 aboutMenu = uimenu(...
     'Parent',           helpMenu,...
     'Label',            'About',...
     'HandleVisibility', 'callback', ...
     'Callback',         @UI.about);
+ uimenu(...
+    'Parent',           helpMenu,...
+    'Label',            'Update',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @UpdateFile);
 
 if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.saveMenu = saveMenu;
@@ -523,5 +528,32 @@ end
 
 function mitosisEditor(src, evnt)
     UI.MitosisEditInterface();
+end
+% Update Function 
+function UpdateFile(src,evnt)
+global CONSTANTS
+	bUpdated = Load.FixOldFileVersions();
+
+        if ( bUpdated )
+            Load.AddConstant('version',softwareVersion,1);
+            % Save Data
+            % Construct a questdlg with two options 
+            prompt = questdlg('There is a new update available! Would you like to save the file?', ... 
+                                'Save...', ... 
+                                'Yes','No','No'); 
+                                % Handle response 
+                                switch prompt 
+                                case 'Yes' 
+                                UI.SaveDataAs();
+                                case 'No'
+                                Helper.SaveLEVerState(CONSTANTS.matFullFile);
+                                    otherwise
+                                        warndlg('Success This has been updated');
+                                end 	
+        else
+           warndlg('it is already updated');
+        end
+        
+
 end
 
