@@ -43,8 +43,10 @@ function bNeedsUpdate = FixOldFileVersions()
         CellPhenotypes.colors(1,:) = [0 0 0];
     end
     % Will search older versions of the code for any variation of ambiguous
-    % or off screen and replace them with 'ambiguous' or 'off screen'
+    % or off screen and replace them with 'ambiguous' or 'off screen' will
+    % merge other ambiguous ones and create new code.
     if (isfield(CellPhenotypes,'descriptions'))
+        
         phenoIDs = findEquivalentPhenotype({'ambiguous', 'unknown'});
         mergePhenoID = mergePhenotypes(phenoIDs);
         if ( isempty(mergePhenoID) )
@@ -59,49 +61,12 @@ function bNeedsUpdate = FixOldFileVersions()
         phenoIDs = findEquivalentPhenotype({'left field of vision','left','top','bottom','right','off screen','offscreen','leftscreen','left screen','left_screen','left-screen','left frame','left_frame','left-frame'});
         mergePhenoID = mergePhenotypes(phenoIDs);
         if ( isempty(mergePhenoID) )
-            mergePhenoID = NewPhenotypes('off screen',[0 1 1]);
+            mergePhenoID = NewPhenotypes('off screen',[.31 .87 .89]);
         else
             CellPhenotypes.descriptions{mergePhenoID} = 'off screen';
-            CellPhenotypes.colors(mergePhenoID,:) = [0 1 1];
+            CellPhenotypes.colors(mergePhenoID,:) = [.31 .87 .89];
         end
-        SwapPhenotypeID(CellPhenotypes.descriptions(3),3,mergePhenoID);
-        
-
-        % These function below ensures that ambiguous and offscreen has the
-        % is on the same area of the stack on ever run. Ambiguous is always
-        % on the second line of the phenotype stack and off screen is in the
-        % third line of the phenotype stack 
-        
-%         if(amb)
-%             swapDescription = CellPhenotypes.descriptions(2);
-%             swapColors = CellPhenotypes.colors(2,:);
-%             i = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
-%             ambigidx = find(CellPhenotypes.hullPhenoSet(2,:) == i);
-%             nAmbigidx = find(CellPhenotypes.hullPhenoSet(2,:) == 2);
-%             if(~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
-%                 CellPhenotypes.descriptions(i) = swapDescription;
-%                 CellPhenotypes.colors(i,:) = swapColors;
-%                 CellPhenotypes.descriptions(2) = {'ambiguous'};
-%                 CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
-%                 CellPhenotypes.hullPhenoSet(2,ambigidx)=2;
-%                 CellPhenotypes.hullPhenoSet(2,nAmbigidx)= i;
-%             end
-%         end
-%         if(ofscr)
-%             swapDescription = CellPhenotypes.descriptions(3);
-%             swapColors = CellPhenotypes.colors(3,:);
-%             i = find(strcmpi('off screen',CellPhenotypes.descriptions));
-%              offscreenidx = find(CellPhenotypes.hullPhenoSet(2,:) == i);
-%              noffScreenidx = find(CellPhenotypes.hullPhenoSet(2,:) == 3);
-%             if(~(strcmp(CellPhenotypes.descriptions{3},'off screen')))
-%                 CellPhenotypes.descriptions(i) = swapDescription;
-%                 CellPhenotypes.colors(i,:) = swapColors;
-%                 CellPhenotypes.descriptions(3) = {'off screen'};
-%                 CellPhenotypes.colors(3,:) = [0 1 1];
-%                 CellPhenotypes.hullPhenoSet(2,offscreenidx)= 3;
-%                 CellPhenotypes.hullPhenoSet(2,noffScreenidx)= i;
-%             end
-%         end
+        SwapPhenotypeID(CellPhenotypes.descriptions(3),3,mergePhenoID);  
     end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
@@ -239,6 +204,7 @@ function outStruct = forceLogicalFields(inStruct, varargin)
 end
 
 function phenoIDs= findEquivalentPhenotype(equivDescriptions)
+%This will look for an equivalent description
     global CellPhenotypes
     phenoIDs = [];
     for i=1:length(equivDescriptions)
@@ -248,6 +214,8 @@ function phenoIDs= findEquivalentPhenotype(equivDescriptions)
 end
 
 function mergePhenoID = mergePhenotypes(phenoIDs)
+% This will find the smallest phenoId that is equivalent and merge them
+% together if they find an equivalent.
 global CellPhenotypes
     mergePhenoID = [];
     
@@ -267,14 +235,10 @@ global CellPhenotypes
     CellPhenotypes.descriptions = CellPhenotypes.descriptions(keepIdx);
     CellPhenotypes.colors = CellPhenotypes.colors(keepIdx,:);
     CellPhenotypes.hullPhenoSet(2,:) = remapIDs(CellPhenotypes.hullPhenoSet(2,:));
-    
-    % Delete cell descriptions/colors  and then remember which ones you
-    % deleted so you can fix it later
-    % make all the phenoIDs the smallest phenoID in hullphenoset of (2,:)
-    
-    % replace all phenoIDs with
 end
 function SwapPhenotypeID(CellIndx,cellPlacementId,MergeId)
+% This will swap the phenotypes to the respective spots where it is suppose
+% to be in the program, without losing the integrity of the cells 
 global CellPhenotypes
         if(cellPlacementId == MergeId)
             return
@@ -290,6 +254,8 @@ global CellPhenotypes
             
 end
 function [NewPhenotypeID]= NewPhenotypes(description,color)
+%will create a new phenotype and add the colors and output the description
+%as a new phenotypeID
 global CellPhenotypes
     CellPhenotypes.descriptions{end+1} = description;
     CellPhenotypes.colors(end+1,:) = color;
