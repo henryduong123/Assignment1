@@ -32,7 +32,6 @@ if ( nargin > 0 )
         Helper.SetDebug(~isdeployed());
     end
 end
-
 if( Load.OpenData() )
     Editor.ReplayableEditAction(@Editor.InitHistory);
 end
