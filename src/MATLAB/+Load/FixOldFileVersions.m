@@ -46,7 +46,7 @@ function bNeedsUpdate = FixOldFileVersions()
     % or off screen and replace them with 'ambiguous' or 'off screen' will
     % merge other ambiguous ones and create new code.
     if (isfield(CellPhenotypes,'descriptions'))
-        
+        MergeDuplicateIDs();
         phenoIDs = findEquivalentPhenotype({'ambiguous', 'unknown'});
         mergePhenoID = mergePhenotypes(phenoIDs);
         if ( isempty(mergePhenoID) )
@@ -260,4 +260,13 @@ global CellPhenotypes
     CellPhenotypes.descriptions{end+1} = description;
     CellPhenotypes.colors(end+1,:) = color;
     NewPhenotypeID =length(CellPhenotypes.descriptions);
+end
+function [mergePhenoID]=MergeDuplicateIDs()
+global CellPhenotypes
+
+    uniqueCell = unique(CellPhenotypes.descriptions(:));
+    mergeIDsRepeated = numel(uniqueCell) ~= numel(CellPhenotypes.descriptions)
+
+
+    mergePhenoID = mergePhenotypes(mergeIDsRepeated);
 end
