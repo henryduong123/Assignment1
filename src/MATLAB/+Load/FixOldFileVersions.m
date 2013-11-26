@@ -45,58 +45,28 @@ function bNeedsUpdate = FixOldFileVersions()
     % Will search older versions of the code for any variation of ambiguous
     % or off screen and replace them with 'ambiguous' or 'off screen'
     if (isfield(CellPhenotypes,'descriptions'))
-        amb = false;
-        ofscr = false;
-        %itramb = 0;
         phenoIDs = findEquivalentPhenotype({'ambiguous', 'unknown'});
         mergePhenoID = mergePhenotypes(phenoIDs);
         if ( isempty(mergePhenoID) )
-            mergePhenoID = addNewPhenotype('ambiguous',[0 1 0]);
+            mergePhenoID = NewPhenotypes('ambiguous',[.549 .28235 .6235]);
         else
             CellPhenotypes.descriptions{mergePhenoID} = 'ambiguous';
-            CellPhenotypes.colors(mergePhenoID,:) = [0 1 0];
+            CellPhenotypes.colors(mergePhenoID,:) = [.549 .28235 .6235];
         end
-        swapPhenotypes(2,mergePhenoID);
+        SwapPhenotypeID(CellPhenotypes.descriptions(2),2,mergePhenoID);
         
-        %CellPhenotypes.descriptions{2} = 'ambiguous';
         
-        phenoIDs = findEquivalentPhenotype({'left field of vision','left','top','bottom','right'});
+        phenoIDs = findEquivalentPhenotype({'left field of vision','left','top','bottom','right','off screen','offscreen','leftscreen','left screen','left_screen','left-screen','left frame','left_frame','left-frame'});
         mergePhenoID = mergePhenotypes(phenoIDs);
         if ( isempty(mergePhenoID) )
-            mergePhenoID = addNewPhenotype('off screen',[0 1 0]);
+            mergePhenoID = NewPhenotypes('off screen',[0 1 1]);
         else
             CellPhenotypes.descriptions{mergePhenoID} = 'off screen';
-            CellPhenotypes.colors(mergePhenoID,:) = [0 1 0];
+            CellPhenotypes.colors(mergePhenoID,:) = [0 1 1];
         end
-        swapPhenotypes(3,mergePhenoID);
-        
-        
-       for i=1:length(CellPhenotypes.descriptions)
+        SwapPhenotypeID(CellPhenotypes.descriptions(3),3,mergePhenoID);
         
 
-            if (strcmpi(CellPhenotypes.descriptions{i},'ambiguous')||strcmpi(CellPhenotypes.descriptions{i},'ambig')||strcmpi(CellPhenotypes.descriptions{i},'unknown'))
-                CellPhenotypes.descriptions{i}= 'ambiguous';
-                amb = true;   
-            end 
-            if (strcmpi(CellPhenotypes.descriptions{i},'off screen')||strcmpi(CellPhenotypes.descriptions{i},'offscreen')||strcmpi(CellPhenotypes.descriptions{i},'leftscreen')||strcmpi(CellPhenotypes.descriptions{i},'left screen')||strcmpi(CellPhenotypes.descriptions{i},'left_screen')||strcmpi(CellPhenotypes.descriptions{i},'left-screen')||strcmpi(CellPhenotypes.descriptions{i},'left frame')||strcmpi(CellPhenotypes.descriptions{i},'left_frame')||strcmpi(CellPhenotypes.descriptions{i},'left-frame'))
-                CellPhenotypes.descriptions{i}= 'off screen';
-                ofscr = true;
-            end
-        end
-    
-        %if ambiguous or off screen isnt found in the old code it will add
-        %them with the colors.
-        if (~amb)
-            CellPhenotypes.descriptions(end+1) = {'ambiguous'};
-            CellPhenotypes.colors(end+1,:) = [.549 .28235 .6235];
-            amb = true;
-        end
-        if (~ofscr)
-            CellPhenotypes.descriptions(end+1) = {'off screen'};
-            CellPhenotypes.colors(end+1,:) = [0 1 1];
-            ofscr = true;
-        end
- 
         % These function below ensures that ambiguous and offscreen has the
         % is on the same area of the stack on ever run. Ambiguous is always
         % on the second line of the phenotype stack and off screen is in the
@@ -304,44 +274,24 @@ global CellPhenotypes
     
     % replace all phenoIDs with
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function SwapPhenotypeID()
+function SwapPhenotypeID(CellIndx,cellPlacementId,MergeId)
 global CellPhenotypes
+        if(cellPlacementId == MergeId)
+            return
+        end
+        cellIdx = find(CellPhenotypes.hullPhenoSet(2,:) == find(strcmpi(MergeID,CellPhenotypes.descriptions)));
+        nCellidx = find(CellPhenotypes.hullPhenoSet(2,:) == cellPlacementId);
+                CellPhenotypes.descriptions(CellIndx) = CellPhenotypes.descriptions{MergeId};
+                CellPhenotypes.colors(CellIndx,:) =  CellPhenotypes.colors(cellPlacementId,:);
+                CellPhenotypes.descriptions(cellPlacementId) = {MergeID};
+                CellPhenotypes.colors(cellPlacementId,:) = CellPhenotype.colors(MergeID);
+                CellPhenotypes.hullPhenoSet(2,cellIdx)=cellPlacementId;
+                CellPhenotypes.hullPhenoSet(2,nCellidx)= CellIndx;
+            
 end
-function DeleteDuplicatePhenotypes
-%                     
-            ambfind = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
-            % delete colors, and descriptions
-            swapDescription = CellPhenotypes.descriptions{'ambiguous'};
-            %swapColors = CellPhenotypes.colors(2,:);
-            ambitr = find(strcmpi('ambiguous',CellPhenotypes.descriptions));
-            ambigidx = find(CellPhenotypes.hullPhenoSet(2,:) == ambitr);
-            nAmbigidx = find(CellPhenotypes.hullPhenoSet(2,:) == 2);
-            if(~(strcmp(CellPhenotypes.descriptions{2},'ambiguous')))
-                CellPhenotypes.descriptions(i) = swapDescription;
-                CellPhenotypes.colors(i,:) = swapColors;
-                CellPhenotypes.descriptions(2) = {'ambiguous'};
-                CellPhenotypes.colors(2,:) = [.549 .28235 .6235];
-                CellPhenotypes.hullPhenoSet(2,ambigidx)=2;
-                CellPhenotypes.hullPhenoSet(2,nAmbigidx)= i;
-            end
+function [NewPhenotypeID]= NewPhenotypes(description,color)
+global CellPhenotypes
+    CellPhenotypes.descriptions{end+1} = description;
+    CellPhenotypes.colors(end+1,:) = color;
+    NewPhenotypeID =length(CellPhenotypes.descriptions);
 end
