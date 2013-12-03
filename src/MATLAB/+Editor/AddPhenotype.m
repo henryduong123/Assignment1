@@ -8,10 +8,17 @@
 function [historyAction phenoID] = AddPhenotype(description)
     global CellPhenotypes Colors
     
+    historyAction = '';
+    
     if ( isempty(Colors) )
         Load.CreateColors();
     end
-    
+    for i=1:length(CellPhenotypes.descriptions)
+    if ((strcmpi(description,CellPhenotypes.descriptions{i}))== 1)
+        phenoID = i;
+        return;
+    end
+    end
     % Find all colors that haven't been used yet
     phenoColors = vertcat(CellPhenotypes.colors);
     allowedColors = getAllowedColors(phenoColors);
@@ -25,8 +32,6 @@ function [historyAction phenoID] = AddPhenotype(description)
     phenoID = length(CellPhenotypes.descriptions);
     
     UI.UpdatePhenotypeMenu();
-    
-    historyAction = '';
 end
 
 function [allowedColors bAllowedColors] = getAllowedColors(phenoColors)
