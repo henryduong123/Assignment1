@@ -202,11 +202,7 @@ function outStruct = forceLogicalFields(inStruct, varargin)
         end
     end
 end
-<<<<<<< PhenotypeMerge
-=======
-<<<<<<< MultiCellTypes
-=======
->>>>>>> local
+
 
 function phenoIDs= findEquivalentPhenotype(equivDescriptions)
 %This will look for an equivalent description
@@ -266,23 +262,23 @@ global CellPhenotypes
     CellPhenotypes.colors(end+1,:) = color;
     NewPhenotypeID =length(CellPhenotypes.descriptions);
 end
+%merges any duplicate ID
 function [mergePhenoID]=MergeDuplicateIDs(description)
 global CellPhenotypes
-<<<<<<< PhenotypeMerge
+    phenoIDs = [];
+    uniqueCell = {};
+    mergePhenoID = [];
+    for i=1:length(CellPhenotypes.descriptions)
+        if ( ~any(strcmpi(CellPhenotypes.descriptions{i},uniqueCell)) )
+            
+            uniqueCell = [uniqueCell; CellPhenotypes.descriptions(i)];
+        end
+    end
+    for j = 1:length(uniqueCell)
 
-    uniqueCell = unique(description(:));
-    mergeIDsRepeated = numel(uniqueCell) ~= numel(description)
-    mergePhenoID = mergePhenotypes(mergeIDsRepeated);
+        equivID=  (find(strcmpi(uniqueCell{j},CellPhenotypes.descriptions)));
+        mergePhenoID = mergePhenotypes(equivID);
+    end
+     
 end
-=======
- phenoIDs = [];
-  for i=1:length(description)
-%     uniqueCell(i) = find(strcmpi(unique(description),CellPhenotypes.descriptions(i)));
- index{i} = strmatch(unique(description), CellPhenotypes.descriptions(i))
-  end
-  
-%     phenoIDs = [phenoIDs uniqueCell];
-%     mergePhenoID = mergePhenotypes(phenoIDs)
-end
->>>>>>> local
->>>>>>> local
+
