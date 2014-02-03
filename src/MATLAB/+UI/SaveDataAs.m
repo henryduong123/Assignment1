@@ -23,29 +23,43 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function SaveDataAs()
+function bSaved = SaveDataAs(bOverWrite)
 
 global CONSTANTS
 
+if ( ~exist('bOverWrite','var') )
+    bOverWrite = false;
+end
+
+bSaved = false;
+
 if (exist('LEVerSettings.mat','file')~=0)
-        load('LEVerSettings.mat');
+    load('LEVerSettings.mat');
 else
     settings.matFilePath = '.\';
 end
 
 time = clock;
 fprintf('Choose a folder to save current data...\n');
-if(strcmp(settings.matFilePath,'.\'))
-    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName '_LEVer.mat']);
-else
-    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        fullfile(settings.matFilePath, [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat']));
+
+newName = [CONSTANTS.datasetName '_LEVer.mat'];
+
+bEditName = (~bOverWrite && ~strcmp(settings.matFilePath,'.\'));
+if ( bEditName )
+    newName = [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat'];
 end
+
+if(strcmp(settings.matFilePath,'.\'))
+    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits', newName);
+else
+    [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits', fullfile(settings.matFilePath, newName));
+end
+
 if (FilterIndex~=0)
     CONSTANTS.matFullFile = [settings.matFilePath settings.matFile];
     Helper.SaveLEVerState(CONSTANTS.matFullFile);
     
+    bSaved = true;
     Editor.History('Saved');
 else
     return

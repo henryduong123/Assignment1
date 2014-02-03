@@ -111,6 +111,10 @@ end
 
 function setMenus()
     global Figures CONSTANTS
+    
+    if ( isempty(Figures) || ~isfield(Figures, 'cells') || ~isfield(Figures, 'tree') )
+        return;
+    end
 
     if ( Editor.StackedHistory.CanUndo() )
         set(Figures.cells.menuHandles.undoMenu,'Enable','on');
