@@ -172,7 +172,8 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 
 		int kMax = floor((double)vol/(parameters->minSize*.6));
 
-		GapStatistic(centerOfMass,pixelCoordinates,kMax+1,tempMeans);
+//		GapStatistic(centerOfMass,pixelCoordinates,kMax+1,tempMeans);
+		GapStatistic(centerOfMass,pixelCoordinates,1,tempMeans);
 
 		for (int j=0; j<tempMeans.size(); ++j)
 		{
