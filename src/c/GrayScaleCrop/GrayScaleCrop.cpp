@@ -170,6 +170,8 @@ CharImageType::RegionType findRegion( std::string curfile )
 
 	itk::SimpleDataObjectDecorator<double>* thresh = thresholdCalculator->GetOutput();
 	float threshold = thresh->Get();
+//	threshold = 75;
+	threshold *= 0.5;
 
 	thresholdFilter->SetLowerThreshold(threshold);
 	thresholdFilter->SetOutsideValue(0);
