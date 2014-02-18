@@ -28,5 +28,5 @@ function SaveLEVerState(filename)
     
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-        'FluorData', 'HaveFluor', 'ResegLinks');
+        'FluorData', 'HaveFluor', 'ResegLinks', '-v7.3');
 end
