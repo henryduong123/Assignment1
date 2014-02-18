@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <exception>
 
 #include "Threader.h"
 #include "itkImageFileReader.h"
@@ -186,13 +187,15 @@ CharImageType::RegionType findRegion( std::string curfile )
 
 	labeler->SetInput(thresholdFilter->GetOutput());
 	labelGeometryImageFilter->SetInput(labeler->GetOutput());
+
 	try
 	{
 		labelGeometryImageFilter->Update();
 	}
-	catch (...)
+	catch (std::exception &e)
 	{
 		printf("Unable to find region of %s!\n",curfile.c_str());
+		printf("exception: %s\n", e.what());
 		return region;
 	}
 
