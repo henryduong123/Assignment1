@@ -27,7 +27,7 @@
 function bNeedsUpdate = FixOldFileVersions()
     global CellHulls CellFamilies HashedCells ConnectedDist GraphEdits ResegLinks Costs CellPhenotypes CellTracks ReplayEditActions Log
 
-    bNeedsUpdate = 0;
+    bNeedsUpdate = false;
     
     emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
     if ( ~isempty(emptyHash) )
@@ -35,52 +35,19 @@ function bNeedsUpdate = FixOldFileVersions()
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
     end
-    
-    % Add color field to phenotype structure as of ver 7.2
-    
-    if ( ~isfield(CellPhenotypes,'colors') )
-        CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
-        CellPhenotypes.colors(1,:) = [0 0 0];
-    end
-    % Will search older versions of the code for any variation of ambiguous
-    % or off screen and replace them with 'ambiguous' or 'off screen' will
-    % merge other ambiguous ones and create new code.
-    if (isfield(CellPhenotypes,'descriptions'))
-        MergeDuplicateIDs(CellPhenotypes.descriptions);
-        phenoIDs = findEquivalentPhenotype({'ambiguous', 'unknown'});
-        mergePhenoID = mergePhenotypes(phenoIDs);
-        if ( isempty(mergePhenoID) )
-            mergePhenoID = NewPhenotypes('ambiguous',[.549 .28235 .6235]);
-        else
-            CellPhenotypes.descriptions{mergePhenoID} = 'ambiguous';
-            CellPhenotypes.colors(mergePhenoID,:) = [.549 .28235 .6235];
-        end
-        SwapPhenotypeID(CellPhenotypes.descriptions(2),2,mergePhenoID);
-        
-        
-        phenoIDs = findEquivalentPhenotype({'left field of vision','left','top','bottom','right','off screen','offscreen','leftscreen','left screen','left_screen','left-screen','left frame','left_frame','left-frame'});
-        mergePhenoID = mergePhenotypes(phenoIDs);
-        if ( isempty(mergePhenoID) )
-            mergePhenoID = NewPhenotypes('off screen',[.31 .87 .89]);
-        else
-            CellPhenotypes.descriptions{mergePhenoID} = 'off screen';
-            CellPhenotypes.colors(mergePhenoID,:) = [.31 .87 .89];
-        end
-        SwapPhenotypeID(CellPhenotypes.descriptions(3),3,mergePhenoID);  
-    end
    
     % Add imagePixels field to CellHulls structure (and resave in place)
     if(~isfield(CellHulls, 'imagePixels'))
         fprintf('\nAdding Image Pixel Information...\n');
         Load.AddImagePixelsField();
         fprintf('Image Information Added\n');
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     % Need userEdited field as of ver 5.0
     if ( ~isfield(CellHulls, 'userEdited') )
         Load.AddUserEditedField();
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     % Remove HashedCells.editedFlag field as of ver 7.0
@@ -88,19 +55,19 @@ function bNeedsUpdate = FixOldFileVersions()
         for t=1:length(HashedCells)
             if ( isfield(HashedCells{t}, 'editedFlag') )
                 HashedCells{t} = rmfield(HashedCells{t}, 'editedFlag');
-                bNeedsUpdate = 1;
+                bNeedsUpdate = true;
             end
         end
     end
     
     if ( isempty(GraphEdits) )
         GraphEdits = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     if ( isempty(ResegLinks) )
         ResegLinks = sparse([], [], [], size(Costs,1), size(Costs,2), round(0.1*size(Costs,2)));
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
 
     % Calculate connected-component distance for all cell hulls (out 2 frames)
@@ -110,7 +77,7 @@ function bNeedsUpdate = FixOldFileVersions()
         mexCCDistance(1:length(CellHulls),0);
 %         Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
         fprintf('Finished\n');
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     % Remove CellTracks.phenotype field and use it to create hullPhenoSet
@@ -119,7 +86,21 @@ function bNeedsUpdate = FixOldFileVersions()
         fprintf('\nConverting Phenotype information...\n');
         Load.UpdatePhenotypeInfo();
         fprintf('Finished\n');
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
+    end
+    
+    % Add color field to phenotype structure as of ver 7.2
+    if ( ~isfield(CellPhenotypes,'colors') )
+        CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
+        CellPhenotypes.colors(1,:) = [0 0 0];
+        bNeedsUpdate = true;
+    end
+    
+    % Will search older versions of the code for any variation of ambiguous
+    % or off screen and replace them with 'ambiguous' or 'off screen' will
+    % merge other ambiguous ones and create new code.
+    if ( Load.FixDefaultPhenotypes() )
+        bNeedsUpdate = true;
     end
     
 %     % Adds the special origin action, to indicate that this is initial
@@ -151,13 +132,13 @@ function bNeedsUpdate = FixOldFileVersions()
             ReplayEditActions(end).randState = randState;
         end
         
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     % Add bLockedField if necessary
     if ( ~isfield(CellFamilies, 'bLocked') )
         Load.AddLockedField();
-        bNeedsUpdate = 1;
+        bNeedsUpdate = true;
     end
     
     % Make sure that CellHulls userEdited, deleted, greenInd
@@ -201,84 +182,5 @@ function outStruct = forceLogicalFields(inStruct, varargin)
             end
         end
     end
-end
-
-
-function phenoIDs= findEquivalentPhenotype(equivDescriptions)
-%This will look for an equivalent description
-    global CellPhenotypes
-    phenoIDs = [];
-    for i=1:length(equivDescriptions)
-        equivID = find(strcmpi(equivDescriptions{i},CellPhenotypes.descriptions));
-        phenoIDs = [phenoIDs equivID];
-    end
-end
-
-function mergePhenoID = mergePhenotypes(phenoIDs)
-% This will find the smallest phenoId that is equivalent and merge them
-% together if they find an equivalent.
-global CellPhenotypes
-    mergePhenoID = [];
-    
-    if (isempty(phenoIDs))
-        return;
-    end
-    
-    % find the smallest phenoiD
-    mergePhenoID = min(phenoIDs);
-    
-    keepIdx = setdiff(1:length(CellPhenotypes.descriptions),phenoIDs);
-    keepIdx = sort([keepIdx mergePhenoID]);
-    
-    remapIDs = mergePhenoID * ones(1,length(CellPhenotypes.descriptions));
-    remapIDs(keepIdx) = 1:length(keepIdx);
-    
-    CellPhenotypes.descriptions = CellPhenotypes.descriptions(keepIdx);
-    CellPhenotypes.colors = CellPhenotypes.colors(keepIdx,:);
-    CellPhenotypes.hullPhenoSet(2,:) = remapIDs(CellPhenotypes.hullPhenoSet(2,:));
-end
-function SwapPhenotypeID(CellIndx,cellPlacementId,MergeId)
-% This will swap the phenotypes to the respective spots where it is suppose
-% to be in the program, without losing the integrity of the cells 
-global CellPhenotypes
-        if(cellPlacementId == MergeId)
-            return
-        end
-        cellIdx = find(CellPhenotypes.hullPhenoSet(2,:) == find(strcmpi(MergeID,CellPhenotypes.descriptions)));
-        nCellidx = find(CellPhenotypes.hullPhenoSet(2,:) == cellPlacementId);
-                CellPhenotypes.descriptions(CellIndx) = CellPhenotypes.descriptions{MergeId};
-                CellPhenotypes.colors(CellIndx,:) =  CellPhenotypes.colors(cellPlacementId,:);
-                CellPhenotypes.descriptions(cellPlacementId) = {MergeID};
-                CellPhenotypes.colors(cellPlacementId,:) = CellPhenotype.colors(MergeID);
-                CellPhenotypes.hullPhenoSet(2,cellIdx)=cellPlacementId;
-                CellPhenotypes.hullPhenoSet(2,nCellidx)= CellIndx;
-            
-end
-function [NewPhenotypeID]= NewPhenotypes(description,color)
-%will create a new phenotype and add the colors and output the description
-%as a new phenotypeID
-global CellPhenotypes
-    CellPhenotypes.descriptions{end+1} = description;
-    CellPhenotypes.colors(end+1,:) = color;
-    NewPhenotypeID =length(CellPhenotypes.descriptions);
-end
-%merges any duplicate ID
-function [mergePhenoID]=MergeDuplicateIDs(description)
-global CellPhenotypes
-    phenoIDs = [];
-    uniqueCell = {};
-    mergePhenoID = [];
-    for i=1:length(CellPhenotypes.descriptions)
-        if ( ~any(strcmpi(CellPhenotypes.descriptions{i},uniqueCell)) )
-            
-            uniqueCell = [uniqueCell; CellPhenotypes.descriptions(i)];
-        end
-    end
-    for j = 1:length(uniqueCell)
-
-        equivID=  (find(strcmpi(uniqueCell{j},CellPhenotypes.descriptions)));
-        mergePhenoID = mergePhenotypes(equivID);
-    end
-     
 end
 

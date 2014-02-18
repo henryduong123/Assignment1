@@ -94,8 +94,8 @@ oldCONSTANTS = CONSTANTS;
 
 Helper.ClearAllGlobals();
 
-answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
-switch answer
+ovwAns = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
+switch ovwAns
     case 'Segment & Track'
         if (~Helper.ImageFileDialog())
             return;
@@ -161,18 +161,20 @@ switch answer
 
         if ( bUpdated )
             Load.AddConstant('version',softwareVersion,1);
-            prompt = questdlg('There is a new update available! Would you like to save the file?', ... 
-                                'Save...', ... 
-                                'Yes','No','No'); 
-                                % Handle response 
-                                switch prompt 
-                                case 'Yes' 
-                                UI.SaveDataAs();
-                                case 'No'
-                                Helper.SaveLEVerState(CONSTANTS.matFullFile);
-                                    otherwise
-                                        warndlg('Success This has been updated');
-                                end 
+            ovwAns = questdlg('Old file format detected! Update required. Would you like to save the updated file to a new location?', ... 
+                                'Verision Update', ... 
+                                'Save As...','Overwrite','Overwrite'); 
+                                
+            % Handle response 
+            switch ovwAns 
+                case 'Save As...' 
+                    if ( ~UI.SaveDataAs(true) )
+                        warning(['File format must updated. Overwriting file: ' CONSTANTS.matFullFile]);
+                        Helper.SaveLEVerState(CONSTANTS.matFullFile);
+                    end
+                case 'Overwrite'
+                    Helper.SaveLEVerState(CONSTANTS.matFullFile);
+            end 
         end
         
          UI.InitializeFigures();
