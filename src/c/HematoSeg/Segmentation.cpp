@@ -230,6 +230,14 @@ DWORD WINAPI segmentation(LPVOID lpParam)
 		int sz=hulls.size();
 	}
 
+	// really big hulls are almost certainly not hemato cells, so remove them
+	for (std::vector<Hull>::iterator h = hulls.begin(); h != hulls.end(); ) {
+		if (h->pixels.size() > 300)
+			hulls.erase(h);
+		else
+			++h;
+	}
+
 	std::string outputText = "";
 	sprintf_s(buffer,"%d\n",hulls.size());
 	outputText += buffer; // Number of hulls in the document
