@@ -26,7 +26,18 @@
 function SaveLEVerState(filename)
     global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks
     
+    gVars = whos('CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
+                 'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
+                 'FluorData', 'HaveFluor', 'ResegLinks', 'global');
+	
+	totalSize = sum([gVars.bytes])/1024/1024;
+    
+    saveParam = '';
+    if ( totalSize > 2000 )
+        saveParam = '-v7.3';
+    end
+    
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-        'FluorData', 'HaveFluor', 'ResegLinks', '-v7.3');
+        'FluorData', 'HaveFluor', 'ResegLinks', saveParam);
 end
