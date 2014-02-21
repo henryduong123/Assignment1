@@ -106,6 +106,7 @@ UI.DrawPool.StartDraw(Figures.tree.axesHandle);
 
 % Clear non-pooled draw resources
 cla(Figures.tree.axesHandle)
+set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 endTime]);
 
 for i=1:size(xTracks,1)
     curTrack = xTracks(i,1);
@@ -139,7 +140,7 @@ end
 
 UI.DrawPool.FinishDraw(Figures.tree.axesHandle);
 
-set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 endTime]);
+% set(Figures.tree.axesHandle, 'XLim', [xMin-1 xMax+1], 'YLim',[-25 endTime]);
 % Figures.tree.axesHandle = overAxes;
 
 if ( CellFamilies(familyID).bLocked )
@@ -637,12 +638,17 @@ end
 end
 
 % how far is 1 pixel in normalized units?
-function delta = pixelDelta(axHandle)
+function [deltaX deltaY] = pixelDelta(axHandle)
 
 x_lim = xlim(axHandle);
+y_lim = ylim(axHandle);
+
 set(axHandle, 'units', 'pixels');
 pos = get(axHandle, 'position');
-delta = x_lim(2) / pos(3);
+
+deltaX = x_lim(2) / pos(3);
+deltaY = y_lim(2) / pos(4);
+
 set(axHandle, 'units', 'normalized');
 
 end
