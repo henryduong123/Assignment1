@@ -10,7 +10,7 @@ function NeuroPicker()
         return;
     end
     
-    [sigDigits datasetName] = Helper.ParseImageName(imgFile, 0);
+    [sigDigits datasetName] = ParseImageName(imgFile);
     datasetPath = fullfile(imgPath,imgFile);
     
     drawCircleSize = 6;
