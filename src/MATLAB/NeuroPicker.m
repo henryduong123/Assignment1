@@ -1,9 +1,11 @@
 function NeuroPicker()
-    global hFig hEmptyMenu hClickMenu drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
+    global hFig hEmptyMenu hClickMenu bDirty drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
     
     hFig = [];
     hEmptyMenu = [];
     hClickMenu = [];
+    
+    bDirty = false;
     
     [imgFile,imgPath,filterIdx] = uigetfile('*.tif', 'Select last frame image');
     if ( filterIdx == 0 )
@@ -33,13 +35,19 @@ function NeuroPicker()
 end
 
 function drawLastFrame()
-    global hFig hEmptyMenu hClickMenu datasetPath drawCircleSize stains stainColors
+    global hFig hEmptyMenu hClickMenu bDirty datasetName datasetPath drawCircleSize defaultStainID stains stainColors
     lastIm = imread(datasetPath);
     
     hAx = get(hFig, 'CurrentAxes');
     if ( isempty(hAx) )
         hAx = axes('Parent',hFig);
         set(hFig, 'CurrentAxes', hAx);
+        
+        xl = [1 size(lastIm,2)];
+        yl = [1 size(lastIm,1)];
+    else
+        xl = xlim(hAx);
+        yl = ylim(hAx);
     end
     
     colormap(hAx, gray);
@@ -61,13 +69,28 @@ function drawLastFrame()
         set(h, 'uicontextmenu',hClickMenu,  'ButtonDownFcn',@phenoClick, 'UserData',i);
     end
     
+    h = plot(hAx, 1,1, '.', 'Color',stainColors(defaultStainID).color, 'Visible','off', 'MarkerSize',32);
+    hLeg = legend(hAx, h, '');
+    set(hLeg, 'Box','off', 'Color','none');
+    
+    xlim(hAx,xl);
+    ylim(hAx,yl);
+    
     axis(hAx,'off');
+    
+    if ( bDirty )
+        set(hFig, 'Name',[datasetName ' Staining *']);
+    else
+        set(hFig, 'Name',[datasetName ' Staining']);
+    end
 end
 
 %%%%%%%%%%%%
 
 function createStainPoint(stainID)
-    global hFig clickedPoint stains
+    global hFig bDirty clickedPoint stains
+    
+    bDirty = true;
     
     set(hFig, 'WindowButtonUpFcn','');
     
@@ -84,7 +107,9 @@ function createStainPoint(stainID)
 end
 
 function deleteStaining(src,evt)
-    global hFig clickedPoint
+    global hFig bDirty clickedPoint
+    
+    bDirty = true;
     
     set(hFig, 'WindowButtonUpFcn','');
     
@@ -143,7 +168,9 @@ function newStain(src, evt)
 end
 
 function newStainID = createNewStain()
-    global stainColors
+    global bDirty stainColors
+    
+    bDirty = true;
     
     newStainID = [];
     
@@ -260,7 +287,7 @@ function loadStainInfo(filepath)
 end
 
 function saveFile(src,evt)
-    global curSavedFile
+    global bDirty curSavedFile
     
     if ( isempty(curSavedFile) )
         saveFileAs(src,evt);
@@ -268,10 +295,13 @@ function saveFile(src,evt)
     end
     
     saveStainInfo(curSavedFile);
+    
+    bDirty = false;
+    drawLastFrame();
 end
 
 function saveFileAs(src,evt)
-    global datasetPath datasetName curSavedFile
+    global bDirty datasetPath datasetName curSavedFile
     
     curPath = fileparts(datasetPath);
     mainPath = fullfile(curPath, '..', [datasetName '_StainInfo.mat']);
@@ -283,10 +313,13 @@ function saveFileAs(src,evt)
     
     curSavedFile = fullfile(pathName, fileName);
     saveStainInfo(curSavedFile);
+    
+    bDirty = false;
+    drawLastFrame();
 end
 
 function openFile(src,evt)
-    global datasetName curSavedFile
+    global bDirty datasetName curSavedFile
     
     guessPath = guessOpenPath();
     
@@ -323,6 +356,8 @@ function openFile(src,evt)
     loadStainInfo(loadFilePath);
     
     curSavedFile = loadFilePath;
+    bDirty = false;
+    
     remakeDefaultsMenu();
     createClickMenu();
     createEmptyMenu();
@@ -354,7 +389,18 @@ function guessPath = guessOpenPath()
 end
 
 function closeFigure(src, evt)
-    global hFig
+    global hFig bDirty
+    
+    if ( bDirty )
+        resp = questdlg('Any unsaved changes will be lost, save now?', 'Unsaved Changes', 'Yes','No','Cancel', 'Yes');
+        if ( strcmpi(resp,'Cancel') )
+            return;
+        end
+        
+        if ( strcmpi(resp,'Yes') )
+            saveFile(src,evt);
+        end
+    end
     
     delete(hFig);
     clear global;
@@ -444,6 +490,8 @@ function setDefaultStain(stainID)
     global defaultStainID
     
     defaultStainID = stainID;
+    
+    drawLastFrame();
     remakeDefaultsMenu();
 end
 
