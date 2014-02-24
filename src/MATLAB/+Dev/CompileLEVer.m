@@ -132,6 +132,9 @@ function CompileLEVer(forceVersion)
     newOutput = compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
     outputFiles = [outputFiles; {newOutput}];
     
+    newOutput = compileMATLAB('NeuroPicker', bindir, {}, toolboxStruct.deps);
+    outputFiles = [outputFiles; {newOutput}];
+    
     
     enableStartupScripts(true);
     
