@@ -49,7 +49,7 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks, st
     i = 1;
     
     checkExtHulls = leafHulls;
-    bCheckLeaves(checkExtHulls) = 1;
+    bCheckLeaves(checkExtHulls) = true;
     while ( i <= length(checkExtHulls) )
         curCheckHull = checkExtHulls(i);
         
@@ -107,7 +107,7 @@ function [assignedExtensions findTime extTime] = LinkTreesForward(rootTracks, st
             addLeaves = nextLeaves(~bCheckLeaves(nextLeaves));
             
             checkExtHulls = [checkExtHulls addLeaves];
-            bCheckLeaves(addLeaves) = 1;
+            bCheckLeaves(addLeaves) = true;
         end
         
         UI.Progressbar((i/length(checkExtHulls))/2);

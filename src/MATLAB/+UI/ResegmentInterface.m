@@ -31,7 +31,12 @@ function ResegmentInterface()
     set(Figures.tree.handle, 'BusyAction','queue', 'Interruptible','on');
     
     tStart = max(Figures.time, 2);
-    bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, hToolbar, preserveFam, tStart);
+    xlims = get(Figures.tree.axesHandle,'XLim');
+    hold(Figures.tree.axesHandle,'on');
+    plot(Figures.tree.axesHandle, [xlims(1), xlims(2)],[tStart, tStart], '-b');
+    hold(Figures.tree.axesHandle,'off');
+    
+    bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, preserveFam, tStart);
     if ( bErr )
         delete(hToolbar);
     end

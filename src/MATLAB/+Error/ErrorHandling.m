@@ -36,8 +36,10 @@ msgboxHandle = msgbox('Attempting to fix database. Will take some time depending
 Error.LogAction(errorMessage,0,0,errStack);
 
 %let the user know that this might take a while
-set(Figures.tree.handle,'Pointer','watch');
-set(Figures.cells.handle,'Pointer','watch');
+if ( ~isempty(Figures) )
+    set(Figures.tree.handle,'Pointer','watch');
+    set(Figures.cells.handle,'Pointer','watch');
+end
 
 Editor.History('Top');
 Error.OutputDebugErrorFile();
@@ -52,6 +54,8 @@ end
 UI.Progressbar(1);
 
 %let the user know that the drawing is done
-set(Figures.tree.handle,'Pointer','arrow');
-set(Figures.cells.handle,'Pointer','arrow');
+if ( ~isempty(Figures) )
+    set(Figures.tree.handle,'Pointer','arrow');
+    set(Figures.cells.handle,'Pointer','arrow');
+end
 end

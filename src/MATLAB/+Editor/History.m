@@ -37,8 +37,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function History(action, varargin)
-    global Figures
-    
     switch action
         case 'Saved'
             Editor.StackedHistory.SetSaved();
@@ -46,7 +44,7 @@ function History(action, varargin)
         case 'Push'
             % Push time context with edit
             if ( isempty(varargin) || ~isnumeric(varargin{1}) )
-                varargin{1} = Figures.time;
+                varargin{1} = getFigureTime();
             end
             
             Editor.StackedHistory.PushState(varargin{1});
@@ -59,14 +57,10 @@ function History(action, varargin)
                 jumpTime = Editor.StackedHistory.UndoState();
                 
                 if ( strcmpi(varargin{1},'Jump') )
-                    Figures.time = jumpTime;
+                    setFigureTime(jumpTime);
                 end
 
-                %Update displays
-                UI.DrawTree(Figures.tree.familyID);
-                UI.DrawCells();
-                UI.UpdateSegmentationEditsMenu();
-                UI.UpdatePhenotypeMenu();
+                updateFigures()
                 Error.LogAction('Undo');
             end
             setMenus();
@@ -78,21 +72,16 @@ function History(action, varargin)
                 jumpTime = Editor.StackedHistory.RedoState();
                 
                 if ( strcmpi(varargin{1},'Jump') )
-                    Figures.time = jumpTime;
+                    setFigureTime(jumpTime);
                 end
                 
-                %Update displays
-                UI.DrawTree(Figures.tree.familyID);
-                UI.DrawCells();
-                UI.UpdateSegmentationEditsMenu();
-                UI.UpdatePhenotypeMenu();
+                updateFigures();
                 Error.LogAction('Redo');
             end
             setMenus();
         case 'Top'
             Editor.StackedHistory.TopState();
-            UI.UpdateSegmentationEditsMenu();
-            UI.UpdatePhenotypeMenu();
+            updateFigures();
         case 'Init'
             Editor.StackedHistory.InitStack();
             setMenus();
@@ -107,6 +96,40 @@ function History(action, varargin)
             Editor.StackedHistory.DropStack();
             setMenus();
     end
+end
+
+function updateFigures()
+    global Figures
+    if ( isempty(Figures) )
+        return;
+    end
+    
+    %Update displays
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
+    UI.UpdateSegmentationEditsMenu();
+    UI.UpdatePhenotypeMenu();
+end
+
+function setFigureTime(time)
+    global Figures
+    
+    if ( isempty(Figures) )
+        return;
+    end
+    
+    Figures.time = time;
+end
+
+function time = getFigureTime()
+    global Figures
+    
+    if ( isempty(Figures) )
+        time = 1;
+        return;
+    end
+    
+    time = Figures.time;
 end
 
 function setMenus()
