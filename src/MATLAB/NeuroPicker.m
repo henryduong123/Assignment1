@@ -1,9 +1,10 @@
 function NeuroPicker()
-    global hFig hEmptyMenu hClickMenu bDirty drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
+    global hFig hEmptyMenu hClickMenu bDirty finalIm drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
     
     hFig = [];
     hEmptyMenu = [];
     hClickMenu = [];
+    finalIm = [];
     
     bDirty = false;
     
@@ -14,6 +15,8 @@ function NeuroPicker()
     
     [sigDigits datasetName] = ParseImageName(imgFile);
     datasetPath = fullfile(imgPath,imgFile);
+    
+    finalIm = imread(datasetPath);
     
     drawCircleSize = 6;
     
@@ -35,16 +38,15 @@ function NeuroPicker()
 end
 
 function drawLastFrame()
-    global hFig hEmptyMenu hClickMenu bDirty datasetName datasetPath drawCircleSize defaultStainID stains stainColors
-    lastIm = imread(datasetPath);
+    global hFig hEmptyMenu hClickMenu bDirty finalIm datasetName drawCircleSize defaultStainID stains stainColors
     
     hAx = get(hFig, 'CurrentAxes');
     if ( isempty(hAx) )
         hAx = axes('Parent',hFig);
         set(hFig, 'CurrentAxes', hAx);
         
-        xl = [1 size(lastIm,2)];
-        yl = [1 size(lastIm,1)];
+        xl = [1 size(finalIm,2)];
+        yl = [1 size(finalIm,1)];
     else
         xl = xlim(hAx);
         yl = ylim(hAx);
@@ -54,7 +56,7 @@ function drawLastFrame()
     set(hAx,'Position',[.01 .01 .98 .98]);
     
     hold(hAx, 'off');
-    hIm = imagesc(lastIm, 'Parent',hAx);
+    hIm = imagesc(finalIm, 'Parent',hAx);
     set(hIm, 'ButtonDownFcn',@imageClick);
     set(hIm, 'uicontextmenu',hEmptyMenu);
     
@@ -70,8 +72,8 @@ function drawLastFrame()
     end
     
     h = plot(hAx, 1,1, '.', 'Color',stainColors(defaultStainID).color, 'Visible','off', 'MarkerSize',32);
-    hLeg = legend(hAx, h, '');
-    set(hLeg, 'Box','off', 'Color','none');
+%     hLeg = legend(hAx, h, '');
+%     set(hLeg, 'Box','off', 'Color','none');
     
     xlim(hAx,xl);
     ylim(hAx,yl);
