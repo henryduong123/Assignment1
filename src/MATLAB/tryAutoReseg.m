@@ -23,6 +23,8 @@ function tryAutoReseg(filename, outFilename)
     % Initialized cached costs here if necessary (placed after fix old file versions for compatibility)
     Load.InitializeCachedCosts(0);
     
+    Editor.ReplayableEditAction(@Editor.InitHistory);
+    
     runTreeInference();
     runAutoReseg();
 end
@@ -37,7 +39,7 @@ function runTreeInference()
 end
 
 function runAutoReseg()
-    global CONSTANTS CellFamilies HashedCells Costs ResegState bResegPaused
+    global CONSTANTS CellFamilies CellHulls HashedCells Costs
     
     neFam = find(arrayfun(@(x)(~isempty(x.startTime)), CellFamilies));
     runFamilies = neFam(arrayfun(@(x)(x.startTime == 1), CellFamilies(neFam)));
@@ -47,7 +49,7 @@ function runAutoReseg()
     
     bErr = Editor.ReplayableEditAction(@Editor.ResegInitializeAction, runFamilies, 2);
     
-    Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, finishTime-1, 'AutoResegTask');
+    Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'AutoResegTask');
 
 %%%%%%%%%
     bFinished = false;
@@ -66,29 +68,16 @@ function runAutoReseg()
         xl = [1 CONSTANTS.imageSize(2)];
         yl = [1 CONSTANTS.imageSize(1)];
         
-        bErr = Editor.ReplayableEditAction(@Editor.ResegFrameAction, t, tMax, [xl;yl]);
+        bErr = Editor.ReplayableEditAction(@Editor.ResegFrameAction, t, tEnd, [xl;yl]);
         
         if ( bErr )
-            return;
-        end
-        
-        % For forward frame-step
-        if ( t == tEnd )
-            break;
-        end
-        
-        if ( isempty(ResegState) || isempty(bResegPaused) )
-            return;
-        end
-        
-        if ( bResegPaused )
             return;
         end
     end
     
 %%%%%%%%%    
     [bErr finishTime] = Editor.ReplayableEditAction(@Editor.ResegFinishAction);
-    Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, 'AutoResegTask');
+    Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, tEnd-1, 'AutoResegTask');
 end
 
 function findImageDir(rootSearchDir)

@@ -94,8 +94,8 @@ oldCONSTANTS = CONSTANTS;
 
 Helper.ClearAllGlobals();
 
-ovwAns = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
-switch ovwAns
+answer = questdlg('Run Segmentation and Tracking or Use Existing Data?','Data Source','Segment & Track','Existing','Existing');
+switch answer
     case 'Segment & Track'
         if (~Helper.ImageFileDialog())
             return;

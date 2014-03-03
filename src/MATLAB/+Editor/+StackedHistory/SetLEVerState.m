@@ -10,7 +10,11 @@ function SetLEVerState(histState)
     GraphEdits = histState.GraphEdits;
     CachedCostMatrix = histState.CachedCostMatrix;
     ConnectedDist = histState.ConnectedDist;
-    Figures.tree.familyID = histState.selectedFamID;
+    
+    if ( ~isempty(Figures) && ~isempty(histState.selectedFamID) )
+        Figures.tree.familyID = histState.selectedFamID;
+    end
+    
     CellPhenotypes = histState.CellPhenotypes;
     SegmentationEdits = histState.SegmentationEdits;
     ResegState = histState.ResegState;

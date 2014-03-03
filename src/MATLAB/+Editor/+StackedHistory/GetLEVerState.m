@@ -10,7 +10,12 @@ function histState = GetLEVerState()
     histState.GraphEdits = GraphEdits;
     histState.CachedCostMatrix = CachedCostMatrix;
     histState.ConnectedDist = ConnectedDist;
-    histState.selectedFamID = Figures.tree.familyID;
+    
+    histState.selectedFamID = [];
+    if ( ~isempty(Figures) )
+        histState.selectedFamID = Figures.tree.familyID;
+    end
+    
     histState.CellPhenotypes = CellPhenotypes;
     histState.SegmentationEdits = SegmentationEdits;
     histState.ResegState = ResegState;
