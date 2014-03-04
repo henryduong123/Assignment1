@@ -214,6 +214,13 @@ resegStatusMenu = uimenu(...
     'Callback',         @toggleResegStatus,...
     'Checked',          'off');
 
+missingCellsMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Missing Cells Counter',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleMissingCells,...
+    'Checked',          'off');
+
 playMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Play',...
@@ -270,6 +277,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.imageMenu = imageMenu;
     Figures.cells.menuHandles.fluorMenu = fluorMenu;
     Figures.cells.menuHandles.resegStatusMenu = resegStatusMenu;
+    Figures.cells.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
     Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
     Figures.cells.menuHandles.structOnlyMenu = structOnlyMenu;
@@ -285,6 +293,7 @@ else
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.fluorMenu = fluorMenu;
     Figures.tree.menuHandles.resegStatusMenu = resegStatusMenu;
+    Figures.tree.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
     Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
     Figures.tree.menuHandles.structOnlyMenu = structOnlyMenu;
@@ -431,7 +440,7 @@ else
 end
 end
 
-function toggleResegStatus(src, evt)
+function toggleResegStatus(src, evnt)
     global Figures
     menuChecked = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
     if ( strcmp(menuChecked, 'on') )
@@ -443,6 +452,19 @@ function toggleResegStatus(src, evt)
         set(Figures.tree.menuHandles.resegStatusMenu, 'Checked', 'on');
         UI.DrawTree(Figures.tree.familyID);
     end
+end
+
+function toggleMissingCells(src,evnt)
+global Figures
+if(strcmp(get(Figures.cells.menuHandles.missingCellsMenu, 'Checked'), 'on'))
+    set(Figures.cells.menuHandles.missingCellsMenu, 'Checked', 'off');
+    set(Figures.tree.menuHandles.missingCellsMenu, 'Checked', 'off');
+    UI.DrawCells();
+else
+    set(Figures.cells.menuHandles.missingCellsMenu, 'Checked', 'on');
+    set(Figures.tree.menuHandles.missingCellsMenu, 'Checked', 'on');
+    UI.DrawCells();
+end
 end
 
 function timeJump(src,evnt)

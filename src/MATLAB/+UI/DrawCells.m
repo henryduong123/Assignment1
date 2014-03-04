@@ -40,6 +40,23 @@ else
     set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
     haveFluor = 1;
 end
+
+% Missing Cells Counter
+missingCells = UI.CellCountDifference();
+if strcmp(get(Figures.cells.menuHandles.missingCellsMenu, 'Checked'),'on')
+    if(missingCells == 0)   % no missing cells = green
+        set(Figures.cells.cellCountLabel,'Visible', 'on',...
+            'ForegroundColor',[0 0.4 0],...
+            'FontSize', 8, 'String', ['Missing Cells: ' num2str(missingCells)]);
+    else % Missing Cells turns red
+        set(Figures.cells.cellCountLabel,'Visible', 'on',...
+            'ForegroundColor',[1 0 0], ...
+            'FontSize', 9, 'String', ['Missing Cells: ' num2str(missingCells)]);
+    end
+else
+    set(Figures.cells.cellCountLabel,'Visible', 'off');
+end
+
 %read in image
 filename = Helper.GetFullImagePath(Figures.time);
 if (exist(filename,'file')==2)
@@ -91,7 +108,8 @@ drawHullFilter = [];
 if ( strcmpi(Figures.cells.editMode, 'mitosis') )
     % Filter so we only draw family "mitosis" hulls when editing
     bDrawLabels = 0;
-    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)),CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
+    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)),...
+        CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
     drawHullFilter = [drawHullFilter{:}];
 end
 
@@ -186,8 +204,24 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             if (Figures.tree.familyID == CellTracks(curTrackID).familyID ||...
                     strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on'))
                 
-                xLabelCorner = max(CellHulls(curHullID).points(:,1));
-                yLabelCorner = max(CellHulls(curHullID).points(:,2));
+                
+                magPoints = ((CellHulls(curHullID).points(:,1)) +((CellHulls(curHullID).points(:,2))));
+                
+                % attach label to point with highest Manhattan distance
+                % (x+y)
+                [~, idx] = max(magPoints);
+                
+                xLabelCorner = CellHulls(curHullID).points(idx,1);
+                yLabelCorner = CellHulls(curHullID).points(idx,2);
+                % end new labels
+                
+%               % old labels
+%                 xLabelCorner = max(CellHulls(curHullID).points(:,1));
+%                 yLabelCorner = max(CellHulls(curHullID).points(:,2));                
+                % draw label in center of mass
+%                 xLabelCorner = CellHulls(curHullID).centerOfMass(2);
+%                 yLabelCorner = CellHulls(curHullID).centerOfMass(1);
+                % end
                 
                 [textHandle, bgHandle] = UI.DrawCellLabel(curAx, drawString, xLabelCorner, yLabelCorner, colorStruct);
                 

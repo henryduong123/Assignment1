@@ -42,6 +42,9 @@ else
         'Tag',          'timeIndicatorLine',...
         'Parent',       Figures.tree.axesHandle);
 end
+
+Figures.cellCount = UI.UpdateCellCount();
 % uistack(Figures.tree.timeIndicatorLine, 'bottom');
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+set(Figures.tree.cellCountLabel,'String',['Cell Count: ' num2str(Figures.cellCount)]);
 end
