@@ -82,45 +82,45 @@ function updateTrackingIndicators()
         Figures.tree.trackingLabel = hLabel;
     end
     
-    % Debugging path code:
-    if ( isfield(Figures.tree,'debugLineList') )
-        bValidHandles = Helper.ValidUIHandle(Figures.tree.debugLineList);
-        validHandles = Figures.tree.debugLineList(bValidHandles);
-        for i=1:length(validHandles)
-            delete(validHandles(i));
-        end
-        Figures.tree.debugLineList = [];
-    end
-    
-    Figures.tree.debugLineList = text(xVal,yEnd-10, num2str(minCost));
-    
-    hold(curAx,'on');
-    curTrackID = selectedTrackID;
-    while ( curTrackID > 0 )
-        predID = SelectStruct.selectPath(curTrackID);
-        edgeDir = sign(SelectStruct.selectCosts(curTrackID));
-        
-        xVal = Figures.tree.trackMap(curTrackID).xCenter;
-        yStart = CellTracks(curTrackID).startTime;
-        yEnd = CellTracks(curTrackID).endTime+1;
-        if ( edgeDir < 0 )
-            yStart = CellTracks(curTrackID).endTime+1;
-            yEnd = CellTracks(curTrackID).startTime;
-        end
-        
-        hvLine = [];
-        hhLine = [];
-        if ( curTrackID ~= selectedTrackID )
-            hvLine = plot(curAx, [xVal xVal], [yStart yEnd], '-r', 'LineWidth',1.5);
-        end
-        if ( predID > 0 )
-            xNext = Figures.tree.trackMap(predID).xCenter;
-            hhLine = plot(curAx, [xVal xNext], [yStart yStart], '-r', 'LineWidth',1.5);
-        end
-        
-        Figures.tree.debugLineList = [Figures.tree.debugLineList hvLine hhLine];
-        curTrackID = predID;
-    end
+%     % Debugging path code:
+%     if ( isfield(Figures.tree,'debugLineList') )
+%         bValidHandles = Helper.ValidUIHandle(Figures.tree.debugLineList);
+%         validHandles = Figures.tree.debugLineList(bValidHandles);
+%         for i=1:length(validHandles)
+%             delete(validHandles(i));
+%         end
+%         Figures.tree.debugLineList = [];
+%     end
+%     
+%     Figures.tree.debugLineList = text(xVal,yEnd-10, num2str(minCost));
+%     
+%     hold(curAx,'on');
+%     curTrackID = selectedTrackID;
+%     while ( curTrackID > 0 )
+%         predID = SelectStruct.selectPath(curTrackID);
+%         edgeDir = sign(SelectStruct.selectCosts(curTrackID));
+%         
+%         xVal = Figures.tree.trackMap(curTrackID).xCenter;
+%         yStart = CellTracks(curTrackID).startTime;
+%         yEnd = CellTracks(curTrackID).endTime+1;
+%         if ( edgeDir < 0 )
+%             yStart = CellTracks(curTrackID).endTime+1;
+%             yEnd = CellTracks(curTrackID).startTime;
+%         end
+%         
+%         hvLine = [];
+%         hhLine = [];
+%         if ( curTrackID ~= selectedTrackID )
+%             hvLine = plot(curAx, [xVal xVal], [yStart yEnd], '-r', 'LineWidth',1.5);
+%         end
+%         if ( predID > 0 )
+%             xNext = Figures.tree.trackMap(predID).xCenter;
+%             hhLine = plot(curAx, [xVal xNext], [yStart yStart], '-r', 'LineWidth',1.5);
+%         end
+%         
+%         Figures.tree.debugLineList = [Figures.tree.debugLineList hvLine hhLine];
+%         curTrackID = predID;
+%     end
 end
 
 function clearIndicators()
@@ -132,15 +132,15 @@ function clearIndicators()
         delete(Figures.tree.trackingLabel);
     end
     
-    %Debugging
-    if ( isfield(Figures.tree,'debugLineList') )
-        bValidHandles = Helper.ValidUIHandle(Figures.tree.debugLineList);
-        validHandles = Figures.tree.debugLineList(bValidHandles);
-        for i=1:length(validHandles)
-            delete(validHandles(i));
-        end
-        Figures.tree.debugLineList = [];
-    end
+%     %Debugging
+%     if ( isfield(Figures.tree,'debugLineList') )
+%         bValidHandles = Helper.ValidUIHandle(Figures.tree.debugLineList);
+%         validHandles = Figures.tree.debugLineList(bValidHandles);
+%         for i=1:length(validHandles)
+%             delete(validHandles(i));
+%         end
+%         Figures.tree.debugLineList = [];
+%     end
 end
 
 function chkTracks = validCurrentTreeTracks()
