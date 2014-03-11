@@ -146,6 +146,14 @@ function loadStainInfo(loadStainPath)
     
     stains = s.stains;
     stainColors = s.stainColors;
+    
+    deadNames = {'Dead';'Died'};
+    
+    for i=1:length(stainColors)
+        if ( any(strcmpi(deadNames,stainColors(i).stain)) )
+            stainColors(i).color = [0.75,0,0.75];
+        end
+    end
 end
 
 function imagesPath = openImages(matPath)
