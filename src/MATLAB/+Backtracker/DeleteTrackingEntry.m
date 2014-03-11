@@ -3,4 +3,6 @@ function DeleteTrackingEntry(selectedTrackID, dirFlag, time)
     
     Families.RemoveFromTree(selectedTrackID, time);
     bDirty = true;
+    
+    Backtracker.UpdateBacktrackInfo();
 end

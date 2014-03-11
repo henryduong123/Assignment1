@@ -1,4 +1,4 @@
-function backtracker()
+function Backtracker()
     global bDirty Figures EditFamIdx CellFamilies HashedCells SelectStruct stains stainColors BackTrackIdx BackSelectHulls
     
     stains = [];

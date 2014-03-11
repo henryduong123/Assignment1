@@ -20,7 +20,7 @@ function newTrackID = TearoffHull(trackID, time)
         % Tearoff both children since can't reconstruct mitosis without
         % this hull
         if ( ~bLeafTrack )
-            Families.RemoveFromTreePrune(CellTracks(trackID).childrenTracks(1));
+            Families.RemoveFromTreePrune(CellTracks(newTrackID).childrenTracks(1));
         end
         return;
     end

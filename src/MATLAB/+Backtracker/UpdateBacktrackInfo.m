@@ -10,5 +10,5 @@ function UpdateBacktrackInfo()
         newEditTime = CellTracks(newEditID).startTime;
     end
     
-    Backtracker.SelectTrackingCell(newEditID, newEditTime);
+    Backtracker.SelectTrackingCell(newEditID, newEditTime, true);
 end

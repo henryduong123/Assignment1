@@ -1,5 +1,9 @@
-function SelectTrackingCell(trackID,time)
-    global bDirty CellTracks SelectStruct BackSelectHulls
+function SelectTrackingCell(trackID,time, bForceUpdate)
+    global bDirty Figures CellTracks SelectStruct BackSelectHulls
+    
+    if ( ~exist('bForceUpdate','var') )
+        bForceUpdate = false;
+    end
     
     familyID = [];
     
@@ -23,12 +27,22 @@ function SelectTrackingCell(trackID,time)
         familyID = CellTracks(trackID).familyID;
     end
     
-    % Allow drawtree to skip (if familyID is already current)
-    Backtracker.DrawTree(familyID);
+    % Update backtrack hulls before DrawCell call
+    Backtracker.UpdateBacktrackHulls();
+    
+    if ( bForceUpdate )
+        % Force redraw of family because a track edit has occurred
+        Figures.tree.familyID = familyID;
+        Backtracker.DrawTree();
+    else
+        % Allow drawtree to skip (if familyID is already current)
+        Backtracker.DrawTree(familyID);
+    end
+    
+    
     Backtracker.DrawCells();
     
     Backtracker.UpdateTimeLine();
-    Backtracker.UpdateBacktrackHulls();
 end
 
 function [treeCosts treePath] = buildSelectTree(trackID)
