@@ -24,6 +24,12 @@ function childHulls = FindChildrenHulls(linePoints, time)
         childHulls = Hulls.SetHullEntries(setHullIDs, newHulls);
     end
     
+    childDist = getHullDistance(childHulls, linePoints);
+    [minDist minIdx] = min(childDist,[],2);
+    if ( minIdx(1) == 2 )
+        childHulls = childHulls([2 1]);
+    end
+    
     if ( any(childHulls == 0) )
         error('Not all child hulls are valid!');
     end
@@ -284,6 +290,16 @@ function updateLocalTracking(newHulls, hullTime)
     if ( hullTime < length(HashedCells) )
         nextHulls = [HashedCells{hullTime+1}.hullID];
         Tracker.UpdateTrackingCosts(hullTime, newHulls, nextHulls);
+    end
+end
+
+function dist = getHullDistance(hulls, points)
+    global CellHulls
+    
+    dist = zeros(length(hulls),length(points));
+    hullCOM = vertcat(CellHulls(hulls).centerOfMass);
+    for i=1:length(hulls)
+        dist(i,:) = sum((repmat(hullCOM(i,[2 1]),2,1) - points).^2, 2).';
     end
 end
 
