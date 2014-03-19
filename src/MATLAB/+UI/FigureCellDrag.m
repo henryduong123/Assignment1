@@ -15,10 +15,13 @@ function FigureCellDrag(src,evnt)
     
     if ( ~Helper.NonEmptyField(Figures.cells, 'dragElements') )
         createNormalDragElements(Figures.cells.downHullID, currentPoint)
-    else
+    elseif ( ishandle(Figures.cells.dragElements.bgLabel) )
         set(Figures.cells.dragElements.bgLabel, 'XData',currentPoint(1,1));
         set(Figures.cells.dragElements.bgLabel, 'YData',currentPoint(1,2));
         set(Figures.cells.dragElements.label, 'Position',currentPoint(1,1:2));
+    else
+        Figures.cells.dragElements = [];
+        set(Figures.cells.handle, 'WindowButtonMotionFcn','');
     end
 end
 
