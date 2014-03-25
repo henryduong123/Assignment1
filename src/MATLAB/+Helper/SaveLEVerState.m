@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SaveLEVerState(filename)
-    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks
+    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks stains stainColors
     
     gVars = whos('CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
                  'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
@@ -39,5 +39,5 @@ function SaveLEVerState(filename)
     
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-        'FluorData', 'HaveFluor', 'ResegLinks', saveParam);
+        'FluorData', 'HaveFluor', 'ResegLinks','stains','stainColors', saveParam);
 end

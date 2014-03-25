@@ -100,6 +100,10 @@ if(haveFluor && strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on')
     [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
     plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
 end
+
+if ( (Figures.time == length(HashedCells)) )
+    drawStainInfo(curAx);
+end
         
 %draw labels if turned on
 Figures.cells.labelHandles = [];
@@ -244,6 +248,26 @@ plot(curAx, [CellHulls(hullID).centerOfMass(2) CellHulls(siblingHullID).centerOf
     'UserData',         trackID,...
     'uicontextmenu',    Figures.cells.contextMenuHandle,...
     'Tag',              'SiblingRelationship');
+end
+
+function drawStainInfo(hAx)
+    global stains stainColors
+    
+    if ( isempty(stainColors) )
+        return;
+    end
+    
+    drawCircleSize = 6;
+    
+    hold(hAx, 'on');
+    for i=1:length(stains)
+        x = stains(i).point(1);
+        y = stains(i).point(2);
+        
+        circleColor = stainColors(stains(i).stainID).color;
+        
+        h = rectangle('Position', [x-drawCircleSize/2 y-drawCircleSize/2 drawCircleSize drawCircleSize], 'Curvature',[1 1], 'EdgeColor',circleColor,'FaceColor',circleColor, 'Parent',hAx);
+    end
 end
 
 function bInLims = checkCOMLims(hullID, xlims, ylims)
