@@ -5,6 +5,10 @@
 function UpdatePhenotypeMenu(phenoMenu)
     global Figures CellPhenotypes
     
+    if ( isempty(Figures) )
+        return;
+    end
+    
     if ( ~exist('phenoMenu', 'var') )
         % Find phenotype menu handle
         contextMenu = Figures.cells.contextMenuHandle;

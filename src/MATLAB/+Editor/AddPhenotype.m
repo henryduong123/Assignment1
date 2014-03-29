@@ -11,7 +11,7 @@ function [historyAction phenoID] = AddPhenotype(description)
     historyAction = '';
     
     if ( isempty(Colors) )
-        Load.CreateColors();
+        Colors = Load.CreateColors();
     end
     for i=1:length(CellPhenotypes.descriptions)
     if ((strcmpi(description,CellPhenotypes.descriptions{i}))== 1)

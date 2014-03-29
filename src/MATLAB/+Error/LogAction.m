@@ -103,6 +103,10 @@ if (isfield(Figures,'tree'))
     Log(logEntry).figures.tree = Figures.tree;
 end
 
+if ( ~exist(logFile,'file') )
+    return;
+end
+
 file = fopen(logFile,'a');
 while(file<2)
     answer = questdlg('Please close the log.','Log Opened','Use new log name','Try Again','Try Again');
