@@ -47,7 +47,7 @@ if(isempty(CellFamilies(familyID).tracks)),return,end
 set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
 
-if ( ~isfield(Figures.tree,'axesHandle') || isempty(Figures.tree.axesHandle) )
+if ( ~isfield(Figures.tree,'axesHandle') || ~Helper.ValidUIHandle(Figures.tree.axesHandle) )
     Figures.tree.axesHandle = axes('Parent', Figures.tree.handle);
     
     set(Figures.tree.axesHandle,...
