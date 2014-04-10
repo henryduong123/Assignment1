@@ -12,15 +12,24 @@
 % DrawCells
 
 function cellDiff = CellCountDifference()
-global Figures CellFamilies
-FamID = Figures.tree.familyID;
-familyTracks = CellFamilies(FamID).tracks;
-hulls = zeros(1,length(familyTracks));
-% Tracks.GetHullID() to check if hull exists in that time.  0 if no hull
-% exists - nnz()
+    global Figures CellFamilies
+
+    cellDiff = 0;
+    
+    FamID = Figures.tree.familyID;
+    
+    familyTracks = CellFamilies(FamID).tracks;
+    if ( isempty(familyTracks) )
+        return;
+    end
+
+    hulls = zeros(1,length(familyTracks));
+    % Tracks.GetHullID() to check if hull exists in that time.  0 if no hull
+    % exists - nnz()
     for k = 1:length(familyTracks)
         hulls(k) = Tracks.GetHullID(Figures.time, familyTracks(k));
-        hullCount = nnz(hulls);
     end
+    
+    hullCount = nnz(hulls);
     cellDiff = Figures.cellCount - hullCount;
 end
