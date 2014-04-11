@@ -30,6 +30,11 @@ function version = GetVersion(command)
         return;
     end
     
+    if ( strcmpi(command, 'buildHash') )
+        version = verInfo.commitHash;
+        return
+    end
+    
     if ( strcmpi(command, 'fullString') )
         version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) '.' verInfo.buildNumber '/' verInfo.buildMachine ' ' cleanBranch];
         return;

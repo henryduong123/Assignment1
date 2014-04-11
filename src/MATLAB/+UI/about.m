@@ -66,9 +66,10 @@ end
 imagesc(im)
 softwareVersion = Helper.GetVersion();
 buildNumber = Helper.GetVersion('buildString');
+buildHash = Helper.GetVersion('buildHash');
 cDate = clock();
 if ( ~isempty(softwareVersion) )
-    set(handles.text1,'string',{['LEVER: ' softwareVersion] ; [' ' buildNumber ' '] ;[] ; ['(c) ' num2str(cDate(1))]  });
+    set(handles.text1,'string',{['LEVER: ' softwareVersion] ; [' ' buildNumber ' '] ;[' ' buildHash(1:20) ' '] ; ['(c) ' num2str(cDate(1))]  });
 else
     set(handles.text1,'string',{['LEVER: (version unknown)' ] ; []; [] ; ['(c) ' num2str(cDate(1))]  });
 end    

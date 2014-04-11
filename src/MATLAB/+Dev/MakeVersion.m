@@ -14,7 +14,8 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
         '       ''minorVersion'',{%d},...'
         '       ''branchName'',{''%s''},...'
         '       ''buildNumber'',{''%s''},...'
-        '       ''buildMachine'',{''%s''});'
+        '       ''buildMachine'',{''%s''},...'
+        '       ''commitHash'',{''%s''});'
         '	end'};
     
     if ( ~exist('bTransientUpdate', 'var') )
@@ -30,7 +31,8 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
                 'minorVersion',{0},...
                 'branchName',{'UNKNOWN'},...
                 'buildNumber',{'UNKNOWN'},...
-                'buildMachine',{'UNKNOWN'});
+                'buildMachine',{'UNKNOWN'},...
+                'commitHash',{''});
 	
 	
 	fallbackFile = 'version.txt';
@@ -67,6 +69,11 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
         verInfo.branchName = strtrim(branchName);
     end
     
+    [status commitHash] = system('git rev-parse HEAD');
+    if ( ~isempty(commitHash) )
+        verInfo.commitHash = strtrim(commitHash);
+    end
+    
     % Get a timestamp build-number
     c = clock();
     verInfo.buildNumber = sprintf('%d.%02d.%02d.%02d', c(1), c(2), c(3), c(4));
@@ -96,7 +103,7 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
             error('Unable to open +Helper\VersionInfo.m for writing');
         end
 
-        fprintf(fid, templateString, verInfo.majorVersion, verInfo.minorVersion, verInfo.branchName, verInfo.buildNumber, verInfo.buildMachine);
+        fprintf(fid, templateString, verInfo.majorVersion, verInfo.minorVersion, verInfo.branchName, verInfo.buildNumber, verInfo.buildMachine, verInfo.commitHash);
 
         fclose(fid);
         
@@ -113,13 +120,15 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
     end
 end
 
-function [verTag branchName] = gitVersionAndBranch(bUseGit, fallbackFile)
+function [verTag branchName commitHash] = gitVersionAndBranch(bUseGit, fallbackFile)
     verTag = '';
     branchName = '';
+    commitHash = '';
     
     if ( bUseGit )
         [verStatus,verTag] = system('git describe --tags --match v[0-9]*.[0-9]* --abbrev=0');
         [branchStatus,branchName] = system('git rev-parse --abbrev-ref HEAD');
+        [hashStatus,commitHash] = system('git rev-parse HEAD');
         
         if ( verStatus ~= 0 )
             fprintf('WARNING: There was an error retrieving tag from git:\n %s\n', verTag);
@@ -129,6 +138,11 @@ function [verTag branchName] = gitVersionAndBranch(bUseGit, fallbackFile)
         if ( branchStatus ~= 0 )
             fprintf('WARNING: There was an error retrieving branch name from git:\n %s\n', branchName);
             branchName = '';
+        end
+        
+        if ( hashStatus ~= 0 )
+            fprintf('WARNING: There was an error retrieving commit hash from git:\n %s\n', commitHash);
+            commitHash = '';
         end
         
         return;
@@ -147,6 +161,7 @@ function [verTag branchName] = gitVersionAndBranch(bUseGit, fallbackFile)
     
     verTag = fgetl(fid);
     branchName = fgetl(fid);
+    commitHash = fgetl(fid);
     
     fclose(fid);
 end
