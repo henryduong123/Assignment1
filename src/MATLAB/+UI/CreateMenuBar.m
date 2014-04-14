@@ -58,6 +58,13 @@ uimenu(...
     'Callback',         @UI.CloseFigure,...
     'Accelerator',      'w');
 
+uimenu(...
+    'Parent',           fileMenu,...
+    'Label',            'Load Stain Info...',...
+    'HandleVisibility', 'callback', ...
+    'Separator',        'on',...
+    'Callback',         @loadStainData);
+
 saveMenu = uimenu(...
     'Parent',           fileMenu,...
     'Label',            'Save',...
@@ -317,6 +324,121 @@ function openFile(src,evnt)
         ReplayEditActions = temp.ReplayEditActions;
     catch mexcp
     end
+end
+
+function [stainID stainDist] = findClosestHullStain(hullID, stainPoints)
+    global CellHulls
+    
+	hullPoints = CellHulls(hullID).points;
+    bContainedPt = true(size(stainPoints,1),1);
+    
+    maxExpand = 15;
+    minExpand = -2;
+    
+    stainID = 0;
+    stainDist = Inf;
+    
+    expDist = maxExpand;
+    for expDist=minExpand:maxExpand
+        bContainedPt = Hulls.ExpandedHullContains(hullPoints, expDist, stainPoints);
+        
+        if ( bContainedPt >= 1 )
+            break;
+        end
+        
+        expDist = expDist - 1;
+    end
+    
+    if ( nnz(bContainedPt) < 1 )
+        return;
+    end
+    
+    stainDist = expDist - minExpand;
+    stainID = find(bContainedPt,1,'first');
+end
+
+function assignPhenotype(hullID, phenoID, bForceAssign)
+    trackID = Hulls.GetTrackID(hullID);
+    trackPhenoID = Tracks.GetTrackPhenotype(trackID);
+    if ( ~bForceAssign && (trackPhenoID > 0) )
+        return;
+    end
+    
+    Editor.ReplayableEditAction(@Editor.ContextSetPhenotype, hullID,phenoID,false);
+end
+
+function assignStains()
+    global stains stainColors HashedCells CellPhenotypes Figures
+    
+    if ( isempty(stains) )
+        return;
+    end
+    
+    Editor.StartReplayableSubtask('AssignStainPhenotypes');
+    
+    stainPoints = vertcat(stains.point);
+    stainPhenoMap = zeros(length(stainColors),1);
+    for i=1:length(stainColors)
+        [bErr stainPhenoMap(i)] = Editor.ReplayableEditAction(@Editor.AddPhenotype, stainColors(i).stain);
+        if ( bErr )
+            Editor.StopReplayableSubtask(Figures.time, 'AssignStainPhenotypes');
+            return;
+        end
+        
+        CellPhenotypes.colors(stainPhenoMap(i),:) = stainColors(i).color;
+    end
+    
+    lastHullIDs = [HashedCells{end}.hullID];
+    distMat = Inf*ones(length(lastHullIDs),size(stainPoints,1));
+    for i=1:length(lastHullIDs)
+        [stainPointIdx stainDist] = findClosestHullStain(lastHullIDs(i), stainPoints);
+        if ( stainPointIdx <= 0 )
+            continue;
+        end
+        
+        distMat(i, stainPointIdx) = stainDist;
+    end
+    
+    [minHullDist bestAssignIdx] = min(distMat,[],1);
+    for i=1:length(bestAssignIdx)
+        if ( isinf(minHullDist(i)) )
+            continue;
+        end
+        
+        hullID = lastHullIDs(bestAssignIdx(i));
+        
+        stainID = stains(i).stainID;
+        assignPhenotype(hullID, stainPhenoMap(stainID), 1);
+    end
+    
+    Load.FixDefaultPhenotypes();
+    Editor.StopReplayableSubtask(Figures.time, 'AssignStainPhenotypes');
+    
+    UI.DrawCells();
+end
+
+function loadStainData(src,evt)
+    global CONSTANTS stains stainColors
+    
+    chkDir = '.';
+    if ( isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile) )
+        chkDir = fileparts(CONSTANTS.matFullFile);
+    end
+    
+    [stainFile stainPath filterIdx] = uigetfile(fullfile(chkDir,'*_StainInfo.mat'), 'Open Staining Data',fullfile(chkDir, [CONSTANTS.datasetName '_StainInfo.mat']));
+    if ( filterIdx == 0 )
+        return;
+    end
+    
+    S = load(fullfile(stainPath,stainFile));
+    if ( ~isfield(S,'stains') )
+        return;
+    end
+    
+    stains = S.stains;
+    stainColors = S.stainColors;
+    
+    assignStains();
 end
 
 function saveFile(src,evnt)

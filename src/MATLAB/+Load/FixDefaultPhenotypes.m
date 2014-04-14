@@ -2,6 +2,14 @@ function bNeedsUpdate = FixDefaultPhenotypes()
     % Merge together any duplicate phenotypes (based on description)
     bNeedsUpdate = mergeDuplicateIDs();
     
+    % Create the default 'died' phenotype and merge with any
+    % equivalent descriptors. Force phenoID = 1.
+    equivAmbigDesc = {'died', 'dead'};
+    
+    phenoIDs = findEquivalentPhenotype(equivAmbigDesc);
+    mergePhenoID = mergePhenotypes(phenoIDs);
+    bForcedChange = forcePhenotypeID(mergePhenoID, 1);
+    
     % Create the default 'ambiguous' phenotype and merge with any
     % equivalent descriptors. Force phenoID = 2.
     equivAmbigDesc = {'ambiguous', 'unknown'};

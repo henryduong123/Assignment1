@@ -13,12 +13,13 @@ function [historyAction phenoID] = AddPhenotype(description)
     if ( isempty(Colors) )
         Colors = Load.CreateColors();
     end
-    for i=1:length(CellPhenotypes.descriptions)
-    if ((strcmpi(description,CellPhenotypes.descriptions{i}))== 1)
-        phenoID = i;
+    
+    bAlreadyPheno = strcmpi(description,CellPhenotypes.descriptions);
+    if ( any(bAlreadyPheno) )
+        phenoID = find(bAlreadyPheno,1,'first');
         return;
     end
-    end
+    
     % Find all colors that haven't been used yet
     phenoColors = vertcat(CellPhenotypes.colors);
     allowedColors = getAllowedColors(phenoColors);
