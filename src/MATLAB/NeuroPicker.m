@@ -1,10 +1,14 @@
 function NeuroPicker()
-    global hFig hEmptyMenu hClickMenu bDirty finalIm drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
+    global hFig hEmptyMenu hClickMenu bDirty viewIm finalIm stainIm stainImFluor drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
     
     hFig = [];
     hEmptyMenu = [];
     hClickMenu = [];
+    
+    viewIm = [];
     finalIm = [];
+    stainIm = [];
+    stainImFluor = struct('name',{}, 'color',{}, 'image',{}, 'menu',{});
     
     bDirty = false;
     
@@ -13,53 +17,61 @@ function NeuroPicker()
         return;
     end
     
+    phaseFiles = dir(fullfile(imgPath,'*_Phase.tif'));
+    if ( isempty(phaseFiles) )
+        loadFl = questdlg('Would you like to load fluorescent stain images?');
+        if ( strcmpi(loadFl,'yes') )
+            [stainImFile,stainImPath,filterIdx] = uigetfile(fullfile(imgPath,'*_Phase.tif'), 'Select stain phase image');
+            if ( filterIdx ~= 0 )
+                loadStainImages(fullfile(stainImPath,stainImFile));
+            end
+        end
+    else
+        loadStainImages(fullfile(imgPath,phaseFiles(1).name));
+    end
+    
     [sigDigits datasetName] = ParseImageName(imgFile);
     datasetPath = fullfile(imgPath,imgFile);
     
     finalIm = imread(datasetPath);
+    viewIm = finalIm;
     
     drawCircleSize = 6;
     
     defaultStainID = 2;
     stains = struct('point',{}, 'stainID',{});
-    stainColors = struct('stain',{'unstained';'neuron';'not neuron'}, 'color',{[0.7 0.5 0];[0 0.8 0];[1 0 0]});
+    
+    if ( isempty(stainIm) )
+        stainColors = struct('stain',{'neuron';'not neuron'}, 'color',{[0 0.7 0];[0.7 0 0]});
+    else
+        stainColors = struct('stain',{}, 'color',{});
+        for i=1:length(stainImFluor)
+            stainColors = [stainColors; struct('stain',{stainImFluor(i).name}, 'color',{stainImFluor(i).color})];
+        end
+    end
+    
     bEdited = false;
     
     hFig = figure();
     set(hFig, 'CloseRequestFcn',@closeFigure);
+    set(hFig, 'WindowScrollWheelFcn',@scrollToggle);
+%     set(hFig, 'WindowScrollWheelFcn',@ScrollToggle);
     
     createMenu();
     createEmptyMenu();
     createClickMenu();
     
-    set(hFig, 'Name',[datasetName ' Staining']);
+    titleStr = [datasetName ' fixed cell frame'];
+    set(hFig, 'Name',[titleStr ' - Staining']);
     
-    drawLastFrame();
+    updateFluorescent();
+    drawFrame();
 end
 
-function drawLastFrame()
-    global hFig hEmptyMenu hClickMenu bDirty finalIm datasetName drawCircleSize defaultStainID stains stainColors
+function drawStains()
+    global hFig hClickMenu drawCircleSize defaultStainID stains stainColors
     
     hAx = get(hFig, 'CurrentAxes');
-    if ( isempty(hAx) )
-        hAx = axes('Parent',hFig);
-        set(hFig, 'CurrentAxes', hAx);
-        
-        xl = [1 size(finalIm,2)];
-        yl = [1 size(finalIm,1)];
-    else
-        xl = xlim(hAx);
-        yl = ylim(hAx);
-    end
-    
-    colormap(hAx, gray);
-    set(hAx,'Position',[.01 .01 .98 .98]);
-    
-    hold(hAx, 'off');
-    hIm = imagesc(finalIm, 'Parent',hAx);
-    set(hIm, 'ButtonDownFcn',@imageClick);
-    set(hIm, 'uicontextmenu',hEmptyMenu);
-    
     hold(hAx, 'on');
     for i=1:length(stains)
         x = stains(i).point(1);
@@ -74,17 +86,98 @@ function drawLastFrame()
     h = plot(hAx, 1,1, '.', 'Color',stainColors(defaultStainID).color, 'Visible','off', 'MarkerSize',32);
 %     hLeg = legend(hAx, h, '');
 %     set(hLeg, 'Box','off', 'Color','none');
+
+    axis(hAx,'off');
+end
+
+function updateFluorescent()
+    global fluorIm fluorAlpha stainImFluor
+    
+    fluorIm = [];
+    fluorAlpha = [];
+    
+    if ( isempty(stainImFluor) )
+        return;
+    end
+    
+    drawFlIdx = [];
+    for i=1:length(stainImFluor);
+        chkDraw = get(stainImFluor(i).menu, 'Checked');
+        if ( strcmpi(chkDraw,'off') )
+            continue;
+        end
+        
+        drawFlIdx = [drawFlIdx i];
+    end
+    
+    imSize = size(stainImFluor(1).image);
+    
+    fluorIm = zeros([imSize 3]);
+    fluorAlpha = zeros(imSize);
+    
+    for i=1:length(drawFlIdx)
+        curIdx = drawFlIdx(i);
+        
+        alphaIm = stainImFluor(curIdx).image;
+        colorIm = zeros([size(stainImFluor(curIdx).image) 3]);
+        for j=1:3
+            colorIm(:,:,j) = stainImFluor(curIdx).color(j) * stainImFluor(curIdx).image;
+        end
+        
+        fluorIm = colorIm.*repmat(alphaIm,[1 1 3]) + (fluorIm.*repmat(fluorAlpha,[1 1 3]).*(1 - repmat(alphaIm,[1 1 3])));
+        
+        newAlpha = alphaIm + (fluorAlpha .* (1-alphaIm));
+        
+        fluorIm = fluorIm ./ repmat(newAlpha, [1 1 3]);
+        fluorAlpha = newAlpha;
+    end
+end
+
+function drawFluorescent()
+    global hFig stainImFluor hEmptyMenu fluorIm fluorAlpha
+    
+    if ( isempty(stainImFluor) )
+        return;
+    end
+    
+    hAx = get(hFig, 'CurrentAxes');
+    
+    hold(hAx, 'on');
+    hIm = imagesc(fluorIm, 'Parent',hAx, 'alphaData',fluorAlpha, 'AlphaDataMapping','none');
+    hold(hAx, 'off');
+    
+    set(hIm, 'ButtonDownFcn',@imageClick);
+    set(hIm, 'uicontextmenu',hEmptyMenu);
+end
+
+function drawFrame()
+    global hFig hEmptyMenu viewIm
+    
+    hAx = get(hFig, 'CurrentAxes');
+    if ( isempty(hAx) )
+        hAx = axes('Parent',hFig);
+        set(hFig, 'CurrentAxes', hAx);
+        
+        xl = [1 size(viewIm,2)];
+        yl = [1 size(viewIm,1)];
+    else
+        xl = xlim(hAx);
+        yl = ylim(hAx);
+    end
+    
+    colormap(hAx, gray);
+    set(hAx,'Position',[.01 .01 .98 .98]);
+    
+    hold(hAx, 'off');
+    hIm = imagesc(viewIm, 'Parent',hAx);
+    set(hIm, 'ButtonDownFcn',@imageClick);
+    set(hIm, 'uicontextmenu',hEmptyMenu);
+    
+    drawFluorescent();
+    drawStains();
     
     xlim(hAx,xl);
     ylim(hAx,yl);
-    
-    axis(hAx,'off');
-    
-    if ( bDirty )
-        set(hFig, 'Name',[datasetName ' Staining *']);
-    else
-        set(hFig, 'Name',[datasetName ' Staining']);
-    end
 end
 
 %%%%%%%%%%%%
@@ -105,7 +198,7 @@ function createStainPoint(stainID)
     
     createClickMenu();
     createEmptyMenu();
-    drawLastFrame();
+    drawFrame();
 end
 
 function deleteStaining(src,evt)
@@ -124,7 +217,7 @@ function deleteStaining(src,evt)
     
     createClickMenu();
     createEmptyMenu();
-    drawLastFrame();
+    drawFrame();
 end
 
 function stainIdx = findClickedStain(xyPoint)
@@ -194,13 +287,7 @@ function newStainID = createNewStain()
         break;
     end
     
-    minColorDist = 0;
-    for i=1:300
-        startColor = rand(1,3);
-        
-        colorDists = badColorDist(startColor, vertcat(stainColors.color));
-        minColorDist = min(colorDists);
-    end
+    startColor = getRandomColor(vertcat(stainColors.color));
     
     stainColor = uisetcolor(startColor,'New Stain Color');
     
@@ -208,6 +295,21 @@ function newStainID = createNewStain()
     
     newStainID = length(stainColors);
     remakeDefaultsMenu();
+end
+
+function color = getRandomColor(inColors)
+    numTries = 300;
+    testColors = zeros(numTries,3);
+    minColorDist = zeros(numTries,1);
+    for i=1:numTries
+        testColors(i) = rand(1,3);
+        
+        colorDists = badColorDist(testColors(i), inColors);
+        minColorDist(i) = min(colorDists);
+    end
+    
+    [bestDist bestColorIdx] = max(minColorDist);
+    color = testColors(bestColorIdx);
 end
 
 function dists = badColorDist(newColor, colors)
@@ -288,6 +390,64 @@ function loadStainInfo(filepath)
     load(filepath);
 end
 
+function loadStainImages(filePath)
+    global stainIm stainImFluor
+    
+    [phaseImPath,phaseImName] = fileparts(filePath);
+    commonToken = regexpi(phaseImName,'(.+)_Phase', 'once','tokens');
+    if ( isempty(commonToken) )
+        return;
+    end
+    
+    commonName = commonToken{1};
+    commonPattern = regexptranslate('escape',commonName);
+    
+    fileList = dir(fullfile(phaseImPath,[commonName '*.tif']));
+    if ( isempty(fileList) )
+        return;
+    end
+    
+    phaseIm = imread(filePath);
+    if ( ndims(phaseIm) == 3 )
+        phaseIm = mean(phaseIm,3);
+    end
+    
+    stainIm = double(phaseIm) / 255.0;
+    
+    stainImFluor = struct('name',{}, 'color',{}, 'image',{}, 'menu',{});
+    for i=1:length(fileList)
+        fluorToken = regexpi(fileList(i).name,[commonPattern '_(.+)\.tif'], 'once','tokens');
+        if ( isempty(fluorToken) )
+            continue;
+        end
+        
+        if ( strcmpi(fluorToken,'Phase') )
+            continue;
+        end
+        
+        im = imread(fullfile(phaseImPath,fileList(i).name));
+        if ( ndims(im) == 3 )
+            bIgnoreBG = ~all(im==0,3);
+            hsvIm = rgb2hsv(im);
+            
+            hueIm = hsvIm(:,:,1);
+            satIm = hsvIm(:,:,2);
+            valIm = hsvIm(:,:,3);
+            
+            guessHue = median(hueIm(bIgnoreBG(:)));
+            guessSat = median(satIm(bIgnoreBG(:)));
+            guessColor = hsv2rgb([guessHue guessSat 1]);
+            
+            imGray = valIm;
+        else
+            imGray = double(im) / 255.0;
+            guessColor = getRandomColor(zeros(0,3));
+        end
+        
+        stainImFluor = [stainImFluor; struct('name',{fluorToken{1}}, 'color',{guessColor}, 'image',{imGray}, 'menu',{[]})];
+    end
+end
+
 function saveFile(src,evt)
     global bDirty curSavedFile
     
@@ -299,7 +459,7 @@ function saveFile(src,evt)
     saveStainInfo(curSavedFile);
     
     bDirty = false;
-    drawLastFrame();
+    drawFrame();
 end
 
 function saveFileAs(src,evt)
@@ -317,7 +477,7 @@ function saveFileAs(src,evt)
     saveStainInfo(curSavedFile);
     
     bDirty = false;
-    drawLastFrame();
+    drawFrame();
 end
 
 function openFile(src,evt)
@@ -363,7 +523,7 @@ function openFile(src,evt)
     remakeDefaultsMenu();
     createClickMenu();
     createEmptyMenu();
-    drawLastFrame();
+    drawFrame();
 end
 
 function guessPath = guessOpenPath()
@@ -390,6 +550,30 @@ function guessPath = guessOpenPath()
     end
 end
 
+function scrollToggle(src, evt)
+    global hFig bDirty viewIm finalIm stainIm datasetName
+    
+    if ( isempty(stainIm) )
+        titleStr = datasetName;
+        viewIm = finalIm;
+    elseif ( viewIm == finalIm )
+        titleStr = [datasetName ' fixed cell frame'];
+        viewIm = stainIm;
+    else
+        titleStr = [datasetName ' last movie frame'];
+        viewIm = finalIm;
+    end
+    
+    % Set figure title.
+    if ( bDirty )
+        set(hFig, 'Name',[titleStr ' - Staining *']);
+    else
+        set(hFig, 'Name',[titleStr ' - Staining']);
+    end
+    
+    drawFrame();
+end
+
 function closeFigure(src, evt)
     global hFig bDirty
     
@@ -411,7 +595,7 @@ end
 %%%%%%%%%%%%
 
 function createMenu()
-    global hFig hDefaultMenu
+    global hFig hDefaultMenu hViewMenu
     
     set(hFig, 'Menu','none', 'Toolbar','figure', 'NumberTitle','off');
 
@@ -449,12 +633,102 @@ function createMenu()
         'Separator',        'on',...
         'Callback',         @closeFigure);
     
+    hViewMenu = uimenu(...
+        'Parent',           hFig,...
+        'Label',            'View',...
+        'HandleVisibility', 'callback');
+    
     hDefaultMenu = uimenu(...
         'Parent',           hFig,...
         'Label',            'Left-Click: ...',...
         'HandleVisibility', 'callback');
     
+    remakeViewMenu();
     remakeDefaultsMenu();
+end
+
+function remakeViewMenu()
+    global hViewMenu stainImFluor
+    
+    childItems = get(hViewMenu, 'children');
+    for i=1:length(childItems)
+        delete(childItems(i));
+    end
+    
+    if ( isempty(stainImFluor) )
+        uimenu('Parent',hViewMenu,...
+               'Enable','off',...
+               'Checked','off',...
+               'Label','No fluorescent images loaded');
+        
+        return;
+    end
+    
+    for i=1:length(stainImFluor)
+        hMenu = uimenu('Parent',hViewMenu,...
+                       'Enable','on',...
+                       'Checked','on',...
+                       'Label',stainImFluor(i).name,...
+                       'ForegroundColor',  stainImFluor(i).color,...
+                       'Callback',@(src,evt)(toggleFluorescent(i)));
+        
+        stainImFluor(i).menu = hMenu;
+    end
+    
+    bAllEnable = true(1,length(stainImFluor));
+    uimenu('Parent',hViewMenu,...
+           'Enable','on',...
+           'Checked','off',...
+           'Separator','on',...
+           'Label','View all',...
+           'Callback',@(src,evt)(setAllFluorescent(bAllEnable)));
+    
+	bAllDisable = false(1,length(stainImFluor));
+    uimenu('Parent',hViewMenu,...
+           'Enable','on',...
+           'Checked','off',...
+           'Label','View none',...
+           'Callback',@(src,evt)(setAllFluorescent(bAllDisable)));
+end
+
+function toggleFluorescent(fluorID)
+    global stainImFluor
+    
+    if ( isempty(fluorID) )
+        return;
+    end
+    
+    if ( fluorID <= 0 )
+        return;
+    end
+    
+    if ( fluorID > length(stainImFluor) )
+        return;
+    end
+    
+    curShow = get(stainImFluor(fluorID).menu, 'Checked');
+    if ( strcmpi(curShow,'on') )
+        set(stainImFluor(fluorID).menu, 'Checked','off');
+    else
+        set(stainImFluor(fluorID).menu, 'Checked','on');
+    end
+    
+    updateFluorescent();
+    drawFrame();
+end
+
+function setAllFluorescent(bEnabled)
+    global stainImFluor
+    
+    for i=1:length(stainImFluor)
+        set(stainImFluor(i).menu, 'Checked','off');
+        if ( bEnabled(i) )
+            set(stainImFluor(i).menu, 'Checked','on');
+        end
+    end
+    
+    updateFluorescent();
+    drawFrame();
 end
 
 function remakeDefaultsMenu()
@@ -493,7 +767,7 @@ function setDefaultStain(stainID)
     
     defaultStainID = stainID;
     
-    drawLastFrame();
+    drawFrame();
     remakeDefaultsMenu();
 end
 
@@ -557,9 +831,6 @@ function addStainMenu(hMenu, funcPtr)
     
     for i=1:length(stainColors)
         enSep = 'off';
-        if ( i==2 )
-            enSep = 'on';
-        end
         
         uimenu(...
             'Parent',           hMenu,...
