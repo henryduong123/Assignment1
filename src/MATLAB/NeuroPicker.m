@@ -30,6 +30,31 @@ function NeuroPicker()
         loadStainImages(fullfile(imgPath,phaseFiles(1).name));
     end
     
+    lastImgFile = '';
+    lastImgFrame = 0;
+    
+    flist = dir(fullfile(imgPath,'*.tif'));
+    for i=1:length(flist)
+        imgFilePattern = '(.+)_t(\d+).tif';
+        imgFileTokens = regexpi(flist(i).name,imgFilePattern, 'once','tokens');
+        if ( isempty(imgFileTokens) )
+            continue;
+        end
+        
+        imgFrame = str2double(imgFileTokens{2});
+        if ( imgFrame > lastImgFrame )
+            lastImgFrame = imgFrame;
+            lastImgFile = [imgFileTokens{1} '_t' imgFileTokens{2} '.tif'];
+        end
+    end
+    
+    if ( isempty(lastImgFile) )
+        msgbox('Unable to identify last frame image in selected folder.');
+        return;
+    end
+    
+    imgFile = lastImgFile;
+    
     [sigDigits datasetName] = ParseImageName(imgFile);
     datasetPath = fullfile(imgPath,imgFile);
     
@@ -55,7 +80,7 @@ function NeuroPicker()
     hFig = figure();
     set(hFig, 'CloseRequestFcn',@closeFigure);
     set(hFig, 'WindowScrollWheelFcn',@scrollToggle);
-%     set(hFig, 'WindowScrollWheelFcn',@ScrollToggle);
+    set(hFig, 'KeyPressFcn',@figureKeyPress);
     
     createMenu();
     createEmptyMenu();
@@ -547,6 +572,14 @@ function guessPath = guessOpenPath()
     if ( ~isempty(flist) )
         guessPath = mainPath;
         return;
+    end
+end
+
+function figureKeyPress(src,evt)
+    if ( strcmpi(evt.Key, 'downarrow') || strcmpi(evt.Key, 'rightarrow') )
+        scrollToggle();
+    elseif ( strcmpi(evt.Key, 'uparrow') || strcmpi(evt.Key, 'leftarrow') )
+        scrollToggle();
     end
 end
 
