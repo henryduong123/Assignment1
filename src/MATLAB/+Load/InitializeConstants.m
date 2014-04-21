@@ -32,6 +32,9 @@ global CONSTANTS
 im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
 Load.AddConstant('imageSize',size(im),0);
 
+numFrames = Helper.LoadNumFrames(Helper.GetFullImagePath(1));
+Load.AddConstant('numFrames', numFrames,0);
+
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
     Load.AddConstant('cellType',cellType,1);
