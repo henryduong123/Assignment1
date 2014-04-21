@@ -39,7 +39,7 @@ function hullID = FindHull(time, curPoint)
 
     bInHull = false(1,length(chkHulls));
     for i=1:length(chkHulls)
-        bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.clickMargin, chkPoint);
+        bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.pointClickMargin, chkPoint);
     end
     
     if ( nnz(bInHull) == 0 )

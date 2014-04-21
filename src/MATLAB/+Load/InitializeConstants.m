@@ -45,6 +45,7 @@ Load.AddConstant('minFamilyTimeFrame',          25, 1);
 Load.AddConstant('maxFrameDifference',          1, 1);
 Load.AddConstant('historySize',                 10, 1);
 Load.AddConstant('clickMargin',                 2, 1);
+Load.AddConstant('pointClickMargin',            10, 1);
 Load.AddConstant('minTrackScore',               0.5,1);
 Load.AddConstant('maxPropagateFrames',          50,1);
 
