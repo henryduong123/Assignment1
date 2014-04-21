@@ -1,9 +1,12 @@
 function NeuroPicker()
-    global hFig hEmptyMenu hClickMenu bDirty viewIm finalIm stainIm stainImFluor drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited
+    global hFig hEmptyMenu hClickMenu bDirty viewIm finalIm stainIm stainImFluor drawCircleSize defaultStainID datasetPath datasetName stains stainColors bEdited phasePoints stainPoints lastHulls
     
     hFig = [];
     hEmptyMenu = [];
     hClickMenu = [];
+    
+    phasePoints = zeros(0,2);
+    stainPoints = zeros(0,2);
     
     viewIm = [];
     finalIm = [];
@@ -29,6 +32,15 @@ function NeuroPicker()
     else
         loadStainImages(fullfile(imgPath,phaseFiles(1).name));
     end
+    
+    [matFile,matPath,filterIdx] = uigetfile(fullfile(imgPath,'*.mat'), 'Select segmentation file');
+    if ( filterIdx == 0 )
+        return;
+    end
+    
+    S = load(fullfile(matPath,matFile));
+    lastHullIdx = [S.HashedCells{end}.hullID];
+    lastHulls = S.CellHulls(lastHullIdx);
     
     lastImgFile = '';
     lastImgFrame = 0;
@@ -93,11 +105,49 @@ function NeuroPicker()
     drawFrame();
 end
 
+% function drawStains()
+%     global hFig hClickMenu drawCircleSize defaultStainID stains stainColors stainPoints phasePoints
+%     
+%     hAx = get(hFig, 'CurrentAxes');
+%     hold(hAx, 'on');
+%     for i=1:length(stains)
+%         x = stains(i).point(1);
+%         y = stains(i).point(2);
+%         
+%         circleColor = stainColors(stains(i).stainID).color;
+%         
+%         h = rectangle('Position', [x-drawCircleSize/2 y-drawCircleSize/2 drawCircleSize drawCircleSize], 'Curvature',[1 1], 'EdgeColor',circleColor,'FaceColor',circleColor, 'Parent',hAx);
+%         set(h, 'uicontextmenu',hClickMenu,  'ButtonDownFcn',@phenoClick, 'UserData',i);
+%     end
+%     
+%     h = plot(hAx, 1,1, '.', 'Color',stainColors(defaultStainID).color, 'Visible','off', 'MarkerSize',32);
+% %     hLeg = legend(hAx, h, '');
+% %     set(hLeg, 'Box','off', 'Color','none');
+% 
+%     axis(hAx,'off');
+% end
+
 function drawStains()
-    global hFig hClickMenu drawCircleSize defaultStainID stains stainColors
+    global hFig hClickMenu drawCircleSize defaultStainID stains stainColors stainPoints phasePoints
     
     hAx = get(hFig, 'CurrentAxes');
     hold(hAx, 'on');
+    
+%     plot(hAx, stainPoints(:,1), stainPoints(:,2), '.r');
+%     plot(hAx, phasePoints(:,1), phasePoints(:,2), '.g');
+%     
+%     numCorrPoints = min(size(stainPoints,1),size(phasePoints,1));
+%     
+%     for i=1:numCorrPoints
+%         plot(hAx, [stainPoints(i,1) phasePoints(i,1)], [stainPoints(i,2) phasePoints(i,2)], '-r');
+%     end
+%     
+%     A = findAffineTransform(phasePoints(1:numCorrPoints,:), stainPoints(1:numCorrPoints,:));
+%     hBackPoints = [phasePoints ones(size(phasePoints,1),1)];
+%     hStainPoints = hBackPoints*A;
+%     
+%     plot(hAx, hStainPoints(:,1), hStainPoints(:,2), 'xr');
+    
     for i=1:length(stains)
         x = stains(i).point(1);
         y = stains(i).point(2);
@@ -116,13 +166,27 @@ function drawStains()
 end
 
 function updateFluorescent()
-    global fluorIm fluorAlpha stainImFluor
+    global fluorIm fluorAlpha stainImFluor dapiPoints
     
     fluorIm = [];
     fluorAlpha = [];
     
     if ( isempty(stainImFluor) )
         return;
+    end
+    
+    dapiPoints = [];
+    
+    idxDAPI = find(strcmpi('DAPI', {stainImFluor.name}),1,'first');
+    if ( ~isempty(idxDAPI) )
+        thDAPI = graythresh(stainImFluor(idxDAPI).image);
+        bwDAPI = im2bw(stainImFluor(idxDAPI).image, thDAPI);
+       	ccDAPI = bwconncomp(bwDAPI);
+        
+        for i=1:ccDAPI.NumObjects
+            [r c] = ind2sub(ccDAPI.ImageSize,ccDAPI.PixelIdxList{i});
+            dapiPoints = [dapiPoints; mean([c r],1)];
+        end
     end
     
     drawFlIdx = [];
@@ -159,16 +223,92 @@ function updateFluorescent()
 end
 
 function drawFluorescent()
-    global hFig stainImFluor hEmptyMenu fluorIm fluorAlpha
+    global hFig stainImFluor hEmptyMenu fluorIm fluorAlpha stainPoints phasePoints viewIm finalIm dapiPoints lastHulls
     
     if ( isempty(stainImFluor) )
         return;
     end
     
+    lastPointsFlip = vertcat(lastHulls.centerOfMass);
+    lastPoints = lastPointsFlip(:,[2 1]);
+    
+    A = guessAffineTransform(lastPoints, dapiPoints);
+    hTrnfLastPoints = [lastPoints ones(size(lastPoints,1),1)]*A;
+%     lastPointsFlip = vertcat(lastHulls.centerOfMass);
+%     lastPoints = lastPointsFlip(:,[2 1]);
+%     
+%     D = pdist2(lastPoints, dapiPoints);
+%     D(D>200) = Inf;
+%     [assignIdx assingDist] = assignmentoptimal(D);
+%     
+%     bCorrPoint = (assignIdx > 0);
+%     assLastPoints = lastPoints(bCorrPoint,:);
+%     assDapiPoints = dapiPoints(assignIdx(bCorrPoint),:);
+    
+%     bAssPoints = false(size(bCorrPoint));
+%     for i=1:length(bCorrPoint)
+%         if ( ~bCorrPoint(i) )
+%             continue;
+%         end
+%         
+%         if ( sum((lastPoints(i,:)-dapiPoints(assignIdx(i),:)).^2) > 200^2 )
+%             continue;
+%         end
+%         
+%         bAssPoints(i) = true;
+%     end
+%     assLastPoints = lastPoints(bAssPoints,:);
+%     assDapiPoints = dapiPoints(assignIdx(bAssPoints),:);
+    
+%     numCorrPoints = min(size(stainPoints,1),size(phasePoints,1));
+%     A = findAffineTransform(assLastPoints, assDapiPoints);
+%     hTrnfLastPoints = [assLastPoints ones(size(assLastPoints,1),1)]*A;
+    
+%     if ( viewIm == finalIm )
+        [X Y] = meshgrid(1:size(fluorIm,2), 1:size(fluorIm,1));
+        hGrid = [X(:) Y(:) ones(numel(X),1)];
+        hPreimage = hGrid*A;
+
+        preImX = zeros(size(X));
+        preImY = zeros(size(Y));
+
+        preImX(:) = hPreimage(:,1);
+        preImY(:) = hPreimage(:,2);
+
+        trnfAlpha = interp2(X, Y, fluorAlpha, preImX, preImY);
+        trnfIm = zeros(size(fluorIm));
+        for i=1:3
+            trnfIm(:,:,i) = interp2(X, Y, fluorIm(:,:,i), preImX, preImY);
+        end
+%         
+%         hDapi = [dapiPoints ones(size(dapiPoints,1),1)];
+%         hTrnfPoints = hDapi/A;
+%         trnfPoints = hTrnfPoints(:,[1 2]);
+        
+        trnfLast = vertcat(lastHulls.centerOfMass);
+%     else
+%         trnfAlpha = fluorAlpha;
+%         trnfIm = fluorIm;
+        
+        trnfPoints = dapiPoints;
+        
+%         hLastPoints = [vertcat(lastHulls.centerOfMass) ones(length(lastHulls),1)];
+%         hTrnfLast = hLastPoints*A;
+%         trnfLast = hTrnfLast(:,[1 2]);
+%     end
+
     hAx = get(hFig, 'CurrentAxes');
     
     hold(hAx, 'on');
-    hIm = imagesc(fluorIm, 'Parent',hAx, 'alphaData',fluorAlpha, 'AlphaDataMapping','none');
+    hIm = imagesc(trnfIm, 'Parent',hAx, 'alphaData',trnfAlpha, 'AlphaDataMapping','none');
+    plot(hAx, trnfPoints(:,1), trnfPoints(:,2), '.g');
+    plot(hAx, trnfLast(:,2), trnfLast(:,1), '.r');
+    plot(hAx, hTrnfLastPoints(:,1), hTrnfLastPoints(:,2), 'xr')
+    
+%     for i=1:size(assLastPoints,1)
+%         plot(hAx, [assLastPoints(i,1) assDapiPoints(i,1)], [assLastPoints(i,2) assDapiPoints(i,2)], '-r');
+%         plot(hAx, [hTrnfLastPoints(i,1) assDapiPoints(i,1)], [hTrnfLastPoints(i,2) assDapiPoints(i,2)], '--g');
+%     end
     hold(hAx, 'off');
     
     set(hIm, 'ButtonDownFcn',@imageClick);
@@ -352,18 +492,26 @@ end
 %%%%%%%%%%%%
 
 function imageClick(src, evt)
-    global hFig clickedPoint defaultStainID
+    global hFig clickedPoint defaultStainID stainPoints phasePoints finalIm viewIm
     currentPoint = get(gca,'CurrentPoint');
     clickedPoint = currentPoint(1,1:2);
     
-    selectionType = get(hFig,'SelectionType');
-    if ( strcmp(selectionType,'normal') )
-        set(hFig, 'WindowButtonUpFcn',@(src,evt)(createStainPoint(defaultStainID)));
+%     selectionType = get(hFig,'SelectionType');
+%     if ( strcmp(selectionType,'normal') )
+%         set(hFig, 'WindowButtonUpFcn',@(src,evt)(createStainPoint(defaultStainID)));
+%     end
+
+    if ( viewIm == finalIm )
+        phasePoints = [phasePoints; clickedPoint];
+    else
+        stainPoints = [stainPoints; clickedPoint];
     end
+    
+    drawFrame();
 end
 
 function phenoClick(stainIdx, src, evt)
-    global hFig hClickMenu clickedPoint
+    global hFig hClickMenu clickedPoint pointCorr
     currentPoint = get(gca,'CurrentPoint');
     clickedPoint = currentPoint(1,1:2);
     
