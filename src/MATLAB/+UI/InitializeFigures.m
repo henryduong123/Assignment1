@@ -46,8 +46,11 @@ Figures.cells.handle = figure();
 Figures.tree.handle = figure();
 
 Figures.cells.selectedHulls = [];
-Figures.controlDown = 0; %control key is currently down? for selecting cells and fine adjustment
+Figures.controlDown = false; %control key is currently down? for selecting cells and fine adjustment
 Figures.cells.PostDrawHookOnce = {}; %list of functions to call post DrawCells. Cleared on every draw
+
+Figures.downHullID = -1;
+Figures.downClickPoint = [0 0];
 
 whitebg(Figures.cells.handle,'k');
 whitebg(Figures.tree.handle,'w');
@@ -224,8 +227,7 @@ elseif strcmp(evnt.Key,'comma')
  elseif ( strcmp(evnt.Key,'control') )
      if(~Figures.controlDown)
          %prevent this from getting reset when moving the mouse
-        Figures.controlDown = get(Figures.tree.axesHandle,'CurrentPoint');
-        Figures.controlDown = Figures.controlDown(3);
+        Figures.controlDown = true;
      end
 elseif ( strcmp(evnt.Key,'delete') || strcmp(evnt.Key,'backspace') )
 	deleteSelectedCells();
@@ -241,7 +243,7 @@ end
 function figureKeyRelease(src,evnt)
     global Figures
 
-        Figures.controlDown = 0;
+        Figures.controlDown = false;
 end
 
 function figureTreeDown(src,evnt)
@@ -377,10 +379,6 @@ function moveLine()
 global Figures HashedCells
 time = get(Figures.tree.axesHandle,'CurrentPoint');
 time = round(time(3));
-
-if(Figures.controlDown)
-    time = round((time - Figures.controlDown)/4 + Figures.controlDown);
-end
 
 if(strcmp(Figures.advanceTimerHandle.Running,'on'))
     UI.TogglePlay([],[]);

@@ -12,6 +12,8 @@ function FigureCellDown(src,evnt, labelID)
     end
     
     currentPoint = get(gca,'CurrentPoint');
+    Figures.downClickPoint = currentPoint(1,1:2);
+    
     if ( strcmpi(Figures.cells.editMode, 'mitosis') )
         createMitosisDragLine(currentPoint);
         set(Figures.cells.handle, 'WindowButtonMotionFcn', @UI.FigureCellDrag);
@@ -33,10 +35,6 @@ function FigureCellDown(src,evnt, labelID)
     end
 
     if(strcmp(selectionType,'normal'))
-        if(strcmp(Figures.advanceTimerHandle.Running,'on'))
-            UI.TogglePlay(src,evnt);
-        end
-
         if (~Figures.controlDown )
             UI.ClearCellSelection();
         end

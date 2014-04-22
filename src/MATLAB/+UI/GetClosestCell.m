@@ -26,7 +26,8 @@
 function [hullID trackID] = GetClosestCell(allowEmpty)
 global Figures
 
-hullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
+currentPoint = UI.GetClickedCellPoint();
+hullID = Hulls.FindHull(Figures.time, currentPoint);
 if(0>=hullID)
     if (allowEmpty )
         hullID = [];

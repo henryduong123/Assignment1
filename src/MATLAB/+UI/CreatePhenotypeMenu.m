@@ -24,7 +24,8 @@ end
 function updatePhenoCheck(src, evnt)
     global CellPhenotypes Figures
     
-    hullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
+    currentPoint = UI.GetClickedCellPoint();
+    hullID = Hulls.FindHull(Figures.time, currentPoint);
     if ( hullID <= 0 )
         return;
     end

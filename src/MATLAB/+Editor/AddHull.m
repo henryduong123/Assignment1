@@ -28,9 +28,7 @@ function AddHull(num)
 global Figures CellHulls
 
 [hullID trackID] = UI.GetClosestCell(1);
-clickPt = get(gca,'CurrentPoint');
-
-clickCoord = clickPt(1,1:2);
+clickCoord = UI.GetClickedCellPoint();
 
 if ( ~Hulls.CheckHullsContainsPoint(clickCoord, CellHulls(hullID)) )
     trackID = [];
@@ -51,7 +49,7 @@ if(~isempty(trackID) && (num > 1))
     
     Error.LogAction('Split cell',trackID,[trackID newTracks]);
     
-elseif ( num == 1 )
+elseif ( isempty(trackID) && (num == 1) )
     % Try to run local segmentation and find a hull we missed or place a
     % point-hull at least
     [bErr newTrack] = Editor.ReplayableEditAction(@Editor.AddNewCell, clickCoord, Figures.time);

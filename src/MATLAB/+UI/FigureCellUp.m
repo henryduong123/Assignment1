@@ -27,7 +27,7 @@ if ( strcmpi(Figures.cells.editMode, 'mitosis') )
         UI.DrawCells();
     end
     
-    clear global MitDragCoords;
+    clear MitDragCoords;
     return;
 end
 
@@ -35,10 +35,11 @@ if(Figures.cells.downHullID == -1)
     return
 end
 
+currentPoint = get(gca,'CurrentPoint');
 if ( ~bWasDragging )
     currentHullID = Figures.cells.downHullID;
 else
-    currentHullID = Hulls.FindHull(Figures.time, get(gca,'CurrentPoint'));
+    currentHullID = Hulls.FindHull(Figures.time, currentPoint);
 end
 
 if ( currentHullID == -1 )
