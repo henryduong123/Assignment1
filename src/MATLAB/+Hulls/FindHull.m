@@ -33,13 +33,17 @@ function hullID = FindHull(time, curPoint)
     chkPoint = curPoint(1,1:2);
     
     frameHulls = [HashedCells{time}.hullID];
-    bMayOverlap = Hulls.RadiusContains(frameHulls, CONSTANTS.clickMargin, chkPoint);
+    bMayOverlap = Hulls.RadiusContains(frameHulls, CONSTANTS.pointClickMargin, chkPoint);
 
     chkHulls = frameHulls(bMayOverlap);
 
     bInHull = false(1,length(chkHulls));
     for i=1:length(chkHulls)
-        bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.pointClickMargin, chkPoint);
+        if ( size(CellHulls(chkHulls(i)).points,1) == 1 )
+            bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.pointClickMargin, chkPoint);
+        else
+            bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.clickMargin, chkPoint);
+        end
     end
     
     if ( nnz(bInHull) == 0 )

@@ -14,10 +14,10 @@ function bInside = ExpandedHullContains(cvHull, expandRadius, pointList)
         normPlanes = -normPlanes;
     end
     
-    normPoints = normPlanes + [normPlanes(end,:); normPlanes(1:(end-1),:)];
+    normPoints = (normPlanes + [normPlanes(end,:); normPlanes(1:(end-1),:)]) / 2;
     normDots = sum(normPlanes .* [normPlanes(end,:); normPlanes(1:(end-1),:)], 2);
     
-    alphas = expandRadius ./ (1+normDots);
+    alphas = expandRadius ./ sqrt((1+normDots)/2);
     expandPoints = cvHull + [[alphas alphas].*normPoints; alphas(1)*normPoints(1,:)];
     
     bInside = inpolygon(pointList(:,1), pointList(:,2), expandPoints(:,1), expandPoints(:,2));
