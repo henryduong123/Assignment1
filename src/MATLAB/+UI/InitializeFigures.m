@@ -120,6 +120,10 @@ set(Figures.tree.handle,...
 %which is needed for dragging
 set(Figures.tree.handle, 'WindowButtonMotionFcn',@(src,evt)(src));
 Figures.tree.dragging = [];
+Figures.tree.trackMap = [];
+Figures.tree.trackingLine = [];
+Figures.tree.trackingLabel = [];
+Figures.tree.trackingBacks = [];
 
 UI.CreateMenuBar(Figures.tree.handle);
 UI.CreateContextMenuTree();
@@ -369,9 +373,6 @@ end
 function figureTreeMotion(src,evnt)
 global Figures
     moveLine();
-    if(~isempty(Figures.tree.dragging))
-        mitosisHandleDragging(Figures.tree.dragging);
-    end
     UI.DrawCells();
 end
 

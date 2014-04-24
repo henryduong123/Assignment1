@@ -1,23 +1,33 @@
 function MitosisEditInterface()
-    global Figures CellFamilies HashedCells
+    global Figures CellFamilies CellTracks CellHulls HashedCells MitosisEditStruct
     
     Figures.cells.editMode = 'mitosis';
     
     editTree = Figures.tree.familyID;
     
+    MitosisEditStruct.editingHullID = [];
+    MitosisEditStruct.selectedTrackID = [];
+    
+    MitosisEditStruct.selectCosts = [];
+    MitosisEditStruct.selectPath = [];
+    
+    rootTrackID = CellFamilies(editTree).rootTrackID;
+    firstHull = CellTracks(rootTrackID).hulls(1);
+    
+    UI.MitosisSelectTrackingCell(rootTrackID,CellHulls(firstHull).time, true);
+    
     % Order matters here, we want the Init action to be part of the subtask
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'MitosisEditTask');
     Editor.ReplayableEditAction(@Editor.MitosisEditInitializeAction, editTree, length(HashedCells));
-    
-    UI.DrawTree(editTree);
-    UI.DrawCells();
     
     hToolbar = addButtons();
 end
 
 function cleanupMitosisInterface(hToolbar)
-    global Figures
+    global Figures MitosisEditStruct
     Figures.cells.editMode = 'normal';
+    
+    MitosisEditStruct = [];
     
     Editor.ReplayableEditAction(@Editor.StopReplayableSubtask, 1, 'MitosisEditTask');
     

@@ -43,6 +43,9 @@ else
         'Parent',       Figures.tree.axesHandle);
 end
 
+UI.UpdateResegIndicators();
+UI.UpdateMitosisTrackingIndicators();
+
 Figures.cellCount = UI.UpdateCellCount();
 % uistack(Figures.tree.timeIndicatorLine, 'bottom');
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);

@@ -3,7 +3,7 @@
 % 
 % Create user identified mitosis events and add to current tree.
 
-function historyAction = CreateMitosisAction(treeID, time, linePoints)
+function historyAction = CreateMitosisAction(trackID, dirFlag, treeID, time, linePoints)
     global CellFamilies CellTracks HashedCells
     
     if ( time < 2 )
@@ -50,6 +50,12 @@ function historyAction = CreateMitosisAction(treeID, time, linePoints)
     % the correct family
     if ( CellTracks(parentTrack).familyID == treeID )
         balancedTrack = parentTrack;
+    end
+    
+    if ( ~isempty(trackID) && dirFlag > 0 )
+        balancedTrack = trackID;
+    else
+        error('Adding mitosis event above edit is currently unsupported!');
     end
     
     if ( balancedTrack ~= parentTrack )

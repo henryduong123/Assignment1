@@ -4,7 +4,7 @@
 % NLS 6/11/12 Created
 
 function FigureCellUp(src,evnt)
-global Figures CellTracks MitDragCoords
+global CONSTANTS Figures CellHulls CellFamilies CellTracks MitDragCoords
 
 bWasDragging = false;
 if ( Helper.NonEmptyField(Figures.cells, 'dragElements') )
@@ -17,6 +17,7 @@ end
 set(Figures.cells.handle,'WindowButtonUpFcn','');
 set(Figures.cells.handle,'WindowButtonMotionFcn',@(src,evt)(1))
 
+currentPoint = get(gca, 'CurrentPoint');
 if ( strcmpi(Figures.cells.editMode, 'mitosis') )
     % Find new Mitosis cells and parent
     dragDistSq = sum((MitDragCoords(:,1)-MitDragCoords(:,2)).^2);
@@ -25,6 +26,30 @@ if ( strcmpi(Figures.cells.editMode, 'mitosis') )
         
         UI.DrawTree(Figures.tree.familyID);
         UI.DrawCells();
+    else
+        curFamID = Figures.tree.familyID;
+        drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)), CellFamilies(curFamID).tracks, 'UniformOutput',0);
+        drawHullFilter = [drawHullFilter{:}];
+        
+        bCurHulls = ([CellHulls(drawHullFilter).time] == Figures.time);
+        if ( nnz(bCurHulls) > 0 )
+            chkHulls = drawHullFilter(bCurHulls);
+            bInHull = false(1,length(chkHulls));
+            for i=1:length(chkHulls)
+                if ( size(CellHulls(chkHulls(i)).points,1) == 1 )
+                    bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.pointClickMargin, currentPoint(1,1:2));
+                else
+                    bInHull(i) = Hulls.ExpandedHullContains(CellHulls(chkHulls(i)).points, CONSTANTS.clickMargin, currentPoint(1,1:2));
+                end
+            end
+            
+            if ( any(bInHull) )
+                inHulls = chkHulls(bInHull);
+                trackID = Hulls.GetTrackID(inHulls(1));
+                
+                UI.MitosisSelectTrackingCell(trackID, Figures.time, true);
+            end
+        end
     end
     
     clear MitDragCoords;
@@ -70,7 +95,7 @@ UI.DrawCells();
 end
 
 function addMitosisEvent(treeID, time, dragCoords)
-    global CellTracks CellFamilies
+    global CellHulls CellTracks CellFamilies MitosisEditStruct
     % Find new Mitosis cells and parent
     
     if ( time < 2 )
@@ -98,7 +123,21 @@ function addMitosisEvent(treeID, time, dragCoords)
 %         return;
 %     end
     
-    Editor.ReplayableEditAction(@Editor.CreateMitosisAction, treeID, time, (dragCoords.'));
+    dirFlag = UI.MitosisGetSelectedDirTo(time);
+    bErr = Editor.ReplayableEditAction(@Editor.CreateMitosisAction, MitosisEditStruct.selectedTrackID, dirFlag, treeID, time, (dragCoords.'));
+    if ( bErr )
+        return;
+    end
     
+    hullID = Hulls.FindHull(time, dragCoords(:,1).');
+    
+    if ( hullID == 0 )
+        hullID = MitosisEditStruct.editingHullID;
+    end
+    
+    trackID = Hulls.GetTrackID(hullID);
+    hullTime = CellHulls(hullID).time;
+    
+    UI.MitosisSelectTrackingCell(trackID, hullTime, true);
 end
 

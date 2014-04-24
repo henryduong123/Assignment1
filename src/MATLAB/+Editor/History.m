@@ -104,6 +104,10 @@ function updateFigures()
         return;
     end
     
+    if ( strcmpi(Figures.cells.editMode,'mitosis') )
+        UI.MitosisSelectTrackingCell([],[],true);
+    end
+    
     %Update displays
     UI.DrawTree(Figures.tree.familyID);
     UI.DrawCells();

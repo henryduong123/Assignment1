@@ -30,7 +30,7 @@
 
 function DrawCells()
 
-global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData
+global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData MitosisEditStruct
 
 % figure(Figures.cells.handle);
 if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
@@ -199,6 +199,18 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'LineStyle',        colorStruct.edgeStyle,...
             'LineWidth',        colorStruct.edgeWidth);
         
+        % Show bright selected cell outline
+        if ( ~isempty(MitosisEditStruct) && isfield(MitosisEditStruct,'selectedTrackID') )
+            if ( ~isempty(MitosisEditStruct.selectedTrackID) && (MitosisEditStruct.selectedTrackID == curTrackID) )
+                hullPoints = CellHulls(curHullID).points;
+                if ( size(hullPoints,1) == 1 )
+                    drawExpandedHull(curAx, hullPoints, CONSTANTS.pointClickMargin);
+                else
+                    drawExpandedHull(curAx, hullPoints, 1);
+                end
+            end
+        end
+        
         %draw label
         if( bDrawLabels )%don't draw labels if dragging a mitosis
             if (Figures.tree.familyID == CellTracks(curTrackID).familyID ||...
@@ -258,6 +270,17 @@ if(~isempty(Figures.cells.PostDrawHookOnce))
     Figures.cells.PostDrawHookOnce = {};
 end
 drawnow();
+end
+
+function drawExpandedHull(curAx, hullPoints, expandRadius)
+    expandPoints = Helper.MakeExpandedCVHull(hullPoints, expandRadius);
+    if ( isempty(expandPoints) )
+        rectangle('Parent',curAx, 'Curvature',[1 1], 'EdgeColor','r', 'LineStyle','--' ,'LineWidth',2,...
+                  'Position',[hullPoints(1,1)-expandRadius hullPoints(1,2)-expandRadius 2*expandRadius 2*expandRadius]);
+        return;
+    end
+    
+    plot(curAx, expandPoints(:,1), expandPoints(:,2), '--r','LineWidth',2);
 end
 
 function tracksDrawn = drawSiblingsLine(curAx, trackID,hullID)
