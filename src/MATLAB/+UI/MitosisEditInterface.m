@@ -14,11 +14,11 @@ function MitosisEditInterface()
     rootTrackID = CellFamilies(editTree).rootTrackID;
     firstHull = CellTracks(rootTrackID).hulls(1);
     
-    UI.MitosisSelectTrackingCell(rootTrackID,CellHulls(firstHull).time, true);
-    
     % Order matters here, we want the Init action to be part of the subtask
     Editor.ReplayableEditAction(@Editor.StartReplayableSubtask, 'MitosisEditTask');
     Editor.ReplayableEditAction(@Editor.MitosisEditInitializeAction, editTree, length(HashedCells));
+    
+    UI.MitosisSelectTrackingCell(rootTrackID,CellHulls(firstHull).time, true);
     
     hToolbar = addButtons();
 end

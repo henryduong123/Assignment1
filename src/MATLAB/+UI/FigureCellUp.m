@@ -28,7 +28,7 @@ if ( strcmpi(Figures.cells.editMode, 'mitosis') )
         UI.DrawCells();
     else
         curFamID = Figures.tree.familyID;
-        drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)), CellFamilies(curFamID).tracks, 'UniformOutput',0);
+        drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(CellTracks(x).hulls~=0)), CellFamilies(curFamID).tracks, 'UniformOutput',0);
         drawHullFilter = [drawHullFilter{:}];
         
         bCurHulls = ([CellHulls(drawHullFilter).time] == Figures.time);
@@ -103,6 +103,11 @@ function addMitosisEvent(treeID, time, dragCoords)
         return
     end
     
+    if ( isempty(MitosisEditStruct) || ~isfield(MitosisEditStruct,'selectedTrackID') || isempty(MitosisEditStruct.selectedTrackID) )
+        msgbox('No cells selected for mitosis identification','No Cell Selected','warn');
+        return;
+    end
+    
     treeTracks = [CellFamilies(treeID).tracks];
     
     bInTracks = Helper.CheckInTracks(time, treeTracks, 0, 0);
@@ -124,7 +129,7 @@ function addMitosisEvent(treeID, time, dragCoords)
 %     end
     
     dirFlag = UI.MitosisGetSelectedDirTo(time);
-    bErr = Editor.ReplayableEditAction(@Editor.CreateMitosisAction, MitosisEditStruct.selectedTrackID, dirFlag, treeID, time, (dragCoords.'));
+    bErr = Editor.ReplayableEditAction(@Editor.CreateMitosisAction, MitosisEditStruct.selectedTrackID, dirFlag, time, (dragCoords.'));
     if ( bErr )
         return;
     end

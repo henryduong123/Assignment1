@@ -45,9 +45,13 @@ end
 function setPhenotype(src, evnt)
     global Figures CellPhenotypes
 
-    [hullID trackID] = UI.GetClosestCell(0);
-    if(isempty(trackID))
-        return
+    if ( strcmpi(Figures.cells.editMode, 'mitosis') )
+        [hullID trackID] = UI.MitosisSelectPhenotype();
+    else
+        [hullID trackID] = UI.GetClosestCell(0);
+        if(isempty(trackID))
+            return
+        end
     end
     
     clickPheno = get(src, 'UserData');

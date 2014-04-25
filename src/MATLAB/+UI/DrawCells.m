@@ -102,13 +102,13 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'),'off'))
     set(im,'Visible','off');
 end
 
-bDrawLabels = isempty(Figures.tree.movingMitosis);
+bDrawLabels = true;
 
 drawHullFilter = [];
 if ( strcmpi(Figures.cells.editMode, 'mitosis') )
     % Filter so we only draw family "mitosis" hulls when editing
     bDrawLabels = 0;
-    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(1)),...
+    drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(CellTracks(x).hulls~=0)),...
         CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
     drawHullFilter = [drawHullFilter{:}];
 end
@@ -130,14 +130,6 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
            
         curHullID = HashedCells{Figures.time}(i).hullID;
         curTrackID = HashedCells{Figures.time}(i).trackID;
-        
-        %if dragging a mitosis, only show the siblings: Draws faster
-        %and makes it easier to follow what is changing
-        if(Figures.tree.movingMitosis)
-            if(Figures.tree.movingMitosis ~= curTrackID)
-                continue;
-            end
-        end
         
         if ( ~isempty(drawHullFilter) && ~any(curHullID == drawHullFilter ) )
             continue;
@@ -262,13 +254,7 @@ end
 
 
 Figures.cells.axesHandle = curAx;
-if(~isempty(Figures.cells.PostDrawHookOnce))
-    for i=1:length(Figures.cells.PostDrawHookOnce)
-        hook = Figures.cells.PostDrawHookOnce{i};
-        hook(curAx);
-    end       
-    Figures.cells.PostDrawHookOnce = {};
-end
+
 drawnow();
 end
 

@@ -3,96 +3,47 @@
 % 
 % Create user identified mitosis events and add to current tree.
 
-function historyAction = CreateMitosisAction(trackID, dirFlag, treeID, time, linePoints)
-    global CellFamilies CellTracks HashedCells
+function historyAction = CreateMitosisAction(trackID, dirFlag, time, linePoints)
+    global CellTracks
     
     if ( time < 2 )
         error('Mitosis event cannot be defined in the first frame');
     end
     
-    treeTracks = [CellFamilies(treeID).tracks];
-    
-    bInTracks = Helper.CheckInTracks(time, treeTracks, 0, 0);
-	checkTracks = treeTracks(bInTracks);
-    if ( isempty(checkTracks) )
-        error('No valid tracks to add a mitosis onto');
-    end
-    
-    startTimes = [CellTracks(checkTracks).startTime];
-    [minTime minIdx] = min(startTimes);
-    
-    forceParents = [];
-    % If a mitosis is specified RIGHT after another one, we have a problem
-    % so force old mitosis children into the list
-    if ( minTime == time-1 )
-        forceParents = arrayfun(@(x)(CellTracks(x).hulls(1)), checkTracks);
-    end
-    
+    treeID = CellTracks(trackID).familyID;
     linePoints = clipToImage(linePoints);
-    
     
     % Find or create hulls to define mitosis event
     childHulls = Segmentation.MitosisEditor.FindChildrenHulls(linePoints, time);
-    parentHull = Segmentation.MitosisEditor.FindParentHull(childHulls, linePoints, time-1, forceParents);
+    parentHull = Segmentation.MitosisEditor.FindParentHull(childHulls, linePoints, time-1);
     
-%     costMatrix = Tracker.GetCostMatrix();
+    chkDropHull = Helper.GetNearestTrackHull(trackID, time+1,+1);
     
-%     bLeafTrack = arrayfun(@(x)(isempty(x.childrenTracks)), CellTracks(treeTracks));
-%     leafTracks = treeTracks(bLeafTrack);
-
-    Helper.SetTreeLocked(treeID, 0);
-    
-    % NOTE: This just makes the tree as balanced as possible, it is probably not correct
-    balancedTrack = checkTracks(minIdx);
-    parentTrack = Hulls.GetTrackID(parentHull);
-    
-    % TODO: Don't change things up if parentTrack is already complete and on
-    % the correct family
-    if ( CellTracks(parentTrack).familyID == treeID )
-        balancedTrack = parentTrack;
+    parentTrackID = Hulls.GetTrackID(parentHull);
+    if ( parentTrackID ~= trackID )
+        parentTrackID = Tracks.TearoffHull(parentHull);
+        
+        Tracks.ChangeTrackID(parentTrackID, trackID, time-1);
     end
     
-    if ( ~isempty(trackID) && dirFlag > 0 )
-        balancedTrack = trackID;
-    else
-        error('Adding mitosis event above edit is currently unsupported!');
+    chkTrackID = Hulls.GetTrackID(childHulls(1));
+    if ( chkTrackID ~= trackID )
+        chkTrackID = Tracks.TearoffHull(childHulls(1));
+        Tracks.ChangeLabel(chkTrackID, trackID, time);
     end
     
-    if ( balancedTrack ~= parentTrack )
-        attemptLockedChangeLabel(parentTrack, balancedTrack, time-1);
-    end
+    newTrackID = Tracks.TearoffHull(childHulls(2));
+    Families.AddMitosis(newTrackID, trackID, time);
     
-    childTrack = Hulls.GetTrackID(childHulls(1));
-    if ( balancedTrack ~= childTrack )
-        attemptLockedChangeLabel(childTrack, balancedTrack, time);
-    end
-    
-    childTrack = Hulls.GetTrackID(childHulls(2));
-    if ( Helper.CheckTreeLocked(childTrack) )
-        error('Not yet implemented: Locked "addMitosis"');
-    else
-        Families.AddMitosis(childTrack, balancedTrack, time);
-    end
-    
-    % TODO: Make this respect the endTime from start of state
-    if ( time < length(HashedCells) )
-        for i=1:2
-            childTrack = Hulls.GetTrackID(childHulls(i));
-            Helper.DropSubtree(childTrack);
-        end
+    if ( chkDropHull > 0 )
+        leftChildTrackID = Hulls.GetTrackID(childHulls(1));
+        fixupChildTrackID = Hulls.GetTrackID(chkDropHull);
+        Tracks.ChangeLabel(fixupChildTrackID, leftChildTrackID, time+1);
     end
     
     Helper.SetTreeLocked(treeID, 1);
     
     historyAction = 'Push';
-end
-
-function attemptLockedChangeLabel(changeTrack, desiredTrack, time)
-    if ( Helper.CheckTreeLocked(changeTrack) )
-        Tracks.LockedChangeLabel(changeTrack, desiredTrack, time);
-    else
-        Tracks.ChangeLabel(changeTrack, desiredTrack, time);
-    end
 end
 
 function newPoints = clipToImage(linePoints)

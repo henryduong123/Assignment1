@@ -14,5 +14,5 @@ function historyAction = MitosisEditInitializeAction(treeID, endTime)
     
     CellFamilies(treeID).bLocked = 1;
     
-    historyAction = 'Push';
+    historyAction = '';
 end
