@@ -269,9 +269,10 @@ aboutMenu = uimenu(...
     'Callback',         @UI.about);
  uimenu(...
     'Parent',           helpMenu,...
-    'Label',            'Update',...
+    'Label',            'Submit Bug Report',...
     'HandleVisibility', 'callback', ...
-    'Callback',         @UpdateFile);
+    'Separator',        'on', ...
+    'Callback',         @createBugReport);
 
 if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.saveMenu = saveMenu;
@@ -673,31 +674,32 @@ end
 function mitosisEditor(src, evnt)
     UI.MitosisEditInterface();
 end
-% Update Function 
-function UpdateFile(src,evnt)
-global CONSTANTS
-	bUpdated = Load.FixOldFileVersions();
 
-        if ( bUpdated )
-            Load.AddConstant('version',softwareVersion,1);
-            % Save Data
-            % Construct a questdlg with two options 
-            prompt = questdlg('There is a new update available! Would you like to save the file?', ... 
-                                'Save...', ... 
-                                'Yes','No','No'); 
-                                % Handle response 
-                                switch prompt 
-                                case 'Yes' 
-                                UI.SaveDataAs();
-                                case 'No'
-                                Helper.SaveLEVerState(CONSTANTS.matFullFile);
-                                    otherwise
-                                        warndlg('Success This has been updated');
-                                end 	
-        else
-           warndlg('it is already updated');
+function urlStr = urlifyString(inStr)
+    urlStr = [];
+    for i=1:length(inStr)
+        if ( isalpha_num(inStr(i)) )
+            urlStr = [urlStr inStr(i)];
+            continue;
         end
         
+        urlStr = [urlStr '%' dec2hex(uint8(inStr(i)), 2)];
+    end
+end
 
+function createBugReport(src,evnt)
+    verString = Helper.GetVersion('fullstring');
+    
+%     issueLabels = 'bug';
+%     issueTitle = '<ISSUE TITLE>';
+%     issueDesc = sprintf('%s\n\n### Description:\n<ENTER BUG DESCRIPTION>\n\n### Reproduction:\n1. <ENTER REPRODUCTION STEPS>\n', verString);
+    issueDesc = sprintf('%s\n\n', verString);
+    
+    newIssueURI = 'https://git-bioimage.coe.drexel.edu/bioimage/lever/issues/new';
+    
+    reqStr = ['?' 'issue%5Bassignee_id%5D=' '2' ...
+              '&' 'issue%5Bdescription%5D=' urlifyString(issueDesc)];
+	
+	system(['explorer "' newIssueURI reqStr '"']);
 end
 

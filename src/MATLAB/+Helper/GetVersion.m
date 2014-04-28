@@ -36,7 +36,7 @@ function version = GetVersion(command)
     end
     
     if ( strcmpi(command, 'fullString') )
-        version = [num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) '.' verInfo.buildNumber '/' verInfo.buildMachine ' ' cleanBranch];
+        version = ['LEVER v' num2str(verInfo.majorVersion) '.' num2str(verInfo.minorVersion) ' ' verInfo.buildNumber '/' verInfo.buildMachine ' ' cleanBranch ' ' verInfo.commitHash];
         return;
     end
     
