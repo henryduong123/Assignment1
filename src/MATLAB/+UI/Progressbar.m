@@ -26,7 +26,7 @@
 % this m-file modified by Quan Quach on 12/12/07
 % email: quan.quach@gmail.com
 % Original Author: Steve Hoelzer
-function [stopBar] =  Progressbar(fractiondone, position)
+function [stopBar] =  Progressbar(fractiondone, position, title)
 
 if(~exist('fractiondone'))
     return
@@ -113,7 +113,7 @@ end
 % 2004-Oct-20   Efficient if-else structure for sec2timestr
 %
 stopBar = 0;
-persistent progfig progpatch starttime lastupdate firstIteration
+persistent progfig progpatch progtitle starttime lastupdate firstIteration
 
 % Set defaults for variables not passed in
 if nargin < 1
@@ -121,6 +121,9 @@ if nargin < 1
 end
 if nargin < 2
     position = 0;
+end
+if ( nargin < 3 )
+    title = '';
 end
 
 try
@@ -136,7 +139,6 @@ catch
     progfig = []; % Set to empty so a new progress bar is created
     firstIteration = [];
 end
-
 
 percentdone = floor(100*fractiondone);
 
@@ -189,6 +191,12 @@ if (isempty(progfig) && (isempty(firstIteration)))
         error('position is not formatted correctly')
     end
     
+    titlePad = 0;
+    if ( ~isempty(title) || ~isempty(progtitle) )
+        titlePad = 0.9;
+        height = (1+titlePad)*height;
+    end
+    
     % Initialize progress bar
     progfig = figure(...
         'Units',            'normalized',...
@@ -197,8 +205,29 @@ if (isempty(progfig) && (isempty(firstIteration)))
         'Resize',           'off',...
         'MenuBar',          'none',...
         'BackingStore',     'off' );
+    
+    totalHeight = 0.80;
+    
+    barTop = 0.10;
+    barHeight = totalHeight;
+    
+	progtitle = [];
+    if ( ~isempty(title) )
+        titleHeight = titlePad*totalHeight / (1+titlePad);
+        barHeight = totalHeight / (1+titlePad);
+        
+        pad = 0.04;
+        
+        progtitle = uicontrol(...
+            'Units','normalized',...
+            'Style','text', 'Parent',progfig,...
+            'String','', 'BackgroundColor',[0.8 0.8 0.8],...
+            'HorizontalAlignment','left', 'FontSize',10,...
+            'Position',[0.02 barTop+pad+barHeight 0.96 titleHeight-pad]);
+    end
+    
     progaxes = axes(...
-        'Position',         [0.02 0.15 0.96 0.70],...
+        'Position',         [0.02 barTop 0.96 barHeight],...
         'XLim',             [0 1],...
         'YLim',             [0 1],...
         'Box',              'on',...
@@ -236,10 +265,14 @@ if (isempty(progfig) && ~(fractiondone==0))
     delete(progfig) % Close progress bar
 
     % Clear persistent vars
-    clear progfig progpatch starttime lastupdate firstIteration
+    clear progfig progpatch progtitle starttime lastupdate firstIteration
     stopBar = 1;
     return    
     
+end
+
+if ( ~isempty(title) && ~isempty(progtitle) )
+    set(progtitle, 'String',title);
 end
     
     
@@ -275,7 +308,7 @@ if percentdone == 100 % Task completed
     %change the close request function back to normal
     set(progfig,'CloseRequestFcn','closereq'); 
     % Clear persistent vars
-    clear progpatch starttime lastupdate firstIteration 
+    clear progpatch progtitle starttime lastupdate firstIteration 
     delete(progfig);
     clear progfig
     return
@@ -286,6 +319,7 @@ lastupdate = clock;
     %%
     function closeBar(src,evnt)
         progpatch = [];
+        progtitle = [];
         starttime = [];
         lastupdate = [];
         firstIteration = [];
