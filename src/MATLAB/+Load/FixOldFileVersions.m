@@ -144,10 +144,20 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = true;
     end
     
+    if ( ~isfield(CellFamilies, 'bCompleted') )
+        Load.AddCompletedField();
+        bNeedsUpdate = true;
+    end
+    
+    if ( ~isfield(CellFamilies, 'correctedTime') )
+        Load.AddCorrectedTimeField();
+        bNeedsUpdate = true;
+    end
+    
     % Make sure that CellHulls userEdited, deleted, greenInd
-    % are all "logical". Also, CellFamilies.bLocked
+    % are all "logical". Also, CellFamilies.bLocked/bCompleted
     CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
-    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked');
+    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);
     emptyIdx = find(bEmptyHulls);

@@ -18,7 +18,7 @@ trackID = CellTracks(trackID).parentTrack;
  % This will unlock the tree and if the cell family is locked it will
  % unlock it but otherwise it will lock it.
     if ( isempty(CellFamilies(familyID).bLocked) )
-        CellFamilies(familyID).bLocked = 0;
+        CellFamilies(familyID).bLocked = false;
     end
     
     bIsLocked = CellFamilies(familyID).bLocked;

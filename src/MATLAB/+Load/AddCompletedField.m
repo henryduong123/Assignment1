@@ -1,4 +1,4 @@
-function AddLockedField()
+function AddCompletedField()
     global CellFamilies
     
     oldCellFamilies = CellFamilies;
@@ -8,5 +8,6 @@ function AddLockedField()
         'tracks', {oldCellFamilies.tracks},...
         'startTime', {oldCellFamilies.startTime},...
         'endTime', {oldCellFamilies.endTime},...
-        'bLocked', {false});
+        'bLocked', {oldCellFamilies.bLocked},...
+        'bCompleted', {false});
 end
