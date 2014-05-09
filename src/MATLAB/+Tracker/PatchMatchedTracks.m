@@ -30,11 +30,11 @@ function PatchMatchedTracks()
     global CellFamilies CellTracks CellHulls
     
     bLockedFamilies = [CellFamilies.bLocked];
-    unlockedFamilies = CellFamilies(~bLockedFamilies);
+    unlockedFamilies = find(~bLockedFamilies);
     
     % Get root hulls of all families
-    checkHulls = arrayfun(@getRootHullID, unlockedFamilies, 'UniformOutput',0);
-    checkHulls = [checkHulls{:}];
+    checkHulls = arrayfun(@getRootHullID, unlockedFamilies);
+    checkHulls = checkHulls(checkHulls > 0);
     
     % Check possible attachments in order of time
     [srtTimes srtIdx] = sort([CellHulls(checkHulls).time]);
@@ -44,7 +44,7 @@ function PatchMatchedTracks()
     
     leafHulls = [];
     for i=1:length(unlockedFamilies)
-        checkTracks = unlockedFamilies(i).tracks;
+        checkTracks = CellFamilies(unlockedFamilies(i)).tracks;
         for j=1:length(checkTracks)
             if ( ~isempty(CellTracks(checkTracks(j)).childrenTracks) )
                 continue;
@@ -101,14 +101,15 @@ function PatchMatchedTracks()
     end
 end
 
-function hullID = getRootHullID(family)
-    global CellTracks
+function hullID = getRootHullID(familyID)
+    global CellTracks CellFamilies
     
-    if ( isempty(family.startTime) )
-        hullID = [];
+    hullID = 0;
+    if ( isempty(CellFamilies(familyID).startTime) )
         return;
     end
     
-    hullID = CellTracks(family.rootTrackID).hulls(1);
+    rootTrackID = CellFamilies(familyID).rootTrackID;
+    hullID = CellTracks(rootTrackID).hulls(1);
 end
 
