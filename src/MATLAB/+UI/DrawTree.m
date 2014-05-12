@@ -191,7 +191,8 @@ end
 showResegStatus = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
 if ( strcmpi(showResegStatus, 'on') )
     trackStruct = values(trackMap);
-    smallBox = cellfun(@(x)(x.smallBox),trackStruct);
+    boxCell = cellfun(@(x)(x.xSmallBox),trackStruct, 'UniformOutput',0);
+    smallBox = vertcat(boxCell{:});
     minSpacing = min(abs(smallBox(:,2)-smallBox(:,1)))/2;
     if ( isempty(minSpacing) )
         minSpacing = 1;
@@ -200,7 +201,7 @@ if ( strcmpi(showResegStatus, 'on') )
     pdelta = pixelDelta(Figures.tree.axesHandle);
     padLeft = min(minSpacing/3, 4*pdelta);
     for i=1:length(sortedTracks)
-        drawResegInfo(sortedTracks(i), trackMap(sortedTracks(i)).center-padLeft);
+        drawResegInfo(sortedTracks(i), trackMap(sortedTracks(i)).xCenter-padLeft);
     end
 end
 
