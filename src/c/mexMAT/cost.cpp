@@ -133,7 +133,7 @@ double getCost(std::vector<int>& path, int srcIdx, int bCheck)
 	{
 		double dlcd = calcHullDist(path[k], path[k+1]);
 
-		if ( dlcd > vmax )
+		if ( dlcd > vmax && k >= srcIdx )
 			return DoubleLims::infinity();
 	}
 
