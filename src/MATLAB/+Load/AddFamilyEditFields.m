@@ -1,21 +1,39 @@
-function AddCorrectedTimeField()
+function bNeedsUpdate = AddFamilyEditFields()
     global CellFamilies
     
-    oldCellFamilies = CellFamilies;
+    bNeedsUpdate = false;
     
-    CellFamilies = struct(...
-        'rootTrackID',  {oldCellFamilies.rootTrackID},...
-        'tracks', {oldCellFamilies.tracks},...
-        'startTime', {oldCellFamilies.startTime},...
-        'endTime', {oldCellFamilies.endTime},...
-        'bLocked', {oldCellFamilies.bLocked},...
-        'bCompleted', {oldCellFamilies.bCompleted},...
-        'correctedTime',{0});
-    
-    lockedFamIDs = find([CellFamilies.bLocked] ~= 0);
-    for i=1:length(lockedFamIDs)
-        CellFamilies(lockedFamIDs(i)).correctedTime = getCorrectedTime(lockedFamIDs(i));
+    % Add bLockedField if necessary
+    if ( ~isfield(CellFamilies, 'bLocked') )
+        CellFamilies = addDefaultField(CellFamilies, 'bLocked', false);
+        bNeedsUpdate = true;
     end
+    
+    if ( ~isfield(CellFamilies, 'bCompleted') )
+        CellFamilies = addDefaultField(CellFamilies, 'bCompleted', false);
+        bNeedsUpdate = true;
+    end
+    
+    if ( ~isfield(CellFamilies, 'correctedTime') )
+        CellFamilies = addDefaultField(CellFamilies, 'correctedTime', false);
+        
+        lockedFamIDs = find([CellFamilies.bLocked] ~= 0);
+        for i=1:length(lockedFamIDs)
+            CellFamilies(lockedFamIDs(i)).correctedTime = getCorrectedTime(lockedFamIDs(i));
+        end
+        
+        bNeedsUpdate = true;
+    end
+    
+    if ( ~isfield(CellFamilies, 'editInfo') )
+        CellFamilies = addDefaultField(CellFamilies, 'editInfo', struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0}));
+        bNeedsUpdate = true;
+    end
+end
+
+function outStruct = addDefaultField(inStruct, fieldName, defaultVal)
+    outStruct = inStruct;
+    [outStruct.(fieldName)] = deal(defaultVal);
 end
 
 function correctedTime = getCorrectedTime(familyID)

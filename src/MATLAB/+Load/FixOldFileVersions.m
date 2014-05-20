@@ -138,21 +138,9 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = true;
     end
     
-    % Add bLockedField if necessary
-    if ( ~isfield(CellFamilies, 'bLocked') )
-        Load.AddLockedField();
-        bNeedsUpdate = true;
-    end
-    
-    if ( ~isfield(CellFamilies, 'bCompleted') )
-        Load.AddCompletedField();
-        bNeedsUpdate = true;
-    end
-    
-    if ( ~isfield(CellFamilies, 'correctedTime') )
-        Load.AddCorrectedTimeField();
-        bNeedsUpdate = true;
-    end
+    % Add in any missing "edit" fields for families
+    bFamilyUpdate = Load.AddFamilyEditFields();
+    bNeedsUpdate = (bNeedsUpdate || bFamilyUpdate);
     
     % Make sure that CellHulls userEdited, deleted, greenInd
     % are all "logical". Also, CellFamilies.bLocked/bCompleted
