@@ -35,12 +35,10 @@ function bNeedsUpdate = FixOldFileVersions()
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
     end
-   
-    % Add imagePixels field to CellHulls structure (and resave in place)
-    if(~isfield(CellHulls, 'imagePixels'))
-        fprintf('\nAdding Image Pixel Information...\n');
-        Load.AddImagePixelsField();
-        fprintf('Image Information Added\n');
+    
+    % As of version 7.9, remove imagePixels field
+    if ( isfield(CellHulls, 'imagePixels') )
+        Load.RemoveImagePixelsField();
         bNeedsUpdate = true;
     end
     
