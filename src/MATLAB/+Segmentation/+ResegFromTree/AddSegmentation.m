@@ -58,7 +58,6 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     
     newHull.centerOfMass = mean([r c]);
     newHull.indexPixels = newObj.indPixels;
-    newHull.imagePixels = newObj.imPixels;
     
     newHull.points = [c(ch),r(ch)];
     
