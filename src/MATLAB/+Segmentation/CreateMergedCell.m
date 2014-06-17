@@ -38,7 +38,6 @@ function [mergeObj, deleteCells] = CreateMergedCell(mergeCells)
         
         mergeObj.time = CellHulls(deleteCells(1)).time;
         mergeObj.indexPixels = vertcat(CellHulls(deleteCells).indexPixels);
-        mergeObj.imagePixels = vertcat(CellHulls(deleteCells).imagePixels);
         
         [r c] = ind2sub(CONSTANTS.imageSize, mergeObj.indexPixels);
         ch = Helper.ConvexHull(c,r);

@@ -89,7 +89,6 @@ for i=1:k
     connComps{i} = hull.indexPixels(bIdxPix);
     
     nh.indexPixels = hull.indexPixels(bIdxPix);
-    nh.imagePixels = hull.imagePixels(bIdxPix);
     nh.centerOfMass = mean([hy hx]);
     nh.time = hull.time;
     

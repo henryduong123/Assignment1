@@ -81,8 +81,7 @@ function newHulls = splitMitosisHull(hullID, linePoints, bForcePoints)
         
         connComps{i} = CellHulls(hullID).indexPixels(bIdxPix);
 
-        imPix = CellHulls(hullID).imagePixels(bIdxPix);
-        nh = createNewHullStruct(hx,hy, imPix, CellHulls(hullID).time);
+        nh = createNewHullStruct(hx,hy, CellHulls(hullID).time);
         if ( isempty(nh) )
             newHulls = [];
             return;
@@ -204,7 +203,6 @@ function outHullID = mergeHullValues(hullID, mergeStruct)
     
     [dump, idxA, idxB] = union(CellHulls(hullID).indexPixels, mergeStruct.indexPixels);
     CellHulls(hullID).indexPixels = [CellHulls(hullID).indexPixels(idxA); mergeStruct.indexPixels(idxB)];
-    CellHulls(hullID).imagePixels = [CellHulls(hullID).imagePixels(idxA); mergeStruct.imagePixels(idxB)];
     
     [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
@@ -221,7 +219,6 @@ function subtractHulls(hullID, subHullID)
     
     [dump, subIdx] = union(CellHulls(hullID).indexPixels, CellHulls(subHullID).indexPixels);
     CellHulls(hullID).indexPixels = CellHulls(hullID).indexPixels(subIdx);
-    CellHulls(hullID).imagePixels = CellHulls(hullID).imagePixels(subIdx);
     
     [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
@@ -253,7 +250,7 @@ function newHullID = addHullEntry(obj, time)
     newHullID = Hulls.SetHullEntries(0, newHull);
 end
 
-function newHull = createNewHullStruct(x,y, imagePixels, time)
+function newHull = createNewHullStruct(x,y, time)
     global CONSTANTS CellHulls
     
     newHull = Helper.MakeEmptyStruct(CellHulls);
@@ -261,7 +258,6 @@ function newHull = createNewHullStruct(x,y, imagePixels, time)
     idxPix = sub2ind(CONSTANTS.imageSize, y,x);
     
     newHull.indexPixels = idxPix;
-    newHull.imagePixels = imagePixels;
     newHull.centerOfMass = mean([y x], 1);
     newHull.time = time;
     

@@ -94,8 +94,6 @@ for i=1:length(track.hulls)
     
     trackData.Features(featureIndex,1) = stats.Area;
     trackData.Features(featureIndex,2) = stats.ConvexArea;
-    trackData.Features(featureIndex,3) = mean(CellHulls(track.hulls(i)).imagePixels);
-    trackData.Features(featureIndex,4) = sqrt(var(CellHulls(track.hulls(i)).imagePixels));
     trackData.Features(featureIndex,5) = stats.Eccentricity;
     
     dx = CellHulls(track.hulls(j)).centerOfMass(1)-CellHulls(track.hulls(i)).centerOfMass(1);

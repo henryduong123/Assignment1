@@ -53,7 +53,6 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         connComps{i} = hull.indexPixels(bIdxPix);
 
         nh.indexPixels = hull.indexPixels(bIdxPix);
-        nh.imagePixels = hull.imagePixels(bIdxPix);
         nh.centerOfMass = mean([hy hx]);
         nh.time = hull.time;
 

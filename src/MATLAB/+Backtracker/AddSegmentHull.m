@@ -25,14 +25,12 @@ function newTrackID = AddSegmentHull(clickPt, time)
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
         newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
-        newHull.imagePixels = img(newHull.indexPixels);
     else
         newHull.time = time;
         newHull.points = newObj.points;
         [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
         newHull.centerOfMass = mean([r c]);
         newHull.indexPixels = newObj.indPixels;
-        newHull.imagePixels = newObj.imPixels;
     end
     
     newHullID = Hulls.SetHullEntries(0, newHull);

@@ -34,7 +34,7 @@ for i=1:length(CellTracks)
     trackMetrics = [trackMetrics getMetrics(i,CellTracks(i))];
 end
 
-data = 'Cell Label,Number of Frames,First Frame,Last Frame,Origin Cell,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area,Mean Pixel,Standard Deviation Pixel\n';
+data = 'Cell Label,Number of Frames,First Frame,Last Frame,Origin Cell,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area\n';
 for i=1:length(trackMetrics)
     data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ',' num2str(trackMetrics(i).firstFrame) ',' num2str(trackMetrics(i).lastFrame) ',' num2str(trackMetrics(i).familyID) ',' ];
     if(~isempty(trackMetrics(i).parent))
@@ -100,7 +100,6 @@ trackMetric.familyID = track.familyID;
 
 velocities = [];
 areas = [];
-intensities = [];
 
 for i=1:length(track.hulls)-1
     if(~track.hulls(i)),continue,end
@@ -117,7 +116,6 @@ for i=1:length(track.hulls)-1
     v = dist/(j-i);
     velocities = [velocities v];
     areas = [areas length(CellHulls(track.hulls(i)).indexPixels)];
-    intensities = [intensities CellHulls(track.hulls(i)).imagePixels'];
 end
 if(track.hulls(length(track.hulls)))
     areas = [areas length(CellHulls(track.hulls(length(track.hulls))).indexPixels)];%i only goes to length -1;
@@ -130,6 +128,4 @@ trackMetric.meanArea = mean(areas);
 trackMetric.minArea = min(areas);
 trackMetric.maxArea = max(areas);
 trackMetric.standardDeviationArea = sqrt(var(areas));
-trackMetric.meanIntesity = mean(intensities);
-trackMetric.standardDeviationIntesity = sqrt(var(intensities));
 end
