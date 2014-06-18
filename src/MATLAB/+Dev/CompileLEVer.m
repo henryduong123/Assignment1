@@ -157,6 +157,8 @@ function [vsStruct comparch] = setupCompileTools()
     if ( isempty(vsStruct.vstoolroot) )
         error('Cannot compile MTC and mexMAT without Visual Studio 2010');
     end
+    
+    setenv('MATLAB_DIR', matlabroot());
 
     comparch = computer('arch');
     if ( strcmpi(comparch,'win64') )
