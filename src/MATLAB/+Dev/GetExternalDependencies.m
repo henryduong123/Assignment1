@@ -231,19 +231,19 @@ function [deplist calledFrom] = recursiveGetDeps(checkNames, bFollowToolboxes, d
 end
 
 function [deplist calledFrom newEntries] = mergeLists(deplist, calledFrom, newdeps, newCalledFrom)
-    newIdx = cellfun(@(x)(find(strcmpi(x,deplist))), newdeps, 'UniformOutput',0);
-    bNew = cellfun(@(x)(isempty(x)), newIdx);
+    oldIdx = cellfun(@(x)(find(strcmpi(x,deplist))), newdeps, 'UniformOutput',0);
+    bNew = cellfun(@(x)(isempty(x)), oldIdx);
     
     newEntries = newdeps(bNew);
     
     idxMap = zeros(1,length(newdeps));
-    idxMap(~bNew) = [newIdx{~bNew}];
+    idxMap(~bNew) = [oldIdx{~bNew}];
     idxMap(bNew) = (1:length(newEntries)) + length(deplist);
     
     deplist = [deplist; newEntries];
     calledFrom = [calledFrom; cell(length(newEntries),1)];
     
-    calledFrom(idxMap) = cellfun(@(x,y)(union(x,idxMap(y))), calledFrom(idxMap), newCalledFrom, 'UniformOutput',0);
+    calledFrom(idxMap) = cellfun(@(x,y)(unique([x idxMap(y)])), calledFrom(idxMap), newCalledFrom, 'UniformOutput',0);
 end
 
 function [checkNames fullNames] = getLocalNames(dirName, packageString)
