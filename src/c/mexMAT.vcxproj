@@ -82,7 +82,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\MATLAB\R2009bSP1\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MEXMAT_EXPORTS;MATLAB_MEX_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -97,7 +97,7 @@
     <Link>
       <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)..\..\..\MATLAB\$(ProjectName).mexw32</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\MATLAB\R2009bSP1\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>mexMAT/mexMAT.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -116,7 +116,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2012a\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MEXMAT_EXPORTS;MATLAB_MEX_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -131,7 +131,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     <Link>
       <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)..\..\..\MATLAB\$(ProjectName).mexw64</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2012a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>mexMAT/mexMAT.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -148,7 +148,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\MATLAB\R2009bSP1\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MEXMAT_EXPORTS;MATLAB_MEX_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -160,7 +160,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     <Link>
       <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\MATLAB\R2009bSP1\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>mexMAT/mexMAT.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -182,7 +182,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2012a\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MATLAB_DIR)\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MEXMAT_EXPORTS;MATLAB_MEX_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -194,7 +194,7 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     <Link>
       <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2012a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MATLAB_DIR)\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>mexMAT/mexMAT.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
