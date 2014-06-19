@@ -94,6 +94,9 @@ function bNeedsUpdate = FixOldFileVersions()
         CellPhenotypes.colors = hsv(length(CellPhenotypes.descriptions));
         CellPhenotypes.colors(1,:) = [0 0 0];
         bNeedsUpdate = true;
+    elseif ( iscell(CellPhenotypes.colors) )
+        CellPhenotypes.colors = CellPhenotypes.colors{1};
+        bNeedsUpdate = true;
     end
     
     % Will search older versions of the code for any variation of ambiguous
