@@ -28,32 +28,36 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features levels] = Segmentor(tStart,tStep,tEnd,cellType,imageAlpha,rootImageFolder,imageNamePattern,rootFluorFolder,fluorNamePattern)
+function [objs features levels] = Segmentor(varargin)
 
 objs=[];
 features = [];
 levels = struct('haloLevel',{}, 'igLevel',{});
 
-if ( exist(fullfile('+Segmentation',[cellType 'FrameSegmentor']), 'file') )
-    segFunc = str2func(['Segmentation.' cellType 'FrameSegmentor']);
+argStruct = setSegArgs(varargin);
+if ( isempty(argStruct) )
+    return;
+end
+
+if ( exist(fullfile('+Segmentation',[argStruct.cellType 'FrameSegmentor']), 'file') )
+    segFunc = str2func(['Segmentation.' argStruct.cellType 'FrameSegmentor']);
 else
-    fprintf(['WARNING: Could not find Segmentation.' cellType 'FrameSegmentor() using default segmentation routine\n']);
+    fprintf(['WARNING: Could not find Segmentation.' argStruct.cellType 'FrameSegmentor() using default segmentation routine\n']);
     segFunc = @Segmentation.FrameSegmentor;
 end
 
-try
-    if(ischar(tStart)),tStart = str2double(tStart);end
-    if(ischar(tStep)),tStep = str2double(tStep);end
-    if(ischar(tEnd)),tEnd = str2double(tEnd);end
-    if(ischar(imageAlpha)),imageAlpha = str2double(imageAlpha);end
+try 
+    fprintf(1,'%s\n',argStruct.rootImageFolder);
+    fprintf(1,'%s\n',argStruct.imageNamePattern);
     
-    fprintf(1,'%s\n',rootImageFolder);
-    fprintf(1,'%s\n',imageNamePattern);
+    Load.AddConstant('rootImageFolder', argStruct.rootImageFolder, 1);
+    Load.AddConstant('imageNamePattern', argStruct.imageNamePattern, 1);
+    Load.AddConstant('rootFluorFolder', [argStruct.rootFluorFolder '\'], 1);
+    Load.AddConstant('fluorNamePattern', argStruct.fluorNamePattern, 1);
     
-    Load.AddConstant('rootImageFolder', rootImageFolder, 1);
-    Load.AddConstant('imageNamePattern', imageNamePattern, 1);
-    Load.AddConstant('rootFluorFolder', [rootFluorFolder '\'], 1);
-    Load.AddConstant('fluorNamePattern', fluorNamePattern, 1);
+    tStart = argStruct.tStart;
+    tEnd = argStruct.tEnd;
+    tStep = argStruct.tStep;
     
     numImages = tEnd/tStep;
 
@@ -67,7 +71,7 @@ try
 
         im = Helper.LoadIntensityImage(fname);
 
-        [frmObjs frmFeatures frmLevels] = segFunc(im, t, imageAlpha);
+        [frmObjs frmFeatures frmLevels] = segFunc(im, t, argStruct.imageAlpha);
         objs = [objs frmObjs];
         features = [features frmFeatures];
         levels = [levels frmLevels];
@@ -91,3 +95,71 @@ fclose(fSempahore);
 
 fprintf('\tDone\n');
 end
+
+function argStruct = setSegArgs(argCell)
+    argStruct = [];
+    
+    % If a field is added or modified make sure to add corresponding type.
+    argFields = {'tStart','tStep','tEnd','cellType','imageAlpha','rootImageFolder','imageNamePattern','rootFluorFolder','fluorNamePattern'};
+    argTypes = {'double','double','double','char','double','char','char','char','char'};
+    
+    procID = 1;
+    if ( ~isempty(argCell) )
+        procID = convertArg(argCell{1}, argTypes{1});
+    end
+    errFilename = ['.\segmentationData\err_' num2str(procID) '.log'];
+    
+    if ( length(argCell) ~= length(argFields) )
+        cltime = clock();
+        
+        fid = fopen(errFilename, 'w');
+        fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));%, t);
+        
+        if ( length(argCell) > length(argFields) )
+            fprintf(fid, '  Too many input arguments expected %d: %d extra\n', length(argFields), (length(argCell)-length(argFields)));
+        else
+            fprintf(fid, '  Too few input arguments expected %d: %d missing\n', length(argFields), (length(argFields) - length(argCell)));
+        end
+        
+        printArgs(fid, argCell, argFields);
+
+        fclose(fid);
+        return;
+    end
+    
+    argStruct = makeArgStruct(argCell, argFields, argTypes);
+end
+
+function argStruct = makeArgStruct(argCell, argFields, argTypes)
+    argStruct = struct();
+    for i=1:length(argFields);
+        argStruct.(argFields{i}) = convertArg(argCell{i}, argTypes{i});
+    end
+end
+
+function outArg = convertArg(inArg, toType)
+    if ( strcmpi(toType,'char') )
+        outArg = num2str(inArg);
+    elseif ( ischar(inArg) )
+        outArg = cast(str2double(inArg), toType);
+    else
+        outArg = cast(inArg, toType);
+    end
+end
+
+function printArgs(fid, argCell, argFields)
+    for i=1:length(argFields)
+        curArg = '[]';
+        if ( i <= length(argCell) )
+            curArg = num2str(argCell{i});
+        end
+        
+        fprintf(fid, '    %d: %s = %s\n', i, argFields{i}, curArg);
+    end
+    
+    for i=(length(argFields)+1):length(argCell)
+        curArg = num2str(argCell{i});
+        fprintf(fid, '    %d: [] = %s\n', i, curArg);
+    end
+end
+
