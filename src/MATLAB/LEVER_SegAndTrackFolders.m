@@ -53,6 +53,10 @@ if ( exist('maxProcessors','var') )
 end
 
 dlist=dir(directory_name);
+
+bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dlist);
+bValidDir = ~bInvalidName & (vertcat(dlist.isdir) > 0);
+dlist = dlist(bValidDir);
 for dd=1:length(dlist)
     
     if ( ~(dlist(dd).isdir) )
