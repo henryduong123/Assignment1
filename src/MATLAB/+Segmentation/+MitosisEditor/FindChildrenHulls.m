@@ -160,7 +160,7 @@ function hullID = mergeOverlapping(objs, chkPoint, time)
     newObj = chkObjs(minIdx);
     
     [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
-    newHullEntry = createNewHullStruct(c, r, newObj.imPixels, time);
+    newHullEntry = createNewHullStruct(c, r, time);
     
     bMergeHulls = arrayfun(@(x)(nnz(ismember(newHullEntry.indexPixels,CellHulls(x).indexPixels)) > 5), frameHulls);
     mergeHulls = frameHulls(bMergeHulls);
@@ -237,7 +237,7 @@ function newHullID = addPointHullEntry(chkPoint, time)
     filename = Helper.GetFullImagePath(time);
     img = Helper.LoadIntensityImage(filename);
     
-    newHull = createNewHullStruct(x, y, img(y,x), time);
+    newHull = createNewHullStruct(x, y, time);
     newHullID = Hulls.SetHullEntries(0, newHull);
 end
 
@@ -246,7 +246,7 @@ function newHullID = addHullEntry(obj, time)
     
     [r c] = ind2sub(CONSTANTS.imageSize, obj.indPixels);
     
-    newHull = createNewHullStruct(c, r, obj.imPixels, time);
+    newHull = createNewHullStruct(c, r, time);
     newHullID = Hulls.SetHullEntries(0, newHull);
 end
 
