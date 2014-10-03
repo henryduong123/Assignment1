@@ -60,6 +60,7 @@ function errStatus = SegAndTrack()
     % full-movie segmentation which handles threading internally
     % (see e.g. HematoSeg.exe)
     
+    errStatus = '';
     switch CONSTANTS.cellType
         case 'Hemato'
             tic;
@@ -86,12 +87,18 @@ function errStatus = SegAndTrack()
                 CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
             
         otherwise
+            errStatus = '';
             return
     end
     
     
     
-    if (errStatus)
+    if ( ~isempty(errStatus) )
+        errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
+        fid = fopen(errFilename, 'wt');
+        fprintf(fid, '%s', errStatus);
+        fclose(fid);
+        
         return
     end
     

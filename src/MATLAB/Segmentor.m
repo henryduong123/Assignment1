@@ -81,8 +81,13 @@ catch excp
     cltime = clock();
     errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
     fid = fopen(errFilename, 'w');
-    fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));%, t);
-    Error.PrintException(fid, excp);
+    if ( ~exist('t', 'var') )
+        fprintf(fid, '%02d:%02d:%02.1f - Error in segmentor\n',cltime(4),cltime(5),cltime(6));
+    else
+        fprintf(fid, '%02d:%02d:%02.1f - Error in segmenting frame %d \n',cltime(4),cltime(5),cltime(6), t);
+    end
+    excpMessage = Error.PrintException(excp);
+    fprintf(fid, '%s', excpMessage);
     fclose(fid);
     return;
 end

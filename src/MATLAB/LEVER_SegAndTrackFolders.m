@@ -100,8 +100,14 @@ for dd=1:length(dlist)
     
     if ( ~bTrialRun )    
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-        if ( errStatus ~= 0 )
+        if ( ~isempty(errStatus) )
             fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n',CONSTANTS.datasetName);
+            
+            errFilename = fullfile(outputDir, [CONSTANTS.datasetName '_segtrack_err.log']);
+            fid = fopen(errFilename, 'wt');
+            fprintf(fid, '%s', errStatus);
+            fclose(fid);
+            
             continue;
         end
 

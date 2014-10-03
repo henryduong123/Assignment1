@@ -38,7 +38,8 @@ function LinkTreeFolders(dataRootPath, pushSubdir)
             end
             
             errlog = fopen([CONSTANTS.datasetName '_push_error.log'], 'w');
-            Error.PrintException(errlog,excp);
+            errStatus = Error.PrintException(excp);
+            fprintf(errlog, '%s', errStatus);
             fclose(errlog);
             
             UI.Progressbar(1);

@@ -1,7 +1,7 @@
-function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
+function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
     global CONSTANTS
     
-    status = 1;
+    errStatus = sprintf('Unknown Error\n');
     tSeg = 0;
     tTrack = 0;
 
@@ -41,10 +41,10 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     CONSTANTS.imageSize = size(chkIm);
     
     if ( ndims(CONSTANTS.imageSize) ~= 2 )
+        
         cltime = clock();
-        errlog = fopen([datasetName '_seg_error.log'], 'w');
-        fprintf(errlog, '%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
-        fclose(errlog);
+        errStatus = sprintf('%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
+        
         return;
     end
     
@@ -86,25 +86,23 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     end
     
     if ( ~all(bSegFileExists) )
-        status = 1;
+        errStatus = '';
         tSeg = toc;
         
         % Collect segmentation error logs into one place
-        errlog = fopen([datasetName '_seg_error.log'], 'w');
         for i=1:length(bSegFileExists)
             if ( bSegFileExists(i) )
                 continue;
             end
-            fprintf(errlog, '----------------------------------\n');
+            errStatus = sprintf( '----------------------------------\n');
             objerr = fopen(fullfile('.','segmentationData',['err_' num2str(i) '.log']));
             logline = fgetl(objerr);
             while ( ischar(logline) )
-                fprintf(errlog, '%s\n', logline);
+                errStatus = [errStatus sprintf('%s\n', logline)];
                 logline = fgetl(objerr);
             end
             fclose(objerr);
         end
-        fclose(errlog);
         
         return;
     end
@@ -128,12 +126,8 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     catch excp
         
         cltime = clock();
-        errlog = fopen([datasetName '_seg_error.log'], 'w');
-        fprintf(errlog, '%02d:%02d:%02.1f - Problem loading segmentation\n',cltime(4),cltime(5),cltime(6));
-        Error.PrintException(errlog, excp);
-        fclose(errlog);
-        
-        status = 1;
+        errStatus = sprintf('%02d:%02d:%02.1f - Problem loading segmentation\n',cltime(4),cltime(5),cltime(6));
+        errStatus = [errStatus Error.PrintException(excp)];
         tSeg = toc;
         return;
     end
@@ -174,12 +168,9 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     catch excp
         
         cltime = clock();
-        errlog = fopen([datasetName '_seg_error.log'], 'w');
-        fprintf(errlog, '%02d:%02d:%02.1f - Problem building LEVER structures\n',cltime(4),cltime(5),cltime(6));
-        Error.PrintException(errlog, excp);
-        fclose(errlog);
+        errStatus = sprintf('%02d:%02d:%02.1f - Problem building LEVER structures\n',cltime(4),cltime(5),cltime(6));
+        errStatus = [errStatus Error.PrintException(excp)];
         
-        status = 1;
         return;
     end
     
@@ -190,7 +181,7 @@ function [status tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imag
     clear cellSegLevels;
     clear leveltimes;
     
-    status = 0;
+    errStatus = '';
 end
 
 function removeOldFiles(rootDir, filePattern)

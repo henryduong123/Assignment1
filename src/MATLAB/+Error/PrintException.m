@@ -1,29 +1,29 @@
-function PrintException(fid, excp, prefixstr)
+function excpString = PrintException(excp, prefixstr)
     if ( ~exist('prefixstr','var') )
         prefixstr = '  ';
     end
     
-    fprintf(fid,'%s',prefixstr);
-    fprintf(fid, 'stacktrace: \n');
+    excpString = sprintf('%sstacktrace: \n', prefixstr);
     numspaces = 5;
     stacklevel = 1;
     for i=length(excp.stack):-1:1
-        fprintf(fid,'%s',prefixstr);
+        fprintf('%s',prefixstr);
+        excpString = [excpString sprintf('%s', prefixstr)];
         for j=1:numspaces
-            fprintf(fid,' ');
+            excpString = [excpString ' '];
         end
         
-        fprintf(fid,'%d.',stacklevel);
+        excpString = [excpString sprintf('%d.',stacklevel)];
         for j=1:stacklevel
-            fprintf(fid,' ');
+            excpString = [excpString ' '];
         end
         
         [mfdir mfile mfext] = fileparts(excp.stack(i).file);
         
-        fprintf(fid, '%s%s: %s(): %d\n', mfile, mfext, excp.stack(i).name, excp.stack(i).line);
+        excpString = [excpString sprintf('%s%s: %s(): %d\n', mfile, mfext, excp.stack(i).name, excp.stack(i).line)];
         
         stacklevel = stacklevel + 1;
     end
-    fprintf(fid,'%s',prefixstr);
-    fprintf(fid, 'message: %s\n', excp.message);
+    
+    excpString = [excpString sprintf('%smessage: %s\n',prefixstr,excp.message)];
 end
