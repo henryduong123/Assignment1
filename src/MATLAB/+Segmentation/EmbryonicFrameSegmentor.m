@@ -4,6 +4,10 @@ function [objs features levels] = EmbryonicFrameSegmentor(im, t, imageAlpha)
     levels = struct('haloLevel',{0}, 'igLevel',{0});
     
     level=imageAlpha*graythresh(im);
+    
+    level = min(level,0.95);
+    level = max(level,0.05);
+    
     bwHalo=im2bw(im,level);
     
     bwDark=0*im;
