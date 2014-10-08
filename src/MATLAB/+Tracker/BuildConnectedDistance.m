@@ -57,8 +57,8 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
         UpdateDistances(updateCells(i), t, t+2, hullPerims);
         
         if ( bUpdateIncoming )
-            UpdateDistances(updateCells(i), t, t-1);
-            UpdateDistances(updateCells(i), t, t-2);
+            UpdateDistances(updateCells(i), t, t-1, hullPerims);
+            UpdateDistances(updateCells(i), t, t-2, hullPerims);
         end
     end
     
