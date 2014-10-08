@@ -39,6 +39,8 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
         ConnectedDist = cell(1,max(updateCells));
     end
     
+    hullPerims = FindPerims(updateCells);
+    
     for i=1:length(updateCells)
         if (bShowProgress)
             UI.Progressbar((i-1)/length(updateCells));
@@ -51,8 +53,8 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
         ConnectedDist{updateCells(i)} = [];
         t = CellHulls(updateCells(i)).time;
         
-        UpdateDistances(updateCells(i), t, t+1);
-        UpdateDistances(updateCells(i), t, t+2);
+        UpdateDistances(updateCells(i), t, t+1, hullPerims);
+        UpdateDistances(updateCells(i), t, t+2, hullPerims);
         
         if ( bUpdateIncoming )
             UpdateDistances(updateCells(i), t, t-1);
@@ -65,7 +67,35 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
     end
 end
 
-function UpdateDistances(updateCell, t, tNext)
+function [hullPerims] = FindPerims(updateCells)
+    global CellHulls CONSTANTS
+    
+    hullPerims = struct(...
+        'perimeterPoints', []);
+    
+    parfor i=1:numel(updateCells)
+        [r, c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
+        minR = min(r);
+        minC = min(c);
+        r1 = r - minR + 1;
+        c1 = c - minC + 1;
+        if max(r1) == 1 || max(c1) == 1
+            r2 = r;
+            c2 = c;
+        else
+            im = zeros(max(r1), max(c1));
+            ind = sub2ind(size(im), r1, c1);
+            im(ind) = 1;
+            im2 = bwperim(im);
+            [r2, c2] = find(im2);
+            r2 = r2 + minR - 1;
+            c2 = c2 + minC - 1;
+        end
+        hullPerims(i).perimeterPoints = [r2 c2];
+    end
+end
+
+function UpdateDistances(updateCell, t, tNext, hullPerims)
     global CellHulls HashedCells CONSTANTS
     
     if ( tNext < 1 || tNext > length(HashedCells) )
@@ -94,18 +124,8 @@ function UpdateDistances(updateCell, t, tNext)
             SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
             continue;
         end
-        ccMinDistSq = Inf;
-        for k=1:length(r)
-            ccDistSq = (rNext-r(k)).^2 + (cNext-c(k)).^2;
-            ccRowMin = min(ccDistSq);
-            if ( ccRowMin < ccMinDistSq )
-                ccMinDistSq = ccRowMin;
-            end
-            
-            if ( ccRowMin < 1 )
-                break;
-            end
-        end
+        d = pdist2(hullPerims(updateCell).perimeterPoints, hullPerims(nextCells(i)).perimeterPoints);
+        ccMinDistSq = min(d(:)).^2;
         
         if ( abs(tNext-t) == 1 )
             ccMaxDist = CONSTANTS.dMaxConnectComponent;
