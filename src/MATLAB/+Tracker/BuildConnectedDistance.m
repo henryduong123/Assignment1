@@ -26,7 +26,7 @@
 
 function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
     global CellHulls ConnectedDist
-    
+
     if ( ~exist('bUpdateIncoming', 'var') )
         bUpdateIncoming = 0;
     end
@@ -39,7 +39,7 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
         ConnectedDist = cell(1,max(updateCells));
     end
     
-    hullPerims = FindPerims(updateCells);
+    hullPerims = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
     
     for i=1:length(updateCells)
         if (bShowProgress)
@@ -67,32 +67,29 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
     end
 end
 
-function [hullPerims] = FindPerims(updateCells)
+function [hullPerims] = AddPerim(hullPerims, hullID)
     global CellHulls CONSTANTS
+
+    if isKey(hullPerims, hullID), return, end;
     
-    hullPerims = struct(...
-        'perimeterPoints', []);
-    
-    parfor i=1:numel(updateCells)
-        [r, c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
-        minR = min(r);
-        minC = min(c);
-        r1 = r - minR + 1;
-        c1 = c - minC + 1;
-        if max(r1) == 1 || max(c1) == 1
-            r2 = r;
-            c2 = c;
-        else
-            im = zeros(max(r1), max(c1));
-            ind = sub2ind(size(im), r1, c1);
-            im(ind) = 1;
-            im2 = bwperim(im);
-            [r2, c2] = find(im2);
-            r2 = r2 + minR - 1;
-            c2 = c2 + minC - 1;
-        end
-        hullPerims(i).perimeterPoints = [r2 c2];
+    [r, c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
+    minR = min(r);
+    minC = min(c);
+    r1 = r - minR + 1;
+    c1 = c - minC + 1;
+    if max(r1) == 1 || max(c1) == 1
+        r2 = r;
+        c2 = c;
+    else
+        im = zeros(max(r1), max(c1));
+        ind = sub2ind(size(im), r1, c1);
+        im(ind) = 1;
+        im2 = bwperim(im);
+        [r2, c2] = find(im2);
+        r2 = r2 + minR - 1;
+        c2 = c2 + minC - 1;
     end
+    hullPerims(hullID) = [r2 c2];
 end
 
 function UpdateDistances(updateCell, t, tNext, hullPerims)
@@ -113,31 +110,36 @@ function UpdateDistances(updateCell, t, tNext, hullPerims)
     comDistSq = sum((ones(length(nextCells),1)*CellHulls(updateCell).centerOfMass - vertcat(CellHulls(nextCells).centerOfMass)).^2, 2);
     
     nextCells = nextCells(comDistSq <= ((tDist*CONSTANTS.dMaxCenterOfMass)^2));
+    
+    if ~isempty(nextCells) > 0
+        hullPerims = AddPerim(hullPerims, updateCell);
 
-    [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(updateCell).indexPixels);
-    for i=1:length(nextCells)
-        [rNext cNext] = ind2sub(CONSTANTS.imageSize, CellHulls(nextCells(i)).indexPixels);
-
-        isect = intersect(CellHulls(updateCell).indexPixels, CellHulls(nextCells(i)).indexPixels);
-        if ( ~isempty(isect) )
-            isectDist = 1 - (length(isect) / min(length(CellHulls(updateCell).indexPixels), length(CellHulls(nextCells(i)).indexPixels)));
-            SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
-            continue;
+        for i=1:length(nextCells)
+            
+            isect = intersect(CellHulls(updateCell).indexPixels, CellHulls(nextCells(i)).indexPixels);
+            if ( ~isempty(isect) )
+                isectDist = 1 - (length(isect) / min(length(CellHulls(updateCell).indexPixels), length(CellHulls(nextCells(i)).indexPixels)));
+                SetDistance(updateCell, nextCells(i), isectDist, tNext-t);
+                continue;
+            end
+            %        d = pdist2(hullPerims(updateCell).perimeterPoints, hullPerims(nextCells(i)).perimeterPoints);
+            hullPerims = AddPerim(hullPerims, nextCells(i));
+            d  = pdist2(hullPerims(updateCell), hullPerims(nextCells(i)));
+            
+            ccMinDistSq = min(d(:)).^2;
+            
+            if ( abs(tNext-t) == 1 )
+                ccMaxDist = CONSTANTS.dMaxConnectComponent;
+            else
+                ccMaxDist = 1.5*CONSTANTS.dMaxConnectComponent;
+            end
+            
+            if ( ccMinDistSq > (ccMaxDist^2) )
+                continue;
+            end
+            
+            SetDistance(updateCell, nextCells(i), sqrt(ccMinDistSq), tNext-t);
         end
-        d = pdist2(hullPerims(updateCell).perimeterPoints, hullPerims(nextCells(i)).perimeterPoints);
-        ccMinDistSq = min(d(:)).^2;
-        
-        if ( abs(tNext-t) == 1 )
-            ccMaxDist = CONSTANTS.dMaxConnectComponent;
-        else
-            ccMaxDist = 1.5*CONSTANTS.dMaxConnectComponent;
-        end
-        
-        if ( ccMinDistSq > (ccMaxDist^2) )
-            continue;
-        end
-        
-        SetDistance(updateCell, nextCells(i), sqrt(ccMinDistSq), tNext-t);
     end
 end
 
@@ -148,7 +150,7 @@ function SetDistance(updateCell, nextCell, dist, updateDir)
         ConnectedDist{updateCell} = [ConnectedDist{updateCell}; nextCell dist];
         
         % Sort hulls to match MEX code
-        [sortHulls sortIdx] = sort(ConnectedDist{updateCell}(:,1));
+        [~, sortIdx] = sort(ConnectedDist{updateCell}(:,1));
         ConnectedDist{updateCell} = ConnectedDist{updateCell}(sortIdx,:);
     else
         chgIdx = [];
@@ -163,7 +165,7 @@ function SetDistance(updateCell, nextCell, dist, updateDir)
         end
         
         % Sort hulls to match MEX code
-        [sortHulls sortIdx] = sort(ConnectedDist{nextCell}(:,1));
+        [~, sortIdx] = sort(ConnectedDist{nextCell}(:,1));
         ConnectedDist{nextCell} = ConnectedDist{nextCell}(sortIdx,:);
     end
 end
