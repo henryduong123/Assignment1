@@ -82,9 +82,6 @@ function CompileLEVer(forceVersion)
     newOutput = compileMEX('mexHashData', vsStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('mexCCDistance', vsStruct);
-    outputFiles = [outputFiles; {newOutput}];
-    
     
     newOutput = compileEXE('MTC', vsStruct, bindir);
     outputFiles = [outputFiles; {newOutput}];
@@ -131,10 +128,6 @@ function CompileLEVer(forceVersion)
     
     newOutput = compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
     outputFiles = [outputFiles; {newOutput}];
-    
-    newOutput = compileMATLAB('NeuroPicker', bindir, {}, toolboxStruct.deps);
-    outputFiles = [outputFiles; {newOutput}];
-    
     
     enableStartupScripts(true);
     

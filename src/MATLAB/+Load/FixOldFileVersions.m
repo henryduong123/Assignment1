@@ -72,8 +72,7 @@ function bNeedsUpdate = FixOldFileVersions()
     if ( ~Load.CheckFileVersionString('4.3') || isempty(ConnectedDist) )
         fprintf('\nBuilding Cell Distance Information...\n');
         ConnectedDist = [];
-        mexCCDistance(1:length(CellHulls),0);
-%         Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
+        Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
         fprintf('Finished\n');
         bNeedsUpdate = true;
     end

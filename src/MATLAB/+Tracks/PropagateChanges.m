@@ -247,9 +247,8 @@ function revertSplit(t, hull, newHulls, oldHull)
     
     CellHulls(hull) = oldHull;
     CellHulls = CellHulls(leaveHulls);
-        
-   mexCCDistance(hull,1);
-%     Tracker.BuildConnectedDistance(hull,1);
+    
+    Tracker.BuildConnectedDistance(hull,1);
 end
 
 function bFullLength = checkTrackLengths(hulls, minlength)
