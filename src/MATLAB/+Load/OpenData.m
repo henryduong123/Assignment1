@@ -95,7 +95,7 @@ switch answer
         Load.InitializeConstants();
         
         errOpen = Segmentation.SegAndTrack();
-        if(~errOpen)
+        if ( isempty(errOpen) )
             opened = 1;
         else
             CONSTANTS = oldCONSTANTS;

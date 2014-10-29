@@ -30,7 +30,7 @@ function errStatus = SegAndTrack()
     global CONSTANTS CellPhenotypes
 
     % Modified 
-    errStatus = 1;
+    errStatus = 'Cancel';
     
     settings = Load.ReadSettings();
 
@@ -57,26 +57,9 @@ function errStatus = SegAndTrack()
     % (see e.g. HematoSeg.exe)
     
     errStatus = '';
-    switch CONSTANTS.cellType
-        case 'Adult'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
+    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
                 CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
                 CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        case 'Embryonic'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
-                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
-                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        case 'Wehi'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
-                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
-                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        otherwise
-            errStatus = '';
-            return
-    end
     
     if ( ~isempty(errStatus) )
         errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
