@@ -54,12 +54,6 @@ Load.AddConstant('maxPropagateFrames',          50,1);
 
 %% Particular Constants
 typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
-if (~isfield(typeParams.segParams, 'imageAlpha'))
-    Load.AddConstant('imageAlpha', 1.5);
-else
-    Load.AddConstant('imageAlpha', typeParams.segParams.imageAlpha);
-end
-
 Load.AddConstant('timeResolution', typeParams.leverParams.timeResolution); %in min per frame
 
 Load.AddConstant('maxPixelDistance', typeParams.leverParams.maxPixelDistance, 1);

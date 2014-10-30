@@ -34,52 +34,58 @@ objs=[];
 features = [];
 levels = struct('haloLevel',{}, 'igLevel',{});
 
-argStruct = setSegArgs(varargin);
-if ( isempty(argStruct) )
+supportedCellTypes = Load.GetSupportedCellTypes();
+[procArgs segArgs] = setSegArgs(supportedCellTypes, varargin);
+if ( isempty(procArgs) )
     return;
 end
 
-if ( exist(fullfile('+Segmentation',['FrameSegmentor_' argStruct.cellType]), 'file') )
-    segFunc = str2func(['Segmentation.FrameSegmentor_' argStruct.cellType]);
+% Use the supported type structure to find segmentation routine
+typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
+funcName = char(supportedCellTypes(typeIdx).segRoutine.func);
+funcPath = which(funcName);
+
+if ( ~isempty(funcPath) )
+    segFunc = supportedCellTypes(typeIdx).segRoutine.func;
 else
-    fprintf(['WARNING: Could not find Segmentation.FrameSegmentor_' argStruct.cellType ' () using default FrameSegmentor() segmentation routine\n']);
+    fprintf(['WARNING: Could not find ' funcName '() using default Segmentation.FrameSegmentor() routine\n']);
     segFunc = @Segmentation.FrameSegmentor;
 end
 
+segParams = struct2cell(segArgs);
+
 try 
-    fprintf(1,'%s\n',argStruct.rootImageFolder);
-    fprintf(1,'%s\n',argStruct.imageNamePattern);
+    fprintf(1,'%s\n',argStruct.imagePolder);
+    fprintf(1,'%s\n',argStruct.imagePattern);
     
-    Load.AddConstant('rootImageFolder', argStruct.rootImageFolder, 1);
-    Load.AddConstant('imageNamePattern', argStruct.imageNamePattern, 1);
-    Load.AddConstant('rootFluorFolder', [argStruct.rootFluorFolder '\'], 1);
-    Load.AddConstant('fluorNamePattern', argStruct.fluorNamePattern, 1);
+    Load.AddConstant('rootImageFolder', procArgs.imagePolder, 1);
+    Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
     
-    tStart = argStruct.tStart;
-    tEnd = argStruct.tEnd;
-    tStep = argStruct.tStep;
+    tStart = procArgs.procID;
+    tEnd = procArgs.numFrames;
+    tStep = procArgs.numProcesses;
     
-    numImages = tEnd/tStep;
+    numImages = floor(tEnd/tStep);
 
     for t = tStart:tStep:tEnd
-        fname=Helper.GetFullImagePath(t);
-        if(isempty(dir(fname)))
+        imFilename = Helper.GetFullImagePath(t);
+        if ( ~exist(imFilename,'file') )
             continue;
         end
 
-        fprintf('%d%%...',floor(floor(t/tStep)/numImages*100));
+        fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
 
-        im = Helper.LoadIntensityImage(fname);
+        im = Helper.LoadIntensityImage(imFilename);
 
-        [frmObjs frmFeatures frmLevels] = segFunc(im, t, argStruct.imageAlpha);
         objs = [objs frmObjs];
         features = [features frmFeatures];
         levels = [levels frmLevels];
+        [frmObjs frmFeatures frmLevels] = segFunc(im, t, segParams{:});
     end
     
 catch excp
     cltime = clock();
-    errFilename = ['.\segmentationData\err_' num2str(tStart) '.log'];
+    errFilename = ['.\segmentationData\err_' num2str(procArgs.procID) '.log'];
     fid = fopen(errFilename, 'w');
     if ( ~exist('t', 'var') )
         fprintf(fid, '%02d:%02d:%02.1f - Error in segmentor\n',cltime(4),cltime(5),cltime(6));
@@ -101,38 +107,78 @@ fclose(fSempahore);
 fprintf('\tDone\n');
 end
 
-function argStruct = setSegArgs(argCell)
-    argStruct = [];
+function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numFrames',{0}, 'cellType',{''}, 'imagePath',{''}, 'imagePattern',{''});
     
-    % If a field is added or modified make sure to add corresponding type.
-    argFields = {'tStart','tStep','tEnd','cellType','imageAlpha','rootImageFolder','imageNamePattern','rootFluorFolder','fluorNamePattern'};
-    argTypes = {'double','double','double','char','double','char','char','char','char'};
+    procArgFields = fieldnames(procArgs);
+    procArgTypes = structfun(@(x)(class(x)), procArgs, 'UniformOutput',0);
+    
+    segArgs = [];
     
     procID = 1;
     if ( ~isempty(argCell) )
-        procID = convertArg(argCell{1}, argTypes{1});
+       procID = convertArg(argCell{1}, procArgTypes{1});
     end
-    errFilename = ['.\segmentationData\err_' num2str(procID) '.log'];
+    errFilename = ['.\segmentationData\err_' num2str(procArgs.procID) '.log'];
     
-    if ( length(argCell) ~= length(argFields) )
+    if ( length(argCell) < length(procArgFields) )
         cltime = clock();
         
         fid = fopen(errFilename, 'w');
-        fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));%, t);
+        fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));
+        fprintf(fid, '  Too few input arguments expected at least %d: %d missing\n', length(argFields), (length(argFields) - length(argCell)));
         
+        printArgs(fid, argCell, procArgFields);
+
+        fclose(fid);
+        
+        procArgs = [];
+        return;
+    end
+    
+    procArgs = makeArgStruct(argCell, procArgFields, procArgTypes);
+    
+    % Use cell type to figure out what segmentation parameters are
+    % available, and what algorithm to use.
+    typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
+    
+    segArgCell = argCell(length(procArgFields)+1:end);
+    segArgFields = {SupportedTypes(typeIdx).segRoutine.params.name};
+    segArgTypes = cell(1,length(cellParamFields));
+    [segArgTypes{:}] = deal('double');
+    
+    if ( (length(segArgCell)) ~= length(segArgFields) )
+        cltime = clock();
+        
+        fid = fopen(errFilename, 'w');
+        fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));
         if ( length(argCell) > length(argFields) )
             fprintf(fid, '  Too many input arguments expected %d: %d extra\n', length(argFields), (length(argCell)-length(argFields)));
         else
             fprintf(fid, '  Too few input arguments expected %d: %d missing\n', length(argFields), (length(argFields) - length(argCell)));
         end
         
-        printArgs(fid, argCell, argFields);
+        printArgs(fid, argCell, [procArgFields segArgFields]);
 
         fclose(fid);
+        
+        procArgs = [];
         return;
     end
     
-    argStruct = makeArgStruct(argCell, argFields, argTypes);
+    segArgs = makeArgStruct(segArgCell, segArgFields, segArgTypes);
+end
+
+function typeIdx = findSupportedTypeIdx(cellType, supportedTypes)
+    typeIdx = find(strcmpi(cellType, {supportedTypes.name}),1,'first');
+    
+    % Try default cell type if we don't have current type in supported list.
+    if ( isempty(typeIdx) )
+        fprintf(['WARNING: Unsupported cell type: ' cellType ' using default "Embryonic" cell type instead\n']);
+        
+        cellType = 'Embryonic';
+        typeIdx = find(strcmpi(cellType, {supportedTypes.name}),1,'first');
+    end
 end
 
 function argStruct = makeArgStruct(argCell, argFields, argTypes)

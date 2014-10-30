@@ -1,5 +1,5 @@
-function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
     global CONSTANTS
+function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, namePattern, numProcessors, segArgs)
     
     errStatus = sprintf('Unknown Error\n');
     tSeg = 0;
@@ -8,19 +8,18 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
     %% Segmentation
     tic
     
+    % Remove trailing \ or / from rootFolder
+    if ( (rootFolder(end) == '\') || (rootFolder(end) == '/') )
+        rootFolder = rootFolder(1:end-1);
+    end
+    
     fileList = dir(fullfile(rootFolder, [datasetName '*.tif']));
     numberOfImages = length(fileList);
-    % numberOfImages = 10;
+    
     numProcessors = min(numProcessors, numberOfImages);
     
     if ( numberOfImages < 1 )
         return;
-    end
-    
-    % Wehi fluorescence breaks down after around frame 500
-    if strcmp(CONSTANTS.cellType, 'Wehi')
-%        numberOfImages = 550;
-        numberOfImages = 500;
     end
 
     cellSegments = [];
@@ -40,38 +39,34 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
     chkIm = Helper.LoadIntensityImage(firstImg);
     CONSTANTS.imageSize = size(chkIm);
     
-    if ( ndims(CONSTANTS.imageSize) ~= 2 )
-        
+    if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) > 3 )
         cltime = clock();
         errStatus = sprintf('%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
         
         return;
     end
     
-    if(isempty(dir('.\segmentationData')))
-        system('mkdir .\segmentationData');
+    if ( ~exist('.\segmentationData','dir'))
+        mkdir('segmentationData');
     end
     
-    [dirName chkFile] = fileparts(CONSTANTS.rootImageFolder);
-    if ( ~isempty(chkFile) )
-        dirName = fullfile(dirName, chkFile);
-    end
-    rootFluorFolder=CONSTANTS.rootFluorFolder(1:end-1);
-
-    for i=1:numProcessors
-         system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-            num2str(numberOfImages) ' "' CONSTANTS.cellType '" ' ...
-            num2str(imageAlpha) ' "' dirName '" "' CONSTANTS.imageNamePattern '"' ...
-            ' "' rootFluorFolder '" "' CONSTANTS.fluorNamePattern '" && exit']);
-        %use line below instead of the 3 lines above for non-parallel or to debug
-        % Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern,rootFluorFolder, CONSTANTS.fluorNamePattern);
+    if ( isdeployed() )
+        for procID=1:numProcessors
+            segCmd = makeSegCommand(procID,numProcessors,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs);
+            system(['start ' segCmd ' && exit']);
+        end
+    else
+        matlabpool(numProcessors)
+        parfor procID=1:numProcessors
+            Segmentor(procID,numProcessors,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
+        end
     end
 
     bSegFileExists = false(1,numProcessors);
-    for i=1:numProcessors
-        errFile = ['.\segmentationData\err_' num2str(i) '.log'];
-        fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
-        semFile = ['.\segmentationData\done_' num2str(i) '.txt'];
+    for procID=1:numProcessors
+        errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
+        fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+        semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
         semDesc = dir(semFile);
         fileDescriptor = dir(fileName);
         efd = dir(errFile);
@@ -82,7 +77,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
             semDesc = dir(semFile);
         end
         
-        bSegFileExists(i) = ~isempty(fileDescriptor);
+        bSegFileExists(procID) = ~isempty(fileDescriptor);
     end
     
     if ( ~all(bSegFileExists) )
@@ -90,12 +85,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
         tSeg = toc;
         
         % Collect segmentation error logs into one place
-        for i=1:length(bSegFileExists)
-            if ( bSegFileExists(i) )
+        for procID=1:length(bSegFileExists)
+            if ( bSegFileExists(procID) )
                 continue;
             end
+            
             errStatus = sprintf( '----------------------------------\n');
-            objerr = fopen(fullfile('.','segmentationData',['err_' num2str(i) '.log']));
+            objerr = fopen(fullfile('.','segmentationData',['err_' num2str(procID) '.log']));
             logline = fgetl(objerr);
             while ( ischar(logline) )
                 errStatus = [errStatus sprintf('%s\n', logline)];
@@ -109,10 +105,10 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
 
     try
         leveltimes = [];
-        for i=1:numProcessors
-            fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
+        for procID=1:numProcessors
+            fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
-            tst = whos('-file', fileName);
+            tstLoad = whos('-file', fileName);
             
             load(fileName);
             
@@ -182,6 +178,20 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
     clear leveltimes;
     
     errStatus = '';
+end
+
+function segCmd = makeSegCommand(procID, numProc, numFrames, cellType, rootFolder, imagePattern, segArg)
+    segCmd = 'Segmentor';
+    segCmd = [segCmd ' "' num2str(procID) '"'];
+    segCmd = [segCmd ' "' num2str(numProc) '"'];
+    segCmd = [segCmd ' "' num2str(numFrames) '"'];
+    segCmd = [segCmd ' "' cellType '"'];
+    segCmd = [segCmd ' "' rootFolder '"'];
+    segCmd = [segCmd ' "' imagePattern '"'];
+    
+    for i=1:length(segArg)
+        segCmd = [segCmd ' "' num2str(segArg{i}) '"'];
+    end
 end
 
 function removeOldFiles(rootDir, filePattern)
