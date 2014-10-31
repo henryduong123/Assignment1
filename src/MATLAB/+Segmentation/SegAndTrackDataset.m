@@ -1,5 +1,5 @@
 function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, namePattern, numProcessors, segArgs)
-    global CONSTANTS
+    global CONSTANTS CellHulls HashedCells ConnectedDist
     
     errStatus = sprintf('Unknown Error\n');
     tSeg = 0;
@@ -18,10 +18,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     if ( numFrames < 1 )
         return;
     end
-
-    cellSegments = [];
-    cellFeat = [];
-    cellSegLevels = [];
 
     fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
 
@@ -109,7 +105,8 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
 
     try
-        leveltimes = [];
+        cellSegments = [];
+        frameOrder = [];
         for procID=1:numProcessors
             fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
@@ -117,12 +114,8 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
             
             load(fileName);
             
-            cellSegments = [cellSegments objs];
-            cellFeat = [cellFeat features];
-            cellSegLevels = [cellSegLevels levels];
-            leveltimes = [leveltimes unique([objs.t])];
-            
-            pause(1)
+            cellSegments = [cellSegments hulls];
+            frameOrder = [frameOrder frameTimes];
         end
     catch excp
         
@@ -133,39 +126,46 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         return;
     end
 
-    segtimes = [cellSegments.t];
-    [srtseg srtidx] = sort(segtimes);
-    cellSegments = cellSegments(srtidx);
-    cellFeat = cellFeat(srtidx);
+    % Sort segmentations and fluorescent data so that they are time ordered
+    segtimes = [cellSegments.time];
+    [srtSegs srtIdx] = sort(segtimes);
+    CellHulls = cellSegments(srtIdx);
 
-    [srtlevels srtidx] = sort(leveltimes);
-    cellSegLevels = cellSegLevels(srtidx);
-
-    fprintf('Please wait...');
-
-    cellSegments = Tracker.GetDarkConnectedHulls(cellSegments);
-%     save ( ['.\segmentationData\SegObjs_' datasetName '.mat'],'cellSegments');
-    Segmentation.WriteSegData(cellSegments,datasetName);
+    [srtFrames srtIdx] = sort(frameOrder);
+    
+    fprintf('Building Connected Component Distances... ');
+    HashedCells = cell(1,numFrames);
+    for t=1:tmax
+        HashedCells{t} = struct('hullID',{}, 'trackID',{});
+    end
+    
+    for i=1:length(CellHulls)
+        HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
+    end
+    
+    ConnectedDist = [];
+    Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
+    Segmentation.RewriteSegData('segmentationData',datasetName);
 
     fprintf(1,'\nDone\n');
-
-    fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
-    fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
-    tSeg=toc;
+    tSeg = toc;
 
     %% Tracking
     tic
     fprintf(1,'Tracking...');
+    fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
+    fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
+    
     system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    
     fprintf('Done\n');
-    tTrack=toc;
+    tTrack = toc;
 
-    %% Inport into LEVer's data sturcture
-    [objHulls gConnect HashedHulls] = Tracker.ReadTrackData(CONSTANTS.imageSize, cellSegments, datasetName);
-
+    %% Import into LEVer's data sturcture
+    [objTracks gConnect] = Tracker.RereadTrackData('segmentationData', CONSTANTS.datasetName);
     fprintf('Finalizing Data...');
     try
-        Tracker.ConvertTrackingData(objHulls,gConnect);
+        Tracker.RebuildTrackingData(objTracks, gConnect);
     catch excp
         
         cltime = clock();
@@ -174,13 +174,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         
         return;
     end
-    
     fprintf('Done\n');
-    
-    clear cellSegments;
-    clear cellFeat;
-    clear cellSegLevels;
-    clear leveltimes;
     
     errStatus = '';
 end

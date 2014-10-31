@@ -1,6 +1,5 @@
-function [objs features levels] = FrameSegmentor_Embryonic(chanIm, t, imageAlpha)
-    objs = [];
-    features = [];
+function hulls = FrameSegmentor_Embryonic(chanIm, t, imageAlpha)
+    hulls = [];
     levels = struct('haloLevel',{0}, 'igLevel',{0});
     
     if ( length(chanIm) > 1 )
@@ -11,6 +10,7 @@ function [objs features levels] = FrameSegmentor_Embryonic(chanIm, t, imageAlpha
     if ( isempty(im) )
         return;
     end
+    
     
     level=imageAlpha*graythresh(im);
     
@@ -137,45 +137,16 @@ function [objs features levels] = FrameSegmentor_Embryonic(chanIm, t, imageAlpha
         % it's a keeper!
         bwCellFG(pix)=1;
         
-        no=[];
-        no.t=t;
-        no.points = [c(ch),r(ch)];
+        %TODO: Helper functions for hull, and other struct templates, so
+        %that we don't have to deal with structure integrity issues.
+        newHull = [];
+        newHull.time = t;
+        newHull.points = [c(ch),r(ch)]; % ACK MARK HACK HACK
+        newHull.indexPixels = pix;
         
-        no.indPixels=pix;
-        if LTails(r(1),c(1))
-            TailPix = find(LTails==LTails(r(1),c(1)));
-            TailPix=union(TailPix,pix);
-        else
-            TailPix=pix;
-        end
-        no.indTailPixels=TailPix;
-        no.imPixels=im(pix);
+        newHull.tag = 'darkInterior';
         
-        % surround completely by Halo?
-        if all(bwHaloHoles(pix))
-            no.BrightInterior=1;
-        else
-            no.BrightInterior=0;
-        end
-        
-        no.ID=-1;
-        no.Eccentricity=stats(idx(i)).Eccentricity;
-        
-        nf = [];
-        nf.darkRatio = 0;
-        nf.haloRatio = 0;
-        nf.igRatio = 0;
-        nf.darkIntRatio = 0;
-        nf.brightInterior = 0;
-        
-        nf.polyPix = find(bwPoly);
-        nf.perimPix = [];
-        nf.igPix = [];
-        nf.haloPix = [];
-        
-        objs = [objs no];
-        features = [features nf];
-        %     drawnow
+        hulls = [hulls newHull];
     end
     
     % bright interiors
@@ -198,38 +169,17 @@ function [objs features levels] = FrameSegmentor_Embryonic(chanIm, t, imageAlpha
         ch = Helper.ConvexHull(c,r);
         
         bwPoly = poly2mask(c(ch),r(ch),size(im,1),size(im,2));
-        if ~isempty(find(bwCellFG &bwPoly, 1)),continue,end
-        no=[];
-        no.t=t;
-        
-        no.points=[c(ch),r(ch)];
-        no.ID=-1;
-        
-        no.indPixels=pix;
-        if LTails(r(1),c(1))
-            TailPix = find(LTails==LTails(r(1),c(1)));
-            TailPix=union(TailPix,pix);
-        else
-            TailPix=pix;
+        if ( ~isempty(find(bwCellFG & bwPoly, 1)) )
+            continue;
         end
-        no.indTailPixels=TailPix;
-        no.BrightInterior=1;
-        no.Eccentricity=stats(idx(i)).Eccentricity;
-        no.imPixels=im(pix);
         
-        nf = [];
-        nf.darkRatio = 0;
-        nf.haloRatio = 0;
-        nf.igRatio = 0;
-        nf.darkIntRatio = 0;
-        nf.brightInterior = 1;
+                newHull = [];
+        newHull.time = t;
+        newHull.points = [c(ch),r(ch)]; % ACK MARK HACK HACK
+        newHull.indexPixels = pix;
         
-        nf.polyPix = [];
-        nf.perimPix = [];
-        nf.igPix = [];
-        nf.haloPix = [];
+        newHull.tag = 'brightInterior';
         
-        objs = [objs no];
-        features = [features nf];
+        hulls = [hulls newHull];
     end
 end

@@ -25,14 +25,15 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, time)
-    global CONSTANTS HaveFluor FluorData
-
+function hulls = PartialImageSegment(chanImg, centerPt, subSize, segFunc, segArgs)
     if ( length(subSize) < 2 )
         subSize = [subSize(1) subSize(1)];
     end
     
-    imSize = size(img);
+    imSize = [0 0];
+    for c=1:length(chanImg)
+        imSize = max([imSize; size(chanImg{c})],[],1);
+    end
     
     coordMin = floor([centerPt(1)-subSize(1)/2 centerPt(2)-subSize(2)/2]);
     coordMin(coordMin < 1) = 1;
@@ -46,33 +47,31 @@ function [hulls features] = PartialImageSegment(img, centerPt, subSize, alpha, t
     end
     
     % Build the subimage to be segmented
-    subImg = img(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
+    subImSize = [0 0];
+    chanSubImg = cell(1,length(chanImg));
+    for c=1:length(chanImg)
+        if ( isempty(chanImg{c}) )
+            continue;
+        end
+        
+        chanSubImg{c} = chanImg{c}(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
+        subImSize = max([subImSize; size(chanSubImg{c})],[],1);
+    end
     
-    [objs objFeat] = Segmentation.FrameSegmentor(subImg, 1, alpha);
+    localHulls = segFunc(chanSubImg, 1, segArgs{:});
     
-    [hulls features] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat);
+    hulls = fixupFromSubimage(coordMin, imSize, subImSize, localHulls);
 end
 
-function [newObjs newFeatures] = fixupFromSubimage(coordMin, img, subImg, objs, objFeat)
-    newObjs = objs;
-    newFeatures = objFeat;
+function newHulls = fixupFromSubimage(coordMin, origSize, subSize, hulls)
+    newHulls = hulls;
     
     xoffset = coordMin(1)-1;
     yoffset = coordMin(2)-1;
     
-    globSz = size(img);
-    locSz = size(subImg);
-    
-    for i=1:length(objs)
-        newObjs(i).points = objs(i).points + ones(size(objs(i).points,1),1)*[xoffset yoffset];
-        newObjs(i).indPixels = makeGlobalPix(objs(i).indPixels, globSz, locSz, xoffset, yoffset);
-        newObjs(i).indTailPixels = makeGlobalPix(objs(i).indTailPixels, globSz, locSz, xoffset, yoffset);
-        newObjs(i).imPixels = img(newObjs(i).indPixels);
-        
-        newFeatures(i).polyPix = makeGlobalPix(objFeat(i).polyPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).perimPix = makeGlobalPix(objFeat(i).perimPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).igPix = makeGlobalPix(objFeat(i).igPix, globSz, locSz, xoffset, yoffset);
-        newFeatures(i).haloPix = makeGlobalPix(objFeat(i).haloPix, globSz, locSz, xoffset, yoffset);
+    for i=1:length(hulls)
+        newHulls(i).points = hulls(i).points + ones(size(hulls(i).points,1),1)*[xoffset yoffset];
+        newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, xoffset, yoffset);
     end
 end
 

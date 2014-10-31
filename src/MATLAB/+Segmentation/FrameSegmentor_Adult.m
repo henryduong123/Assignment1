@@ -1,6 +1,5 @@
-function [objs features levels] = FrameSegmentor_Adult(chanIm, t, imageAlpha)
-    objs = [];
-    features = [];
+function hulls = FrameSegmentor_Adult(chanIm, t, imageAlpha)
+    hulls = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});
     
     if ( length(chanIm) > 1 )
@@ -11,6 +10,7 @@ function [objs features levels] = FrameSegmentor_Adult(chanIm, t, imageAlpha)
     if ( isempty(im) )
         return;
     end
+    
     
     levels.haloLevel = graythresh(im);
     level=imageAlpha*levels.haloLevel;
@@ -143,94 +143,14 @@ function [objs features levels] = FrameSegmentor_Adult(chanIm, t, imageAlpha)
         % it's a keeper!
         bwCellFG(pix)=1;
         
-        no=[];
-        no.t=t;
-        no.points = [c(ch),r(ch)];
+        newHull = [];
+        newHull.time = t;
+        newHull.points = [c(ch),r(ch)];
+        newHull.indexPixels = pix;
         
-        no.indPixels=pix;
-        if LTails(r(1),c(1))
-            TailPix = find(LTails==LTails(r(1),c(1)));
-            TailPix=union(TailPix,pix);
-        else
-            TailPix=pix;
-        end
-        no.indTailPixels=TailPix;
-        no.imPixels=im(pix);
+        newHull.tag = 'darkInterior';
         
-        % surround completely by Halo?
-        if all(bwHaloHoles(pix))
-            no.BrightInterior=1;
-        else
-            no.BrightInterior=0;
-        end
-        
-        no.ID=-1;
-        no.Eccentricity=stats(idx(i)).Eccentricity;
-        
-        % object features
-        oldLbl = LCenters(pix(1));
-        
-        polyPix = LPolyPix{oldLbl};
-%         [polyR polyC] = ind2sub(size(im), polyPix);
-        
-%         perimPix = LPerimPix{oldLbl};
-%         [perimR perimC] = ind2sub(size(im), perimPix);
-        
-        oldPix = find(LCenters==oldLbl);
-        newLbls = unique(LCells(oldPix));
-        newLbls = newLbls(newLbls > 0);
-%         centroid = [];
-%         
-%         polyDist = Inf*ones(length(polyR),length(newLbls));
-% %         perimDist = Inf*ones(length(perimR),length(newLbls));
-%         for j=1:length(newLbls)
-%             [newR newC] = find(LCells == newLbls(j));
-%             centroid = mean([newR newC],1);
-%             
-%             polyDist(:,j) = ((polyR - centroid(1)).^2 + (polyC - centroid(2)).^2);
-% %             perimDist(:,j) = ((perimR - centroid(1)).^2 + (perimC - centroid(2)).^2);
-%         end
-%         
-%         [mpd polyIdx] = min(polyDist,[],2);
-%         [mpd perimIdx] = min(perimDist,[],2);
-
-        if ( length(newLbls) > 1 )
-            lblPix = cell(1,length(newLbls));
-            for j=1:length(newLbls)
-                lblPix{j} = find(LCells == newLbls(j));
-            end
-
-            polyIdx = Segmentation.AssignPolyPix(polyPix, lblPix, size(im));
-        else
-            polyIdx = ones(length(polyPix),1);
-        end
-        
-        curIdx = find(newLbls==idx(i));
-        
-        polyPix = polyPix(polyIdx==curIdx);
-        perimPix = Segmentation.BuildPerimPix(polyPix, size(im));
-        
-        igRat = nnz(bwig(perimPix)) / length(perimPix);
-        HaloRat = nnz(bwHalo(perimPix)) / length(perimPix);
-        
-        bwDarkInterior = bwDarkCenters(polyPix);
-        DarkRat = nnz(bwDarkInterior) / length(polyPix);
-        
-        nf = [];
-        nf.darkRatio = nnz(bwDark(pix)) / length(pix);
-        nf.haloRatio = HaloRat;
-        nf.igRatio = igRat;
-        nf.darkIntRatio = DarkRat;
-        nf.brightInterior = 0;
-        
-        nf.polyPix = polyPix;
-        nf.perimPix = perimPix;
-        nf.igPix = find(bwig(perimPix));
-        nf.haloPix = find(bwHalo(perimPix));
-        
-        objs = [objs no];
-        features = [features nf];
-        %     drawnow
+        hulls = [hulls newHull];
     end
     
     % bright interiors
@@ -254,37 +174,12 @@ function [objs features levels] = FrameSegmentor_Adult(chanIm, t, imageAlpha)
         
         bwPoly = poly2mask(c(ch),r(ch),size(im,1),size(im,2));
         if ~isempty(find(bwCellFG &bwPoly, 1)),continue,end
-        no=[];
-        no.t=t;
         
-        no.points=[c(ch),r(ch)];
-        no.ID=-1;
+        newHull = [];
+        newHull.time = t;
+        newHull.points = [c(ch),r(ch)];
+        newHull.indexPixels = pix;
         
-        no.indPixels=pix;
-        if LTails(r(1),c(1))
-            TailPix = find(LTails==LTails(r(1),c(1)));
-            TailPix=union(TailPix,pix);
-        else
-            TailPix=pix;
-        end
-        no.indTailPixels=TailPix;
-        no.BrightInterior=1;
-        no.Eccentricity=stats(idx(i)).Eccentricity;
-        no.imPixels=im(pix);
-        
-        nf = [];
-        nf.darkRatio = 0;
-        nf.haloRatio = 0;
-        nf.igRatio = 0;
-        nf.darkIntRatio = 0;
-        nf.brightInterior = 1;
-        
-        nf.polyPix = find(bwPoly);
-        nf.perimPix = [];
-        nf.igPix = [];
-        nf.haloPix = [];
-        
-        objs = [objs no];
-        features = [features nf];
+        newHull.tag = 'darkInterior';
     end
 end

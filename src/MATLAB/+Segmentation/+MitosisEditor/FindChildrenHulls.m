@@ -118,9 +118,9 @@ function newHulls = addMergeSegmentations(childHulls, linePoints, time)
         end
         
         chkPoint = linePoints(i,:);
-        objs = partialSegObjs(chkPoint, time);
+        hulls = partialSegHulls(chkPoint, time);
         
-        newHulls(i) = mergeOverlapping(objs, chkPoint, time);
+        newHulls(i) = mergeOverlapping(hulls, chkPoint, time);
     end
     
     for i=1:length(childHulls)
@@ -130,15 +130,15 @@ end
 
 % This function finds any hulls overlapping the chkPoint and returns it,
 % will also merge this hull with overlapping hulls if necessary
-function hullID = mergeOverlapping(objs, chkPoint, time)
+function hullID = mergeOverlapping(chkHulls, chkPoint, time)
     global CONSTANTS CellHulls HashedCells
     
     hullID = 0;
     frameHulls = [HashedCells{time}.hullID];
     
-    bInHull = false(length(objs),1);
-    for i=1:length(objs)
-        bInHull(i) = inpolygon(chkPoint(1), chkPoint(2), objs(i).points(:,1), objs(i).points(:,2));
+    bInHull = false(length(chkHulls),1);
+    for i=1:length(chkHulls)
+        bInHull(i) = inpolygon(chkPoint(1), chkPoint(2), chkHulls(i).points(:,1), chkHulls(i).points(:,2));
     end
     
     if ( ~any(bInHull) )
@@ -146,20 +146,20 @@ function hullID = mergeOverlapping(objs, chkPoint, time)
         return;
     end
     
-    chkObjs = objs(bInHull);
+    validHulls = chkHulls(bInHull);
     
-    objCOM = zeros(length(chkObjs),2);
-    for i=1:length(chkObjs)
-        [r c] = ind2sub(CONSTANTS.imageSize, chkObjs(i).indPixels);
+    objCOM = zeros(length(validHulls),2);
+    for i=1:length(validHulls)
+        [r c] = ind2sub(CONSTANTS.imageSize, validHulls(i).indexPixels);
         objCOM = mean([r c], 1);
     end
     
-    distSq = sum((objCOM - repmat([chkPoint(2) chkPoint(1)],length(chkObjs),1)).^2, 2);
+    distSq = sum((objCOM - repmat([chkPoint(2) chkPoint(1)],length(validHulls),1)).^2, 2);
     [minDistSq minIdx] = min(distSq);
     
-    newObj = chkObjs(minIdx);
+    newHull = validHulls(minIdx);
     
-    [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
+    [r c] = ind2sub(CONSTANTS.imageSize, newHull.indexPixels);
     newHullEntry = createNewHullStruct(c, r, time);
     
     bMergeHulls = arrayfun(@(x)(nnz(ismember(newHullEntry.indexPixels,CellHulls(x).indexPixels)) > 5), frameHulls);
@@ -186,14 +186,14 @@ function hullID = mergeOverlapping(objs, chkPoint, time)
         return;
     end
     
-    newObj = Segmentation.ForceDisjointSeg(newObj, time, chkPoint);
+    newHull = Segmentation.ForceDisjointSeg(newHull, time, chkPoint);
     
-    if ( isempty(newObj) )
+    if ( isempty(newHull) )
         hullID = addPointHullEntry(chkPoint, time);
         return;
     end
     
-    hullID = addHullEntry(newObj, time);
+    hullID = addHullEntry(newHull, time);
 end
 
 function outHullID = mergeHullValues(hullID, mergeStruct)
@@ -234,17 +234,14 @@ function newHullID = addPointHullEntry(chkPoint, time)
     x = max(round(chkPoint(1)), 1);
     y = max(round(chkPoint(2)), 1);
     
-    filename = Helper.GetFullImagePath(time);
-    img = Helper.LoadIntensityImage(filename);
-    
     newHull = createNewHullStruct(x, y, time);
     newHullID = Hulls.SetHullEntries(0, newHull);
 end
 
-function newHullID = addHullEntry(obj, time)
+function newHullID = addHullEntry(hull, time)
     global CONSTANTS
     
-    [r c] = ind2sub(CONSTANTS.imageSize, obj.indPixels);
+    [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
     newHullID = Hulls.SetHullEntries(0, newHull);
@@ -268,13 +265,29 @@ function newHull = createNewHullStruct(x,y, time)
     end
 
     newHull.points = [x(chIdx) y(chIdx)];
+    
+    newHull.tag = '';
 end
 
-function objs = partialSegObjs(chkPoint, time)
-    filename = Helper.GetFullImagePath(time);
-    img = Helper.LoadIntensityImage(filename);
+function hulls = partialSegHulls(chkPoint, time)
+    global CONSTANTS
+    
+    imSet = Helper.LoadIntensityImageSet(time);
 
-    objs = Segmentation.PartialImageSegment(img, chkPoint, 200, 1.0, time);
+    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    segFunc = typeParams.resegRoutines(1).func;
+    paramData = typeParams.resegRoutines(1).params;
+    
+    segParams = cell(1,length(paramData));
+    for i=1:length(paramData)
+        if ( isempty(paramData(i).range) )
+            segParams{i} = paramData(i).default;
+        else
+            segParams{i} = paramData(i).range(1);
+        end
+    end
+    
+    hulls = Segmentation.PartialImageSegment(imSet, chkPoint, 200, segFunc, segParams);
 end
 
 function updateLocalTracking(newHulls, hullTime)

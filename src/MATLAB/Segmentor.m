@@ -28,11 +28,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [objs features levels] = Segmentor(varargin)
+function [hulls frameTimes] = Segmentor(varargin)
 
-objs=[];
-features = [];
-levels = struct('haloLevel',{}, 'igLevel',{});
+hulls = [];
+frameTimes = [];
 
 supportedCellTypes = Load.GetSupportedCellTypes();
 [procArgs segArgs] = setSegArgs(supportedCellTypes, varargin);
@@ -77,12 +76,19 @@ try
         if ( isempty(chanImSet) )
             continue;
         end
-
-        [frmObjs frmFeatures frmLevels] = segFunc(chanImSet, t, segParams{:});
-
-        objs = [objs frmObjs];
-        features = [features frmFeatures];
-        levels = [levels frmLevels];
+        
+        frameHulls = segFunc(chanImSet, t, segParams{:});
+        
+        for i=1:length(frameHulls)
+            if ( ~isfield(frameHulls(i),'tag') || isempty(frameHulls(i).tag) )
+                frameHulls(i).tag = char(segFunc);
+            else
+                frameHulls(i).tag = [char(segFunc) ':' frameHulls(i).tag];
+            end
+        end
+        
+        hulls = [hulls frameHulls];
+        frameTimes = [frameTimes; t];
     end
     
 catch excp
@@ -100,10 +106,11 @@ catch excp
     return;
 end
 
-fileName = ['.\segmentationData\objs_' num2str(tStart) '.mat'];
-save(fileName,'objs','features','levels');
+fileName = fullfile('segmentationData',['objs_' num2str(tStart) '.mat']);
+save(fileName,'hulls','frameTimes');
 
-fSempahore = fopen(['.\segmentationData\done_' num2str(tStart) '.txt'], 'w');
+% Write this file to indicate that the segmentaiton data is actually fully saved
+fSempahore = fopen(fullfile('segmentationData',['done_' num2str(tStart) '.txt']), 'w');
 fclose(fSempahore);
 
 fprintf('\tDone\n');

@@ -53,23 +53,33 @@ end
 function parentHull = addParentHull(midpoint, time, mitosisPoints)
     global CONSTANTS
     
-    parentHull = [];
+    imSet = Helper.LoadIntensityImageSet(time);
+
+    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    segFunc = typeParams.resegRoutines(1).func;
+    paramData = typeParams.resegRoutines(1).params;
     
-    filename = Helper.GetFullImagePath(time);
-    img = Helper.LoadIntensityImage(filename);
+    segParams = cell(1,length(paramData));
+    for i=1:length(paramData)
+        if ( isempty(paramData(i).range) )
+            segParams{i} = paramData(i).default;
+        else
+            segParams{i} = paramData(i).range(1);
+        end
+    end
     
-    objs = Segmentation.PartialImageSegment(img, midpoint, 200, 1.0, time);
+    hulls = Segmentation.PartialImageSegment(imSet, midpoint, 200, segFunc, segParams);
     
-    pointCounts = zeros(1,length(objs));
-    for i=1:length(objs)
-        [r c] = ind2sub(CONSTANTS.imageSize, objs(i).indPixels);
+    pointCounts = zeros(1,length(hulls));
+    for i=1:length(hulls)
+        [r c] = ind2sub(CONSTANTS.imageSize, hulls(i).indexPixels);
         bContainsPoints = inpolygon(c,r, mitosisPoints(:,1), mitosisPoints(:,2));
         pointCounts(i) = nnz(bContainsPoints);
     end
     
     [maxPoints maxIdx] = max(pointCounts);
     if ( maxPoints > 0 )
-        parentHull = addHullEntry(objs(maxIdx), time);
+        parentHull = addHullEntry(hulls(maxIdx), time);
         Tracker.TrackAddedHulls(parentHull, midpoint);
         return;
     end
@@ -89,10 +99,10 @@ function newHullID = addPointHullEntry(chkPoint, time)
     newHullID = Hulls.SetHullEntries(0, newHull);
 end
 
-function newHullID = addHullEntry(obj, time)
+function newHullID = addHullEntry(hull, time)
     global CONSTANTS
     
-    [r c] = ind2sub(CONSTANTS.imageSize, obj.indPixels);
+    [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
     newHullID = Hulls.SetHullEntries(0, newHull);
