@@ -53,18 +53,18 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         mkdir('segmentationData');
     end
     
-    if ( isdeployed() )
+%     if ( isdeployed() )
         for procID=1:numProcessors
             segCmd = makeSegCommand(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs);
             system(['start ' segCmd ' && exit']);
         end
-    else
-%         matlabpool(numProcessors)
-%         parfor procID=1:numProcessors
-        for procID=1:numProcessors
-            Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
-        end
-    end
+%     else
+% %         matlabpool(numProcessors)
+% %         parfor procID=1:numProcessors
+%         for procID=1:numProcessors
+%             Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
+%         end
+%     end
 
     bSegFileExists = false(1,numProcessors);
     for procID=1:numProcessors
