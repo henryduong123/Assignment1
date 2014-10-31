@@ -13,7 +13,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         rootFolder = rootFolder(1:end-1);
     end
     
+    % Set CONSTANTS.imageSize as soon as possible
+    [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+    Load.AddConstant('numFrames', numFrames,1);
+    Load.AddConstant('numChannels', numChannels,1);
+    
     numProcessors = min(numProcessors, numFrames);
+    numProcessors = min(numProcessors, 4);
     
     if ( numFrames < 1 )
         return;
@@ -27,8 +33,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         removeOldFiles('segmentationData', 'done_*.txt');
     end
     
-    % Set CONSTANTS.imageSize as soon as possible
-    [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
     imSet = Helper.LoadIntensityImageSet(1);
 
     imSizes = zeros(length(imSet),2);
@@ -37,8 +41,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
 
     Load.AddConstant('imageSize', max(imSizes,[],1),1);
-    Load.AddConstant('numFrames', numFrames,1);
-    Load.AddConstant('numChannels', numChannels,1);
     
     if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) > 3 )
         cltime = clock();
@@ -57,8 +59,9 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
             system(['start ' segCmd ' && exit']);
         end
     else
-        matlabpool(numProcessors)
-        parfor procID=1:numProcessors
+%         matlabpool(numProcessors)
+%         parfor procID=1:numProcessors
+        for procID=1:numProcessors
             Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
         end
     end

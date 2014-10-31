@@ -26,8 +26,8 @@ function [numChannels numFrames] = GetImListInfo(rootFolder, namePattern)
     
     matchTok = regexpi(fileNames, matchPattern, 'tokens','once');
     
-    times = cellfun(@(x)(str2double(x{1})), matchTok);
-    chans = cellfun(@(x)(str2double(x{2})), matchTok);
+    times = cellfun(@(x)(str2double(x{2})), matchTok);
+    chans = cellfun(@(x)(str2double(x{1})), matchTok);
     
     numChannels = max(chans);
     numFrames = max(times);

@@ -10,12 +10,12 @@ function [datasetName namePattern] = ParseImageName(imageName)
         return;
     end
     
-    chanStr = matchTok{1}{2};
-    timeStr = matchTok{1}{3};
+    chanStr = matchTok{2};
+    timeStr = matchTok{3};
     
     chanDigits = length(chanStr);
     timeDigits = length(timeStr);
     
-    datasetName = matchTok{1}{1};
+    datasetName = matchTok{1};
     namePattern = [datasetName 'c%0' num2str(chanDigits) 'd_t%0' num2str(timeDigits) 'd' fileExt];
 end

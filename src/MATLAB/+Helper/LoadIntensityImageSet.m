@@ -3,9 +3,14 @@ function chanImSet = LoadIntensityImageSet(frame)
     
     chanImSet = cell(1,CONSTANTS.numChannels);
     
+    channelOrder = [1:CONSTANTS.numChannels];
+    if ( isfield(CONSTANTS,'channelOrder') )
+        channelOrder = CONSTANTS.channelOrder;
+    end
+    
     bAllMissing = true;
     for c = 1:CONSTANTS.numChannels
-        imFilename = Helper.GetFullImagePath(c, frame);
+        imFilename = Helper.GetFullImagePath(channelOrder(c), frame);
         if ( ~exist(imFilename,'file') )
             continue;
         end

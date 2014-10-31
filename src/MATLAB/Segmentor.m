@@ -120,7 +120,7 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'imagePath',{''}, 'imagePattern',{''});
     
     procArgFields = fieldnames(procArgs);
-    procArgTypes = structfun(@(x)(class(x)), procArgs, 'UniformOutput',0);
+    procArgTypes = cellfun(@(x)(class(x)), struct2cell(procArgs), 'UniformOutput',0);
     
     segArgs = [];
     

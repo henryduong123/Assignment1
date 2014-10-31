@@ -30,6 +30,10 @@ function InitializeConstants()
 global CONSTANTS
 
 [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+
+Load.AddConstant('numFrames', numFrames,0);
+Load.AddConstant('numChannels', numChannels,0);
+
 imSet = Helper.LoadIntensityImageSet(1);
 
 imSizes = zeros(length(imSet),2);
@@ -38,8 +42,6 @@ for i=1:length(imSet)
 end
 
 Load.AddConstant('imageSize', max(imSizes,[],1),0);
-Load.AddConstant('numFrames', numFrames,0);
-Load.AddConstant('numChannels', numChannels,0);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
@@ -87,5 +89,5 @@ end
 
 Load.AddConstant('channelOrder', channelOrder,0);
 Load.AddConstant('channelColor', channelColor,0);
-load.AddConstant('channelFluor', channelFluor,0);
+Load.AddConstant('channelFluor', channelFluor,0);
 end
