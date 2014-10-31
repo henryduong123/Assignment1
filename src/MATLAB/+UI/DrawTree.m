@@ -25,7 +25,7 @@
 
 function DrawTree(familyID, endTime)
 
-global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState FluorData HaveFluor
+global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState FluorData
 
 if ( ~exist('endTime','var') )
     endTime = length(HashedCells);
@@ -212,7 +212,9 @@ for i=1:length(hasPhenos)
 end
 
 % draw ticks to indicate which times have fluorescence
-fluorTimes = find(HaveFluor);
+bFluorOn = cellfun(@(x)(~isempty(x)), FluorData);
+fluorTimes = any(bFluorOn,2);
+
 pdelta = pixelDelta(Figures.tree.axesHandle);
 x_lim = xlim;
 % xlim = get(Figures.tree.axesHandle,'XLim');

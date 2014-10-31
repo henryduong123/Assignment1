@@ -1,5 +1,5 @@
 function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix, checkHulls, nextHulls, bAggressive)
-    global CONSTANTS CellHulls HashedCells FluorData HaveFluor
+    global CONSTANTS CellHulls HashedCells
 
     if ( ~exist('bAggressive','var') )
         bAggressive = 0;
