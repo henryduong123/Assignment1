@@ -68,7 +68,24 @@ Load.AddConstant('dMaxConnectComponent', typeParams.leverParams.dMaxConnectCompo
 
 Load.AddConstant('dMaxCenterOfMass', typeParams.trackParams.dMaxCenterOfMass,1);
 Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConnectComponentTracker,1);
-Load.AddConstant('channelOrder', typeParams.channelParams.channelOrder,0);
-Load.AddConstant('channelColor', typeParams.channelParams.channelColor,0);
-load.AddConstant('channelFluor', typeParams.channelParams.channelFluor,0);
+
+% Try to update channel info based on loaded image data.
+channelOrder = typeParams.channelParams.channelOrder;
+channelColor = typeParams.channelParams.channelColor;
+channelFluor = typeParams.channelParams.channelFluor;
+numMissingChan = numChannels - length(channelOrder);
+if ( numMissingChan > 0 )
+    missingChannels = length(channelOrder):length(channelOrder)+numMissingChan;
+    channelOrder = [channelOrder missingChannels];
+    channelColor = [channelColor; hsv(numMissingChan+2)];
+    channelFluor = [channelFluor false(1,numMissingChan)];
+elseif ( numMissingChan < 0 )
+    channelOrder = channelOrder(1:numChannels);
+    channelColor = channelColor(1:numChannels,:);
+    channelFluor = channelFluor(1:numChannels);
+end
+
+Load.AddConstant('channelOrder', channelOrder,0);
+Load.AddConstant('channelColor', channelColor,0);
+load.AddConstant('channelFluor', channelFluor,0);
 end

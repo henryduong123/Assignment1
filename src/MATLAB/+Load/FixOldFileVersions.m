@@ -36,6 +36,12 @@ function bNeedsUpdate = FixOldFileVersions()
         end
     end
     
+    % As of version 7.11, add tag field for CellHulls
+    if ( ~isfield(CellHulls, 'tag') )
+        CellHulls.tag = '';
+        bNeedsUpdate = true;
+    end
+    
     % As of version 7.9, remove imagePixels field
     if ( isfield(CellHulls, 'imagePixels') )
         Load.RemoveImagePixelsField();
