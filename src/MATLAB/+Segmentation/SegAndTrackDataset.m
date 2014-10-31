@@ -42,7 +42,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
 
     Load.AddConstant('imageSize', max(imSizes,[],1),1);
     
-    if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) > 3 )
+    if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) >= 3 )
         cltime = clock();
         errStatus = sprintf('%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
         
@@ -132,13 +132,19 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     % Sort segmentations and fluorescent data so that they are time ordered
     segtimes = [cellSegments.time];
     [srtSegs srtIdx] = sort(segtimes);
-    CellHulls = cellSegments(srtIdx);
+    CellHulls = Helper.MakeInitStruct(Helper.GetCellHullTemplate(), cellSegments(srtIdx));
+    
+    % Make sure center of mass is available
+    for i=1:length(CellHulls)
+        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
+        CellHulls(i).centerOfMass = mean([r c], 1);
+    end
 
     [srtFrames srtIdx] = sort(frameOrder);
     
     fprintf('Building Connected Component Distances... ');
     HashedCells = cell(1,numFrames);
-    for t=1:tmax
+    for t=1:numFrames
         HashedCells{t} = struct('hullID',{}, 'trackID',{});
     end
     

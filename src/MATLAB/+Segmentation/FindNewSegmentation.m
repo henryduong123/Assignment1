@@ -32,7 +32,7 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         
         for j=1:numel(paramGrid{1})
             paramArgs = cellfun(@(x)(x(j)), paramGrid, 'UniformOutput',0);
-            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, time, segFunc, paramArgs);
+            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
 
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
             if ( ~isempty(hull) )

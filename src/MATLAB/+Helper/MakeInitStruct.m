@@ -8,7 +8,8 @@ function newStruct = MakeInitStruct(templateStruct, initStruct)
         error('Template structure must have at least one field');
     end
 
-    outFields = fieldnames(templateStruct);
+    initSize = size(initStruct);
+    [outFields newStruct] = initNonemptyStruct(templateStruct, initSize);
     
     % If this isn't an empty structure, then we can force logical fields
     bLogical = false(1,length(outFields));
@@ -16,22 +17,28 @@ function newStruct = MakeInitStruct(templateStruct, initStruct)
         bLogical = structfun(@(x)(islogical(x)), templateStruct(1));
     end
     
-    newStruct = struct();
     for i=1:length(outFields)
         if ( ~bLogical(i) )
             if ( isfield(initStruct,outFields(i)) )
-                newStruct.(outFields{i}) = initStruct.(outFields{i});
+                [newStruct.(outFields{i})] = deal(initStruct.(outFields{i}));
             else
-                newStruct.(outFields{i}) = [];
+                [newStruct.(outFields{i})] = deal([]);
             end
         else
             if ( isfield(initStruct,outFields(i)) )
-                newStruct.(outFields{i}) = forceLogical(initStruct.(outFields{i}));
+                [newStruct.(outFields{i})] = deal(forceLogical(initStruct.(outFields{i})));
             else
-                newStruct.(outFields{i}) = false;
+                [newStruct.(outFields{i})] = deal(false);
             end
         end
     end
+end
+
+function [outFields tempStruct] = initNonemptyStruct(templateStruct, structSize)
+    outFields = fieldnames(templateStruct);
+    fieldStruct = cell2struct(cell(1,length(outFields)), outFields, 2);
+    
+    tempStruct = repmat(fieldStruct, structSize);
 end
 
 function bValue = forceLogical(value)

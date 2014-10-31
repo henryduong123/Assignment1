@@ -125,7 +125,7 @@ switch answer
             
             Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
-            if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)
+            if ( ~isfield(CONSTANTS,'imageNamePattern') || isempty(Helper.LoadPrimaryIntensityImage(1)) )
                 if (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return

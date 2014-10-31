@@ -33,7 +33,8 @@ function DrawCells()
 global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS MitosisEditStruct
 
 % figure(Figures.cells.handle);
-set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
+timeLabel = ['Time: ' num2str(Figures.time)];
+set(Figures.cells.timeLabel,'String',timeLabel);
 
 % Missing Cells Counter
 missingCells = UI.CellCountDifference();
