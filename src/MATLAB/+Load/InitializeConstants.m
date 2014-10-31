@@ -29,11 +29,17 @@ function InitializeConstants()
 
 global CONSTANTS
 
-im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
-Load.AddConstant('imageSize',size(im),0);
+[numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+imSet = Helper.LoadIntensityImageSet(1);
 
-numFrames = Helper.LoadNumFrames(Helper.GetFullImagePath(1));
+imSizes = zeros(length(imSet),2);
+for i=1:length(imSet)
+    imSizes(i,:) = size(imSet{i});
+end
+
+Load.AddConstant('imageSize', max(imSizes,[],1),0);
 Load.AddConstant('numFrames', numFrames,0);
+Load.AddConstant('numChannels', numChannels,0);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
@@ -62,4 +68,7 @@ Load.AddConstant('dMaxConnectComponent', typeParams.leverParams.dMaxConnectCompo
 
 Load.AddConstant('dMaxCenterOfMass', typeParams.trackParams.dMaxCenterOfMass,1);
 Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConnectComponentTracker,1);
+Load.AddConstant('channelOrder', typeParams.channelParams.channelOrder,0);
+Load.AddConstant('channelColor', typeParams.channelParams.channelColor,0);
+load.AddConstant('channelFluor', typeParams.channelParams.channelFluor,0);
 end

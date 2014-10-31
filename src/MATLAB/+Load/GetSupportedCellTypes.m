@@ -1,9 +1,9 @@
 function SupportedTypes = GetSupportedCellTypes()
 
     segAlgTemplate = struct('func',{}, 'params',{});
-    frameSegAlgorithms = [struct('func',{@Segmentation.FrameSegmentor}, 'params',{[createParam('imageAlpha', 1.5, [0.9 0.5])]});
-                        struct('func',{@Segmentation.FrameSegmentor_Adult}, 'params',{[createParam('imageAlpha', 1.5, [0.9 0.5])]});
-                        struct('func',{@Segmentation.FrameSegmentor_Embryonic}, 'params',{[createParam('imageAlpha', 1.5, [0.9 0.5])]})];
+    frameSegAlgorithms = [struct('func',{@Segmentation.FrameSegmentor}, 'params',{[createParam('imageAlpha', 1.5, [1.0 0.5 5])]});
+                        struct('func',{@Segmentation.FrameSegmentor_Adult}, 'params',{[createParam('imageAlpha', 1.5, [1.0 0.5 5])]});
+                        struct('func',{@Segmentation.FrameSegmentor_Embryonic}, 'params',{[createParam('imageAlpha', 1.5, [1.0 0.5 5])]})];
 
     SupportedTypes = struct('name',{[]}, 'segRoutine',{segAlgTemplate}, 'resegRoutines',{segAlgTemplate}, 'trackParams',{[]}, 'leverParams',{[]});
     
@@ -12,12 +12,14 @@ function SupportedTypes = GetSupportedCellTypes()
     SupportedTypes(1).resegRoutines(1) = getAlgorithm('Adult', frameSegAlgorithms);
     SupportedTypes(1).trackParams = struct('dMaxCenterOfMass',{40}, 'dMaxConnectComponentTracker',{20});
     SupportedTypes(1).leverParams = struct('timeResolution',{5}, 'maxPixelDistance',{40}, 'maxCenterOfMassDistance',{40}, 'dMaxConnectComponent',{40});
+    SupportedTypes(1).channelParams = struct('channelOrder',{[1]}, 'channelColor',{[1 1 1]}, 'channelFluor',{[false]});
     
     SupportedTypes(2).name = 'Embryonic';
     SupportedTypes(2).segRoutine = getAlgorithm('Embryonic', frameSegAlgorithms);
     SupportedTypes(2).resegRoutines(1) = getAlgorithm('Embryonic', frameSegAlgorithms);
     SupportedTypes(2).trackParams = struct('dMaxCenterOfMass',{80}, 'dMaxConnectComponentTracker',{40});
     SupportedTypes(2).leverParams = struct('timeResolution',{10}, 'maxPixelDistance',{80}, 'maxCenterOfMassDistance',{80}, 'dMaxConnectComponent',{40});
+    SupportedTypes(2).channelParams = struct('channelOrder',{[1]}, 'channelColor',{[1 1 1]}, 'channelFluor',{[false]});
 
 end
 
