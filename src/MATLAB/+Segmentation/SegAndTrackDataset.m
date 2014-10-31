@@ -187,10 +187,11 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     errStatus = '';
 end
 
-function segCmd = makeSegCommand(procID, numProc, numFrames, cellType, rootFolder, imagePattern, segArg)
+function segCmd = makeSegCommand(procID, numProc, numChannels, numFrames, cellType, rootFolder, imagePattern, segArg)
     segCmd = 'Segmentor';
     segCmd = [segCmd ' "' num2str(procID) '"'];
     segCmd = [segCmd ' "' num2str(numProc) '"'];
+    segCmd = [segCmd ' "' num2str(numChannels) '"'];
     segCmd = [segCmd ' "' num2str(numFrames) '"'];
     segCmd = [segCmd ' "' cellType '"'];
     segCmd = [segCmd ' "' rootFolder '"'];
