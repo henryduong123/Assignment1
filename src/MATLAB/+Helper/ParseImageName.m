@@ -5,7 +5,7 @@ function [datasetName namePattern] = ParseImageName(imageName)
     namePattern = '';
     
     [filePath fileName fileExt] = fileparts(imageName);
-    matchTok = regexpi(fileName, '^(.+_)c(\d+)_t(\d+)$', 'tokens', 'once');
+    matchTok = regexpi(fileName, '^(.+_)c(\d+)_t(\d+)(.*)$', 'tokens', 'once');
     if ( isempty(matchTok) )
         return;
     end
@@ -17,5 +17,5 @@ function [datasetName namePattern] = ParseImageName(imageName)
     timeDigits = length(timeStr);
     
     datasetName = matchTok{1};
-    namePattern = [datasetName 'c%0' num2str(chanDigits) 'd_t%0' num2str(timeDigits) 'd' fileExt];
+    namePattern = [datasetName 'c%0' num2str(chanDigits) 'd_t%0' num2str(timeDigits) 'd' matchTok{4} fileExt];
 end
