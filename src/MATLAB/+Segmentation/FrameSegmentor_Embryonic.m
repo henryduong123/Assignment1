@@ -1,7 +1,16 @@
-function [objs features levels] = FrameSegmentor_Embryonic(im, t, imageAlpha)
+function [objs features levels] = FrameSegmentor_Embryonic(chanIm, t, imageAlpha)
     objs = [];
     features = [];
     levels = struct('haloLevel',{0}, 'igLevel',{0});
+    
+    if ( length(chanIm) > 1 )
+        fprintf('WARNING: Multichannel segmentation not supported by this algorithm, using channel 1\n');
+    end
+    
+    im = chanIm{1};
+    if ( isempty(im) )
+        return;
+    end
     
     level=imageAlpha*graythresh(im);
     

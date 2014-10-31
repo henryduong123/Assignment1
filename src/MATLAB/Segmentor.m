@@ -55,32 +55,34 @@ end
 segParams = struct2cell(segArgs);
 
 try 
-    fprintf(1,'%s\n',argStruct.imagePolder);
-    fprintf(1,'%s\n',argStruct.imagePattern);
+    fprintf(1,'%s\n',procArgs.imagePath);
+    fprintf(1,'%s\n',procArgs.imagePattern);
     
-    Load.AddConstant('rootImageFolder', procArgs.imagePolder, 1);
+    Load.AddConstant('rootImageFolder', procArgs.imagePath, 1);
     Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
+    Load.AddConstant('numChannels', procArgs.numChannels, 1);
+    Load.AddConstant('numFrames', procArgs.numFrames, 1);
     
     tStart = procArgs.procID;
     tEnd = procArgs.numFrames;
     tStep = procArgs.numProcesses;
     
     numImages = floor(tEnd/tStep);
+    numChannels = procArgs.numChannels;
 
     for t = tStart:tStep:tEnd
-        imFilename = Helper.GetFullImagePath(t);
-        if ( ~exist(imFilename,'file') )
+        fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
+        
+        chanImSet = Helper.LoadIntensityImageSet(t);
+        if ( isempty(chanImSet) )
             continue;
         end
 
-        fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
-
-        im = Helper.LoadIntensityImage(imFilename);
+        [frmObjs frmFeatures frmLevels] = segFunc(chanImSet, t, segParams{:});
 
         objs = [objs frmObjs];
         features = [features frmFeatures];
         levels = [levels frmLevels];
-        [frmObjs frmFeatures frmLevels] = segFunc(im, t, segParams{:});
     end
     
 catch excp
@@ -108,7 +110,7 @@ fprintf('\tDone\n');
 end
 
 function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
-    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numFrames',{0}, 'cellType',{''}, 'imagePath',{''}, 'imagePattern',{''});
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'imagePath',{''}, 'imagePattern',{''});
     
     procArgFields = fieldnames(procArgs);
     procArgTypes = structfun(@(x)(class(x)), procArgs, 'UniformOutput',0);
@@ -143,8 +145,8 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
     
     segArgCell = argCell(length(procArgFields)+1:end);
-    segArgFields = {SupportedTypes(typeIdx).segRoutine.params.name};
-    segArgTypes = cell(1,length(cellParamFields));
+    segArgFields = {supportedCellTypes(typeIdx).segRoutine.params.name};
+    segArgTypes = cell(1,length(segArgFields));
     [segArgTypes{:}] = deal('double');
     
     if ( (length(segArgCell)) ~= length(segArgFields) )

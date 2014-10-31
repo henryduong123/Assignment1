@@ -1,7 +1,16 @@
-function [objs features levels] = FrameSegmentor_Adult(im, t, imageAlpha)
+function [objs features levels] = FrameSegmentor_Adult(chanIm, t, imageAlpha)
     objs = [];
     features = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});
+    
+    if ( length(chanIm) > 1 )
+        fprintf('WARNING: Multichannel segmentation not supported by this algorithm, using channel 1\n');
+    end
+    
+    im = chanIm{1};
+    if ( isempty(im) )
+        return;
+    end
     
     levels.haloLevel = graythresh(im);
     level=imageAlpha*levels.haloLevel;

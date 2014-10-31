@@ -1,5 +1,5 @@
-    global CONSTANTS
 function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, namePattern, numProcessors, segArgs)
+    global CONSTANTS
     
     errStatus = sprintf('Unknown Error\n');
     tSeg = 0;
@@ -13,12 +13,9 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         rootFolder = rootFolder(1:end-1);
     end
     
-    fileList = dir(fullfile(rootFolder, [datasetName '*.tif']));
-    numberOfImages = length(fileList);
+    numProcessors = min(numProcessors, numFrames);
     
-    numProcessors = min(numProcessors, numberOfImages);
-    
-    if ( numberOfImages < 1 )
+    if ( numFrames < 1 )
         return;
     end
 
@@ -35,9 +32,17 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
     
     % Set CONSTANTS.imageSize as soon as possible
-    firstImg = Helper.GetFullImagePath(1);
-    chkIm = Helper.LoadIntensityImage(firstImg);
-    CONSTANTS.imageSize = size(chkIm);
+    [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+    imSet = Helper.LoadIntensityImageSet(1);
+
+    imSizes = zeros(length(imSet),2);
+    for i=1:length(imSet)
+        imSizes(i,:) = size(imSet{i});
+    end
+
+    Load.AddConstant('imageSize', max(imSizes,[],1),1);
+    Load.AddConstant('numFrames', numFrames,1);
+    Load.AddConstant('numChannels', numChannels,1);
     
     if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) > 3 )
         cltime = clock();
@@ -52,13 +57,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     
     if ( isdeployed() )
         for procID=1:numProcessors
-            segCmd = makeSegCommand(procID,numProcessors,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs);
+            segCmd = makeSegCommand(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs);
             system(['start ' segCmd ' && exit']);
         end
     else
         matlabpool(numProcessors)
         parfor procID=1:numProcessors
-            Segmentor(procID,numProcessors,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
+            Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,rootFolder,namePattern,segArgs{:});
         end
     end
 
