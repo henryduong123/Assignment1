@@ -19,7 +19,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     Load.AddConstant('numChannels', numChannels,1);
     
     numProcessors = min(numProcessors, numFrames);
-    numProcessors = min(numProcessors, 4);
     
     if ( numFrames < 1 )
         return;
