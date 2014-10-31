@@ -58,10 +58,8 @@ else
 end
 
 %read in image
-filename = Helper.GetFullImagePath(Figures.time);
-if (exist(filename,'file')==2)
-    img = Helper.LoadIntensityImage(filename);
-else
+img = Helper.LoadPrimaryIntensityImage(Figures.time);
+if ( isempty(img) )
     img = zeros(CONSTANTS.imageSize);
 end
 
