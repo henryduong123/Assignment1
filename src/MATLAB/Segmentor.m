@@ -88,7 +88,7 @@ try
         end
         
         hulls = [hulls frameHulls];
-        frameTimes = [frameTimes; t];
+        frameTimes = [frameTimes t];
     end
     
 catch excp
