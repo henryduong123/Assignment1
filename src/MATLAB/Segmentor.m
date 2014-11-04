@@ -39,6 +39,10 @@ if ( isempty(procArgs) )
     return;
 end
 
+if ( isempty(procArgs.channelOrder) )
+	procArgs.channelOrder = 1:procArgs.numChannels;
+end
+
 % Use the supported type structure to find segmentation routine
 typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
 funcName = char(supportedCellTypes(typeIdx).segRoutine.func);
@@ -61,6 +65,7 @@ try
     Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
     Load.AddConstant('numChannels', procArgs.numChannels, 1);
     Load.AddConstant('numFrames', procArgs.numFrames, 1);
+    Load.AddConstant('channelOrder', procArgs.channelOrder, 1);
     
     tStart = procArgs.procID;
     tEnd = procArgs.numFrames;
@@ -117,7 +122,7 @@ fprintf('\tDone\n');
 end
 
 function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
-    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'imagePath',{''}, 'imagePattern',{''});
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'channelOrder',{[]}, 'imagePath',{''}, 'imagePattern',{''});
     
     procArgFields = fieldnames(procArgs);
     procArgTypes = cellfun(@(x)(class(x)), struct2cell(procArgs), 'UniformOutput',0);
@@ -201,7 +206,7 @@ function outArg = convertArg(inArg, toType)
     if ( strcmpi(toType,'char') )
         outArg = num2str(inArg);
     elseif ( ischar(inArg) )
-        outArg = cast(str2double(inArg), toType);
+        outArg = cast(str2num(inArg), toType);
     else
         outArg = cast(inArg, toType);
     end

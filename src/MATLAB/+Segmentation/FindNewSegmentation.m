@@ -10,43 +10,55 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         
         % Search 5 levels in the range of each entry if we are searching.
         chkParams = resegRoutines(i).params;
+        paramList = recBuildParams([], chkParams);
         
-        paramSpace = {};
-        for j=1:length(chkParams)
-            paramRange = chkParams(j).range;
-            if ( isempty(paramRange) )
-                paramSpace{j} = chkParams(j).default;
-            end
-            
-            if ( bSearchParams )
-                paramSpace{j} = linspace(paramRange(1), paramRange(2), paramRange(3));
-            else
-                paramSpace{j} = paramRange(1);
-            end
+        if ( isempty(paramList) )
+            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
+            hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
         end
         
-        paramGrid = cell(1,length(chkParams));
-        if ( ~isempty(chkParams) )
-            [paramGrid{:}] = ndgrid(paramSpace{:});
-        end
-        
-        for j=1:numel(paramGrid{1})
-            paramArgs = cellfun(@(x)(x(j)), paramGrid, 'UniformOutput',0);
+        for j=1:size(paramList)
+            paramArgs = mat2cell(paramList(j,:),1,1);
             chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
 
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
+            
             if ( ~isempty(hull) )
-                if ( ~isfield(hull,'tag') || isempty(hull.tag) )
-                    hull.tag = char(segFunc);
-                else
-                    hull.tag = [char(resegRoutines(i).func) ':' hull.tag];
-                end
-
-                return;
+                break;
             end
         end
         
+        if ( isempty(hull) )
+            continue;
+        end
+        
+        if ( ~isfield(hull,'tag') || isempty(hull.tag) )
+            hull.tag = char(segFunc);
+        else
+            hull.tag = [char(resegRoutines(i).func) ':' hull.tag];
+        end
     end
+end
+
+function paramList = recBuildParams(inList, chkParams)
+    paramList = inList;
+    
+    if ( isempty(chkParams) )
+        return;
+    end
+    
+    curParam = chkParams{1};
+    
+    paramRange = curParam.range;
+    if ( isempty(paramRange) )
+        paramRange = [curParam.default curParam.default 1];
+    end
+    
+    paramSet = linspace(paramRange(1), paramRange(2), paramRange(3));
+    [X Y] = meshgrid(1:size(paramList,1), length(paramSet));
+    
+    paramList = [paramList(X(:)) paramSet(Y(:))];
+    paramList = recBuildParams(paramList, chkParams(2:end));
 end
 
 function hull = validIntersectHull(chkHulls, centerPt, overlapPoints)
