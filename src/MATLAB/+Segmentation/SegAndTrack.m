@@ -27,7 +27,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function errStatus = SegAndTrack()
-    global CONSTANTS
+    global CONSTANTS CellPhenotypes
 
     % Modified 
     errStatus = 1;
@@ -91,8 +91,6 @@ function errStatus = SegAndTrack()
             return
     end
     
-    
-    
     if ( ~isempty(errStatus) )
         errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
         fid = fopen(errFilename, 'wt');
@@ -101,6 +99,9 @@ function errStatus = SegAndTrack()
         
         return
     end
+    
+    % Initialize cell phenotype structure in all cases.
+    CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{[0 0 0;.549 .28235 .6235;0 1 1]});
     
     UI.InitializeFigures();
     
