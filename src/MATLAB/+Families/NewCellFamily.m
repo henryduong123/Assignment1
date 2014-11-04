@@ -41,7 +41,8 @@ if(isempty(CellFamilies))
         'endTime',       {time},...
         'bLocked',       {false},...
         'bCompleted',    {false},...
-        'correctedTime', {0});
+        'correctedTime', {0},...
+        'editInfo', struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0}));
     
     curFamilyID = 1;
 else
@@ -57,6 +58,7 @@ else
     CellFamilies(curFamilyID).bLocked = false;
     CellFamilies(curFamilyID).bCompleted = false;
     CellFamilies(curFamilyID).correctedTime = 0;
+    CellFamilies(curFamilyID).editInfo = struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0});
 end
 
 end
