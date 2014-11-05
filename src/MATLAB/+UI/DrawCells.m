@@ -53,10 +53,13 @@ else
 end
 
 %read in image
-img = Helper.LoadPrimaryIntensityImage(Figures.time);
+img = Helper.LoadChannelIntensityImage(Figures.time,Figures.chanIdx);
 if ( isempty(img) )
     img = zeros(CONSTANTS.imageSize);
 end
+
+chanLabel = sprintf('Channel: %d', CONSTANTS.channelOrder(Figures.chanIdx));
+set(Figures.cells.chanLabel,'String',chanLabel);
 
 curAx = get(Figures.cells.handle, 'CurrentAxes');
 if ( isempty(curAx) )
