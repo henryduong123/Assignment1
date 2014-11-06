@@ -13,7 +13,7 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         paramList = recBuildParams([], chkParams);
         
         if ( isempty(paramList) )
-            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
+            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc,{});
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
         end
         
