@@ -37,9 +37,6 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
     
     
     chkHull = Segmentation.FindNewSegmentation(chanImSet, clickPt, subSize, true, [], time);
-    if ( isempty(chkHull) )
-        return;
-    end
 
     newHull = Helper.MakeEmptyStruct(CellHulls);
     newHull.userEdited = true;
@@ -48,12 +45,12 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         chkHull = Segmentation.ForceDisjointSeg(chkHull, time, clickPt);
     end
     
-    if ( isempty(newObj) )
+    if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
         newHull.time = time;
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
-        newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
+        newHull.indexPixels = sub2ind(CONSTANTS.imageSize, newHull.points(2), newHull.points(1));
         
         newHull.tag = 'Manual';
     else
