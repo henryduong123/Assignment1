@@ -58,6 +58,9 @@ if ( isempty(img) )
     img = zeros(CONSTANTS.imageSize);
 end
 
+imMax = max(img(:));
+img = mat2gray(img,[0 imMax]);
+
 chanLabel = sprintf('Channel: %d', CONSTANTS.channelOrder(Figures.chanIdx));
 set(Figures.cells.chanLabel,'String',chanLabel);
 
@@ -73,7 +76,7 @@ yl=ylim(curAx);
 %adjust the image display
 
 hold(curAx, 'off');
-im = imagesc(img, 'Parent',curAx);
+im = imagesc(img, 'Parent',curAx, [0 1]);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
 set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
 
