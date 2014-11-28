@@ -116,8 +116,8 @@
     </Link>
     <PostBuildEvent>
       <Message>Copy pdb and mex files to bin and MATLAB directories</Message>
-      <Command>copy $(OutDir)$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32
-copy $(OutDir)$(ProjectName).pdb ..\MATLAB
+      <Command>copy "$(OutDir)$(ProjectName).dll" "..\MATLAB\$(ProjectName).mexw32"
+copy "$(OutDir)$(ProjectName).pdb" ..\MATLAB
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -150,8 +150,8 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     </Link>
     <PostBuildEvent>
       <Message>Copy pdb and mex files to bin and MATLAB directories</Message>
-      <Command>copy $(OutDir)$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw64
-copy $(OutDir)$(ProjectName).pdb ..\MATLAB
+      <Command>copy "$(OutDir)$(ProjectName).dll" "..\MATLAB\$(ProjectName).mexw64"
+copy "$(OutDir)$(ProjectName).pdb" ..\MATLAB
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -181,8 +181,8 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     </Link>
     <PostBuildEvent>
       <Message>Copy pdb and mex files to bin and MATLAB directories</Message>
-      <Command>copy $(OutDir)$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw32
-copy $(OutDir)$(ProjectName).pdb ..\MATLAB
+      <Command>copy "$(OutDir)$(ProjectName).dll" "..\MATLAB\$(ProjectName).mexw32"
+copy "$(OutDir)$(ProjectName).pdb" ..\MATLAB
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -215,8 +215,8 @@ copy $(OutDir)$(ProjectName).pdb ..\MATLAB
     </Link>
     <PostBuildEvent>
       <Message>Copy pdb and mex files to bin and MATLAB directories</Message>
-      <Command>copy $(OutDir)$(ProjectName).dll ..\MATLAB\$(ProjectName).mexw64
-copy $(OutDir)$(ProjectName).pdb ..\MATLAB
+      <Command>copy "$(OutDir)$(ProjectName).dll" "..\MATLAB\$(ProjectName).mexw64"
+copy "$(OutDir)$(ProjectName).pdb" ..\MATLAB
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
