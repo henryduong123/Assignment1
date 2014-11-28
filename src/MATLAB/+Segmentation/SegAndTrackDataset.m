@@ -127,6 +127,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         tSeg = toc;
         return;
     end
+    
+    if ( isempty(cellSegments) )
+        cltime = clock();
+        errStatus = sprintf('%02d:%02d:%02.1f - No segmentations found\n',cltime(4),cltime(5),cltime(6));
+        tSeg = toc;
+        return;
+    end
 
     % Sort segmentations and fluorescent data so that they are time ordered
     segtimes = [cellSegments.time];

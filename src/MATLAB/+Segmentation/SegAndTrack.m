@@ -62,6 +62,10 @@ function errStatus = SegAndTrack()
     
     if ( ~isempty(errStatus) )
         errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
+        
+        fprintf('ERROR: Segmentation/Tracking did not complete successfully.\n');
+        fprintf('       See %s for more details.\n',errFilename);
+        
         fid = fopen(errFilename, 'wt');
         fprintf(fid, '%s', errStatus);
         fclose(fid);
