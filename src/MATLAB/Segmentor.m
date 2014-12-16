@@ -161,18 +161,18 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     segArgTypes = cell(1,length(segArgFields));
     [segArgTypes{:}] = deal('double');
     
-    if ( (length(segArgCell)) ~= length(segArgFields) )
+    if ( (length(segArgCell{1})) ~= length(segArgFields) )
         cltime = clock();
         
         fid = fopen(errFilename, 'w');
         fprintf(fid, '%02d:%02d:%02.1f - Problem segmenting frame \n',cltime(4),cltime(5),cltime(6));
-        if ( length(argCell) > length(argFields) )
-            fprintf(fid, '  Too many input arguments expected %d: %d extra\n', length(argFields), (length(argCell)-length(argFields)));
+        if ( length(segArgCell) > length(segArgFields) )
+            fprintf(fid, '  Too many input arguments expected %d: %d extra\n', length(segArgFields), (length(segArgCell)-length(segArgFields)));
         else
-            fprintf(fid, '  Too few input arguments expected %d: %d missing\n', length(argFields), (length(argFields) - length(argCell)));
+            fprintf(fid, '  Too few input arguments expected %d: %d missing\n', length(segArgFields), (length(segArgFields) - length(segArgCell)));
         end
         
-        printArgs(fid, argCell, [procArgFields segArgFields]);
+        printArgs(fid, segArgCell, [procArgFields segArgFields]);
 
         fclose(fid);
         
@@ -180,7 +180,7 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
         return;
     end
     
-    segArgs = makeArgStruct(segArgCell, segArgFields, segArgTypes);
+    segArgs = makeArgStruct(segArgCell{1}, segArgFields, segArgTypes);
 end
 
 function typeIdx = findSupportedTypeIdx(cellType, supportedTypes)
