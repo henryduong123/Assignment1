@@ -156,12 +156,26 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     % available, and what algorithm to use.
     typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
     
-    segArgCell = argCell(length(procArgFields)+1:end);
+%    segArgCell = argCell{length(procArgFields)+1:end};
+    segArgCell = {};
+    k = 1;
+    for i = length(procArgFields)+1:length(argCell)
+        tmp = argCell{i};
+        if iscell(tmp)
+            for j=1:length(tmp)
+                segArgCell{k} = tmp{j};
+                k = k +1;
+            end
+        else
+            segArgCell{k} = tmp;
+            k = k + 1;
+        end
+    end
     segArgFields = {supportedCellTypes(typeIdx).segRoutine.params.name};
     segArgTypes = cell(1,length(segArgFields));
     [segArgTypes{:}] = deal('double');
     
-    if ( (length(segArgCell{1})) ~= length(segArgFields) )
+    if ( (length(segArgCell)) ~= length(segArgFields) )
         cltime = clock();
         
         fid = fopen(errFilename, 'w');
@@ -180,7 +194,7 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
         return;
     end
     
-    segArgs = makeArgStruct(segArgCell{1}, segArgFields, segArgTypes);
+    segArgs = makeArgStruct(segArgCell, segArgFields, segArgTypes);
 end
 
 function typeIdx = findSupportedTypeIdx(cellType, supportedTypes)
