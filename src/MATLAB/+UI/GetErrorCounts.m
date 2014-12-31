@@ -20,7 +20,9 @@ for tid=1:nTracks
     nMissingHulls=nMissingHulls+length(find(hulls==0));
     hulls(hulls==0)=[];
     
-    nTrackEdits=nTrackEdits+ nnz(any(GraphEdits(hulls,:),1));
+%      nTrackEdits=nTrackEdits+ nnz(any(GraphEdits(hulls,:),1));
+    hx = GraphEdits(hulls,hulls);
+    nTrackEdits=nTrackEdits+ nnz(any(hx,1));
     nSegmentationEdits=nSegmentationEdits+length(find([CellHulls(hulls).userEdited]~=0));
-     
+    
 end
