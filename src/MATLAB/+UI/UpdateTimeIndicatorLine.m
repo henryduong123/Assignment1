@@ -50,4 +50,8 @@ Figures.cellCount = UI.UpdateCellCount();
 % uistack(Figures.tree.timeIndicatorLine, 'bottom');
 set(Figures.tree.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 set(Figures.tree.cellCountLabel,'String',['Cell Count: ' num2str(Figures.cellCount)]);
+
+[nSegmentationEdits, nTrackEdits, nMissingHulls, nHulls] = UI.GetErrorCounts();
+errorRate = (nSegmentationEdits+nTrackEdits+nMissingHulls)/nHulls/2;
+set(Figures.tree.cellEditsLabel,'String',sprintf('Seg: %d Track: %d Missing: %d Hulls: %d Rate: %.2f%%', nSegmentationEdits, nTrackEdits, nMissingHulls, nHulls, errorRate*100));
 end
