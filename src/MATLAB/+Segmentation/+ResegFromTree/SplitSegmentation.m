@@ -58,6 +58,7 @@ function [newSegs costMatrix nextHulls] = SplitSegmentation(splitHull, numSplit,
     setHullIDs(bAssignHullIdx) = splitHull;
     % Just arbitrarily assign clone's hull for now
     newSegs = Hulls.SetHullEntries(setHullIDs, newHulls);
+    Editor.LogEdit('Split', splitHull, newSegs, false);
     
     updateIdx = find(nextHulls == splitHull);
     

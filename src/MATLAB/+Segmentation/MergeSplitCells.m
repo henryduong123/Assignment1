@@ -49,6 +49,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
     
     mergeObj.userEdited = true;
     Hulls.SetHullEntries(replaceCell, mergeObj);
+    Editor.LogEdit('Merge', deleteCells, replaceCell, true);
     
     for i=1:length(deleteCells)
         Hulls.RemoveHull(deleteCells(i));

@@ -172,6 +172,7 @@ function [newHullIDs oldHull] = splitNextFrame(hullID, k)
     setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
     newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
+    Editor.LogEdit('Split', hullID, setHullIDs, false);
 end
 
 function trackedSplits = verifySplit(costMatrix, extendHulls, nextHulls, newHulls, splitHulls)
