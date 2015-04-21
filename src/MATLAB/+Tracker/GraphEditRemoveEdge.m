@@ -34,6 +34,11 @@ function GraphEditRemoveEdge(trackID, time)
         return;
     end
     
+    trackEdge = Segmentation.ResegFromTree.GetTrackInEdge(time, trackID);
+    if ( trackEdge(1) > 0 )
+        Editor.LogEdit('RemoveEdge',trackEdge(1),nextHull,true);
+    end
+    
     possibleFamilyParents = [];
     familyID = CellTracks(trackID).familyID;
     for i=1:length(CellFamilies(familyID).tracks)

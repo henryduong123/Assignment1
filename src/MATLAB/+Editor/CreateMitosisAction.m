@@ -41,6 +41,8 @@ function historyAction = CreateMitosisAction(trackID, dirFlag, time, linePoints)
         Tracks.ChangeLabel(fixupChildTrackID, leftChildTrackID, time+1);
     end
     
+    Editor.LogEdit('Mitosis',parentHull,childHulls,true);
+    
     Helper.SetTreeLocked(treeID, 1);
     
     historyAction = 'Push';
