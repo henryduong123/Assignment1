@@ -90,7 +90,7 @@ function kIdx = gmmCluster(X, k, oldMeans)
 
     [minDist minIdx] = min(distSq,[],2);
     gmoptions = statset('Display','off', 'MaxIter',400);
-    obj = gmdistribution.fit(X, k, 'Start',minIdx, 'Regularize',0.5 , 'Options',gmoptions);
+    obj = Helper.fitGMM(X, k, 'Start',minIdx, 'Regularize',0.5 , 'Options',gmoptions);
     kIdx = cluster(obj, X);
 end
 

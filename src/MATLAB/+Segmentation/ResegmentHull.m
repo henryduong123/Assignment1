@@ -51,13 +51,13 @@ switch CONSTANTS.cellType
             % ~10x faster but ocassionally poor results - used for interactivity
             [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
             start = struct('mu', {centers}, 'Sigma', {repmat(eye(2,2), [1 1 k])},'PComponents',{(ones(1,k)/k)});
-            obj = gmdistribution.fit([c,r], k, 'Start',start, 'Options',gmoptions);
+            obj = Helper.fitGMM([c,r], k, 'Start',start, 'Options',gmoptions);
         else
-            obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
+            obj = Helper.fitGMM([c,r], k, 'Replicates',15, 'Options',gmoptions);
         end
         kIdx = cluster(obj, [c,r]);
     case 'Embryonic'
-        obj = gmdistribution.fit([c,r], k, 'Replicates',15, 'Options',gmoptions);
+        obj = Helper.fitGMM([c,r], k, 'Replicates',15, 'Options',gmoptions);
         kIdx = cluster(obj, [c,r]);
     otherwise
         [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
