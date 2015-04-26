@@ -1,9 +1,9 @@
-% historyAction = SliceAtFrame(rootTrackID, time)
+% historyAction = SliceAtFrameAction(rootTrackID, time)
 % Edit Action:
 %
 % Call RemoveFromTree() on all tracks on family at time.
 
-function historyAction = SliceAtFrame(rootTrackID, time)
+function historyAction = SliceAtFrameAction(rootTrackID, time)
     global CellFamilies CellTracks
     
     familyID = CellTracks(rootTrackID).familyID;
