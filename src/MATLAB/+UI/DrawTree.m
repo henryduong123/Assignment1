@@ -150,6 +150,24 @@ else
     set(Figures.tree.axesHandle, 'Color','w');
 end
 
+if ( CellFamilies(familyID).bFrozen )
+    set(Figures.tree.menuHandles.freezeMenu, 'Checked','on');
+    set(Figures.cells.menuHandles.freezeMenu, 'Checked','on');
+    
+    % Disable the "locking mechanism if tree is already frozen"
+    set(Figures.tree.menuHandles.lockMenu, 'Enable','off');
+    set(Figures.cells.menuHandles.lockMenu, 'Enable','off');
+    
+%     frzColor = hsv2rgb([0.6 0.25 1.0]);
+    set(Figures.tree.axesHandle, 'Color',[0.75 0.85 1.0]);
+else
+    set(Figures.tree.menuHandles.freezeMenu, 'Checked','off');
+    set(Figures.cells.menuHandles.freezeMenu, 'Checked','off');
+    
+    set(Figures.tree.menuHandles.lockMenu, 'Enable','on');
+    set(Figures.cells.menuHandles.lockMenu, 'Enable','on');
+end
+
 zoom(Figures.tree.handle, 'reset');
 
 phenoHandles = [];

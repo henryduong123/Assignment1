@@ -140,9 +140,9 @@ function bNeedsUpdate = FixOldFileVersions()
     bNeedsUpdate = (bNeedsUpdate || bFamilyUpdate);
     
     % Make sure that CellHulls userEdited, deleted, greenInd
-    % are all "logical". Also, CellFamilies.bLocked/bCompleted
+    % are all "logical". Also, CellFamilies.bLocked/bCompleted/bFrozen
     CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
-    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted');
+    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted', 'bFrozen');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);
     emptyIdx = find(bEmptyHulls);

@@ -19,7 +19,7 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
     bLongEdge = bLongEdge(~bReallyLongEdge);
     
     [checkHulls uniqueIdx] = unique(checkEdges(:,1));
-    nextHulls = [HashedCells{t}.hullID];
+    nextHulls = ignoreFrozenHulls(t);
     
     % Find mitosis edges
     mitIdx = setdiff(1:size(checkEdges,1), uniqueIdx);
@@ -208,4 +208,13 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
     
     newEdges(srtOldIdx,:) = newEdges(srtNewIdx,:);
     
+end
+
+function nextHulls = ignoreFrozenHulls(t)
+    global HashedCells
+    
+    nextTracks = [HashedCells{t}.trackID];
+    bFrozen = Helper.CheckTreeFrozen(nextTracks);
+    
+    nextHulls = [HashedCells{t}(~bFrozen).hullID];
 end
