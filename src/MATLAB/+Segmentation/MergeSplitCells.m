@@ -1,4 +1,4 @@
-% [deleteCells replaceCell] = MergeSplitCells(mergeCells)
+% [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
 % Attempt to merge cells that are oversegmented and propagate the merge forward in time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,8 +24,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
-    global CellHulls HashedCells
+function [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
+    global CellFamilies CellHulls HashedCells
     
     deleteCells = [];
     replaceCell = [];
@@ -35,6 +35,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     end
     
     t = CellHulls(mergeCells(1)).time;
+    bestEdge = getLockedMergeTrack(t, mergeCells, selectedTree);
     [mergeObj, deleteCells] = Segmentation.CreateMergedCell(mergeCells);
     
     if ( isempty(mergeObj) || isempty(deleteCells) )
@@ -46,7 +47,7 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
     replaceCell = min(deleteCells);
     deleteCells = setdiff(deleteCells,replaceCell);
     
-    mergeObj.userEdited = false;
+    mergeObj.userEdited = true;
     Hulls.SetHullEntries(replaceCell, mergeObj);
     
     for i=1:length(deleteCells)
@@ -68,6 +69,11 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells)
         extendHulls = checkHulls(bExtendHulls);
         affectedHulls = nextHulls(bAffectedHulls);
         
+        if ( ~isempty(bestEdge) )
+            bestEdge(1) = replaceCell;
+            [costMatrix extendHulls affectedHulls] = enforceTrackEdges(bestEdge, costMatrix,extendHulls,affectedHulls);
+        end
+        
         Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, []);
     end
 end
@@ -87,3 +93,53 @@ function nextMergeCells = getNextMergeCells(t, mergeCells)
     end
 end
 
+function [costMatrix extendHulls affectedHulls] = enforceTrackEdges(edges, costMatrix,extendHulls,affectedHulls)
+    for i=1:size(edges,1)
+        rIdx = find(extendHulls == edges(i,1));
+        cIdx = find(affectedHulls == edges(i,2));
+        
+        if ( isempty(rIdx) )
+            costMatrix = [costMatrix;Inf*ones(1,size(costMatrix,2))];
+            extendHulls = [extendHulls edges(i,1)];
+            rIdx = length(extendHulls);
+        end
+        
+        if ( isempty(cIdx) )
+            costMatrix = [costMatrix Inf*ones(size(costMatrix,1),1)];
+            affectedHulls = [affectedHulls edges(i,2)];
+            cIdx = length(affectedHulls);
+        end
+        
+        costMatrix(rIdx,:) = Inf;
+        costMatrix(:,cIdx) = Inf;
+        costMatrix(rIdx,cIdx) = 1;
+    end
+end
+
+function bestEdge = getLockedMergeTrack(t, mergeCells, selectedTree)
+    global CellFamilies
+    
+    bestEdge = [];
+    
+    oldTrackIDs = Hulls.GetTrackID(mergeCells);
+    if ( CellFamilies(selectedTree).bLocked > 0 )
+        curFamTracks = oldTrackIDs(ismember(oldTrackIDs,CellFamilies(selectedTree).tracks));
+        if ( ~isempty(curFamTracks) )
+            bestEdge = getTrackEdge(t, curFamTracks(1));
+            return;
+        end
+    end
+end
+
+function edge = getTrackEdge(t, trackID)
+    edge = [];
+    
+    startHull = Tracks.GetHullID(t,trackID);
+    endHull = Helper.GetNearestTrackHull(trackID,t+1,+1);
+
+    if ( any([startHull endHull] == 0) )
+        return;
+    end
+    
+    edge = [startHull endHull];
+end
