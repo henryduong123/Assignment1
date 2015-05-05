@@ -1,5 +1,7 @@
 function SetTreeFrozen(treeID, bFrozen)
-    global CellFamilies
+    global CellFamilies    
     
     CellFamilies(treeID).bFrozen = (bFrozen ~= 0);
+    
+    Helper.UpdateFrozenCosts(treeID, bFrozen);
 end
