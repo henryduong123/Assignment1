@@ -24,11 +24,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function SaveLEVerState(filename)
-    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks stains stainColors
+    global CellFamilies CellHulls CellTracks HashedCells Costs GraphEdits CONSTANTS ConnectedDist CellPhenotypes Log ReplayEditActions FluorData HaveFluor ResegLinks EditList stains stainColors
     
     gVars = whos('CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
                  'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-                 'FluorData', 'HaveFluor', 'ResegLinks', 'global');
+                 'FluorData', 'HaveFluor', 'ResegLinks', 'EditList', 'global');
 	
 	totalSize = sum([gVars.bytes])/1024/1024;
     
@@ -39,5 +39,5 @@ function SaveLEVerState(filename)
     
     save(filename,'CellFamilies','CellHulls','CellTracks','HashedCells','Costs','GraphEdits','CONSTANTS',...
         'ConnectedDist','CellPhenotypes','Log','ReplayEditActions',...
-        'FluorData', 'HaveFluor', 'ResegLinks','stains','stainColors', saveParam);
+        'FluorData', 'HaveFluor', 'ResegLinks','EditList','stains','stainColors', saveParam);
 end

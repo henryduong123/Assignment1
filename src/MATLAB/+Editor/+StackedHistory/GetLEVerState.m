@@ -1,6 +1,6 @@
 
 function histState = GetLEVerState()
-    global CellFamilies CellTracks HashedCells CellHulls Costs GraphEdits ResegLinks CachedCostMatrix ConnectedDist Figures CellPhenotypes SegmentationEdits ResegState MitosisEditStruct
+    global CellFamilies CellTracks HashedCells CellHulls Costs GraphEdits ResegLinks CachedCostMatrix ConnectedDist Figures CellPhenotypes SegmentationEdits ResegState MitosisEditStruct EditList
 
     histState.CellFamilies = CellFamilies;
     histState.CellTracks = CellTracks;
@@ -21,4 +21,5 @@ function histState = GetLEVerState()
     histState.ResegState = ResegState;
     histState.ResegLinks = ResegLinks;
     histState.MitosisEditStruct = MitosisEditStruct;
+    histState.EditList = EditList;
 end
