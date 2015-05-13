@@ -5,24 +5,11 @@ global CellFamilies CellTracks CellHulls Figures GraphEdits
 % CountEdits
 currentTree=Figures.tree.familyID;
 
-nHulls = 0;
-nMissingHulls=0;
-nSegmentationEdits=0;
-nTrackEdits=0;
+[famHulls nMissingHulls] = Families.GetAllHulls(currentTree);
+hx = GraphEdits(famHulls,famHulls);
 
-nTracks=length(CellFamilies(currentTree).tracks);
-for tid=1:nTracks
-    ID = CellFamilies(currentTree).tracks(tid);
-    
-    hulls =(CellTracks(ID).hulls);
-    nHulls=nHulls+length(find(hulls~=0));
-    
-    nMissingHulls=nMissingHulls+length(find(hulls==0));
-    hulls(hulls==0)=[];
-    
-%      nTrackEdits=nTrackEdits+ nnz(any(GraphEdits(hulls,:),1));
-    hx = GraphEdits(hulls,hulls);
-    nTrackEdits=nTrackEdits+ nnz(any(hx,1));
-    nSegmentationEdits=nSegmentationEdits+length(find([CellHulls(hulls).userEdited]~=0));
-    
+nTrackEdits = nnz(any(abs(hx)==1,2));
+nSegmentationEdits = nnz([CellHulls(famHulls).userEdited]~=0);
+nHulls = length(famHulls);
+
 end
