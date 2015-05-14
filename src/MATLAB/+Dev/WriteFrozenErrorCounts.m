@@ -2,31 +2,35 @@ function WriteFrozenErrorCounts(rootDir)
     flist = dir(fullfile(rootDir,'*.mat'));
 
     fid = fopen(fullfile(rootDir,'errorCounts.csv'),'wt');
-    fprintf(fid, 'Dataset, Clone ID, Hull Count, Missing Hulls, User Edits, Auto Edits, User Error %%, Total Error %%\n');
+    fprintf(fid, 'Dataset, Clone ID, Hull Count, Track Count, Missing Hulls, User Seg Edits, User Track, Auto Seg Edits, User Seg Error %%, User Track Error %%, Total Seg Error %%\n');
 
     for i=1:length(flist)
-        [datasetName, frozenTrees, hullCount, missingCount, userEdits, autoEdits] = datasetErrors(rootDir,flist(i).name);
+        [datasetName, frozenTrees, hullCount, trackCount, missingCount, userSegEdits, userTrackEdits, autoSegEdits] = datasetErrors(rootDir,flist(i).name);
         if ( isempty(frozenTrees) )
             continue;
         end
 
-        userPct = 100 * (userEdits ./ (2*hullCount - 1));
-        totalPct = 100 * ((userEdits + autoEdits) ./ (2*hullCount - 1));
+        userSegPct = 100 * (userSegEdits ./ hullCount);
+        userTrackPct = 100 * (userSegEdits ./ (hullCount-1));
+        totalSegPct = 100 * ((userSegEdits + autoSegEdits) ./ hullCount);
 
-        fprintf(fid,'%s, %d, %d, %d, %d, %d, %f%%, %f%%\n', datasetName, frozenTrees(1), hullCount(1), missingCount(1), userEdits(1), autoEdits(1),userPct(1),totalPct(1));
-        for j=2:length(frozenTrees)
-            fprintf(fid,'%s, %d, %d, %d, %d, %d, %f%%, %f%%\n', '', frozenTrees(j), hullCount(j), missingCount(j), userEdits(j), autoEdits(j),userPct(j),totalPct(j));
+        for j=1:length(frozenTrees)
+            fprintf(fid,'%s, %d, %d, %d, %d, %d, %d, %d, %f%%, %f%%, %f%%\n', datasetName, frozenTrees(j), hullCount(j), trackCount(j), missingCount(j), userSegEdits(j), userTrackEdits(j), autoSegEdits(j),userSegPct(j),userTrackPct(j), totalSegPct(j));
+            
+            datasetName = '';
         end
     end
 
     fclose(fid);
 end
 
-function [datasetName, frozenTrees, hullCount, missingCount, userEdits, autoEdits] = datasetErrors(rootDir,dataName)
+function [datasetName, frozenTrees, hullCount, trackCount, missingCount, userSegEdits, userTrackEdits, autoSegEdits] = datasetErrors(rootDir,dataName)
     hullCount = [];
+    trackCount = [];
     missingCount = [];
-    userEdits = [];
-    autoEdits = [];
+    userSegEdits = [];
+    autoSegEdits = [];
+    userTrackEdits = [];
 
     datasetName = '';
     load(fullfile(rootDir,dataName));
@@ -43,8 +47,10 @@ function [datasetName, frozenTrees, hullCount, missingCount, userEdits, autoEdit
 
         hullCount(i) = length(hullIDs);
         missingCount(i) = missingHulls;
+        trackCount(i) = length(CellFamilies(frozenTrees(i)).tracks);
 
-        userEdits(i) = Helper.GetFamilyEditCount(frozenTrees(i),1,0);
-        autoEdits(i) = Helper.GetFamilyEditCount(frozenTrees(i),0,1);
+        userSegEdits(i) = Helper.GetFamilySegEditCount(frozenTrees(i),1,0);
+        autoSegEdits(i) = Helper.GetFamilySegEditCount(frozenTrees(i),0,1);
+        userTrackEdits(i) = Helper.GetFamilyTrackEditCount(frozenTrees(i),0,1);
     end
 end
