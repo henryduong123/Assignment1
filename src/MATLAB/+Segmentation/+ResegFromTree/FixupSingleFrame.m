@@ -6,6 +6,10 @@ function newPreserveTracks = FixupSingleFrame(t, preserveTracks, tEnd, viewLims)
     
     preserveTracks = preserveTracks(~bFrozen);
     
+    if ( isempty(preserveTracks) )
+        return;
+    end
+    
     bInTracks = Helper.CheckInTracks(t, preserveTracks);
     if ( nnz(bInTracks) == 0 )
         return;

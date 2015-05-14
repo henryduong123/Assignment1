@@ -111,6 +111,19 @@ function bFinished = runReseg(hToolbar)
     bFinished = true;
 end
 
+function bValid = verifySelectedTree()
+    global ResegState Figures
+    bValid = false;
+    
+    if ( ResegState.primaryTree ~= Figures.tree.familyID )
+        msgbox('The selected lineage is not the lineage being resegmented!','Incorrect Tree', 'warning');
+
+        return;
+    end
+    
+    bValid = true;
+end
+
 function cleanupReseg(hToolbar)
     global Figures
     
@@ -125,6 +138,10 @@ end
 
 function playReseg(hToolbar)
     global ResegState
+    
+    if ( ~verifySelectedTree() )
+        return;
+    end
     
     setProcessingToolbarState(hToolbar);
 
@@ -207,6 +224,10 @@ function forwardReseg(src,evnt)
     end
     
     if ( ~bResegPaused )
+        return;
+    end
+    
+    if ( ~verifySelectedTree() )
         return;
     end
     

@@ -41,8 +41,6 @@ if ( familyID > length(CellFamilies) )
     return;
 end
 
-if(isempty(CellFamilies(familyID).tracks)),return,end
-
 %let the user know that this might take a while
 set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
@@ -58,6 +56,21 @@ if ( ~isfield(Figures.tree,'axesHandle') || ~Helper.ValidUIHandle(Figures.tree.a
         'XTick',    [],...
         'Box',      'off',...
         'DrawMode', 'fast');
+end
+
+% Used to indicate that the current viewing tree is NOT the current reseg tree.
+badResegColor = [1 0.8 0.8];
+if ( ~isempty(ResegState) && (ResegState.primaryTree ~= Figures.tree.familyID) )
+    set(Figures.tree.axesHandle, 'Color',badResegColor);
+    
+    xl = xlim(Figures.tree.axesHandle);
+    yl = ylim(Figures.tree.axesHandle);
+    text(xl(1),yl(1),'Selected tree is not being resegmented!', 'HorizontalAlignment','Left', 'VerticalAlignment','Top', 'Parent',Figures.tree.axesHandle);
+end
+
+% Leave current tree up if invalid tree selected
+if(isempty(CellFamilies(familyID).tracks))
+    return;
 end
 
 if ( ~UI.DrawPool.HasPool(Figures.tree.axesHandle) )
@@ -166,6 +179,15 @@ else
     
     set(Figures.tree.menuHandles.lockMenu, 'Enable','on');
     set(Figures.cells.menuHandles.lockMenu, 'Enable','on');
+end
+
+% Used to indicate that the current viewing tree is NOT the current reseg tree.
+if ( ~isempty(ResegState) && (ResegState.primaryTree ~= Figures.tree.familyID) )
+    set(Figures.tree.axesHandle, 'Color',badResegColor);
+    
+    xl = xlim(Figures.tree.axesHandle);
+    yl = ylim(Figures.tree.axesHandle);
+    text(xl(1),yl(1),' Selected tree is not being resegmented!', 'HorizontalAlignment','Left', 'VerticalAlignment','Top', 'Parent',Figures.tree.axesHandle);
 end
 
 zoom(Figures.tree.handle, 'reset');
