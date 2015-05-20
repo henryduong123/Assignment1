@@ -11,7 +11,7 @@ function WriteFrozenErrorCounts(rootDir)
         end
 
         userSegPct = 100 * (userSegEdits ./ hullCount);
-        userTrackPct = 100 * (userSegEdits ./ (hullCount-1));
+        userTrackPct = 100 * (userTrackEdits ./ (hullCount-1));
         totalSegPct = 100 * ((userSegEdits + autoSegEdits) ./ hullCount);
 
         for j=1:length(frozenTrees)
@@ -34,6 +34,7 @@ function [datasetName, frozenTrees, hullCount, trackCount, missingCount, userSeg
 
     datasetName = '';
     load(fullfile(rootDir,dataName));
+    Load.FixOldFileVersions();
 
     frozenTrees = find([CellFamilies.bFrozen] ~= 0);
     if ( isempty(frozenTrees) )
@@ -51,6 +52,6 @@ function [datasetName, frozenTrees, hullCount, trackCount, missingCount, userSeg
 
         userSegEdits(i) = Helper.GetFamilySegEditCount(frozenTrees(i),1,0);
         autoSegEdits(i) = Helper.GetFamilySegEditCount(frozenTrees(i),0,1);
-        userTrackEdits(i) = Helper.GetFamilyTrackEditCount(frozenTrees(i),0,1);
+        userTrackEdits(i) = Helper.GetFamilyTrackEditCount(frozenTrees(i),1,0);
     end
 end

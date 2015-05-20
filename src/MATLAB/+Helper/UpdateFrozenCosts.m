@@ -24,7 +24,7 @@ function UpdateFrozenCosts(treeID, bFrozen)
             childTracks = CellTracks(famTracks(i)).childrenTracks;
             if ( ~isempty(childTracks) )
                 childHull = CellTracks(childTracks(1)).hulls(1);
-                siblingHull = CellTracks(childTracks(1)).hulls(2);
+                siblingHull = CellTracks(childTracks(2)).hulls(1);
 
                 trackEdges = [trackEdges; trackHulls(end) childHull 1];
                 trackEdges = [trackEdges; trackHulls(end) siblingHull 2];
