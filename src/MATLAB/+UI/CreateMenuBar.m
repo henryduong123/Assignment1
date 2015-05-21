@@ -644,9 +644,11 @@ UI.DrawCells();
 end
 
 function sliceTree(src, evnt)
-    global Figures
+    global Figures CellFamilies
     
-    Editor.ReplayableEditAction(@Editor.SliceAtFrameAction, Figures.tree.familyID, Figures.time+1);
+    familyID = Figures.tree.familyID;
+    rootTrackID = CellFamilies(familyID).rootTrackID;
+    Editor.ReplayableEditAction(@Editor.SliceAtFrameAction, rootTrackID, Figures.time+1);
     
     UI.DrawTree(Figures.tree.familyID);
     UI.DrawCells();
