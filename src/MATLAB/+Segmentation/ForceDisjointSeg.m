@@ -36,6 +36,8 @@ function newHull = ForceDisjointSeg(hull, time, centerPt)
         if ( inpolygon(centerPt(1), centerPt(2), c(ch), r(ch)) )
             bCCPix = ismember(pix, CC.PixelIdxList{i});
             
+            newHull = hull;
+            
             newHull.indexPixels = CC.PixelIdxList{i};
             newHull.points = [c(ch) r(ch)];
             break;
