@@ -62,15 +62,6 @@ function errStatus = SegAndTrack()
     
     errStatus = '';
     switch CONSTANTS.cellType
-        case 'Hemato'
-            tic;
-            Segmentation.HematoSegmentation();
-            tSeg = toc;
-            tic;
-            Tracker.HematoTracker();
-            tTrack = toc;
-            errStatus = 0;
-            
         case 'Adult'
             [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
                 CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...

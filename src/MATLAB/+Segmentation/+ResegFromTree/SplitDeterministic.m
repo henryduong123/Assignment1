@@ -24,8 +24,6 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         kIdx = gmmCluster([c,r], k, oldMeans);
     elseif ( strcmpi(CONSTANTS.cellType,'Embryonic') )
         kIdx = gmmCluster([c,r], k, oldMeans);
-    elseif ( strcmpi(CONSTANTS.cellType,'Hemato') )
-        [kIdx centers] = kmeans([c,r], k, 'start',oldMeans, 'EmptyAction','drop');
     else
         [kIdx centers] = kmeans([c,r], k, 'start',oldMeans, 'EmptyAction','drop');
     end
