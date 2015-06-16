@@ -85,12 +85,6 @@ function CompileLEVer(forceVersion)
     
     newOutput = compileEXE('MTC', vsStruct, bindir);
     outputFiles = [outputFiles; {newOutput}];
-    
-    newOutput = compileEXE('HematoSeg', vsStruct, bindir);
-    outputFiles = [outputFiles; {newOutput}];
-    
-    newOutput = compileEXE('GrayScaleCrop', vsStruct, bindir);
-    outputFiles = [outputFiles; {newOutput}];
 
     [toolboxStruct externalStruct] = Dev.GetExternalDependencies();
     if ( ~isempty(externalStruct.deps) )
