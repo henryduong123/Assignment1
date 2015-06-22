@@ -41,10 +41,13 @@ function traverseTree(newFamilyID,trackID)
 %will add the tracks to the new family along the way
 global CellFamilies CellTracks
 
-Families.RemoveTrackFromFamily(trackID);
-%add track
-CellFamilies(newFamilyID).tracks = [CellFamilies(newFamilyID).tracks trackID];
-CellTracks(trackID).familyID = newFamilyID;
+curFamilyID = CellTracks(trackID).familyID;
+if ( newFamilyID ~= curFamilyID )
+    Families.RemoveTrackFromFamily(trackID);
+    %add track
+    CellFamilies(newFamilyID).tracks = [CellFamilies(newFamilyID).tracks trackID];
+    CellTracks(trackID).familyID = newFamilyID;
+end
    
 for i=1:length(CellTracks(trackID).childrenTracks)
     traverseTree(newFamilyID, CellTracks(trackID).childrenTracks(i));
