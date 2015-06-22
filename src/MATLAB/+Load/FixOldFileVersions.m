@@ -151,13 +151,13 @@ function bNeedsUpdate = FixOldFileVersions()
         CellHulls(emptyIdx(i)).userEdited = false;
     end
     
-    % Get rid of timer handle in Log
-    for i=1:length(Log)
-        if(isfield(Log(i),'figures'))
-            if(isfield(Log(i).figures,'advanceTimerHandle'))
-                Log(i).figures.advanceTimerHandle = [];
-            end
+    % Get rid of all figure related handles in Log
+    if(isfield(Log,'figures'))
+        for i=1:length(Log)
+            Log(i).frame = Log(i).figures.time;
         end
+        Log = rmfield(Log,'figures');
+        bNeedsUpdate = true;
     end
 end
 

@@ -95,13 +95,7 @@ Log(logEntry).stack = callstack;
 Log(logEntry).action = action;
 Log(logEntry).oldValue = oldValue;
 Log(logEntry).newValue = newValue;
-Log(logEntry).figures.time = figTime;
-if (isfield(Figures,'cells'))
-    Log(logEntry).figures.cells = Figures.cells;
-end
-if (isfield(Figures,'tree'))
-    Log(logEntry).figures.tree = Figures.tree;
-end
+Log(logEntry).frame = figTime;
 
 if ( ~exist(logFile,'file') )
     return;
@@ -128,7 +122,7 @@ global Log
 for i=1:length(Log)
     newRowString = [[num2str(Log(i).time(1)) '/' num2str(Log(i).time(2)) '/' num2str(Log(i).time(3))] ','...
         [num2str(Log(i).time(4)) ':' num2str(Log(i).time(5)) ':' num2str(round(Log(i).time(6)))] ',' Log(i).user ',,'...
-        Log(i).action ',' num2str(Log(i).figures.time) ','];
+        Log(i).action ',' num2str(Log(i).frame) ','];
     
     % This attempts to fix any character codes above 255, which generally
     % means that there's a Log Action which doesn't use num2str to convert
