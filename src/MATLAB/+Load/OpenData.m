@@ -153,11 +153,11 @@ switch answer
             goodLoad = 1;
         end
         
-        Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
-        
         Load.InitializeConstants();
         
         bUpdated = Load.FixOldFileVersions();
+        
+        Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
 
         if ( bUpdated )
             Load.AddConstant('version',softwareVersion,1);
