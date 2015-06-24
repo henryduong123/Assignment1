@@ -16,10 +16,11 @@ function bInTrack = CheckInTracks(t, tracks, bIncludeStart, bIncludeEnd)
     bAtStart = ([CellTracks(tracks).startTime] == t) & (bIncludeStart ~= 0);
     bAtEnd = ([CellTracks(tracks).endTime] == t) & (bIncludeEnd ~= 0);
     
-    bPastStart = ([CellTracks(tracks).startTime] < t) | bAtStart;
     bRootTracks = arrayfun(@(x)(isempty(x.parentTrack)), CellTracks(tracks));
+    bPastStart = ([CellTracks(tracks).startTime] < t) | (bAtStart & ~bRootTracks);
+    
     bLeafTracks = arrayfun(@(x)(isempty(x.childrenTracks)), CellTracks(tracks));
     bBeforeEnd = ([CellTracks(tracks).endTime] > t) | bAtEnd;
 
-    bInTrack = (bPastStart & (bBeforeEnd | bLeafTracks) & (~bAtStart & ~bRootTracks));
+    bInTrack = (bPastStart & (bBeforeEnd | bLeafTracks));
 end
