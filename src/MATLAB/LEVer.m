@@ -24,6 +24,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function LEVer(varargin)
+if (isdeployed())
+    Load.SetWorkingDir();
+end
 if ( nargin > 0 )
     if ( strcmpi(varargin{1}, '-v') )
         UI.about;
