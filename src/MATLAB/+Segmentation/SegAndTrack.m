@@ -32,11 +32,7 @@ function errStatus = SegAndTrack()
     % Modified 
     errStatus = 1;
     
-    if (exist('LEVerSettings.mat','file')~=0)
-            load('LEVerSettings.mat');
-    else
-        settings.matFilePath = '.\';
-    end
+    settings = Load.ReadSettings();
 
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
         [CONSTANTS.datasetName '_LEVer.mat']);
@@ -46,7 +42,7 @@ function errStatus = SegAndTrack()
     end
 
     % 
-    save('LEVerSettings.mat','settings');
+    Load.SaveSettings(settings);
     Load.AddConstant('matFullFile',[settings.matFilePath settings.matFile],1);
     
     numProcessors = getenv('Number_of_processors');

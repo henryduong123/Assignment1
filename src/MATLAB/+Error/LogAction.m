@@ -32,8 +32,8 @@ function LogAction(action,oldValue,newValue,callstack)
 global Figures CONSTANTS Log
 time = clock;%[year month day hour minute seconds]
 
-if (exist('LEVerSettings.mat','file')~=0)
-	load('LEVerSettings.mat');
+settings = Load.ReadSettings();
+if ( ~isempty(settings.matFilePath) )
     logPath = settings.matFilePath;
     logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
 elseif ( isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile) )
