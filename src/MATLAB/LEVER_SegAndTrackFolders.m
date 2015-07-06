@@ -6,8 +6,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
-function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
-global CONSTANTS;
+function LEVER_SegAndTrackFolders(outputDir, datasetPrefix, maxProcessors)
+global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
 
@@ -25,6 +25,10 @@ if ( ~directory_name ),return,end
 
 if ( ~exist('outputDir','var') )
     outputDir = directory_name;
+end
+
+if ( ~exist('datasetPrefix','var') )
+    datasetPrefix = '';
 end
 
 % Trial run command
@@ -70,7 +74,7 @@ for dirIdx=1:length(dirList)
     end
         
     CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
-    CONSTANTS.datasetName = [dirList(dirIdx).name '_'];
+    CONSTANTS.datasetName = [datasetPrefix dirList(dirIdx).name '_'];
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
@@ -78,7 +82,6 @@ for dirIdx=1:length(dirList)
         continue
     end
     
-    Load.InitializeConstants();
     Load.AddConstant('version',softwareVersion,1);
     
     fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
@@ -93,13 +96,15 @@ for dirIdx=1:length(dirList)
     end
     
     CONSTANTS.imageNamePattern = namePattern;
-    if ( ~strcmpi(firstimfile, Helper.GetImageName(1)) )
+    if ( ~strcmpi(firstimfile, Helper.GetImageName(1,1)) )
         fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', CONSTANTS.datasetName);
         continue;
     end
     
+    Load.InitializeConstants();
+
     if ( ~bTrialRun )
-        segArgs = getCellTypeSegParams(CONSTANTS.cellType);
+        segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
         if ( ~isempty(errStatus) )
             fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', CONSTANTS.datasetName);
@@ -111,6 +116,9 @@ for dirIdx=1:length(dirList)
             
             continue;
         end
+        
+        % Initialize cell phenotype structure in all cases.
+        CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{[0 0 0;.549 .28235 .6235;0 1 1]});
 
         Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 
