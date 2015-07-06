@@ -57,7 +57,7 @@ function errStatus = SegAndTrack()
     % (see e.g. HematoSeg.exe)
     
     errStatus = '';
-    segArgs = getCellTypeSegParams(CONSTANTS.cellType);
+    segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
     [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
     
     if ( ~isempty(errStatus) )
@@ -85,11 +85,4 @@ function errStatus = SegAndTrack()
     Editor.ReplayableEditAction(@Editor.OriginAction, 1);
     
     Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
-end
-
-function segArgs = getCellTypeSegParams(cellType)
-    segArgs = {};
-    
-    typeParams = Load.GetCellTypeParameters(cellType);
-    segArgs = {typeParams.segRoutine.params.default};
 end
