@@ -69,7 +69,7 @@ function bNeedsUpdate = FixOldFileVersions()
     end
 
     % Calculate connected-component distance for all cell hulls (out 2 frames)
-    if ( ~Load.CheckFileVersionString('4.3') || isempty(ConnectedDist) )
+    if ( ~Load.FileVersionGreaterOrEqual('4.3') || isempty(ConnectedDist) )
         fprintf('\nBuilding Cell Distance Information...\n');
         ConnectedDist = [];
         Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
@@ -79,7 +79,7 @@ function bNeedsUpdate = FixOldFileVersions()
     
     % Remove CellTracks.phenotype field and use it to create hullPhenoSet
     % instead
-    if ( ~Load.CheckFileVersionString('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
+    if ( ~Load.FileVersionGreaterOrEqual('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
         fprintf('\nConverting Phenotype information...\n');
         Load.UpdatePhenotypeInfo();
         fprintf('Finished\n');

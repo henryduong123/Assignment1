@@ -1,4 +1,4 @@
-% CheckFileVersionString.m - Checks if the version string in a LEVer file
+% FileVersionGreaterOrEqual.m - Checks if the version string in a LEVer file
 % is greater than or equal to the current LEVer version.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function bGreatOrEqual = CheckFileVersionString(minVersion)
+function bGreatOrEqual = FileVersionGreaterOrEqual(minVerString)
     global CONSTANTS
     
     bGreatOrEqual = 0;
@@ -33,8 +33,19 @@ function bGreatOrEqual = CheckFileVersionString(minVersion)
         return;
     end
     
+    numTok = regexp(minVerString, '(\d+)\.(\d+(?:\.\d+)?).*', 'tokens', 'once');
+    if ( isempty(numTok) )
+        return;
+    end
+    
+    minVersion = parseVerString(minVerString);
+    fileVersion = parseVerString(CONSTANTS.version);
+    if ( isempty(minVersion) || isempty(fileVersion) )
+        return;
+    end
+    
     % Sorts entries, if CONSTANTS.version is >= minVersion, then order will start with entry 1.
-    [dump,order] = sort({minVersion,CONSTANTS.version});
+    [dump,order] = sortrows([minVersion; fileVersion]);
     
     if ( order(1) ~= 1 )
         return;
@@ -42,3 +53,15 @@ function bGreatOrEqual = CheckFileVersionString(minVersion)
     
     bGreatOrEqual = 1;
 end
+
+function versionVec = parseVerString(verString)
+    versionVec = [];
+    
+    numTok = regexp(verString, '(\d+)\.(\d+(?:\.\d+)?).*', 'tokens', 'once');
+    if ( isempty(numTok) )
+        return;
+    end
+    
+    versionVec = [str2double(numTok{1}) str2double(numTok{2})];
+end
+
