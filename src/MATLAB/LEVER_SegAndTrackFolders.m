@@ -13,6 +13,8 @@ CONSTANTS=[];
 
 softwareVersion = Helper.GetVersion();
 
+Load.SetWorkingDir();
+
 cellType = Load.QueryCellType();
 Load.AddConstant('cellType',cellType,1);
 
