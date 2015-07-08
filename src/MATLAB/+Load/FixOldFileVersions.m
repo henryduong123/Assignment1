@@ -69,7 +69,7 @@ function bNeedsUpdate = FixOldFileVersions()
     end
 
     % Calculate connected-component distance for all cell hulls (out 2 frames)
-    if ( ~Load.CheckFileVersionString('4.3') || isempty(ConnectedDist) )
+    if ( ~Load.FileVersionGreaterOrEqual('4.3') || isempty(ConnectedDist) )
         fprintf('\nBuilding Cell Distance Information...\n');
         ConnectedDist = [];
         Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
@@ -79,7 +79,7 @@ function bNeedsUpdate = FixOldFileVersions()
     
     % Remove CellTracks.phenotype field and use it to create hullPhenoSet
     % instead
-    if ( ~Load.CheckFileVersionString('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
+    if ( ~Load.FileVersionGreaterOrEqual('5.0') || (~isfield(CellPhenotypes,'hullPhenoSet') && isfield(CellTracks,'phenotype') && isfield(CellTracks,'timeOfDeath')) )
         fprintf('\nConverting Phenotype information...\n');
         Load.UpdatePhenotypeInfo();
         fprintf('Finished\n');
@@ -140,9 +140,9 @@ function bNeedsUpdate = FixOldFileVersions()
     bNeedsUpdate = (bNeedsUpdate || bFamilyUpdate);
     
     % Make sure that CellHulls userEdited, deleted, greenInd
-    % are all "logical". Also, CellFamilies.bLocked/bCompleted
+    % are all "logical". Also, CellFamilies.bLocked/bCompleted/bFrozen
     CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
-    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted');
+    CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted', 'bFrozen');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);
     emptyIdx = find(bEmptyHulls);
@@ -151,13 +151,13 @@ function bNeedsUpdate = FixOldFileVersions()
         CellHulls(emptyIdx(i)).userEdited = false;
     end
     
-    % Get rid of timer handle in Log
-    for i=1:length(Log)
-        if(isfield(Log(i),'figures'))
-            if(isfield(Log(i).figures,'advanceTimerHandle'))
-                Log(i).figures.advanceTimerHandle = [];
-            end
+    % Get rid of all figure related handles in Log
+    if(isfield(Log,'figures'))
+        for i=1:length(Log)
+            Log(i).frame = Log(i).figures.time;
         end
+        Log = rmfield(Log,'figures');
+        bNeedsUpdate = true;
     end
 end
 

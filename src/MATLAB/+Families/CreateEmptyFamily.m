@@ -12,6 +12,7 @@ function familyID = CreateEmptyFamily()
         CellFamilies(familyID).(strFieldNames{i}) = [];
     end
     CellFamilies(familyID).bLocked = false;
+    CellFamilies(familyID).bFrozen = false;
     CellFamilies(familyID).bCompleted = false;
     CellFamilies(familyID).correctedTime = 0;
 end

@@ -49,19 +49,7 @@ else
 end
     
 %Settings is used for open file dialog to remember last location
-if (exist('LEVerSettings.mat','file'))
-    load('LEVerSettings.mat');
-else
-    settings.imagePath = '.\';
-    settings.matFilePath = '.\';
-    settings.matFile = '*.mat';
-end
-
-if (~isfield(settings,'matFilePath'))
-    settings.matFilePath = '.\';
-end
-
-save('LEVerSettings.mat','settings');
+settings = Load.ReadSettings();
 
 goodLoad = 0;
 opened = 0;
@@ -100,7 +88,7 @@ switch answer
         if (~Helper.ImageFileDialog())
             return;
         end
-        load('LEVerSettings.mat');
+        settings = Load.ReadSettings();
         
         Load.AddConstant('version',softwareVersion,1);
         Load.AddConstant('cellType', [], 1);
@@ -133,7 +121,7 @@ switch answer
                 end
             end
             
-            save('LEVerSettings.mat','settings');
+            Load.SaveSettings(settings);
             
             Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
@@ -153,11 +141,11 @@ switch answer
             goodLoad = 1;
         end
         
-        Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
-        
         Load.InitializeConstants();
         
         bUpdated = Load.FixOldFileVersions();
+        
+        Error.LogAction(['Opened file ' CONSTANTS.matFullFile]);
 
         if ( bUpdated )
             Load.AddConstant('version',softwareVersion,1);

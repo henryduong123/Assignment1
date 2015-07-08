@@ -86,6 +86,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     end
     
     addedHull = Hulls.SetHullEntries(0, newHull);
+    Editor.LogEdit('Add', [], addedHull, false);
     
     nextHulls = [nextHulls addedHull];
     costMatrix = [costMatrix chkCosts];

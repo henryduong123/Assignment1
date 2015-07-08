@@ -132,7 +132,7 @@ end
 function mergeSelectedCells()
     global Figures
     
-    [bErr deletedCells replaceCell] = Editor.ReplayableEditAction(@Editor.MergeCells, Figures.cells.selectedHulls);
+    [bErr deletedCells replaceCell] = Editor.ReplayableEditAction(@Editor.MergeCellsAction, Figures.cells.selectedHulls, Figures.tree.familyID);
     if ( bErr )
         return;
     end

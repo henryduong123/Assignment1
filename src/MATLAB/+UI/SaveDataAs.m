@@ -33,11 +33,7 @@ end
 
 bSaved = false;
 
-if (exist('LEVerSettings.mat','file')~=0)
-    load('LEVerSettings.mat');
-else
-    settings.matFilePath = '.\';
-end
+settings = Load.ReadSettings();
 
 time = clock;
 fprintf('Choose a folder to save current data...\n');
@@ -65,7 +61,6 @@ else
     return
 end
 
-save('LEVerSettings.mat','settings');
-
+Load.SaveSettings(settings);
 Error.LogAction(['Saved As: ' settings.matFile]);
 end

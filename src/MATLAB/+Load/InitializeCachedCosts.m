@@ -2,7 +2,7 @@
 % Initialize CachedCostMatrix from current Costs and GraphEdits
 
 function InitializeCachedCosts(bForceInitialize)
-    global Costs GraphEdits CellHulls CachedCostMatrix
+    global Costs GraphEdits CellHulls CachedCostMatrix CellFamilies
     
     if ( ~bForceInitialize && (size(CachedCostMatrix,1) == size(Costs,1)) )
         return;
@@ -45,6 +45,12 @@ function InitializeCachedCosts(bForceInitialize)
     end
     for i=1:length(r)
         CachedCostMatrix(r(i),c(i)) = eps * GraphEdits(r(i),c(i));
+    end
+    
+    % Update cached costs for frozen tree hulls
+    frozenTrees = find([CellFamilies.bFrozen] > 0);
+    for i=1:length(frozenTrees)
+        Helper.UpdateFrozenCosts(frozenTrees(i),true);
     end
 end
 

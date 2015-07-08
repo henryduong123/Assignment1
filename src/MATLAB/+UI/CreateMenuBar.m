@@ -151,6 +151,14 @@ mitosisMenu = uimenu(...
     'Callback',         @mitosisEditor,...
     'Enable',           'on');
 
+sliceMenu = uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Stop tree here',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @sliceTree,...
+    'Separator',        'on',...
+    'Enable',           'on');
+
 lockMenu = uimenu(...
     'Parent',           editMenu,...
     'Label',            'Lock Tree',...
@@ -160,6 +168,16 @@ lockMenu = uimenu(...
     'Enable',           'on',...
     'Checked',          'off',...
     'Accelerator',      'u');
+
+freezeMenu = uimenu(...
+    'Parent',           editMenu,...
+    'Label',            'Freeze Tree',...
+    'HandleVisibility', 'callback', ...
+    'Callback',         @toggleTreeFrozen,...
+    'Separator',        'off',...
+    'Enable',           'on',...
+    'Checked',          'off',...
+    'Accelerator',      'r');
     
 
 labelsMenu = uimenu(...
@@ -287,6 +305,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.cells.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
+    Figures.cells.menuHandles.freezeMenu = freezeMenu;
     Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
     Figures.cells.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.cells.menuHandles.learnEditsMenu = learnEditsMenu;
@@ -303,6 +322,7 @@ else
     Figures.tree.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.tree.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
+    Figures.tree.menuHandles.freezeMenu = freezeMenu;
     Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
     Figures.tree.menuHandles.structOnlyMenu = structOnlyMenu;
 %     Figures.tree.menuHandles.learnEditsMenu = learnEditsMenu;
@@ -623,11 +643,30 @@ UI.DrawTree(CellTracks(answer).familyID);
 UI.DrawCells();
 end
 
+function sliceTree(src, evnt)
+    global Figures CellFamilies
+    
+    familyID = Figures.tree.familyID;
+    rootTrackID = CellFamilies(familyID).rootTrackID;
+    Editor.ReplayableEditAction(@Editor.SliceAtFrameAction, rootTrackID, Figures.time+1);
+    
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
+end
+
 function toggleTreeLock(src, evnt)
     global Figures
     
     Editor.ReplayableEditAction(@Editor.TreeLockAction, Figures.tree.familyID);
     UI.DrawTree(Figures.tree.familyID);
+end
+
+function toggleTreeFrozen(src, evnt)
+    global Figures
+    
+    Editor.ReplayableEditAction(@Editor.TreeFreezeAction, Figures.tree.familyID);
+    UI.DrawTree(Figures.tree.familyID);
+    UI.DrawCells();
 end
 
 function treeInference(src, evt)

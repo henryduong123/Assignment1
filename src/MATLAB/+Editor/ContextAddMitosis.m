@@ -60,8 +60,8 @@ bAffectsLocked = [bParentLock bChildrenLock];
 if ( ~bCanAdd )
     lockedTracks = [trackID siblingTrack leftChildTrack];
     lockedTracks = lockedTracks(bAffectsLocked);
-
-    lockedList = unique([CellTracks(lockedTracks).rootTrackID]);
+    
+    lockedList = unique(lockedTracks);
 
     resp = questdlg(['This edit may add or remove multiple unintended mitosis events from the locked tree(s): ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Breaking Locked Tree', 'Continue', 'Cancel', 'Cancel');
     if ( strcmpi(resp,'Cancel') )

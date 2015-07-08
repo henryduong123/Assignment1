@@ -1,7 +1,7 @@
 function ClearAllGlobals()
 global CellFamilies CellTracks HashedCells CONSTANTS CellHulls Costs GraphEdits
 global CachedCostMatrix ConnectedDist CellPhenotypes SegmentationEdits ReplayEditActions
-global ResegState ResegLinks MitosisEditStruct
+global ResegState ResegLinks MitosisEditStruct EditList
 
 CellFamilies = [];
 CellTracks  = [];
@@ -19,4 +19,5 @@ ResegState = [];
 ResegLinks = [];
 
 MitosisEditStruct = [];
+EditList = [];
 end

@@ -3,7 +3,7 @@
 % costs up to date.
 
 function UpdateCachedCosts(fromHulls, toHulls)
-    global CellHulls Costs GraphEdits CachedCostMatrix
+    global CellFamilies CellTracks CellHulls Costs GraphEdits CachedCostMatrix
     
     % Add any graphedited hulls to from/to list
     toHulls = union(toHulls, find(any(GraphEdits(fromHulls,:)~=0, 1)));
@@ -12,6 +12,16 @@ function UpdateCachedCosts(fromHulls, toHulls)
     % Don't mess with deleted edges
     fromHulls = fromHulls(~[CellHulls(fromHulls).deleted]);
     toHulls = toHulls(~[CellHulls(toHulls).deleted]);
+    
+    % Ignore frozen hulls
+    bFrozenFam = ([CellFamilies.bFrozen]);
+    frozenTracks = [CellFamilies(bFrozenFam).tracks];
+    chkHulls = [CellTracks(frozenTracks).hulls];
+    frozenHulls = chkHulls(chkHulls>0);
+    
+    fromHulls = setdiff(fromHulls,frozenHulls);
+    toHulls = setdiff(toHulls,frozenHulls);
+    
     
     % Update CachedCostMatrix
     fromMap = zeros(1,size(Costs,1));

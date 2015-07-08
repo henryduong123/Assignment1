@@ -191,14 +191,31 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
             'LineStyle',        colorStruct.edgeStyle,...
             'LineWidth',        colorStruct.edgeWidth);
         
+        % Plot light-blue border if frozen track
+        if ( Helper.CheckTreeFrozen(curTrackID) )
+            if (Figures.tree.familyID == CellTracks(curTrackID).familyID )
+                drawExpandedHull(curAx, CellHulls(curHullID).points, 1, ...
+                    [0.75 0.85 1.0],colorStruct.edgeStyle,colorStruct.edgeWidth);
+            else
+                plot(curAx, CellHulls(curHullID).points(:,1),...
+                    CellHulls(curHullID).points(:,2),...
+                    'Color',            [0.75 0.85 1.0],...
+                    'UserData',         curTrackID,...
+                    'uicontextmenu',    Figures.cells.contextMenuHandle,...
+                    'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt,curHullID))),...
+                    'LineStyle',        colorStruct.edgeStyle,...
+                    'LineWidth',        colorStruct.edgeWidth);
+            end
+        end
+        
         % Show bright selected cell outline
         if ( ~isempty(MitosisEditStruct) && isfield(MitosisEditStruct,'selectedTrackID') )
             if ( ~isempty(MitosisEditStruct.selectedTrackID) && (MitosisEditStruct.selectedTrackID == curTrackID) )
                 hullPoints = CellHulls(curHullID).points;
                 if ( size(hullPoints,1) == 1 )
-                    drawExpandedHull(curAx, hullPoints, CONSTANTS.pointClickMargin);
+                    drawExpandedHull(curAx, hullPoints, CONSTANTS.pointClickMargin, 'r','--',2);
                 else
-                    drawExpandedHull(curAx, hullPoints, 1);
+                    drawExpandedHull(curAx, hullPoints, 1, 'r','--',2);
                 end
             end
         end
@@ -258,15 +275,15 @@ Figures.cells.axesHandle = curAx;
 drawnow();
 end
 
-function drawExpandedHull(curAx, hullPoints, expandRadius)
-    expandPoints = Helper.MakeExpandedCVHull(hullPoints, expandRadius);
-    if ( isempty(expandPoints) )
-        rectangle('Parent',curAx, 'Curvature',[1 1], 'EdgeColor','r', 'LineStyle','--' ,'LineWidth',2,...
-                  'Position',[hullPoints(1,1)-expandRadius hullPoints(1,2)-expandRadius 2*expandRadius 2*expandRadius]);
-        return;
-    end
-    
-    plot(curAx, expandPoints(:,1), expandPoints(:,2), '--r','LineWidth',2);
+function drawExpandedHull(curAx, hullPoints, expandRadius, color,style,width)
+expandPoints = Helper.MakeExpandedCVHull(hullPoints, expandRadius);
+if ( isempty(expandPoints) )
+    rectangle('Parent',curAx, 'Curvature',[1 1], 'EdgeColor',color, 'LineStyle',style ,'LineWidth',width,...
+        'Position',[hullPoints(1,1)-expandRadius hullPoints(1,2)-expandRadius 2*expandRadius 2*expandRadius]);
+    return;
+end
+
+plot(curAx, expandPoints(:,1), expandPoints(:,2), style,'Color',color, 'LineWidth',width);
 end
 
 function tracksDrawn = drawSiblingsLine(curAx, trackID,hullID)

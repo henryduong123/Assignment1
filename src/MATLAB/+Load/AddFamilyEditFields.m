@@ -29,6 +29,11 @@ function bNeedsUpdate = AddFamilyEditFields()
         CellFamilies = addDefaultField(CellFamilies, 'editInfo', struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0}));
         bNeedsUpdate = true;
     end
+    
+    if ( ~isfield(CellFamilies, 'bFrozen') )
+        CellFamilies = addDefaultField(CellFamilies, 'bFrozen', false);
+        bNeedsUpdate = true;
+    end
 end
 
 function outStruct = addDefaultField(inStruct, fieldName, defaultVal)

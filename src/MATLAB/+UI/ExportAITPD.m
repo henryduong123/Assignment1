@@ -110,7 +110,7 @@ global CONSTANTS
 
 success = 0;
 
-load('LEVerSettings.mat');
+settings = Load.ReadSettings();
 [file,filePath,filterIndex] = uiputfile([settings.matFilePath '*.txt'],'Save data',...
         [CONSTANTS.datasetName '_AITPD.txt']);
 if(filterIndex<1),return,end

@@ -27,12 +27,7 @@ function SaveData(orginal)
 
 global CONSTANTS Figures
 
-if (exist('LEVerSettings.mat','file')~=0)
-        load('LEVerSettings.mat');
-else
-    settings.matFilePath = '.\';
-end
-
+settings = Load.ReadSettings();
 %let the user know that this might take a while
 if(isfield(Figures,'tree') && isfield(Figures.tree,'handle'))
     set(Figures.tree.handle,'Pointer','watch');

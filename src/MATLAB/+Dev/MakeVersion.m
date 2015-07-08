@@ -51,7 +51,7 @@ function verInfo = MakeVersion(bTransientUpdate, forceVersion)
     % Get version info from git tag
     if ( ~isempty(verTag) )
         verTag = strtrim(verTag);
-        numTok = regexp(verTag, '[Vv]([0-9]+)[.]([0-9]+(?:[.][0-9])?).*', 'tokens', 'once');
+        numTok = regexp(verTag, '[Vv](\d+)\.(\d+(?:\.\d+)?).*', 'tokens', 'once');
         if ( length(numTok) >= 2 )
             verInfo.majorVersion = str2double(numTok{1});
             verInfo.minorVersion = str2double(numTok{2});

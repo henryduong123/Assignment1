@@ -1,7 +1,7 @@
 function bOpened = ImageFileDialog()
 global CONSTANTS
 
-load('LEVerSettings.mat');
+settings = Load.ReadSettings();
 
 if ~isfield(settings,'imagePathFl')
     settings.imagePathFl = settings.imagePath;
@@ -59,5 +59,5 @@ while ( ~bOpened )
     bOpened = 1;
 end
 
-save('LEVerSettings.mat','settings');
+Load.SaveSettings(settings);
 end

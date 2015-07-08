@@ -63,6 +63,8 @@ function GraphEditSetEdge(trackID, nextTrackID, time, bLongDistance)
         return;
     end
     
+    Editor.LogEdit('SetEdge', trackHull,nextHull,true);
+    
     GraphEdits(trackHull,:) = 0;
     GraphEdits(:,nextHull) = 0;
     

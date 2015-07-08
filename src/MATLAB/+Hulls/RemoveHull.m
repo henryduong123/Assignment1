@@ -38,4 +38,5 @@ if(isempty(trackID)),return,end
 droppedTracks = Tracks.RemoveHullFromTrack(hullID);
 
 Hulls.ClearHull(hullID);
+Editor.LogEdit('Delete', hullID,[],true);
 end

@@ -65,7 +65,7 @@ for i=1:length(trackMetrics)
         num2str(trackMetrics(i).meanIntesity) ',' num2str(trackMetrics(i).standardDeviationIntesity) '\n'];
 end
 
-load('LEVerSettings.mat');
+settings = Load.ReadSettings();
 file = fopen([settings.matFilePath CONSTANTS.datasetName '_metrics.csv'],'w');
 if(file==-1)
     warndlg(['The file ' settings.matFilePath CONSTANTS.datasetName '_metrics.csv might be opened.  Please close and try again.']);

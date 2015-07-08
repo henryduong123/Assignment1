@@ -36,6 +36,8 @@ function GraphEditAddMitosis(trackID, siblingTrackID, time)
         return;
     end
     
+    Editor.LogEdit('Mitosis',parentHull,[childHull siblingHull],true);
+    
     GraphEdits(parentHull,:) = 0;
     GraphEdits(:,childHull) = 0;
     GraphEdits(:,siblingHull) = 0;
