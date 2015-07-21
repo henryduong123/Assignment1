@@ -68,11 +68,6 @@ for dirIdx=1:length(dirList)
         continue
     end
  
-    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
-    if ( isempty(fileList) )
-        continue
-    end
-        
     CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
     CONSTANTS.datasetName = [datasetPrefix dirList(dirIdx).name '_'];
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
@@ -82,6 +77,11 @@ for dirIdx=1:length(dirList)
         continue
     end
     
+    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
+    if ( isempty(fileList) )
+        continue
+    end
+
     Load.AddConstant('version',softwareVersion,1);
     
     fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
