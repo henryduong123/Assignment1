@@ -180,6 +180,8 @@ function hulls = FrameSegmentor_Adult(chanIm, t, imageAlpha)
         newHull.points = [c(ch),r(ch)];
         newHull.indexPixels = pix;
         
-        newHull.tag = 'darkInterior';
+        newHull.tag = 'brightnterior';
+        
+        hulls = [hulls newHull];
     end
 end
