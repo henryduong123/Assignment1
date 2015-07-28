@@ -57,6 +57,8 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
         costMatrix(mitChkIdx,childIdx) = 1;
     end
     
+    maxAllowedOverlapDist = 2.0;
+    
     bAddedHull = false(size(checkHulls,1),1);
     % TODO: This probably doesn't work very well
     % Try to add hulls 
@@ -73,7 +75,7 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
         overlapDist = Segmentation.ResegFromTree.GetLongOverlapDist(checkHulls(i), nextHulls);
         minOverlap = min(overlapDist);
         
-        if ( minOverlap < 2.0 )
+        if ( minOverlap < maxAllowedOverlapDist )
             continue;
         end
         
@@ -124,7 +126,7 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
         for j=1:desiredCellCount(splitIdx(i))
             chkDist(j) = Segmentation.ResegFromTree.GetLongOverlapDist(desirers{splitIdx(i)}(j), nextHulls(splitIdx(i)));
             bIsMitParent = any(desirers{splitIdx(i)}(j) == mitosisParents);
-            if ( chkDist(j) < 2.0 || bIsMitParent )
+            if ( chkDist(j) < maxAllowedOverlapDist || bIsMitParent )
                 validSplitCount = validSplitCount + 1;
                 validDesirers = [validDesirers desirers{splitIdx(i)}(j)];
             end
