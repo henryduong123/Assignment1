@@ -62,7 +62,6 @@ else
     return;
 end
 
-Tracker.UpdateHematoFluor(Figures.time);
 UI.DrawTree(Figures.tree.familyID);
 UI.DrawCells();
 end

@@ -87,7 +87,6 @@ function ContextChangeLabel(time,trackID)
     end
 
     newTrackID = Hulls.GetTrackID(curHull);
-    Tracker.UpdateHematoFluor(time);
     UI.DrawTree(CellTracks(newTrackID).familyID);
     UI.DrawCells();
 end

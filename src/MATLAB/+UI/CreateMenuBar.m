@@ -225,13 +225,6 @@ imageMenu = uimenu(...
     'Checked',          'on',...
     'Accelerator',      'i');
 
-fluorMenu = uimenu(...
-    'Parent',           viewMenu,...
-    'Label',            'Show Fluorescence',...
-    'HandleVisibility', 'callback',...
-    'Callback',         @toggleFluor,...
-    'Checked',          'on');
-
 resegStatusMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Show Reseg Status',...
@@ -301,7 +294,6 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.playMenu = playMenu;
     Figures.cells.menuHandles.siblingsMenu = siblingsMenu;
     Figures.cells.menuHandles.imageMenu = imageMenu;
-    Figures.cells.menuHandles.fluorMenu = fluorMenu;
     Figures.cells.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.cells.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
@@ -318,7 +310,6 @@ else
     Figures.tree.menuHandles.playMenu = playMenu;
     Figures.tree.menuHandles.siblingsMenu = siblingsMenu;
     Figures.tree.menuHandles.imageMenu = imageMenu;
-    Figures.tree.menuHandles.fluorMenu = fluorMenu;
     Figures.tree.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.tree.menuHandles.missingCellsMenu = missingCellsMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
@@ -566,19 +557,6 @@ if(strcmp(get(Figures.cells.menuHandles.imageMenu, 'Checked'), 'on'))
 else
     set(Figures.cells.menuHandles.imageMenu, 'Checked', 'on');
     set(Figures.tree.menuHandles.imageMenu, 'Checked', 'on');
-    UI.DrawCells();
-end
-end
-
-function toggleFluor(src,evnt)
-global Figures
-if(strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'), 'on'))
-    set(Figures.cells.menuHandles.fluorMenu, 'Checked', 'off');
-    set(Figures.tree.menuHandles.fluorMenu, 'Checked', 'off');
-    UI.DrawCells();
-else
-    set(Figures.cells.menuHandles.fluorMenu, 'Checked', 'on');
-    set(Figures.tree.menuHandles.fluorMenu, 'Checked', 'on');
     UI.DrawCells();
 end
 end

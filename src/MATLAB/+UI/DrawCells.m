@@ -30,16 +30,10 @@
 
 function DrawCells()
 
-global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData MitosisEditStruct
+global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS MitosisEditStruct
 
 % figure(Figures.cells.handle);
-if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
-    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
-    haveFluor = 0;
-else
-    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
-    haveFluor = 1;
-end
+set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
 
 % Missing Cells Counter
 missingCells = UI.CellCountDifference();
@@ -111,12 +105,6 @@ if ( strcmpi(Figures.cells.editMode, 'mitosis') )
     drawHullFilter = [drawHullFilter{:}];
 end
 
-% draw fluor background for this cell
-if(haveFluor && strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on'))
-    [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
-    plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
-end
-
 if ( (Figures.time == length(HashedCells)) )
     drawStainInfo(curAx);
 end
@@ -167,16 +155,6 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if(Figures.cells.showInterior)
             [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
             plot(curAx, c, r, '.', 'Color',colorStruct.edge);
-        end
-        
-        %flor marker exists
-        if(strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on') && isfield(CellHulls(curHullID),'greenInd') && ~isempty(CellHulls(curHullID).greenInd))
-            edgeColor = 'g';
-            drawStyle = '--';
-            drawWidth = 2;
-%            [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
-%            [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
-%            plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
         end
         
         %draw outline

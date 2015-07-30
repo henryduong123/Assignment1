@@ -139,9 +139,9 @@ function bNeedsUpdate = FixOldFileVersions()
     bFamilyUpdate = Load.AddFamilyEditFields();
     bNeedsUpdate = (bNeedsUpdate || bFamilyUpdate);
     
-    % Make sure that CellHulls userEdited, deleted, greenInd
+    % Make sure that CellHulls userEdited, deleted
     % are all "logical". Also, CellFamilies.bLocked/bCompleted/bFrozen
-    CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
+    CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted');
     CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted', 'bFrozen');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);

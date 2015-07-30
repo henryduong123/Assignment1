@@ -25,7 +25,7 @@
 
 function DrawTree(familyID, endTime)
 
-global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState FluorData
+global CellFamilies CellTracks HashedCells Figures CellPhenotypes ResegState
 
 if ( ~exist('endTime','var') )
     endTime = length(HashedCells);
@@ -211,25 +211,7 @@ for i=1:length(hasPhenos)
     set(hPheno,'DisplayName',CellPhenotypes.descriptions{hasPhenos(i)});
 end
 
-% draw ticks to indicate which times have fluorescence
-bFluorOn = cellfun(@(x)(~isempty(x)), FluorData);
-fluorTimes = any(bFluorOn,2);
-
 pdelta = pixelDelta(Figures.tree.axesHandle);
-x_lim = xlim;
-% xlim = get(Figures.tree.axesHandle,'XLim');
-% tickLen = (xlim(2) - xlim(1)) * 0.01;
-for i=1:length(fluorTimes)
-%    line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
-    line([x_lim(2)-10*pdelta x_lim(2)], [fluorTimes(i) fluorTimes(i)],...
-    'color', 'green',...
-    'linewidth', 1);
-end
-
-for i=1:length(sortedTracks)
-    drawFluorMarkers(sortedTracks(i), trackMap(sortedTracks(i)).xCenter, 4*pdelta);
-end
-
 showResegStatus = get(Figures.cells.menuHandles.resegStatusMenu, 'Checked');
 if ( strcmpi(showResegStatus, 'on') )
     trackStruct = values(trackMap);
@@ -535,60 +517,6 @@ function [sortedTracks bFamHasPheno] = simpleTraverseTree(trackID, xVal, trackMa
     trackMap(trackID) = struct('xCenter',{xCenter}, 'xSmallBox',{[xSmallMin xSmallMax]}, 'xBox',{[xMin xMax]}, 'yBox',[yMin yMax]);
 end
 
-function drawFluorMarkers(trackID, xVal, delta)
-global CellTracks;
-
-if (~isfield(CellTracks, 'markerTimes'))
-    return;
-end
-
-ct = CellTracks(trackID);
-len = size(ct.markerTimes, 2);
-
-if (len == 0)
-    return;
-end
-
-% if fluor on in first frame, draw marker from startTime to first frame
-if (ct.markerTimes(1,1) > ct.startTime)
-    if (ct.markerTimes(2,1) > 0)
-        drawVertFluor(trackID, xVal, ct.startTime, ct.markerTimes(1,1), delta);
-        state = 1;
-    else
-        state = 0;
-    end
-else
-    state = -1;
-end
-
-% if fluor is on for a frame, draw marker until next fluor frame
-for i=1:len - 1
-    if (ct.markerTimes(2,i) > 0)
-        drawVertFluor(trackID, xVal, ct.markerTimes(1,i), ct.markerTimes(1,i+1), delta);
-        if (state == 0)
-            drawHorzFluor(trackID, xVal, ct.markerTimes(1, i), 'g');
-        end
-        state = 1;
-    elseif (state == 1)
-        drawHorzFluor(trackID, xVal, ct.markerTimes(1, i), 'k');
-        state = 0;
-    end
-end
-
-% if fluor is on for last frame, draw marker until endTime
-if (ct.markerTimes(1, len) < ct.endTime)
-    if (ct.markerTimes(2,len) > 0)
-        drawVertFluor(trackID, xVal, ct.markerTimes(1, len), ct.endTime, delta);
-        if (state == 0)
-            drawHorzFluor(trackID, xVal, ct.markerTimes(1, len), 'g');
-        end
-    elseif (state == 1)
-        drawHorzFluor(trackID, xVal, ct.markerTimes(1, len), 'k');
-    end
-end
-
-end
-
 % how far is 1 pixel in normalized units?
 function [deltaX deltaY] = pixelDelta(axHandle)
 
@@ -603,39 +531,4 @@ deltaY = y_lim(2) / pos(4);
 
 set(axHandle, 'units', 'normalized');
 
-end
-
-function drawVertFluor(trackID, x, yMin, yMax, delta)
-global Figures;
-
-plot([x+delta x+delta], [yMin yMax],...
-    '-g','LineWidth',1,...
-    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-end
-
-function drawVertLostFluor(trackID, x, yMin, yMax)
-global Figures;
-
-plot([x x], [yMin yMax],...
-    '-r','LineWidth',3,...
-    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-plot([x x], [yMin yMax],...
-    'xr','LineWidth',11,...
-    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
-end
-
-function drawHorzFluor(trackID, x, y, colorspec)
-global Figures;
-
-% xlim = get(Figures.tree.axesHandle,'XLim');
-% tickLen = (xlim(2) - xlim(1)) * 0.01;
-tickLen = 0.4;
-
-%xlim = get(Figures.tree.axesHandle,'XLim');
-%tickLen = (xlim(2) - xlim(1)) * 0.01;
-%line([xlim(2)-tickLen xlim(2)], [fluorTimes(i) fluorTimes(i)],...
-
-plot([x-tickLen x+tickLen], [y y],...
-    ['-' colorspec],'LineWidth',1,...
-    'UserData',trackID,'uicontextmenu',Figures.tree.contextMenuHandle);
 end
