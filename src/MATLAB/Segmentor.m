@@ -129,9 +129,9 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     
     segArgs = [];
     
-    procID = 1;
+    procArgs.procID = 1;
     if ( ~isempty(argCell) )
-       procID = convertArg(argCell{1}, procArgTypes{1});
+       procArgs.procID = convertArg(argCell{1}, procArgTypes{1});
     end
     errFilename = ['.\segmentationData\err_' num2str(procArgs.procID) '.log'];
     
@@ -156,21 +156,7 @@ function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
     % available, and what algorithm to use.
     typeIdx = findSupportedTypeIdx(procArgs.cellType, supportedCellTypes);
     
-%    segArgCell = argCell{length(procArgFields)+1:end};
-    segArgCell = {};
-    k = 1;
-    for i = length(procArgFields)+1:length(argCell)
-        tmp = argCell{i};
-        if iscell(tmp)
-            for j=1:length(tmp)
-                segArgCell{k} = tmp{j};
-                k = k +1;
-            end
-        else
-            segArgCell{k} = tmp;
-            k = k + 1;
-        end
-    end
+    segArgCell = argCell(length(procArgFields)+1:end);
     segArgFields = {supportedCellTypes(typeIdx).segRoutine.params.name};
     segArgTypes = cell(1,length(segArgFields));
     [segArgTypes{:}] = deal('double');
