@@ -1,4 +1,4 @@
-function [objs features levels] = AdultFrameSegmentor(im, t, imageAlpha)
+function [objs features levels] = FrameSegmentor_Adult(im, t, imageAlpha)
     objs = [];
     features = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});

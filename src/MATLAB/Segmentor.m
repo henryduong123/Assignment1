@@ -39,10 +39,10 @@ if ( isempty(argStruct) )
     return;
 end
 
-if ( exist(fullfile('+Segmentation',[argStruct.cellType 'FrameSegmentor']), 'file') )
-    segFunc = str2func(['Segmentation.' argStruct.cellType 'FrameSegmentor']);
+if ( exist(fullfile('+Segmentation',['FrameSegmentor_' argStruct.cellType]), 'file') )
+    segFunc = str2func(['Segmentation.FrameSegmentor_' argStruct.cellType]);
 else
-    fprintf(['WARNING: Could not find Segmentation.' argStruct.cellType 'FrameSegmentor() using default segmentation routine\n']);
+    fprintf(['WARNING: Could not find Segmentation.FrameSegmentor_' argStruct.cellType ' () using default FrameSegmentor() segmentation routine\n']);
     segFunc = @Segmentation.FrameSegmentor;
 end
 

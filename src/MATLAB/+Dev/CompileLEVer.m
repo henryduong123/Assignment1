@@ -207,7 +207,7 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
         extrasList = {};
     end
     extrasList = vertcat({'LEVER_logo.tif';
-                          '+Segmentation\*FrameSegmentor.m';
+                          '+Segmentation\FrameSegmentor_*.m';
                           '+Helper\GetVersion.m';
                           '+Helper\VersionInfo.m'}, extrasList);
     

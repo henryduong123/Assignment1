@@ -1,4 +1,4 @@
-function [objs features levels] = EmbryonicFrameSegmentor(im, t, imageAlpha)
+function [objs features levels] = FrameSegmentor_Embryonic(im, t, imageAlpha)
     objs = [];
     features = [];
     levels = struct('haloLevel',{0}, 'igLevel',{0});
