@@ -125,7 +125,17 @@ switch answer
             
             Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
-            if ( ~isfield(CONSTANTS,'imageNamePattern') || isempty(Helper.LoadPrimaryIntensityImage(1)) )
+            bQueryImageDir = false;
+            if ( ~isfield(CONSTANTS,'imageNamePattern') )
+                bQueryImageDir = true;
+            elseif ( ~isfield(CONSTANTS,'channelOrder') )
+                [numChans numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder,CONSTANTS.imageNamePattern);
+                bQueryImageDir = (numFrames == 0);
+            else
+                bQueryImageDir = isempty(Helper.LoadPrimaryIntensityImage(1));
+            end
+            
+            if ( bQueryImageDir )
                 if (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return

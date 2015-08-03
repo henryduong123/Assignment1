@@ -4,31 +4,43 @@ function [numChannels numFrames] = GetImListInfo(rootFolder, namePattern)
     
     % Generate a directory list glob from namePattern as well as a
     % tokenized set for creating a regexp to match channel and frame numbers
-    dirPattern = regexprep(namePattern, '(.*)_c%\d+d_t%\d+d(.+)', '$1_c*_t*$2');
-    filePattern = regexp(namePattern, '(.*)_c%0(\d+)d_t%0(\d+)d(.+)', 'tokens', 'once');
-    if ( isempty(filePattern) )
+    [prefixString paramTokens postfixString] = Helper.SplitNamePattern(namePattern);
+    if ( isempty(prefixString) )
         return;
     end
+    
+    paramGlobs = cellfun(@(x)(['_' x{1} '*']),paramTokens, 'UniformOutput',0);
+    dirPattern = [prefixString paramGlobs{:}  postfixString];
     
     flist = dir(fullfile(rootFolder,dirPattern));
     if ( isempty(flist) )
         return;
     end
     
-    matchPrefix = regexptranslate('escape', filePattern{1});
-    matchPostfix = regexptranslate('escape', filePattern{4});
-    chanDigits = filePattern{2};
-    frameDigits = filePattern{3};
+    matchPrefix = regexptranslate('escape', prefixString);
+    matchPostfix = regexptranslate('escape', postfixString);
+    paramPatterns = cellfun(@(x)(['_' x{1} '(\d{' x{2} '})']),paramTokens, 'UniformOutput',0);
     
-    matchPattern = [matchPrefix '_c(\d{' chanDigits '})_t(\d{' frameDigits '})' matchPostfix];
+    matchPattern = [matchPrefix paramPatterns{:} matchPostfix];
     
     fileNames = {flist.name};
-    
     matchTok = regexpi(fileNames, matchPattern, 'tokens','once');
     
-    times = cellfun(@(x)(str2double(x{2})), matchTok);
-    chans = cellfun(@(x)(str2double(x{1})), matchTok);
+    paramOrder = cellfun(@(x)(x{1}),paramTokens, 'UniformOutput',0);
+    assumedParams = {'c' 't' 'z'};
+    [bHasParam,paramIdx] = ismember(assumedParams, paramOrder);
     
-    numChannels = max(chans);
-    numFrames = max(times);
+    numChannels = 1;
+    numFrames = 1;
+    numZStack = 1;
+    
+    if ( bHasParam(1) )
+        chans = cellfun(@(x)(str2double(x{paramIdx(1)})), matchTok);
+        numChannels = max(chans);
+    end
+    
+    if ( bHasParam(2) )
+        times = cellfun(@(x)(str2double(x{paramIdx(2)})), matchTok);
+        numFrames = max(times);
+    end
 end

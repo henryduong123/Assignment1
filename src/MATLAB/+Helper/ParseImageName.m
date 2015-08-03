@@ -4,18 +4,29 @@ function [datasetName namePattern] = ParseImageName(imageName)
     datasetName = '';
     namePattern = '';
     
+    supportedPatterns = {%'^(.+)_(c\d+)_(t\d+)_(z\d+)(.*)$';
+                         '^(.+)_(c\d+)_(t\d+)(.*)$';
+                         '^(.+)_(t\d+)(.*)$'};
+    
     [filePath fileName fileExt] = fileparts(imageName);
-    matchTok = regexpi(fileName, '^(.+_)c(\d+)_t(\d+)(.*)$', 'tokens', 'once');
-    if ( isempty(matchTok) )
-        return;
+    for i=1:length(supportedPatterns)
+        matchTok = regexpi(fileName, supportedPatterns{i}, 'tokens', 'once');
+        if ( isempty(matchTok) )
+            continue;
+        end
+        
+        paramPatternSet = '';
+        for j=2:length(matchTok)-1
+            numDigits = length(matchTok{j})-1;
+            paramPattern = ['_' matchTok{j}(1) '%0' num2str(numDigits) 'd'];
+            
+            paramPatternSet = [paramPatternSet paramPattern];
+        end
+        
+        patternPostfix = [matchTok{end} fileExt];
+        
+        datasetName = [matchTok{1} '_'];
+        namePattern = [matchTok{1} paramPatternSet patternPostfix];
+        break;
     end
-    
-    chanStr = matchTok{2};
-    timeStr = matchTok{3};
-    
-    chanDigits = length(chanStr);
-    timeDigits = length(timeStr);
-    
-    datasetName = matchTok{1};
-    namePattern = [datasetName 'c%0' num2str(chanDigits) 'd_t%0' num2str(timeDigits) 'd' matchTok{4} fileExt];
 end
