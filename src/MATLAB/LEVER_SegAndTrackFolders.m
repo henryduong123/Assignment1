@@ -13,7 +13,9 @@ CONSTANTS=[];
 
 softwareVersion = Helper.GetVersion();
 
-Load.SetWorkingDir();
+if (isdeployed())
+    Load.SetWorkingDir();
+end
 
 cellType = Load.QueryCellType();
 Load.AddConstant('cellType',cellType,1);
