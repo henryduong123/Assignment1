@@ -6,7 +6,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
-function LEVER_SegAndTrackFolders(outputDir, datasetPrefix, maxProcessors)
+function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
 global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
@@ -25,10 +25,6 @@ if ( ~directory_name ),return,end
 
 if ( ~exist('outputDir','var') )
     outputDir = directory_name;
-end
-
-if ( ~exist('datasetPrefix','var') )
-    datasetPrefix = '';
 end
 
 % Trial run command
@@ -63,13 +59,25 @@ bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
 dirList = dirList(bValidDir);
 
 for dirIdx=1:length(dirList)
-    
     if ( ~(dirList(dirIdx).isdir) )
         continue
     end
+    
+    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
+    if ( isempty(validStartFilename) )
+        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
+        continue;
+    end
+    
+    [datasetName namePattern] = Helper.ParseImageName(validStartFilename);
+    if ( isempty(datasetName) )
+        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
+        continue;
+    end
  
     CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
-    CONSTANTS.datasetName = [datasetPrefix dirList(dirIdx).name '_'];
+    CONSTANTS.datasetName = datasetName;
+    CONSTANTS.imageNamePattern = namePattern;
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
@@ -87,20 +95,6 @@ for dirIdx=1:length(dirList)
     fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
     
     tic
-    % Get image significant digits
-    firstimfile = fileList(1).name;
-    [datasetName namePattern] = Helper.ParseImageName(firstimfile);
-    if ( isempty(datasetName) )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', CONSTANTS.datasetName);
-        continue;
-    end
-    
-    CONSTANTS.imageNamePattern = namePattern;
-    if ( ~strcmpi(firstimfile, Helper.GetImageName(1,1)) )
-        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', CONSTANTS.datasetName);
-        continue;
-    end
-    
     Load.InitializeConstants();
 
     if ( ~bTrialRun )
@@ -129,4 +123,27 @@ for dirIdx=1:length(dirList)
 end %dd
 
 clear global;
+end
+
+% This function tries to quickly find one or more files that qualify as an
+% initial image frame for parsing dataset names, etc. Returns the first
+% file name found
+function filename = getValidStartFileName(chkPath)
+    filename = '';
+    
+    flist = [];
+    chkDigits = 7:-1:2;
+    for i=1:length(chkDigits)
+        digitStr = ['%0' num2str(chkDigits(i)) 'd'];
+        flist = dir(fullfile(chkPath,['*_t' num2str(1,digitStr) '*.tif']));
+        if ( ~isempty(flist) )
+            break;
+        end
+    end
+    
+    if ( isempty(flist) )
+        return;
+    end
+    
+    filename = flist(1).name;
 end
