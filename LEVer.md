@@ -1,19 +1,27 @@
-# **LEVer**
-## **_Linaging, Editing and Validation (https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master) program. http://bioimage.coe.drexel.edu_**
+# **LEVER**
+## **_Linaging, Editing and Validation
+
+ (https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master) program. http://bioimage.coe.drexel.edu_**
 
 Lever was developed by Drexel University's bioimage lab under the direction of Dr. Andrew Cohen. For more information on our lab click [here](http://bioimage.coe.drexel.edu/info/).
 
-## **Implimentation of Segmentation Algorithms**
-![alt text](MarkDownImages/CellsWindow.PNG)
-Allows users to segment images using a range analysis algorithms developed in MATLAB 
-
-## **Multitemporial tracking and Lineaging of cells**
-![alt text](MarkDownImages/LineageTree.PNG)
-Results of the segmentation can be tracked in order to observe cellular behavior over time and across various cell cycles
+## **Download Instructions**
 
 ## **How to Use**
-Users must run LEVer on a set of Tiffs named using the convention [Experiment Indenfier]_c[channel number]_t[frame number]_z[z value]. Example is SZV_c02_t0034_Z0001 for the second channel, 34th frame and 1 image of the SZV experment image stack.
 
+#### **File Naming**
+Users must run LEVer on a set of Tiffs named using the convention {Experiment Indenfier}_c{channel number}_t{frame number}_z{z value}.
+
+Example SZV_c02_t0034_Z0001 for the second channel, 34th frame and 1 image of the SZV experment image stack.
+
+## **Key Features**
+#### **Implimentation of Segmentation Algorithms**
+![alt text](MarkDownImages/CellsWindow.png)
+Allows users to segment images using a range analysis algorithms developed in MATLAB
+
+#### **Multitemporial tracking and Lineaging of cells**
+![alt text](MarkDownImages/LineageTree.png)
+Results of the segmentation can be tracked in order to observe cellular behavior over time and across various cell cycles
 
 ## **License**
 Copyright 2015 Andrew Cohen
