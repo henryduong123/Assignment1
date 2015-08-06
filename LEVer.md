@@ -1,5 +1,5 @@
 # **LEVER**
-## **_Linaging, Editing and Validation
+## **Linaging, Editing and Validation**
 
  (https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master) program. http://bioimage.coe.drexel.edu_**
 
@@ -7,21 +7,34 @@ Lever was developed by Drexel University's bioimage lab under the direction of D
 
 ## **Download Instructions**
 
-## **How to Use**
+1. Open https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master
+2. Select Download zip in the top right
+3. Select Documents/MATLAB as destination (recommended)
 
-#### **File Naming**
-Users must run LEVer on a set of Tiffs named using the convention {Experiment Indenfier}_c{channel number}_t{frame number}_z{z value}.
+## **Usage Instructions**
 
-Example SZV_c02_t0034_Z0001 for the second channel, 34th frame and 1 image of the SZV experment image stack.
+1. Open MATLAB and set current directory to Documents/MATLAB/LEVER/SRC/MATLAB
+2. Run LEVER.m
+3. Chose 'Segment and Track'
+4. Select the first tiff image of the dataset following the convention discussed below
+5. Chose the correct Segmentation Algorithm and wait for Segmentation and Tracking
+6. Run 'Edit/Resegment Tree From Here' to begin The User Assisted Track Correction Protocol
+7. Use 'File/Export Cell Metrics' to create XLS file or 'File/Export AVI' to download Image movie
+
+**File Naming**
+
+Users must run LEVER on a set of Tiffs named using the convention {Experiment Indenfier}_c{channel number}_t{frame number}_z{z value}.
+Example SZV_c02_t0034_Z0001 for the second channel, 34th frame and 1 image of the SZV experment dataset.
 
 ## **Key Features**
-#### **Implimentation of Segmentation Algorithms**
-![alt text](MarkDownImages/CellsWindow.png)
+#### **Implementation of Segmentation Algorithms**
 Allows users to segment images using a range analysis algorithms developed in MATLAB
+![alt text](MarkDownImages/CellsWindow.png)
+
 
 #### **Multitemporial tracking and Lineaging of cells**
-![alt text](MarkDownImages/LineageTree.png)
 Results of the segmentation can be tracked in order to observe cellular behavior over time and across various cell cycles
+![alt text](MarkDownImages/LineageTree.png)
 
 ## **License**
 Copyright 2015 Andrew Cohen
