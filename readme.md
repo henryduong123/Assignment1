@@ -22,14 +22,21 @@ Example: SZV_c02_t0034_Z0001 Designates the second channel, 34th frame and 1 ima
 
 **Running LEVer.m**
 1. Open MATLAB and set current directory to Documents/MATLAB/LEVER/SRC/MATLAB
+
   ![alt text](Docs/MarkDownImages/mFileinCurrent.png)
+
 2. Run LEVer in the command Window
+
 3. Chose 'Segment & Track'
+
   ![alt text](Docs/MarkDownImages/OLDorNEWdata.png)
+
 4. Select the first tiff image of the dataset following the convention discussed below
+
   ![alt text](Docs/MarkDownImages/OpenFirstData.png)
 
 5. Chose the correct Segmentation Algorithm that corresponds with the cell and microscopy type
+
   ![alt text](Docs/MarkDownImages/SelectCellType.png)
 
 6. Select the location for the .mat file where the data will be stored
