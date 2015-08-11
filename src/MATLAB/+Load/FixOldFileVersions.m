@@ -38,7 +38,7 @@ function bNeedsUpdate = FixOldFileVersions()
     
     % As of version 7.11, add tag field for CellHulls
     if ( ~isfield(CellHulls, 'tag') )
-        CellHulls.tag = '';
+        [CellHulls.tag] = deal('');
         bNeedsUpdate = true;
     end
     
