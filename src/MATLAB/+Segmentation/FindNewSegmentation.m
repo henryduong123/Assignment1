@@ -10,7 +10,7 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         
         % Search 5 levels in the range of each entry if we are searching.
         chkParams = resegRoutines(i).params;
-        paramList = recBuildParams([], chkParams);
+        paramList = buildParams(chkParams, bSearchParams);
         
         if ( isempty(paramList) )
             chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc,{});
@@ -18,7 +18,7 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         end
         
         for j=1:size(paramList)
-            paramArgs = mat2cell(paramList(j,:),1,1);
+            paramArgs = num2cell(paramList(j,:));
             chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
 
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
@@ -40,20 +40,27 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
     end
 end
 
-function paramList = recBuildParams(inList, chkParams)
-    paramList = inList;
+function paramList = buildParams(chkParams, bSearchParams)
+    paramList = [];
     
     if ( isempty(chkParams) )
         return;
     end
     
-    curParam = chkParams{1};
+    paramCell = {chkParams.value};
     
-    paramSet = curParam.value;
-    [X Y] = meshgrid(1:size(paramList,1), length(paramSet));
+    % Just use the first value from each parameter set if not searching.
+    if ( ~bSearchParams )
+        paramList = cellfun(@(x)(x(1)), paramCell);
+    end
     
-    paramList = [paramList(X(:)) paramSet(Y(:))];
-    paramList = recBuildParams(paramList, chkParams(2:end));
+    % Set up a grid of parameter combinations
+    paramGrid = cell(1,length(paramCell));
+    [paramGrid{:}] = ndgrid(paramCell{:});
+    
+    reshapeGrid = cellfun(@(x)(reshape(x,numel(x),1)), paramGrid, 'UniformOutput',0);
+    
+    paramList = [reshapeGrid{:}];
 end
 
 function hull = validIntersectHull(chkHulls, centerPt, overlapPoints)
