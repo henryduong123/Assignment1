@@ -2,5 +2,11 @@ function segArgs = GetCellTypeSegParams(cellType)
     segArgs = {};
     
     typeParams = Load.GetCellTypeParameters(cellType);
-    segArgs = {typeParams.segRoutine.params.default};
+    
+    segParams = {typeParams.segRoutine.params};
+    if ( isempty(segParams) )
+        return;
+    end
+    
+    segArgs = cellfun(@(x)(x.value(1)), segParams);
 end

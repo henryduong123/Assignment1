@@ -49,12 +49,7 @@ function paramList = recBuildParams(inList, chkParams)
     
     curParam = chkParams{1};
     
-    paramRange = curParam.range;
-    if ( isempty(paramRange) )
-        paramRange = [curParam.default curParam.default 1];
-    end
-    
-    paramSet = linspace(paramRange(1), paramRange(2), paramRange(3));
+    paramSet = curParam.value;
     [X Y] = meshgrid(1:size(paramList,1), length(paramSet));
     
     paramList = [paramList(X(:)) paramSet(Y(:))];
