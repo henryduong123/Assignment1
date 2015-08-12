@@ -31,44 +31,24 @@ function distance = SiblingDistance(cell1HullID,cell2HullID)
 
 global CellHulls CONSTANTS
 
+distance = Inf;
+
 if 0 == cell1HullID || 0 == cell2HullID
-    distance = Inf;
     return;
 end
 
 if CellHulls(cell1HullID).time ~= CellHulls(cell2HullID).time
-    distance = Inf;
     return
 end
 
-pixelsCell1 = CellHulls(cell1HullID).indexPixels;
-pixelsCell2 = CellHulls(cell2HullID).indexPixels;
+hullPerims = containers.Map('KeyType','uint32', 'ValueType','any');
 
-if (length(pixelsCell2) < length(pixelsCell1))
-    temp = pixelsCell2;
-    pixelsCell1 = pixelsCell2;
-    pixelsCell2 = temp;
-end
-
-[yCell1 xCell1] = ind2sub(CONSTANTS.imageSize,pixelsCell1);
-[yCell2 xCell2] = ind2sub(CONSTANTS.imageSize,pixelsCell2);
-
-minPixelDistance = Inf;
-
-for i=1:length(yCell1)
-    distanceSqr = (yCell2 - yCell1(i)).^2 + (xCell2-xCell1(i)).^2;
-    curMinDistance = sqrt(min(distanceSqr));
-    if(curMinDistance < minPixelDistance)
-        minPixelDistance = curMinDistance;
-    end
-end
-
+ccDist = Helper.CalcConnectedDistance(cell1HullID,cell2HullID, CONSTANTS.imageSize, hullPerims, CellHulls);
 distanceCenterOfMass = norm(CellHulls(cell1HullID).centerOfMass - CellHulls(cell2HullID).centerOfMass);
 
-distance = distanceCenterOfMass + 1000 * minPixelDistance;
-
-if(distanceCenterOfMass > CONSTANTS.maxCenterOfMassDistance ||...
-        minPixelDistance > CONSTANTS.maxPixelDistance)
-    distance = inf;
+if(distanceCenterOfMass > CONSTANTS.maxCenterOfMassDistance || ccDist > CONSTANTS.maxPixelDistance)
+    return;
 end
+
+distance = distanceCenterOfMass + 1000 * ccDist;
 end
