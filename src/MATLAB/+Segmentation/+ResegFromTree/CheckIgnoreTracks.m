@@ -1,6 +1,6 @@
 % Ignore edges on tracks that end with phenotype markings or are currently
 % outside view limits
-function [bIgnoreEdges bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
+function [bIgnoreEdges, bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
     global CellHulls
     
     bIgnoreEdges = false(length(trackIDs),1);
@@ -15,13 +15,13 @@ function [bIgnoreEdges bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
                 bLongEdges(i) = true;
             end
             
-            if ( ~checkCOMLims(prevHullID, viewLims) )
+            if ( ~checkHullCOMLims(prevHullID, viewLims) )
                 bIgnoreEdges(i) = true;
                 continue;
             end
         end
         
-        [phenotypes phenoHullIDs] = Tracks.GetAllTrackPhenotypes(curTrackID);
+        [phenotypes, phenoHullIDs] = Tracks.GetAllTrackPhenotypes(curTrackID);
         if ( isempty(phenotypes) )
             continue;
         end
@@ -40,7 +40,7 @@ function [bIgnoreEdges bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
     end
 end
 
-function bInLims = checkCOMLims(hullID, viewLims)
+function bInLims = checkHullCOMLims(hullID, viewLims)
     global CONSTANTS CellHulls
     
     if ( isempty(hullID) || hullID == 0 )
@@ -48,36 +48,23 @@ function bInLims = checkCOMLims(hullID, viewLims)
         return;
     end
     
-    lenX = viewLims(1,2)-viewLims(1,1);
-    lenY = viewLims(2,2)-viewLims(2,1);
-    
-    padXLeft = 0;
-    padXRight = 0;
-    padYTop = 0;
-    padYBottom = 0;
-    
+    lenDims = viewLims(:,2) - viewLims(:,1);
     padScale = 0.05;
     
-    if ( viewLims(1,1) >= 6 )
-        padXLeft = padScale*lenX;
-    end
+    imSize = CONSTANTS.imageSize;
+    imSize([1 2]) = imSize([2 1]);
     
-    if ( viewLims(1,2) <= (CONSTANTS.imageSize(2)-5) )
-        padXRight = padScale*lenX;
-    end
+    bNotEdgeMin = (viewLims(:,1) >= 1+5);
+    bNotEdgeMax = (viewLims(:,2) <= (imSize-5).');
     
-    if ( viewLims(2,1) >= 6 )
-        padYTop = padScale*lenY;
-    end
+    padInMin = bNotEdgeMin.*padScale.*lenDims;
+    padInMax = bNotEdgeMax.*padScale.*lenDims;
     
-    if ( viewLims(2,2) <= (CONSTANTS.imageSize(1)-5) )
-        padYBottom = padScale*lenY;
-    end
+    hullCOM = CellHulls(hullID).centerOfMass.';
+    hullCOM([1 2]) = hullCOM([2 1]);
     
-    hull = CellHulls(hullID);
-    bInX = ((hull.centerOfMass(2)>(viewLims(1,1)+padXLeft)) && (hull.centerOfMass(2)<(viewLims(1,2)-padXRight)));
-    bInY = ((hull.centerOfMass(1)>(viewLims(2,1)+padYTop)) && (hull.centerOfMass(1)<(viewLims(2,2)-padYBottom)));
+    bInDim = ((hullCOM > viewLims(:,1)+padInMin) & (hullCOM < viewLims(:,2)-padInMax));
     
-    bInLims = (bInX & bInY);
+    bInLims = all(bInDim);
 end
 
