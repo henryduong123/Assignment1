@@ -45,6 +45,7 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         chkHull = Segmentation.ForceDisjointSeg(chkHull, time, clickPt);
     end
     
+    % TODO: Update manual click hulls for 3D
     if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
         newHull.time = time;
@@ -57,8 +58,8 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         newHull.time = time;
         newHull.points = chkHull.points;
         
-        [r c] = ind2sub(CONSTANTS.imageSize, chkHull.indexPixels);
-        newHull.centerOfMass = mean([r c]);
+        coords = Helper.IndexToCoord(CONSTANTS.imageSize, chkHull.indexPixels);
+        newHull.centerOfMass = mean(coords, 1);
         newHull.indexPixels = chkHull.indexPixels;
         
         newHull.tag = chkHull.tag;

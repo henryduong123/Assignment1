@@ -26,56 +26,53 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function hulls = PartialImageSegment(chanImg, centerPt, subSize, segFunc, segArgs)
-    if ( length(subSize) < 2 )
-        subSize = [subSize(1) subSize(1)];
+    imDims = max(cellfun(@(x)(ndims(x)),chanImg));
+    if ( length(subSize) < imDims )
+        subSize = repmat(subSize(1), imDims);
     end
     
-    imSize = [0 0];
+    imSize = zeros(1,imDims);
     for c=1:length(chanImg)
         imSize = max([imSize; size(chanImg{c})],[],1);
     end
     
-    coordMin = floor([centerPt(1)-subSize(1)/2 centerPt(2)-subSize(2)/2]);
-    coordMin(coordMin < 1) = 1;
+    rcCoordMin = Helper.SwapXY_RC(floor(centerPt - subSize/2));
+    rcCoordMax = Helper.SwapXY_RC(ceil(centerPt + subSize/2));
     
-    coordMax = ceil([centerPt(1)+subSize(1)/2 centerPt(2)+subSize(2)/2]);
-    if ( coordMax(1) > imSize(2) )
-        coordMax(1) = imSize(2);
-    end
-    if ( coordMax(2) > imSize(1) )
-        coordMax(2) = imSize(1);
-    end
+    rcCoordMin(rcCoordMin < 1) = 1;
+    rcCoordMax(rcCoordMax > imSize) = imSize;
+    
+    rcCoordPts = arrayfun(@(x,y)([x:y]),rcCoordMin,rcCoordMax, 'UniformOutput',0);
     
     % Build the subimage to be segmented
-    subImSize = [0 0];
+    subImSize = zeros(1,imDims);
     chanSubImg = cell(1,length(chanImg));
     for c=1:length(chanImg)
         if ( isempty(chanImg{c}) )
             continue;
         end
         
-        chanSubImg{c} = chanImg{c}(coordMin(2):coordMax(2), coordMin(1):coordMax(1));
+        chanSubImg{c} = chanImg{c}(rcCoordPts{:});
         subImSize = max([subImSize; size(chanSubImg{c})],[],1);
     end
     
     localHulls = segFunc(chanSubImg, 1, segArgs{:});
     
-    hulls = fixupFromSubimage(coordMin, imSize, subImSize, localHulls);
+    hulls = fixupFromSubimage(rcCoordMin, imSize, subImSize, localHulls);
 end
 
-function newHulls = fixupFromSubimage(coordMin, origSize, subSize, hulls)
+function newHulls = fixupFromSubimage(rcCoordMin, origSize, subSize, hulls)
     newHulls = hulls;
     
-    xoffset = coordMin(1)-1;
-    yoffset = coordMin(2)-1;
-    
+    rcOffset = rcCoordMin - 1;
+    xyOffset = Helper.SwapXY_RC(rcOffset);
     for i=1:length(hulls)
-        newHulls(i).points = hulls(i).points + ones(size(hulls(i).points,1),1)*[xoffset yoffset];
-        newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, xoffset, yoffset);
+        newHulls(i).points = hulls(i).points + repmat(xyOffset, size(hulls(i).points,1),1);
+        newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
     end
 end
 
-function globidx = makeGlobalPix(locidx, globSz, locSz, xoffset, yoffset)
-    [locr locc] = ind2sub(locSz, locidx);
-    globidx = sub2ind(globSz, locr+yoffset, locc+xoffset);
+function globIdx = makeGlobalPix(locIdx, globSz, locSz, rcOffset)
+    globCoords = Helper.IndexToCoord(locSz, locIdx) + repmat(rcOffset, size(locCoords,1),1);
+    globIdx = Helper.CoordToIndex(globSz, globCoords);
 end
