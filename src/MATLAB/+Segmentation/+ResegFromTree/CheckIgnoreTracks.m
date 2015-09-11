@@ -40,7 +40,7 @@ function [bIgnoreEdges, bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
     end
 end
 
-function bInLims = checkHullCOMLims(hullID, viewLims)
+function bInLims = checkHullCOMLims(hullID, xyViewLims)
     global CONSTANTS CellHulls
     
     if ( isempty(hullID) || hullID == 0 )
@@ -48,22 +48,20 @@ function bInLims = checkHullCOMLims(hullID, viewLims)
         return;
     end
     
-    lenDims = viewLims(:,2) - viewLims(:,1);
+    lenDims = xyViewLims(:,2) - xyViewLims(:,1);
     padScale = 0.05;
     
-    imSize = CONSTANTS.imageSize;
-    imSize([1 2]) = imSize([2 1]);
+    imSize = Helper.SwapXY_RC(CONSTANTS.imageSize);
     
-    bNotEdgeMin = (viewLims(:,1) >= 1+5);
-    bNotEdgeMax = (viewLims(:,2) <= (imSize-5).');
+    bNotEdgeMin = (xyViewLims(:,1) >= 1+5);
+    bNotEdgeMax = (xyViewLims(:,2) <= (imSize-5).');
     
     padInMin = bNotEdgeMin.*padScale.*lenDims;
     padInMax = bNotEdgeMax.*padScale.*lenDims;
     
-    hullCOM = CellHulls(hullID).centerOfMass.';
-    hullCOM([1 2]) = hullCOM([2 1]);
+    hullCOM = Helper.SwapXY_RC(CellHulls(hullID).centerOfMass).';
     
-    bInDim = ((hullCOM > viewLims(:,1)+padInMin) & (hullCOM < viewLims(:,2)-padInMax));
+    bInDim = ((hullCOM > xyViewLims(:,1)+padInMin) & (hullCOM < xyViewLims(:,2)-padInMax));
     
     bInLims = all(bInDim);
 end

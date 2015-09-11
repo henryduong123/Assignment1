@@ -12,22 +12,21 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     oldMeans = zeros(k, Helper.GetNumberOfDimensions());
     for i=1:length(checkHullIDs)
         oldCoord = Helper.IndexToCoord(CONSTANTS.imageSize, CellHulls(checkHullIDs(i)).indexPixels);
-        oldCoord(:,[1 2]) = oldCoord(:,[2 1]);
-        oldMeans(i,:) = mean(oldCoord,1);
+        oldMeans(i,:) = Helper.SwapXY_RC(mean(oldCoord,1));
     end
     
     if ( length(hull.indexPixels) < 2 )
         return;
     end
     
-    coordinates = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
-    coordinates(:,[1 2]) = coordinates(:,[2 1]);
+    rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
+    xyCoords = Helper.SwapXY_RC(rcCoords);
     
     typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
     if ( typeParams.splitParams.useGMM )
-        kIdx = gmmCluster(coordinates, k, oldMeans);
+        kIdx = gmmCluster(xyCoords, k, oldMeans);
     else
-        kIdx = kmeans(coordinates, k, 'start',oldMeans, 'EmptyAction','drop');
+        kIdx = kmeans(xyCoords, k, 'start',oldMeans, 'EmptyAction','drop');
     end
     
     if ( any(isnan(kIdx)) )

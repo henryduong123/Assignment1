@@ -35,17 +35,17 @@ if ( ~exist('bUserEdit','var') )
 end
 
 % guassian clustering (x,y,...) coordinates of cell interior
-coordinates = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
-coordinates(:,[1 2]) = coordinates(:,[2 1]);
+rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
+xyCoords = Helper.SwapXY_RC(rcCoords);
 
 typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
 if ( typeParams.splitParams.useGMM )
     gmoptions = statset('Display','off', 'MaxIter',400);
     
-    obj = Helper.fitGMM(coordinates, k, 'Replicates',15, 'Options',gmoptions);
-    kIdx = cluster(obj, coordinates);
+    obj = Helper.fitGMM(xyCoords, k, 'Replicates',15, 'Options',gmoptions);
+    kIdx = cluster(obj, xyCoords);
 else
-    kIdx = kmeans(coordinates, k, 'Replicates',5, 'EmptyAction','drop');
+    kIdx = kmeans(xyCoords, k, 'Replicates',5, 'EmptyAction','drop');
 end
 
 if ( any(isnan(kIdx)) )
