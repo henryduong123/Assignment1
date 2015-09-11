@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
-    global CellHulls ConnectedDist
+    global CellHulls HashedCells ConnectedDist
 
     if ( ~exist('bUpdateIncoming', 'var') )
         bUpdateIncoming = 0;
@@ -53,82 +53,17 @@ function BuildConnectedDistance(updateCells, bUpdateIncoming, bShowProgress)
         ConnectedDist{updateCells(i)} = [];
         t = CellHulls(updateCells(i)).time;
         
-        UpdateDistances(updateCells(i), t, t+1, hullPerims);
-        UpdateDistances(updateCells(i), t, t+2, hullPerims);
+        ConnectedDist = Tracker.UpdateConnectedDistances(updateCells(i), t, t+1, hullPerims, ConnectedDist,CellHulls,HashedCells);
+        ConnectedDist = Tracker.UpdateConnectedDistances(updateCells(i), t, t+2, hullPerims, ConnectedDist,CellHulls,HashedCells);
         
         if ( bUpdateIncoming )
-            UpdateDistances(updateCells(i), t, t-1, hullPerims);
-            UpdateDistances(updateCells(i), t, t-2, hullPerims);
+            ConnectedDist = Tracker.UpdateConnectedDistances(updateCells(i), t, t-1, hullPerims, ConnectedDist,CellHulls,HashedCells);
+            ConnectedDist = Tracker.UpdateConnectedDistances(updateCells(i), t, t-2, hullPerims, ConnectedDist,CellHulls,HashedCells);
         end
     end
     
     if ( bShowProgress )
         UI.Progressbar(1);
-    end
-end
-
-function UpdateDistances(updateCell, t, tNext, hullPerims)
-    global CellHulls HashedCells CONSTANTS
-    
-    if ( tNext < 1 || tNext > length(HashedCells) )
-        return;
-    end
-    
-    tDist = abs(tNext-t);
-    ccMaxDist = CONSTANTS.dMaxConnectComponent;
-    if ( tDist > 1 )
-        ccMaxDist = 1.5*CONSTANTS.dMaxConnectComponent;
-    end
-    
-    nextCells = [HashedCells{tNext}.hullID];
-    
-    if ( isempty(nextCells) )
-        return;
-    end
-    
-    comDistSq = sum((ones(length(nextCells),1)*CellHulls(updateCell).centerOfMass - vertcat(CellHulls(nextCells).centerOfMass)).^2, 2);
-    
-    nextCells = nextCells(comDistSq <= ((tDist*CONSTANTS.dMaxCenterOfMass)^2));
-    
-    if ( isempty(nextCells) )
-        return;
-    end
-    
-    for i=1:length(nextCells)
-        ccDist = Helper.CalcConnectedDistance(updateCell,nextCells(i), CONSTANTS.imageSize, hullPerims, CellHulls);
-        
-        if ( ccDist > ccMaxDist )
-            continue;
-        end
-        
-        SetDistance(updateCell, nextCells(i), ccDist, tNext-t);
-    end
-end
-
-function SetDistance(updateCell, nextCell, dist, updateDir)
-    global ConnectedDist
-    
-    if ( updateDir > 0 )
-        ConnectedDist{updateCell} = [ConnectedDist{updateCell}; nextCell dist];
-        
-        % Sort hulls to match MEX code
-        [~, sortIdx] = sort(ConnectedDist{updateCell}(:,1));
-        ConnectedDist{updateCell} = ConnectedDist{updateCell}(sortIdx,:);
-    else
-        chgIdx = [];
-        if ( ~isempty(ConnectedDist{nextCell}) )
-            chgIdx = find(ConnectedDist{nextCell}(:,1) == updateCell, 1, 'first');
-        end
-        
-        if ( isempty(chgIdx) )
-            ConnectedDist{nextCell} = [ConnectedDist{nextCell}; updateCell dist];
-        else
-            ConnectedDist{nextCell}(chgIdx,:) = [updateCell dist];
-        end
-        
-        % Sort hulls to match MEX code
-        [~, sortIdx] = sort(ConnectedDist{nextCell}(:,1));
-        ConnectedDist{nextCell} = ConnectedDist{nextCell}(sortIdx,:);
     end
 end
 
