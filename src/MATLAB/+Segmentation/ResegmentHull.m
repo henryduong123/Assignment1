@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newHulls  = ResegmentHull(hull, k, bUserEdit, bKmeansInit)
+function newHulls  = ResegmentHull(hull, k, bUserEdit)
 
 global CONSTANTS CellHulls
 
@@ -34,33 +34,18 @@ if ( ~exist('bUserEdit','var') )
     bUserEdit = 0;
 end
 
-if (~exist('bKmeansInit', 'var'))
-    bKmeansInit = 0;
-end
+% guassian clustering (x,y,...) coordinates of cell interior
+coordinates = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
+coordinates(:,[1 2]) = coordinates(:,[2 1]);
 
-% guassian clustering (x,y) coordinates of cell interior
-[r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
-gmoptions = statset('Display','off', 'MaxIter',400);
-
-
-
-switch CONSTANTS.cellType
-    case 'Adult'
-        if(bKmeansInit)
-            %initialize GMM using kmeans result instead of randomly
-            % ~10x faster but ocassionally poor results - used for interactivity
-            [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
-            start = struct('mu', {centers}, 'Sigma', {repmat(eye(2,2), [1 1 k])},'PComponents',{(ones(1,k)/k)});
-            obj = Helper.fitGMM([c,r], k, 'Start',start, 'Options',gmoptions);
-        else
-            obj = Helper.fitGMM([c,r], k, 'Replicates',15, 'Options',gmoptions);
-        end
-        kIdx = cluster(obj, [c,r]);
-    case 'Embryonic'
-        obj = Helper.fitGMM([c,r], k, 'Replicates',15, 'Options',gmoptions);
-        kIdx = cluster(obj, [c,r]);
-    otherwise
-        [kIdx centers] = kmeans([c,r], k, 'Replicates',5, 'EmptyAction','drop');
+typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+if ( typeParams.splitParams.useGMM )
+    gmoptions = statset('Display','off', 'MaxIter',400);
+    
+    obj = Helper.fitGMM(coordinates, k, 'Replicates',15, 'Options',gmoptions);
+    kIdx = cluster(obj, coordinates);
+else
+    kIdx = kmeans(coordinates, k, 'Replicates',5, 'EmptyAction','drop');
 end
 
 if ( any(isnan(kIdx)) )
