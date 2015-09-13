@@ -32,37 +32,12 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     if ( any(isnan(kIdx)) )
         return;
     end
-
-    connComps = cell(1,k);
-
-    nh = Helper.MakeEmptyStruct(CellHulls);
+    
     for i=1:k
-        bIdxPix = (kIdx == i);
-
-        hx = c(bIdxPix);
-        hy = r(bIdxPix);
-
-        % If any sub-object is less than 15 pixels then cannot split this
-        % hull
-        if ( nnz(bIdxPix) < 15 )
-            newHulls = [];
-            return;
-        end
-
-        connComps{i} = hull.indexPixels(bIdxPix);
-
-        nh.indexPixels = hull.indexPixels(bIdxPix);
-        nh.centerOfMass = mean([hy hx]);
-        nh.time = hull.time;
-
-        chIdx = Helper.ConvexHull(hx,hy);
-        if ( isempty(chIdx) )
-            newHulls = [];
-            return;
-        end
-
-        nh.points = [hx(chIdx) hy(chIdx)];
-
+        newHullPixels = hull.indexPixels( kIdx==i );
+        
+        outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time);
+        
         newHulls = [newHulls nh];
     end
 
@@ -70,8 +45,6 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     % this gives a deterministic ordering to the components
     [sortCOM, sortIdx] = sortrows(vertcat(newHulls.centerOfMass));
     newHulls = newHulls(sortIdx);
-    connComps = connComps(sortIdx);
-    
 end
 
 function kIdx = gmmCluster(X, k, oldMeans)

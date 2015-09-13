@@ -25,7 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function newHulls  = ResegmentHull(hull, k, bUserEdit)
-
 global CONSTANTS CellHulls
 
 newHulls = [];
@@ -52,48 +51,17 @@ if ( any(isnan(kIdx)) )
     return;
 end
 
-connComps = cell(1,k);
-
-nh = Helper.MakeEmptyStruct(CellHulls);
-nh.userEdited = forceLogical(bUserEdit);
 for i=1:k
-    bIdxPix = (kIdx == i);
     
-    hx = c(bIdxPix);
-    hy = r(bIdxPix);
     
-    % If any sub-object is less than 15 pixels then cannot split this
-    % hull
-    if ( nnz(bIdxPix) < 15 )
-        newHulls = [];
-        return;
-    end
-    
-    connComps{i} = hull.indexPixels(bIdxPix);
-    
-    nh.indexPixels = hull.indexPixels(bIdxPix);
-    nh.centerOfMass = mean([hy hx]);
-    nh.time = hull.time;
-    
-    chIdx = Helper.ConvexHull(hx,hy);
-    if ( isempty(chIdx) )
-        newHulls = [];
-        return;
-    end
-    
-    nh.points = [hx(chIdx) hy(chIdx)];
-    
-    newHulls = [newHulls nh];
+    outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time, bUserEdit);
+    newHulls = [newHulls outputHull];
 end
 
 % Define an ordering on the hulls selected, COM is unique per component so
 % this gives a deterministic ordering to the components
 [sortCOM, sortIdx] = sortrows(vertcat(newHulls.centerOfMass));
 newHulls = newHulls(sortIdx);
-connComps = connComps(sortIdx);
-end
 
-function bValue = forceLogical(value)
-    bValue = (value ~= 0);
 end
 
