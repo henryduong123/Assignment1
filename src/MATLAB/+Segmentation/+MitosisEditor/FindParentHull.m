@@ -96,7 +96,7 @@ function newHullID = addPointHullEntry(chkPoint, time)
     img = Helper.LoadIntensityImage(filename);
     
     newHull = createNewHullStruct(x, y, time);
-    newHullID = Hulls.SetHullEntries(0, newHull);
+    newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHullID = addHullEntry(hull, time)
@@ -105,7 +105,7 @@ function newHullID = addHullEntry(hull, time)
     [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
-    newHullID = Hulls.SetHullEntries(0, newHull);
+    newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHull = createNewHullStruct(x,y, time)

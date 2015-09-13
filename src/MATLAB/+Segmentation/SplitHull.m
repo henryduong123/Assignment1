@@ -48,7 +48,7 @@ function newTrackIDs = SplitHull(hullID, k)
     setHullIDs = zeros(1,length(newHulls));
     setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
-    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
+    newHullIDs = Hulls.SetCellHullEntries(setHullIDs, newHulls);
     Editor.LogEdit('Split', hullID, newHullIDs, true);
 
     newTrackIDs = Tracker.TrackAddedHulls(newHullIDs, oldCOM);

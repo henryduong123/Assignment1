@@ -21,7 +21,7 @@ function childHulls = FindChildrenHulls(linePoints, time)
         setHullIDs = zeros(1,length(newHulls));
         setHullIDs(1) = childHulls(1);
         % Just arbitrarily assign clone's hull for now
-        childHulls = Hulls.SetHullEntries(setHullIDs, newHulls);
+        childHulls = Hulls.SetCellHullEntries(setHullIDs, newHulls);
     end
     
     childDist = getHullDistance(childHulls, linePoints);
@@ -235,7 +235,7 @@ function newHullID = addPointHullEntry(chkPoint, time)
     y = max(round(chkPoint(2)), 1);
     
     newHull = createNewHullStruct(x, y, time);
-    newHullID = Hulls.SetHullEntries(0, newHull);
+    newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHullID = addHullEntry(hull, time)
@@ -244,7 +244,7 @@ function newHullID = addHullEntry(hull, time)
     [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
-    newHullID = Hulls.SetHullEntries(0, newHull);
+    newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHull = createNewHullStruct(x,y, time)

@@ -1,11 +1,11 @@
-% [newHulls newFamilies] = SetHullEntries(setIDs, setObjs, newFeat)
+% [newHulls newFamilies] = SetCellHullEntries(setIDs, setObjs, newFeat)
 % Resets the CellHulls fields for cell IDs listed in setHull using the
 % setObj structure list. If an entry in setHullIDs is zero then a new hull
 % entry will be added with associated family/track structures.
 %
 % NOTE: This does not automatically update tracking information for hulls
 
-function [newHulls newFamilies] = SetHullEntries(setHullIDs, setObjs)
+function [newHulls newFamilies] = SetCellHullEntries(setHullIDs, setObjs)
     global CellHulls Costs GraphEdits ResegLinks CachedCostMatrix
     
     newHulls = [];

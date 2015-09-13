@@ -171,7 +171,7 @@ function [newHullIDs oldHull] = splitNextFrame(hullID, k)
     setHullIDs = zeros(1,length(newHulls));
     setHullIDs(1) = hullID;
     % Just arbitrarily assign clone's hull for now
-    newHullIDs = Hulls.SetHullEntries(setHullIDs, newHulls);
+    newHullIDs = Hulls.SetCellHullEntries(setHullIDs, newHulls);
     Editor.LogEdit('Split', hullID, setHullIDs, false);
 end
 
