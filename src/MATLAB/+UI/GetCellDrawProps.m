@@ -11,7 +11,7 @@ function colorStruct = GetCellDrawProps(trackID, hullID, drawString)
 	
 	bDrawOffTree = strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on');
 	
-    if ( Figures.tree.familyID == CellTracks(trackID).familyID )
+    if (HighlightTrack(trackID))
         colorStruct.back = CellTracks(trackID).color.background;
         colorStruct.edge = CellTracks(trackID).color.background;
         colorStruct.text = CellTracks(trackID).color.text;
@@ -37,5 +37,18 @@ function colorStruct = GetCellDrawProps(trackID, hullID, drawString)
     if ( any(Figures.cells.selectedHulls == hullID) )
         colorStruct.edgeWidth = 1.5;
         colorStruct.edgeStyle = '--';
+    end
+end
+
+function bHighlight = HighlightTrack(trackID)
+    global Figures CellTracks CellFamilies
+    
+    bHighlight = 0;
+    
+    if ( Figures.tree.familyID == CellTracks(trackID).familyID )
+        bHighlight = 1;
+    elseif isfield(CellFamilies, 'extFamily')
+        family = CellFamilies(Figures.tree.familyID);
+        bHighlight = find( family.extFamily == CellTracks(trackID).familyID );
     end
 end
