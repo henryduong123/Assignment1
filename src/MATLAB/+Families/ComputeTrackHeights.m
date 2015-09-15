@@ -1,7 +1,22 @@
 function trackHeights = ComputeTrackHeights(rootTrackID)
-    trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
+    global CellFamilies
     
-	recursiveTrackHeights(rootTrackID, trackHeights); 
+    trackHeights = containers.Map('KeyType', 'uint32', 'ValueType', 'uint32');
+    roots = [];
+    if isfield(CellFamilies, 'extFamily')
+        family = CellFamilies(rootTrackID);
+        if isempty(family.extFamily)
+            roots = [rootTrackID];
+        else
+            roots = family.extFamily;
+        end
+    else
+        roots = [rootTrackID];
+    end
+
+    for i=1:length(roots)
+        recursiveTrackHeights(roots(i), trackHeights); 
+    end
 end
 
 function height = recursiveTrackHeights(trackID, trackHeights)
