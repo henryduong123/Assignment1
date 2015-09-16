@@ -86,6 +86,19 @@ uimenu(Figures.cells.contextMenuHandle,...
     'CallBack',     @removeFromTree);
 
 uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Add To Extended Family',...
+    'CallBack',     @addToExtendedFamily,...
+    'Separator',    'on');
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Remove From Extended Family',...
+    'CallBack',     @removeFromExtendedFamily);
+
+uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Show Extended Family',...
+    'CallBack',     @showExtendedFamily);
+
+uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Properties',...
     'CallBack',     @properties,...
     'Separator',    'on');
@@ -233,6 +246,32 @@ function removeFromTree(src,evnt)
     Error.LogAction(['Removed part or all of ' num2str(trackID) ' from tree'],[],trackID);
 
     UI.DrawTree(CellTracks(oldParent).familyID);
+end
+
+function addToExtendedFamily(src,evnt)
+    global Figures
+    
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
+
+    Editor.ContextAddToExtendedFamily(Figures.time, trackID);
+end
+
+function removeFromExtendedFamily(src,evnt)
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
+
+    Editor.ContextRemoveFromExtendedFamily(trackID);
+end
+
+function showExtendedFamily(src,evnt)
+    global CellFamilies CellTracks
+    
+    [hullID trackID] = UI.GetClosestCell(0);
+    if(isempty(trackID)),return,end
+    
+    familyID = CellTracks(trackID).familyID;
+    msgbox({'Extended family:', num2str(CellFamilies(familyID).extFamily)})
 end
 
 function properties(src,evnt)
