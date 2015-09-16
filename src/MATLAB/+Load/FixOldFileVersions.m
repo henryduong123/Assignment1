@@ -36,6 +36,12 @@ function bNeedsUpdate = FixOldFileVersions()
         end
     end
     
+    % As of version 7.11, add tag field for CellHulls
+    if ( ~isfield(CellHulls, 'tag') )
+        [CellHulls.tag] = deal('');
+        bNeedsUpdate = true;
+    end
+    
     % As of version 7.9, remove imagePixels field
     if ( isfield(CellHulls, 'imagePixels') )
         Load.RemoveImagePixelsField();
@@ -139,9 +145,9 @@ function bNeedsUpdate = FixOldFileVersions()
     bFamilyUpdate = Load.AddFamilyEditFields();
     bNeedsUpdate = (bNeedsUpdate || bFamilyUpdate);
     
-    % Make sure that CellHulls userEdited, deleted, greenInd
+    % Make sure that CellHulls userEdited, deleted
     % are all "logical". Also, CellFamilies.bLocked/bCompleted/bFrozen
-    CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted','greenInd');
+    CellHulls = forceLogicalFields(CellHulls, 'userEdited','deleted');
     CellFamilies = forceLogicalFields(CellFamilies, 'bLocked', 'bCompleted', 'bFrozen');
     
     bEmptyHulls = arrayfun(@(x)(isempty(x.deleted)), CellHulls);

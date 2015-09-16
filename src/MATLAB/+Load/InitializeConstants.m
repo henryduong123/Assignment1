@@ -29,11 +29,19 @@ function InitializeConstants()
 
 global CONSTANTS
 
-im = Helper.LoadIntensityImage(Helper.GetFullImagePath(1));
-Load.AddConstant('imageSize',size(im),0);
+[numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
 
-numFrames = Helper.LoadNumFrames(Helper.GetFullImagePath(1));
 Load.AddConstant('numFrames', numFrames,0);
+Load.AddConstant('numChannels', numChannels,0);
+
+imSet = Helper.LoadIntensityImageSet(1);
+
+imSizes = zeros(length(imSet),2);
+for i=1:length(imSet)
+    imSizes(i,:) = size(imSet{i});
+end
+
+Load.AddConstant('imageSize', max(imSizes,[],1),0);
 
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
@@ -54,12 +62,6 @@ Load.AddConstant('maxPropagateFrames',          50,1);
 
 %% Particular Constants
 typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
-if (~isfield(typeParams.segParams, 'imageAlpha'))
-    Load.AddConstant('imageAlpha', 1.5);
-else
-    Load.AddConstant('imageAlpha', typeParams.segParams.imageAlpha);
-end
-
 Load.AddConstant('timeResolution', typeParams.leverParams.timeResolution); %in min per frame
 
 Load.AddConstant('maxPixelDistance', typeParams.leverParams.maxPixelDistance, 1);
@@ -68,4 +70,24 @@ Load.AddConstant('dMaxConnectComponent', typeParams.leverParams.dMaxConnectCompo
 
 Load.AddConstant('dMaxCenterOfMass', typeParams.trackParams.dMaxCenterOfMass,1);
 Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConnectComponentTracker,1);
+
+% Try to update channel info based on loaded image data.
+channelOrder = typeParams.channelParams.channelOrder;
+channelColor = typeParams.channelParams.channelColor;
+channelFluor = typeParams.channelParams.channelFluor;
+numMissingChan = numChannels - length(channelOrder);
+if ( numMissingChan > 0 )
+    missingChannels = length(channelOrder):length(channelOrder)+numMissingChan;
+    channelOrder = [channelOrder missingChannels];
+    channelColor = [channelColor; hsv(numMissingChan+2)];
+    channelFluor = [channelFluor false(1,numMissingChan)];
+elseif ( numMissingChan < 0 )
+    channelOrder = channelOrder(1:numChannels);
+    channelColor = channelColor(1:numChannels,:);
+    channelFluor = channelFluor(1:numChannels);
+end
+
+Load.AddConstant('channelOrder', channelOrder,0);
+Load.AddConstant('channelColor', channelColor,0);
+Load.AddConstant('channelFluor', channelFluor,0);
 end

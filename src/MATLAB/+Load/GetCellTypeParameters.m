@@ -5,8 +5,9 @@ function typeParams = GetCellTypeParameters(cellType)
     typeNames = {cellTypes.name};
     idx = find(strcmpi(typeNames, cellType));
     
-    if ( ~isempty(idx) )
-        typeParams = cellTypes(idx);
+    if ( isempty(idx) )
+        error([cellType ' is not a supported cell type.']);
     end
     
+    typeParams = cellTypes(idx);
 end

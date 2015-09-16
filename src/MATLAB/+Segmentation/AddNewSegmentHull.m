@@ -26,9 +26,8 @@
 
 function newTrackID = AddNewSegmentHull(clickPt, time)
     global CONSTANTS CellHulls
-
-    filename = Helper.GetFullImagePath(time);
-    img = Helper.LoadIntensityImage(filename);
+    
+    chanImSet = Helper.LoadIntensityImageSet(time);
  
     if strcmp(CONSTANTS.cellType, 'Hemato')
         subSize = 100;
@@ -36,37 +35,33 @@ function newTrackID = AddNewSegmentHull(clickPt, time)
         subSize = 200;
     end
     
-    [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, subSize, 1.0, [], time);
     
-    % Aggressive add segmentation
-    if ( isempty(newObj) )
-        for tryAlpha = 1.25:(-0.05):0.5
-            [newObj newFeat] = Segmentation.FindNewSegmentation(img, clickPt, 200, tryAlpha, [], time);
-            if ( ~isempty(newObj) )
-                break;
-            end
-        end
-    end
+    chkHull = Segmentation.FindNewSegmentation(chanImSet, clickPt, subSize, true, [], time);
 
     newHull = Helper.MakeEmptyStruct(CellHulls);
     newHull.userEdited = true;
     
-    if ( ~isempty(newObj) )
-        newObj = Segmentation.ForceDisjointSeg(newObj, time, clickPt);
+    if ( ~isempty(chkHull) )
+        chkHull = Segmentation.ForceDisjointSeg(chkHull, time, clickPt);
     end
     
-    if ( isempty(newObj) )
+    if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
         newHull.time = time;
         newHull.points = round(clickPt);
         newHull.centerOfMass =  [clickPt(2) clickPt(1)];
-        newHull.indexPixels = sub2ind(size(img), newHull.points(2), newHull.points(1));
+        newHull.indexPixels = sub2ind(CONSTANTS.imageSize, newHull.points(2), newHull.points(1));
+        
+        newHull.tag = 'Manual';
     else
         newHull.time = time;
-        newHull.points = newObj.points;
-        [r c] = ind2sub(CONSTANTS.imageSize, newObj.indPixels);
+        newHull.points = chkHull.points;
+        
+        [r c] = ind2sub(CONSTANTS.imageSize, chkHull.indexPixels);
         newHull.centerOfMass = mean([r c]);
-        newHull.indexPixels = newObj.indPixels;
+        newHull.indexPixels = chkHull.indexPixels;
+        
+        newHull.tag = chkHull.tag;
     end
     
     newHullID = Hulls.SetHullEntries(0, newHull);

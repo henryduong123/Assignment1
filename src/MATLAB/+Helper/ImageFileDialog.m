@@ -23,15 +23,20 @@ while ( ~bOpened )
         return
     end
     
-    [sigDigits imageDataset] = Helper.ParseImageName(settings.imageFile, 0);
+    [imageDataset namePattern] = Helper.ParseImageName(settings.imageFile);
+    if ( isempty(imageDataset) )
+        error('File name pattern is not supported: %s', settings.imageFile);
+    end
     
-    if ~isfield(CONSTANTS,'datasetName')
+    Load.AddConstant('imageNamePattern', namePattern, 1);
+    if ( ~isfield(CONSTANTS,'datasetName') )
         Load.AddConstant('datasetName', imageDataset, 1);
     end
-    if (strcmp(imageDataset,[CONSTANTS.datasetName '_']))
+    
+    if ( strcmp(imageDataset, [CONSTANTS.datasetName '_']) )
         Load.AddConstant('datasetName', [CONSTANTS.datasetName '_'], 1);
         bOpened = 1;
-    elseif (~strcmp(imageDataset,CONSTANTS.datasetName))        
+    elseif ( ~strcmp(imageDataset, CONSTANTS.datasetName) )
         answer = questdlg('Image does not match dataset would you like to choose another?','Image Selection','Yes','No','Close LEVer','Yes');
         switch answer
             case 'Yes'
@@ -47,14 +52,11 @@ while ( ~bOpened )
     end
     
     Load.AddConstant('rootImageFolder', settings.imagePath, 1);
-    Load.AddConstant('imageSignificantDigits', sigDigits, 1);
     Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
-    if (exist('fluorDataset'))
-        Load.AddConstant('rootFluorFolder', settings.imagePathFl, 1);
-    else
-        Load.AddConstant('rootFluorFolder', '.\', 1);
-        Load.AddConstant('fluorNamePattern', '.', 1);
-    end
+    
+    [numChannels numFrames] = Helper.GetImListInfo(settings.imagePath, namePattern);
+    Load.AddConstant('numChannels', numChannels, 1);
+    Load.AddConstant('numFrames', numFrames, 1);
     
     bOpened = 1;
 end

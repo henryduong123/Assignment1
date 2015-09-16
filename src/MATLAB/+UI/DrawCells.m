@@ -30,16 +30,11 @@
 
 function DrawCells()
 
-global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS FluorData MitosisEditStruct
+global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS MitosisEditStruct
 
 % figure(Figures.cells.handle);
-if (isempty(FluorData) || isempty(FluorData(Figures.time).greenInd))
-    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time)]);
-    haveFluor = 0;
-else
-    set(Figures.cells.timeLabel,'String',['Time: ' num2str(Figures.time) 'F']);
-    haveFluor = 1;
-end
+timeLabel = ['Time: ' num2str(Figures.time)];
+set(Figures.cells.timeLabel,'String',timeLabel);
 
 % Missing Cells Counter
 missingCells = UI.CellCountDifference();
@@ -58,12 +53,16 @@ else
 end
 
 %read in image
-filename = Helper.GetFullImagePath(Figures.time);
-if (exist(filename,'file')==2)
-    img = Helper.LoadIntensityImage(filename);
-else
+img = Helper.LoadChannelIntensityImage(Figures.time,Figures.chanIdx);
+if ( isempty(img) )
     img = zeros(CONSTANTS.imageSize);
 end
+
+imMax = max(img(:));
+img = mat2gray(img,[0 imMax]);
+
+chanLabel = sprintf('Channel: %d', CONSTANTS.channelOrder(Figures.chanIdx));
+set(Figures.cells.chanLabel,'String',chanLabel);
 
 curAx = get(Figures.cells.handle, 'CurrentAxes');
 if ( isempty(curAx) )
@@ -77,7 +76,7 @@ yl=ylim(curAx);
 %adjust the image display
 
 hold(curAx, 'off');
-im = imagesc(img, 'Parent',curAx);
+im = imagesc(img, 'Parent',curAx, [0 1]);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
 set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
 
@@ -111,12 +110,6 @@ if ( strcmpi(Figures.cells.editMode, 'mitosis') )
     drawHullFilter = arrayfun(@(x)(CellTracks(x).hulls(CellTracks(x).hulls~=0)),...
         CellFamilies(Figures.tree.familyID).tracks, 'UniformOutput',0);
     drawHullFilter = [drawHullFilter{:}];
-end
-
-% draw fluor background for this cell
-if(haveFluor && strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on'))
-    [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
-    plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
 end
 
 if ( (Figures.time == length(HashedCells)) )
@@ -169,16 +162,6 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if(Figures.cells.showInterior)
             [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
             plot(curAx, c, r, '.', 'Color',colorStruct.edge);
-        end
-        
-        %flor marker exists
-        if(strcmp(get(Figures.cells.menuHandles.fluorMenu, 'Checked'),'on') && isfield(CellHulls(curHullID),'greenInd') && ~isempty(CellHulls(curHullID).greenInd))
-            edgeColor = 'g';
-            drawStyle = '--';
-            drawWidth = 2;
-%            [r c] = ind2sub(CONSTANTS.imageSize,CellHulls(curHullID).greenInd);
-%            [r c] = ind2sub(CONSTANTS.imageSize,FluorData(Figures.time).greenInd);
-%            plot(curAx,c,r,'.g','uicontextmenu', Figures.cells.contextMenuHandle);
         end
         
         %draw outline

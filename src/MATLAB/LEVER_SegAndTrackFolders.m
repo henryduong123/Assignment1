@@ -7,21 +7,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
 function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
-global CONSTANTS;
+global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
 
 softwareVersion = Helper.GetVersion();
 
+if (isdeployed())
+    Load.SetWorkingDir();
+end
+
 cellType = Load.QueryCellType();
 Load.AddConstant('cellType',cellType,1);
 
-% Just disable fluorescence for now
-Load.AddConstant('rootFluorFolder', '.\', 1);
-Load.AddConstant('fluorNamePattern', '.', 1);
-
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
-if(~directory_name),return,end
+if ( ~directory_name ),return,end
 
 if ( ~exist('outputDir','var') )
     outputDir = directory_name;
@@ -52,56 +52,56 @@ if ( exist('maxProcessors','var') )
     numProcessors = min(maxProcessors, numProcessors);
 end
 
-dlist=dir(directory_name);
+dirList = dir(directory_name);
 
-bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dlist);
-bValidDir = ~bInvalidName & (vertcat(dlist.isdir) > 0);
-dlist = dlist(bValidDir);
-for dd=1:length(dlist)
-    
-    if ( ~(dlist(dd).isdir) )
+bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dirList);
+bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
+dirList = dirList(bValidDir);
+
+for dirIdx=1:length(dirList)
+    if ( ~(dirList(dirIdx).isdir) )
         continue
+    end
+    
+    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
+    if ( isempty(validStartFilename) )
+        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
+        continue;
+    end
+    
+    [datasetName namePattern] = Helper.ParseImageName(validStartFilename);
+    if ( isempty(datasetName) )
+        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
+        continue;
     end
  
-    fileList = dir(fullfile(directory_name, dlist(dd).name, '*.tif'));
-    if ( isempty(fileList) )
-        continue
-    end
-        
-    CONSTANTS.rootImageFolder = fullfile(directory_name, dlist(dd).name);
-    CONSTANTS.datasetName = [dlist(dd).name '_'];
+    CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
+    CONSTANTS.datasetName = datasetName;
+    CONSTANTS.imageNamePattern = namePattern;
     CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
     
-    Helper.ParseImageName(fileList(1).name);
-    
-    if exist(CONSTANTS.matFullFile,'file')
+    if ( exist(CONSTANTS.matFullFile,'file') )
         fprintf('%s - LEVer data already exists.  Skipping\n', CONSTANTS.datasetName);
         continue
     end
     
-    Load.InitializeConstants();
+    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
+    if ( isempty(fileList) )
+        continue
+    end
+
     Load.AddConstant('version',softwareVersion,1);
     
-    fprintf('seg&track file : %s\n',CONSTANTS.datasetName);
+    fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
+    
     tic
-    CONSTANTS.imageAlpha=1.5;
-    %get image significant digits
-    firstimfile = fileList(1).name;
-    CONSTANTS.imageSignificantDigits = Helper.ParseImageName(firstimfile);
-    if ( CONSTANTS.imageSignificantDigits == 0 )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n',CONSTANTS.datasetName);
-        continue;
-    end
-    
-    if ( ~strcmpi(firstimfile, Helper.GetImageName(1)) )
-        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n',CONSTANTS.datasetName);
-        continue;
-    end
-    
-    if ( ~bTrialRun )    
-        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
+    Load.InitializeConstants();
+
+    if ( ~bTrialRun )
+        segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
+        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
         if ( ~isempty(errStatus) )
-            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n',CONSTANTS.datasetName);
+            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', CONSTANTS.datasetName);
             
             errFilename = fullfile(outputDir, [CONSTANTS.datasetName '_segtrack_err.log']);
             fid = fopen(errFilename, 'wt');
@@ -110,6 +110,9 @@ for dd=1:length(dlist)
             
             continue;
         end
+        
+        % Initialize cell phenotype structure in all cases.
+        CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{[0 0 0;.549 .28235 .6235;0 1 1]});
 
         Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 
@@ -120,4 +123,27 @@ for dd=1:length(dlist)
 end %dd
 
 clear global;
+end
+
+% This function tries to quickly find one or more files that qualify as an
+% initial image frame for parsing dataset names, etc. Returns the first
+% file name found
+function filename = getValidStartFileName(chkPath)
+    filename = '';
+    
+    flist = [];
+    chkDigits = 7:-1:2;
+    for i=1:length(chkDigits)
+        digitStr = ['%0' num2str(chkDigits(i)) 'd'];
+        flist = dir(fullfile(chkPath,['*_t' num2str(1,digitStr) '*.tif']));
+        if ( ~isempty(flist) )
+            break;
+        end
+    end
+    
+    if ( isempty(flist) )
+        return;
+    end
+    
+    filename = flist(1).name;
 end

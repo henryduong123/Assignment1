@@ -30,7 +30,7 @@ function errStatus = SegAndTrack()
     global CONSTANTS CellPhenotypes
 
     % Modified 
-    errStatus = 1;
+    errStatus = 'Cancel';
     
     settings = Load.ReadSettings();
 
@@ -57,29 +57,15 @@ function errStatus = SegAndTrack()
     % (see e.g. HematoSeg.exe)
     
     errStatus = '';
-    switch CONSTANTS.cellType
-        case 'Adult'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
-                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
-                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        case 'Embryonic'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
-                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
-                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        case 'Wehi'
-            [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(...
-                CONSTANTS.rootImageFolder(1:end-1), CONSTANTS.datasetName,...
-                CONSTANTS.imageAlpha, CONSTANTS.imageSignificantDigits, numProcessors);
-            
-        otherwise
-            errStatus = '';
-            return
-    end
+    segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
+    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
     
     if ( ~isempty(errStatus) )
         errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
+        
+        fprintf('ERROR: Segmentation/Tracking did not complete successfully.\n');
+        fprintf('       See %s for more details.\n',errFilename);
+        
         fid = fopen(errFilename, 'wt');
         fprintf(fid, '%s', errStatus);
         fclose(fid);

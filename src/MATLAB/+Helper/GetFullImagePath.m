@@ -1,8 +1,8 @@
-function pathString = GetFullImagePath(frame)
+function pathString = GetFullImagePath(chan, frame)
 global CONSTANTS
 
-image = Helper.GetImageName(frame);
+imageName = Helper.GetImageName(chan, frame);
 
-pathString = fullfile(CONSTANTS.rootImageFolder,image);
+pathString = fullfile(CONSTANTS.rootImageFolder,imageName);
 end
 

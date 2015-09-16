@@ -1,5 +1,5 @@
-function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, imageAlpha, sigDigits, numProcessors)
-    global CONSTANTS
+function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, namePattern, numProcessors, segArgs)
+    global CONSTANTS CellHulls HashedCells ConnectedDist
     
     errStatus = sprintf('Unknown Error\n');
     tSeg = 0;
@@ -8,24 +8,21 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
     %% Segmentation
     tic
     
-    fileList = dir(fullfile(rootFolder, [datasetName '*.tif']));
-    numberOfImages = length(fileList);
-    % numberOfImages = 10;
-    numProcessors = min(numProcessors, numberOfImages);
+    % Remove trailing \ or / from rootFolder
+    if ( (rootFolder(end) == '\') || (rootFolder(end) == '/') )
+        rootFolder = rootFolder(1:end-1);
+    end
     
-    if ( numberOfImages < 1 )
+    % Set CONSTANTS.imageSize as soon as possible
+    [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+    Load.AddConstant('numFrames', numFrames,1);
+    Load.AddConstant('numChannels', numChannels,1);
+    
+    numProcessors = min(numProcessors, numFrames);
+    
+    if ( numFrames < 1 )
         return;
     end
-    
-    % Wehi fluorescence breaks down after around frame 500
-    if strcmp(CONSTANTS.cellType, 'Wehi')
-%        numberOfImages = 550;
-        numberOfImages = 500;
-    end
-
-    cellSegments = [];
-    cellFeat = [];
-    cellSegLevels = [];
 
     fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
 
@@ -35,43 +32,39 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
         removeOldFiles('segmentationData', 'done_*.txt');
     end
     
-    % Set CONSTANTS.imageSize as soon as possible
-    firstImg = Helper.GetFullImagePath(1);
-    chkIm = Helper.LoadIntensityImage(firstImg);
-    CONSTANTS.imageSize = size(chkIm);
+    imSet = Helper.LoadIntensityImageSet(1);
+
+    imSizes = zeros(length(imSet),2);
+    for i=1:length(imSet)
+        imSizes(i,:) = size(imSet{i});
+    end
+
+    Load.AddConstant('imageSize', max(imSizes,[],1),1);
     
-    if ( ndims(CONSTANTS.imageSize) ~= 2 )
-        
+    if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) >= 3 )
         cltime = clock();
         errStatus = sprintf('%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
         
         return;
     end
     
-    if(isempty(dir('.\segmentationData')))
-        system('mkdir .\segmentationData');
+    if ( ~exist('.\segmentationData','dir'))
+        mkdir('segmentationData');
     end
     
-    [dirName chkFile] = fileparts(CONSTANTS.rootImageFolder);
-    if ( ~isempty(chkFile) )
-        dirName = fullfile(dirName, chkFile);
+    for procID=1:numProcessors
+        segCmd = makeSegCommand(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs);
+        system(['start ' segCmd ' && exit']);
     end
-    rootFluorFolder=CONSTANTS.rootFluorFolder(1:end-1);
-
-    for i=1:numProcessors
-         system(['start Segmentor ' num2str(i) ' ' num2str(numProcessors) ' ' ...
-            num2str(numberOfImages) ' "' CONSTANTS.cellType '" ' ...
-            num2str(imageAlpha) ' "' dirName '" "' CONSTANTS.imageNamePattern '"' ...
-            ' "' rootFluorFolder '" "' CONSTANTS.fluorNamePattern '" && exit']);
-        %use line below instead of the 3 lines above for non-parallel or to debug
-        % Segmentor(i,numProcessors,numberOfImages,CONSTANTS.cellType,imageAlpha,dirName,CONSTANTS.imageNamePattern,rootFluorFolder, CONSTANTS.fluorNamePattern);
-    end
+%     for procID=1:numProcessors
+%         Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs{:});
+%     end
 
     bSegFileExists = false(1,numProcessors);
-    for i=1:numProcessors
-        errFile = ['.\segmentationData\err_' num2str(i) '.log'];
-        fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
-        semFile = ['.\segmentationData\done_' num2str(i) '.txt'];
+    for procID=1:numProcessors
+        errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
+        fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+        semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
         semDesc = dir(semFile);
         fileDescriptor = dir(fileName);
         efd = dir(errFile);
@@ -82,7 +75,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
             semDesc = dir(semFile);
         end
         
-        bSegFileExists(i) = ~isempty(fileDescriptor);
+        bSegFileExists(procID) = ~isempty(fileDescriptor);
     end
     
     if ( ~all(bSegFileExists) )
@@ -90,12 +83,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
         tSeg = toc;
         
         % Collect segmentation error logs into one place
-        for i=1:length(bSegFileExists)
-            if ( bSegFileExists(i) )
+        for procID=1:length(bSegFileExists)
+            if ( bSegFileExists(procID) )
                 continue;
             end
+            
             errStatus = sprintf( '----------------------------------\n');
-            objerr = fopen(fullfile('.','segmentationData',['err_' num2str(i) '.log']));
+            objerr = fopen(fullfile('.','segmentationData',['err_' num2str(procID) '.log']));
             logline = fgetl(objerr);
             while ( ischar(logline) )
                 errStatus = [errStatus sprintf('%s\n', logline)];
@@ -108,20 +102,17 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
     end
 
     try
-        leveltimes = [];
-        for i=1:numProcessors
-            fileName = ['.\segmentationData\objs_' num2str(i) '.mat'];
+        cellSegments = [];
+        frameOrder = [];
+        for procID=1:numProcessors
+            fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
-            tst = whos('-file', fileName);
+            tstLoad = whos('-file', fileName);
             
             load(fileName);
             
-            cellSegments = [cellSegments objs];
-            cellFeat = [cellFeat features];
-            cellSegLevels = [cellSegLevels levels];
-            leveltimes = [leveltimes unique([objs.t])];
-            
-            pause(1)
+            cellSegments = [cellSegments hulls];
+            frameOrder = [frameOrder frameTimes];
         end
     catch excp
         
@@ -131,40 +122,60 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
         tSeg = toc;
         return;
     end
+    
+    if ( isempty(cellSegments) )
+        cltime = clock();
+        errStatus = sprintf('%02d:%02d:%02.1f - No segmentations found\n',cltime(4),cltime(5),cltime(6));
+        tSeg = toc;
+        return;
+    end
 
-    segtimes = [cellSegments.t];
-    [srtseg srtidx] = sort(segtimes);
-    cellSegments = cellSegments(srtidx);
-    cellFeat = cellFeat(srtidx);
+    % Sort segmentations and fluorescent data so that they are time ordered
+    segtimes = [cellSegments.time];
+    [srtSegs srtIdx] = sort(segtimes);
+    CellHulls = Helper.MakeInitStruct(Helper.GetCellHullTemplate(), cellSegments(srtIdx));
+    
+    % Make sure center of mass is available
+    for i=1:length(CellHulls)
+        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
+        CellHulls(i).centerOfMass = mean([r c], 1);
+    end
 
-    [srtlevels srtidx] = sort(leveltimes);
-    cellSegLevels = cellSegLevels(srtidx);
-
-    fprintf('Please wait...');
-
-    cellSegments = Tracker.GetDarkConnectedHulls(cellSegments);
-%     save ( ['.\segmentationData\SegObjs_' datasetName '.mat'],'cellSegments');
-    Segmentation.WriteSegData(cellSegments,datasetName);
+    [srtFrames srtIdx] = sort(frameOrder);
+    
+    fprintf('Building Connected Component Distances... ');
+    HashedCells = cell(1,numFrames);
+    for t=1:numFrames
+        HashedCells{t} = struct('hullID',{}, 'trackID',{});
+    end
+    
+    for i=1:length(CellHulls)
+        HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
+    end
+    
+    ConnectedDist = [];
+    Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
+    Segmentation.RewriteSegData('segmentationData',datasetName);
 
     fprintf(1,'\nDone\n');
-
-    fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
-    fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
-    tSeg=toc;
+    tSeg = toc;
 
     %% Tracking
     tic
     fprintf(1,'Tracking...');
+    fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
+    fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
+    
     system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    
     fprintf('Done\n');
-    tTrack=toc;
+    tTrack = toc;
 
-    %% Inport into LEVer's data sturcture
-    [objHulls gConnect HashedHulls] = Tracker.ReadTrackData(CONSTANTS.imageSize, cellSegments, datasetName);
-
+    %% Import into LEVer's data sturcture
+    [objTracks gConnect] = Tracker.RereadTrackData('segmentationData', CONSTANTS.datasetName);
     fprintf('Finalizing Data...');
     try
-        Tracker.ConvertTrackingData(objHulls,gConnect);
+        Tracker.RebuildTrackingData(objTracks, gConnect);
     catch excp
         
         cltime = clock();
@@ -173,15 +184,25 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, i
         
         return;
     end
-    
     fprintf('Done\n');
     
-    clear cellSegments;
-    clear cellFeat;
-    clear cellSegLevels;
-    clear leveltimes;
-    
     errStatus = '';
+end
+
+function segCmd = makeSegCommand(procID, numProc, numChannels, numFrames, cellType, channelOrder, rootFolder, imagePattern, segArg)
+    segCmd = 'Segmentor';
+    segCmd = [segCmd ' "' num2str(procID) '"'];
+    segCmd = [segCmd ' "' num2str(numProc) '"'];
+    segCmd = [segCmd ' "' num2str(numChannels) '"'];
+    segCmd = [segCmd ' "' num2str(numFrames) '"'];
+    segCmd = [segCmd ' "' cellType '"'];
+    segCmd = [segCmd ' "' num2str(channelOrder) '"'];
+    segCmd = [segCmd ' "' rootFolder '"'];
+    segCmd = [segCmd ' "' imagePattern '"'];
+    
+    for i=1:length(segArg)
+        segCmd = [segCmd ' "' num2str(segArg{i}) '"'];
+    end
 end
 
 function removeOldFiles(rootDir, filePattern)

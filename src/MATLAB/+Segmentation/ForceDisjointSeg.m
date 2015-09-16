@@ -2,18 +2,18 @@
 %TODO: Maybe handle convex hull intersection instead of interior points as
 %the current method still allows considerable hull overlap in some cases.
 
-function newObj = ForceDisjointSeg(obj, time, centerPt)
+function newHull = ForceDisjointSeg(hull, time, centerPt)
     global CONSTANTS CellHulls HashedCells
     
-    newObj = [];
+    newHull = [];
     
     ccidxs = vertcat(CellHulls([HashedCells{time}.hullID]).indexPixels);
-    pix = obj.indPixels;
+    pix = hull.indexPixels;
     
     bPickPix = ~ismember(pix, ccidxs);
     
     if ( all(bPickPix) )
-        newObj = obj;
+        newHull = hull;
         return;
     end
     
@@ -22,7 +22,7 @@ function newObj = ForceDisjointSeg(obj, time, centerPt)
     
     CC = bwconncomp(bwimg,8);
     if ( CC.NumObjects < 1 )
-        newObj = [];
+        newHull = [];
         return;
     end
     
@@ -36,12 +36,10 @@ function newObj = ForceDisjointSeg(obj, time, centerPt)
         if ( inpolygon(centerPt(1), centerPt(2), c(ch), r(ch)) )
             bCCPix = ismember(pix, CC.PixelIdxList{i});
             
-            newObj.indPixels = CC.PixelIdxList{i};
-            newObj.imPixels = obj.imPixels(bCCPix);
+            newHull = hull;
             
-            newObj.points = [c(ch) r(ch)];
-%             newobj.COM = mean([r c]);
-            
+            newHull.indexPixels = CC.PixelIdxList{i};
+            newHull.points = [c(ch) r(ch)];
             break;
         end
     end

@@ -47,6 +47,9 @@ function [newSegs costMatrix nextHulls] = SplitSegmentation(splitHull, numSplit,
     
     % Force a hungarian assignment for splits
     assignIdx = assign.assignmentoptimal(newCosts(prevIdx,:));
+    % TODO: This can fail in cases where all single previous hulls get too
+    % far away from one of the split segmentations. Need to re-evaluate
+    % split in such cases.
     for i=1:length(assignIdx)
         newCosts(prevIdx(i),:) = Inf;
         newCosts(prevIdx,assignIdx(i)) = Inf;

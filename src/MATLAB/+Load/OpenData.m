@@ -95,7 +95,7 @@ switch answer
         Load.InitializeConstants();
         
         errOpen = Segmentation.SegAndTrack();
-        if(~errOpen)
+        if ( isempty(errOpen) )
             opened = 1;
         else
             CONSTANTS = oldCONSTANTS;
@@ -125,7 +125,17 @@ switch answer
             
             Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
-            if (~isfield(CONSTANTS,'imageNamePattern') || exist(Helper.GetFullImagePath(1),'file')~=2)
+            bQueryImageDir = false;
+            if ( ~isfield(CONSTANTS,'imageNamePattern') )
+                bQueryImageDir = true;
+            elseif ( ~isfield(CONSTANTS,'channelOrder') )
+                [numChans numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder,CONSTANTS.imageNamePattern);
+                bQueryImageDir = (numFrames == 0);
+            else
+                bQueryImageDir = isempty(Helper.LoadPrimaryIntensityImage(1));
+            end
+            
+            if ( bQueryImageDir )
                 if (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return
