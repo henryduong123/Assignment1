@@ -45,6 +45,8 @@ end
 set(Figures.tree.handle,'Pointer','watch');
 set(Figures.cells.handle,'Pointer','watch');
 
+[localLabels, revLocalLabels] = UI.GetLocalTreeLabels(familyID);
+
 if ( ~isfield(Figures.tree,'axesHandle') || ~Helper.ValidUIHandle(Figures.tree.axesHandle) )
     Figures.tree.axesHandle = axes('Parent', Figures.tree.handle);
     
@@ -140,7 +142,7 @@ bStructOnly = strcmp('on',get(Figures.tree.menuHandles.structOnlyMenu, 'Checked'
 if ( ~bStructOnly )
     bDrawLabels = strcmp('on',get(Figures.tree.menuHandles.treeColorMenu, 'Checked'));
     for i=1:length(sortedTracks)
-        drawCellLabel(Figures.tree.axesHandle, sortedTracks(i), trackMap(sortedTracks(i)).xCenter, bDrawLabels);
+        drawCellLabel(Figures.tree.axesHandle, sortedTracks(i), trackMap(sortedTracks(i)).xCenter, bDrawLabels, localLabels(sortedTracks(i)));
     end
 end
 
@@ -346,19 +348,21 @@ function drawCellEdge(curAx, trackID, xVal)
     end
 end
 
-function drawCellLabel(curAx, trackID, xVal, bDrawLabels)
+function drawCellLabel(curAx, trackID, xVal, bDrawLabels, label)
     global Figures CellTracks CellPhenotypes
     
     phenotype = Tracks.GetTrackPhenotype(trackID);
     yMin = CellTracks(trackID).startTime;
     
-    [fontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
+%    [fontSize circleSize] = UI.GetFontShapeSizes(length(num2str(trackID)));
+    [fontSize, circleSize] = UI.GetFontShapeSizes(length(label));
     if ( ~bDrawLabels )
         fontSize = 6;
         phenoScale = 1.2;
     else
         phenoScale = 1.5;
     end
+    circleSize = circleSize + 5;
     
     textColor = getTextColor(trackID, phenotype, bDrawLabels);
     % Draw text
@@ -370,10 +374,11 @@ function drawCellLabel(curAx, trackID, xVal, bDrawLabels)
 %         'UserData',             trackID,...
 %         'uicontextmenu',        Figures.tree.contextMenuHandle);
     hLabel = UI.DrawPool.GetHandle(curAx, 'Labels');
-    set(hLabel, 'String',num2str(trackID),...
+    set(hLabel, 'String',label,...
                 'Position',[xVal, yMin],...
                 'HorizontalAlignment','center',...
                 'FontSize',fontSize,...
+                'FontWeight', 'bold',...
                 'color',textColor,...
                 'UserData',trackID,...
                 'ButtonDownFcn',@(src,evnt)(UI.FigureTreeDown(src,evnt,trackID)),...
