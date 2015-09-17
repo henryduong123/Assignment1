@@ -1,5 +1,5 @@
 function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
-    global CellFamilies CellTracks
+    global CellFamilies CellTracks Figures
     
     localLabels = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
     revLocalLabels = containers.Map('KeyType', 'char', 'ValueType', 'uint32');
@@ -9,6 +9,9 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
     
     numTracks = length(CellFamilies(familyID).tracks);
     
+    % if 'Show Short Labels' is unchecked, just return the label itself
+    bUseLongLabels = strcmp('off',get(Figures.tree.menuHandles.shortLabelsMenu, 'Checked'));
+
     visitIdx = 1;
     travQueue = rootTrackID;
     while ( ~isempty(travQueue) )
@@ -26,7 +29,7 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
             travQueue = [travQueue childTracks(travOrder)];
         end
         
-        if ( visitIdx == 1 )
+        if ( visitIdx == 1 || bUseLongLabels )
             localLabels(curTrackID) = num2str(curTrackID);
             revLocalLabels(num2str(curTrackID)) = curTrackID;
         else

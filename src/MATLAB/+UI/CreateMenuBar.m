@@ -247,6 +247,13 @@ missingCellsMenu = uimenu(...
     'Callback',         @toggleMissingCells,...
     'Checked',          'off');
 
+shortLabelsMenu = uimenu(...
+    'Parent',           viewMenu,...
+    'Label',            'Show Short Labels',...
+    'HandleVisibility', 'callback',...
+    'Callback',         @toggleShortLabels,...
+    'Checked',          'on');
+
 playMenu = uimenu(...
     'Parent',           viewMenu,...
     'Label',            'Play',...
@@ -304,6 +311,7 @@ if(strcmp(get(handle,'Tag'),'cells'))
     Figures.cells.menuHandles.imageMenu = imageMenu;
     Figures.cells.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.cells.menuHandles.missingCellsMenu = missingCellsMenu;
+    Figures.cells.menuHandles.shortLabelsMenu = shortLabelsMenu;
     Figures.cells.menuHandles.lockMenu = lockMenu;
     Figures.cells.menuHandles.freezeMenu = freezeMenu;
     Figures.cells.menuHandles.treeColorMenu = treeColorMenu;
@@ -320,6 +328,7 @@ else
     Figures.tree.menuHandles.imageMenu = imageMenu;
     Figures.tree.menuHandles.resegStatusMenu = resegStatusMenu;
     Figures.tree.menuHandles.missingCellsMenu = missingCellsMenu;
+    Figures.tree.menuHandles.shortLabelsMenu = shortLabelsMenu;
     Figures.tree.menuHandles.lockMenu = lockMenu;
     Figures.tree.menuHandles.freezeMenu = freezeMenu;
     Figures.tree.menuHandles.treeColorMenu = treeColorMenu;
@@ -603,6 +612,23 @@ else
     set(Figures.tree.menuHandles.missingCellsMenu, 'Checked', 'on');
     UI.DrawCells();
 end
+end
+
+function toggleShortLabels(src, evnt)
+    global Figures
+    menuChecked = get(Figures.cells.menuHandles.shortLabelsMenu, 'Checked');
+    if ( strcmp(menuChecked, 'on') )
+        set(Figures.cells.menuHandles.shortLabelsMenu, 'Checked', 'off');
+        set(Figures.tree.menuHandles.shortLabelsMenu, 'Checked', 'off');
+        UI.DrawTree(Figures.tree.familyID);
+    else
+        set(Figures.cells.menuHandles.shortLabelsMenu, 'Checked', 'on');
+        set(Figures.tree.menuHandles.shortLabelsMenu, 'Checked', 'on');
+        UI.DrawTree(Figures.tree.familyID);
+    end
+    
+    UI.DrawCells();
+    UI.DrawTree(Figures.tree.familyID);
 end
 
 function timeJump(src,evnt)

@@ -362,7 +362,12 @@ function drawCellLabel(curAx, trackID, xVal, bDrawLabels, label)
     else
         phenoScale = 1.5;
     end
-    circleSize = circleSize + 5;
+    
+    % short labels need slightly bigger circles
+    bUseShortLabels = strcmp('on',get(Figures.tree.menuHandles.shortLabelsMenu, 'Checked'));
+    if bUseShortLabels
+        circleSize = circleSize + 5;
+    end
     
     textColor = getTextColor(trackID, phenotype, bDrawLabels);
     % Draw text
