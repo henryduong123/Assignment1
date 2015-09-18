@@ -104,17 +104,21 @@ end
 % ChangeLog:
 % EW 6/8/12 rewritten
 function addMitosis(src,evnt)
-global Figures
+global Figures CellTracks
 
 [hullID siblingTrack] = UI.GetClosestCell(0);
 if(isempty(siblingTrack)),return,end
 
-answer = inputdlg({['Add ' num2str(siblingTrack) ' as a sibling to:']},...
+[localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+siblingTrackStr  = trackToLocal(localLabels, siblingTrack);
+
+answer = inputdlg({['Add ' siblingTrackStr ' as a sibling to:']},...
     'Add Mitosis',1,{''});
 
 if(isempty(answer)),return,end
 
-trackID = str2double(answer(1));
+% trackID = str2double(answer(1));
+trackID = localToTrack(revLocalLabels, answer{1});
 time = Figures.time;
 
 Editor.ContextAddMitosis(trackID,siblingTrack,time);
@@ -235,4 +239,28 @@ function properties(src,evnt)
     [hullID trackID] = UI.GetClosestCell(0);
     if(isempty(trackID)),return,end
     Editor.ContextProperties(hullID,trackID);
+end
+
+function localTrackStr = trackToLocal(localLabels, trackID)
+    global Figures
+    
+    bUseShortLabels = strcmp('on',get(Figures.tree.menuHandles.shortLabelsMenu, 'Checked'));
+
+    if bUseShortLabels && isKey(localLabels, trackID)
+        localTrackStr = localLabels(trackID);
+    else
+        localTrackStr = num2str(trackID);
+    end
+end
+
+function trackID = localToTrack(revLocalLabels, label)
+    global Figures
+
+    bUseShortLabels = strcmp('on',get(Figures.tree.menuHandles.shortLabelsMenu, 'Checked'));
+
+    if bUseShortLabels && isKey(revLocalLabels, label)
+        trackID = revLocalLabels(label);
+    else
+        trackID = str2double(label);
+    end
 end
