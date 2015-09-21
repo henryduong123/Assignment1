@@ -8,5 +8,5 @@ function segArgs = GetCellTypeSegParams(cellType)
         return;
     end
     
-    segArgs = cellfun(@(x)(x.value(1)), segParams);
+    segArgs = cellfun(@(x)(x.value(1)), segParams, 'UniformOutput',0);
 end
