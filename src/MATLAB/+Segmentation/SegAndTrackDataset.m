@@ -166,7 +166,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
     fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
     
-    system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    system(['MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
     
     fprintf('Done\n');
     tTrack = toc;
