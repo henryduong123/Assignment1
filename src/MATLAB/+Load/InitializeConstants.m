@@ -29,10 +29,10 @@ function InitializeConstants()
 
 global CONSTANTS
 
-[numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
+[channelList, frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
 
-Load.AddConstant('numFrames', numFrames,0);
-Load.AddConstant('numChannels', numChannels,0);
+Load.AddConstant('numFrames', frameList(end),0);
+Load.AddConstant('numChannels', channelList(end),0);
 
 imSet = Helper.LoadIntensityImageSet(1);
 
@@ -75,7 +75,7 @@ Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConne
 channelOrder = typeParams.channelParams.channelOrder;
 channelColor = typeParams.channelParams.channelColor;
 channelFluor = typeParams.channelParams.channelFluor;
-numMissingChan = numChannels - length(channelOrder);
+numMissingChan = channelList(end) - length(channelOrder);
 if ( numMissingChan > 0 )
     missingChannels = length(channelOrder):length(channelOrder)+numMissingChan;
     channelOrder = [channelOrder missingChannels];
