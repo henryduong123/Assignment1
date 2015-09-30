@@ -11,7 +11,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     
     chanImSet = Helper.LoadIntensityImageSet(time);
     
-    guessPoint = [CellHulls(prevHull).centerOfMass(2) CellHulls(prevHull).centerOfMass(1)];
+    guessPoint = Helper.SwapXY_RC(CellHulls(prevHull).centerOfMass);
     
     chkHull = Segmentation.FindNewSegmentation(chanImSet, guessPoint, 200, bAggressive, CellHulls(prevHull).indexPixels, time);
     if ( isempty(chkHull) )
