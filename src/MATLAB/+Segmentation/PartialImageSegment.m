@@ -67,7 +67,6 @@ function newHulls = fixupFromSubimage(rcCoordMin, origSize, subSize, hulls)
     rcOffset = rcCoordMin - 1;
     xyOffset = Helper.SwapXY_RC(rcOffset);
     for i=1:length(hulls)
-        newHulls(i).points = hulls(i).points + repmat(xyOffset, size(hulls(i).points,1),1);
         newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
     end
 end

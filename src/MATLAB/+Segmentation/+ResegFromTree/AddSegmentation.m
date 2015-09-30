@@ -18,11 +18,6 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
         return;
     end
     
-    newHull = Helper.MakeEmptyStruct(CellHulls);
-    
-    newHull.time = time;
-    newHull.points = chkHull.points;
-    
     % Remove overlap with other hulls in the frame
     checkAllHulls = [HashedCells{time}.hullID];
     nextPix = vertcat(CellHulls(checkAllHulls).indexPixels);
@@ -32,19 +27,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
         return;
     end
     
-    chkHull.indexPixels = chkPix;
-    [r c] = ind2sub(CONSTANTS.imageSize, chkPix);
-    
-    ch = Helper.ConvexHull(c,r);
-    if ( isempty(ch) )
-        return;
-    end
-    
-    newHull.centerOfMass = mean([r c]);
-    newHull.indexPixels = chkHull.indexPixels;
-    
-    newHull.points = [c(ch),r(ch)];
-    newHull.tag = chkHull.tag;
+    newHull = Hulls.CreateHull(CONSTANTS.imageSize, chkPix, time, false, chkHull.tag);
     
     % Use temporary hull to verify cost (not on a track yet)
     chkIdx = find(checkHulls == prevHull);
