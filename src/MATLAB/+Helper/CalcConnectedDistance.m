@@ -56,7 +56,8 @@ function addPerim(hullID, imageSize, perimMap, cellHulls)
     bwIm(locInd) = true;
     perimIm = bwperim(bwIm);
     
-    [perimCell{:}] = find(perimIm);
+    perimIndexes = find(perimIm);
+    [perimCell{:}] = ind2sub( size(bwIm), perimIndexes );
     locPerim = cell2mat(perimCell);
     
     perimMap(hullID) = locPerim + repmat(minCoord, size(locPerim,1),1) - 1;

@@ -12,10 +12,10 @@ function connDist = UpdateConnDistance(updateHulls, hulls, hash)
         connDist{updateHulls(i)} = [];
         t = hulls(updateHulls(i)).time;
         
-        connDist = Tracker.UpdateDistances(updateHulls(i), t, t+1, hullPerims, connDist,hulls,hash);
-        connDist = Tracker.UpdateDistances(updateHulls(i), t, t+2, hullPerims, connDist,hulls,hash);
+        connDist = Tracker.UpdateConnectedDistances(updateHulls(i), t, t+1, hullPerims, connDist,hulls,hash);
+        connDist = Tracker.UpdateConnectedDistances(updateHulls(i), t, t+2, hullPerims, connDist,hulls,hash);
         
-        connDist = Tracker.UpdateDistances(updateHulls(i), t, t-1, hullPerims, connDist,hulls,hash);
-        connDist = Tracker.UpdateDistances(updateHulls(i), t, t-2, hullPerims, connDist,hulls,hash);
+        connDist = Tracker.UpdateConnectedDistances(updateHulls(i), t, t-1, hullPerims, connDist,hulls,hash);
+        connDist = Tracker.UpdateConnectedDistances(updateHulls(i), t, t-2, hullPerims, connDist,hulls,hash);
     end
 end
