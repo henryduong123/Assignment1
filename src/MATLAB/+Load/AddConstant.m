@@ -27,17 +27,35 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function AddConstant(field,val,overWrite)
+function AddConstant(fieldPath, newValue, overwrite)
 
 global CONSTANTS
 
-if(~exist('overWrite','var'))
-    overWrite = 0;
+if(~exist('overwrite','var'))
+    overwrite = 0;
 end
 
-if(~isfield(CONSTANTS,field))
-    CONSTANTS.(field) = val;
-elseif(overWrite)
-    CONSTANTS.(field) = val;
+if ( isempty(fieldPath) )
+    return;
 end
+
+CONSTANTS = updateField(CONSTANTS, fieldPath, newValue, overwrite);
+end
+
+function outStruct = updateField(inStruct, fieldPath, newValue, overwrite)
+    outStruct = inStruct;
+    
+    [subField, remStr] = strtok(fieldPath,'.');
+    if ( isempty(remStr) )
+        if ( overwrite || ~isfield(inStruct,subField) )
+            outStruct.(subField) = newValue;
+        end
+        return;
+    end
+    
+    if ( ~isfield(inStruct,subField) )
+        outStruct.(subField) = [];
+    end
+    
+    outStruct.(subField) = updateField(outStruct.(subField), remStr, newValue, overwrite);
 end

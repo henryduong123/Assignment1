@@ -26,7 +26,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function errStatus = SegAndTrack()
+function [errStatus, segInfo] = SegAndTrack()
     global CONSTANTS CellPhenotypes
 
     % Modified 
@@ -57,6 +57,10 @@ function errStatus = SegAndTrack()
     % (see e.g. HematoSeg.exe)
     
     errStatus = '';
+    
+    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    segInfo = typeParams.segRoutine;
+    
     segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
     [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
     
