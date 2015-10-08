@@ -121,7 +121,7 @@ if(isempty(answer)),return,end
 trackID = localToTrack(revLocalLabels, answer{1});
 time = Figures.time;
 
-Editor.ContextAddMitosis(trackID,siblingTrack,time);
+Editor.ContextAddMitosis(trackID,siblingTrack,time,localLabels,revLocalLabels);
 end
 
 function changeLabel(src,evnt)

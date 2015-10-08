@@ -2,27 +2,30 @@
 
 % ChangeLog:
 % EW 6/8/12 created
-function ContextAddMitosis(trackID, siblingTrack, time)
+function ContextAddMitosis(trackID, siblingTrack, time, localLabels, revLocalLabels)
 global CellTracks CellFamilies Figures
 
+trackIDLocal = UI.TrackToLocal(localLabels, trackID);
+siblingTrackLocal = UI.TrackToLocal(localLabels, siblingTrack);
+
 if(siblingTrack>length(CellTracks) || isempty(CellTracks(siblingTrack).hulls))
-    msgbox([num2str(siblingTrack) ' is not a valid cell'],'Not a valid cell','error');
+    msgbox([siblingTrackLocal ' is not a valid cell'],'Not a valid cell','error');
     return
 end
 if(CellTracks(siblingTrack).endTime<time || siblingTrack==trackID)
-    msgbox([num2str(siblingTrack) ' is not a valid sister cell'],'Not a valid sister cell','error');
+    msgbox([siblingTrackLocal ' is not a valid sister cell'],'Not a valid sister cell','error');
     return
 end
 if(CellTracks(trackID).startTime>time)
-    msgbox([num2str(trackID) ' starts after ' num2str(siblingTrack)],'Not a valid daughter cell','error');
+    msgbox([trackIDLocal ' starts after ' siblingTrackLocal],'Not a valid daughter cell','error');
     return
 end
 if(~isempty(Tracks.GetTimeOfDeath(siblingTrack)) && Tracks.GetTimeOfDeath(siblingTrack)<=time)
-    msgbox(['Cannot attach a cell to cell ' num2str(siblingTrack) ' beacuse it is dead at this time'],'Dead Cell','help');
+    msgbox(['Cannot attach a cell to cell ' siblingTrackLocal ' beacuse it is dead at this time'],'Dead Cell','help');
     return
 end
 if(~isempty(Tracks.GetTimeOfDeath(trackID)) && Tracks.GetTimeOfDeath(trackID)<=time)
-    msgbox(['Cannot attach a cell to cell ' num2str(trackID) ' beacuse it is dead at this time'],'Dead Cell','help');
+    msgbox(['Cannot attach a cell to cell ' trackIDLocal ' beacuse it is dead at this time'],'Dead Cell','help');
     return
 end
 
@@ -35,11 +38,12 @@ if(CellTracks(trackID).startTime==time)
     while(~bValid)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
-        parentTrack = str2double(answer(1));
+        parentTrackLocal = answer(1);
+        parentTrack = UI.LocalToTrack(revLocalLabels, parentTrackLocal);
         
-        if(CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
+        if(isnan(parentTrack) || CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...
                 (~isempty(Tracks.GetTimeOfDeath(parentTrack)) && Tracks.GetTimeOfDeath(parentTrack)<=time))
-            choice = questdlg([num2str(parentTrack) ' is an invalid parent for these cells, please choose another'],...
+            choice = questdlg([parentTrackLocal ' is an invalid parent for these cells, please choose another'],...
                 'Not a valid parent','Enter a different parent','Cancel','Cancel');
             if ( strcmpi(choice,'Cancel') )
                 return
@@ -62,8 +66,12 @@ if ( ~bCanAdd )
     lockedTracks = lockedTracks(bAffectsLocked);
     
     lockedList = unique(lockedTracks);
+    lockedListLocal = '';
+    for i=1:length(lockedList)
+        lockedListLocal = [lockedListLocal ' ' UI.TrackToLocal(lockedList(i))];
+    end
 
-    resp = questdlg(['This edit may add or remove multiple unintended mitosis events from the locked tree(s): ' num2str(lockedList) '. Do you wish to continue?'], 'Warning: Breaking Locked Tree', 'Continue', 'Cancel', 'Cancel');
+    resp = questdlg(['This edit may add or remove multiple unintended mitosis events from the locked tree(s): ' lockedListLocal '. Do you wish to continue?'], 'Warning: Breaking Locked Tree', 'Continue', 'Cancel', 'Cancel');
     if ( strcmpi(resp,'Cancel') )
         return;
     end

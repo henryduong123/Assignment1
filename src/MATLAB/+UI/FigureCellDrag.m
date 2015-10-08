@@ -40,14 +40,16 @@ function createNormalDragElements(hullID, currentPoint)
     curAx = get(Figures.cells.handle, 'CurrentAxes');
     
     trackID = Hulls.GetTrackID(hullID);
+    [localLabels, ~] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+    trackIDLocal = UI.TrackToLocal(localLabels,trackID);
 
     xCoord = currentPoint(1,1);
     yCoord = currentPoint(1,2);
 
     if(Figures.cells.showInterior)
-        drawString = [num2str(trackID) ' / ' num2str(hullID)];
+        drawString = [trackIDLocal ' / ' num2str(hullID)];
     else
-        drawString = num2str(trackID);
+        drawString = trackIDLocal;
     end
     
     colorStruct = UI.GetCellDrawProps(trackID, hullID, drawString);

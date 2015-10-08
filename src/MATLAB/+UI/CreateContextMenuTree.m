@@ -54,7 +54,7 @@ end
 % ChangeLog:
 % MW Long ago
 function removeMitosis(src,evnt)
-global CellTracks 
+global CellTracks Figures
 object = get(gco);
 if(strcmp(object.Type,'text') || strcmp(object.Marker,'o'))
     %clicked on a node
@@ -86,15 +86,19 @@ elseif(object.YData(1)==object.YData(2))
         end
     end
     
+    [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+    leftLocal = UI.TrackToLocal(localLabels, CellTracks(curTrack).childrenTracks(1));
+    rightLocal = UI.TrackToLocal(localLabels, CellTracks(curTrack).childrenTracks(2));
+    
     choice = questdlg('Which Side to Keep?','Merge With Parent',...
-        num2str(CellTracks(curTrack).childrenTracks(1)),...
-        num2str(CellTracks(curTrack).childrenTracks(2)),'Cancel','Cancel');
+        leftLocal, rightLocal, 'Cancel','Cancel');
     
     if(strcmpi(choice,'Cancel'))
         return
     end
     
-    choice = str2double(choice);
+%     choice = str2double(choice);
+    choice = UI.LocalToTrack(revLocalLabels, choice);
 else
     %clicked on a vertical line
     msgbox('Please Click on a Cell Label or the Horizontal Edge to Remove Mitosis','Unable to Remove Mitosis','warn');
@@ -117,19 +121,24 @@ end
 % ChangeLog:
 % EW 6/8/12 rewrite
 function addMitosis(src,evnt)
+global Figures
+
 trackID = get(gco,'UserData');
 time = get(gca,'CurrentPoint');
 time = round(time(1,2));
 
-answer = inputdlg({'Enter Time of Mitosis',['Enter new sister cell of ' num2str(trackID)]},...
+[localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+
+answer = inputdlg({'Enter Time of Mitosis',['Enter new sister cell of ' UI.TrackToLocal(localLabels, trackID)]},...
     'Add Mitosis',1,{num2str(time),''});
 
 if(isempty(answer)),return,end
 
 time = str2double(answer(1));
-siblingTrack = str2double(answer(2));
+%siblingTrack = str2double(answer(2));
+siblingTrack = UI.LocalToTrack(revLocalLabels, answer{2});
 
-Editor.ContextAddMitosis(trackID,siblingTrack,time);
+Editor.ContextAddMitosis(trackID,siblingTrack,time, localLabels, revLocalLabels);
 end
 
 function changeLabel(src,evnt)

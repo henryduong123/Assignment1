@@ -27,20 +27,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function ContextChangeLabel(time,trackID)
-    global CellTracks
+    global CellTracks Figures
 
-    newTrackID = inputdlg('Enter New Label','New Label',1,{num2str(trackID)});
-    if(isempty(newTrackID)),return,end;
-    newTrackID = str2double(newTrackID(1));
+    [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+    answer = inputdlg('Enter New Label','New Label',1,{UI.TrackToLocal(localLabels, trackID)});
+    if(isempty(answer)),return,end;
     
+    newTrackIDLocal = answer(1);
+    newTrackID = UI.LocalToTrack(revLocalLabels, newTrackIDLocal);
+
     if ( newTrackID > length(CellTracks) )
-        warn = sprintf('Track %d does not exist, use "Remove from Tree" instead.',newTrackID);
+        warn = sprintf('Track %s does not exist, use "Remove from Tree" instead.',newTrackIDLocal);
         warndlg(warn);
         return;
     end
 
     if(isempty(CellTracks(newTrackID).hulls))
-        warn = sprintf('Track %d does not exist, cannot change',newTrackID);
+        warn = sprintf('Track %s does not exist, cannot change',newTrackIDLocal);
         warndlg(warn);
         return
     end
@@ -52,13 +55,13 @@ function ContextChangeLabel(time,trackID)
     end
     
     if ( time < CellTracks(newTrackID).startTime )
-        warn = sprintf('Cannot change label from %d to %d, track %d does not exist until frame %d.',trackID, newTrackID,newTrackID, CellTracks(newTrackID).startTime);
+        warn = sprintf('Cannot change label from %d to %s, track %s does not exist until frame %d.',trackID, newTrackIDLocal,newTrackIDLocal, CellTracks(newTrackID).startTime);
         warndlg(warn);
         return
     end
     
     bOverride = 0;
-    [bLocked bCanChange] = Tracks.CheckLockedChangeLabel(trackID, newTrackID, time);
+    [bLocked, bCanChange] = Tracks.CheckLockedChangeLabel(trackID, newTrackID, time);
     if ( any(bLocked) )
         if ( ~bCanChange )
             resp = questdlg('This edit will affect the structure of tracks on a locked tree, do you wish to continue?', 'Warning: Locked Tree', 'Continue', 'Cancel', 'Cancel');
