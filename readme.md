@@ -1,59 +1,69 @@
-# **LEVer**
-### **The Lineaging, Editing and Validation tool**
+# **LEVER**
+### The Lineage Editing and Validation tool
 
- (https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master) program. http://bioimage.coe.drexel.edu
+LEVER is a MATLAB tool for cell segmentation, tracking and lineaging. By default LEVER tries to identify neural stem cells in phase contrast images. However, the segmentation and tracking algorithms can be extended to identify other cell types using different image modalities. Additional information on extending LEVER can be found in the bioimage/LEVER [wiki](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/home).
 
-Lever was developed by Drexel University's bioimage lab under the direction of Dr. Andrew Cohen. For more information on our lab click [here](http://bioimage.coe.drexel.edu/info/).
+#### Related Publications
+LEVER has been applied to the analysis of thousands of neural progentior cells (NPC) across hundreds of clones. The NPC analysis results along with a discussion of our LEVER algorithms and CloneView web visualization tool was published in Stem Cell Reports.
 
-## **Download Instructions**
+M. Winter, M. Liu, D. Monteleone, J. Melunis, U. Hershberg, S. K. Goderie, S. Temple, and A. R. Cohen, _Computational Image Analysis Reveals Intrinsic Multigenerational Differences Between Anterior and Posterior Cerebral Cortex Neural Progenitor Cells_, Stem Cell Reports, 2015. http://dx.doi.org/10.1016/j.stemcr.2015.08.002
 
-1. Open https://git-bioimage.coe.drexel.edu/bioimage/lever/tree/master
-2. Select Download zip in the top right
-3. Select Documents/MATLAB as destination (recommended)
+---
+The original LEVER software protocol with usage instructions for analyzing proliferating cells was published in Nature Protocols.
 
-## **Usage Instructions**
+Winter et al., _Vertebrate neural stem cell segmentation, tracking and lineaging with validation and editing_, Nat Protocols, vol. 6, pp. 1942-1952, 2011.
 
-**File Naming**
-LEVER datasets must be named using the convention
+---
+LEVER uses an integratedtracking algorithm termed Multitemporal Association Tracking (MAT). The algorithm, applied to microtubule transport tracking was originally published in the International Journal of Computational Biology and Drug Design. A comparison of MAT and other particle tracking algorithms was subsequently published in Nature Methods.
 
-{Experiment Indenfier}_c{channel number}_t{frame number}_z{z value}.
+Chenouard et al., _Objective comparison of particle tracking methods_, Nat Methods, Jan 19 2014.
 
-Example: SZV_c02_t0034_Z0001 Designates the second channel, 34th frame and 1 image of the SZV experment dataset.
+Winter et al., _Axonal transport analysis using Multitemporal Association Tracking_, International Journal of Computational Biology and Drug Design, vol. 5, pp. 35-48, 2012.
 
-**Running LEVer.m**
-1. Open MATLAB and set current directory to Documents/MATLAB/LEVER/SRC/MATLAB
+---
+LEVER was developed at Drexel University's Bioimaging lab under the direction of Dr. Andrew Cohen. For more information check the lab homepage http://bioimage.coe.drexel.edu.
 
-  ![alt text](Docs/MarkDownImages/mFileinCurrent.png)
+## Get The Source Code
 
-2. Run LEVer in the command Window
+##### Clone using Git version control system
+1. Open https://git-bioimage.coe.drexel.edu/opensource/lever
+2. Use the url at the top of the page to clone the git repository
 
-3. Chose 'Segment & Track'
+##### Download a zip archive
+1. Open https://git-bioimage.coe.drexel.edu/opensource/lever/tree/master
+2. Select Download zip option at the top of the page
+3. Unzip into the desired directory
 
-  ![alt text](Docs/MarkDownImages/OLDorNEWdata.png)
+## Running LEVER
+**An installer containing the compiled version of LEVER is available at** http://bioimage.coe.drexel.edu.
 
-4. Select the first tiff image of the dataset following the convention discussed below
+The installer is recommended for users that do not have access to MATLAB or do not need to develop new segmentation algorithms for use with LEVER.
 
-  ![alt text](Docs/MarkDownImages/OpenFirstData.png)
+### Running from source
 
-5. Chose the correct Segmentation Algorithm that corresponds with the cell and microscopy type
+1. Acquire the LEVER source through one of the above methods
+2. Run MATLAB (2012b) and set the current directory to the Path-to-LEVER/src/matlab
+3. Choose 'Segment & Track' to segment new data or 'Existing' to open previously created LEVER data
+4. If segmenting for the first time select an image that adheres to the required file name scheme (see below)
+5. Select the segmentation type that corresponds to the cell type and microscope configuration
 
-  ![alt text](Docs/MarkDownImages/SelectCellType.png)
+#### Image Naming Requirements
+LEVER requires that images for cell segmentation and display adhere to the following format:
 
-6. Select the location for the .mat file where the data will be stored
+ExperimentName_c{channel number}_t{frame number}.tif
 
+For example: Exp2010-01-24_c02_t0034.tif is a valid image file indicating the second channel and 34th frame from an experiment.
 
-## **Key Features of LEVER**
+## Usage
+General usage as well as specific interface documentation are linked below:
+* [General editing commands](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/general-editing)
+* [Tree specification interface](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/tree-editing)
+* [Resegmentation interface](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/resegmentation-interface)
 
-#### **Implementation of Segmentation Algorithms**
-Allows users to segment images using a range analysis algorithms developed in MATLAB
+## Additional Information
+Further information on LEVER is available on the bioimage/LEVER wiki at https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/home
 
-#### **Multitemporial tracking and Lineaging of cells**
-Results of the segmentation can be tracked in order to observe cellular behavior over time and across various cell cycles
-
-### **Additional Information**
-For more information on Global Structures, Major Functions and User controls please see the Git wiki page at https://git-bioimage.coe.drexel.edu/bioimage/lever/wikis/home
-
-### **License**
+## License
 Copyright 2015 Andrew Cohen
 
 LEVer is free software: you can redistribute it and/or modify
@@ -65,8 +75,5 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with LEVer in file "gnu gpl v3.txt".  If not, see
+A copy of the GNU GPL is available with LEVER (gnu gpl v3.txt). Otherwise see
 <http://www.gnu.org/licenses/>.
-
-## **Publications**

@@ -63,6 +63,8 @@ function errStatus = SegAndTrack()
     if ( ~isempty(errStatus) )
         errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
         
+        msgbox(['An error occured during segmentation and tracking. For further details see log file: ' errFilename],'SegAndTrack Error','warn');
+        
         fprintf('ERROR: Segmentation/Tracking did not complete successfully.\n');
         fprintf('       See %s for more details.\n',errFilename);
         

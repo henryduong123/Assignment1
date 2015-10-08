@@ -1,10 +1,17 @@
-function [numChannels numFrames] = GetImListInfo(rootFolder, namePattern)
-    numChannels = 0;
-    numFrames = 0;
+% [channelList, frameList] = GetImListInfo(rootFolder, namePattern)
+% 
+% Use image namePattern to return a list of all unique image frames and channels
+% based on image files in existing under rootFolder.
+% 
+% The lists are returned in sorted order.
+
+function [channelList, frameList] = GetImListInfo(rootFolder, namePattern)
+    channelList = [];
+    frameList = [];
     
     % Generate a directory list glob from namePattern as well as a
     % tokenized set for creating a regexp to match channel and frame numbers
-    [prefixString paramTokens postfixString] = Helper.SplitNamePattern(namePattern);
+    [prefixString, paramTokens, postfixString] = Helper.SplitNamePattern(namePattern);
     if ( isempty(prefixString) )
         return;
     end
@@ -30,17 +37,17 @@ function [numChannels numFrames] = GetImListInfo(rootFolder, namePattern)
     assumedParams = {'c' 't' 'z'};
     [bHasParam,paramIdx] = ismember(assumedParams, paramOrder);
     
-    numChannels = 1;
-    numFrames = 1;
-    numZStack = 1;
+    channelList = 1;
+    frameList = 1;
+    zList = 1;
     
     if ( bHasParam(1) )
         chans = cellfun(@(x)(str2double(x{paramIdx(1)})), matchTok);
-        numChannels = max(chans);
+        channelList = unique(chans);
     end
     
     if ( bHasParam(2) )
         times = cellfun(@(x)(str2double(x{paramIdx(2)})), matchTok);
-        numFrames = max(times);
+        frameList = unique(times);
     end
 end

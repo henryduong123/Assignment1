@@ -14,13 +14,14 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
     
     % Set CONSTANTS.imageSize as soon as possible
-    [numChannels numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
-    Load.AddConstant('numFrames', numFrames,1);
-    Load.AddConstant('numChannels', numChannels,1);
+    [channelList,frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
     
-    numProcessors = min(numProcessors, numFrames);
+    Load.AddConstant('numFrames', frameList(end),1);
+    Load.AddConstant('numChannels', channelList(end),1);
     
-    if ( numFrames < 1 )
+    numProcessors = min(numProcessors, CONSTANTS.numFrames);
+    
+    if ( CONSTANTS.numFrames < 1 )
         return;
     end
 
@@ -53,11 +54,11 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
     
     for procID=1:numProcessors
-        segCmd = makeSegCommand(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs);
+        segCmd = makeSegCommand(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs);
         system(['start ' segCmd ' && exit']);
     end
 %     for procID=1:numProcessors
-%         Segmentor(procID,numProcessors,numChannels,numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs{:});
+%         Segmentor(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs{:});
 %     end
 
     bSegFileExists = false(1,numProcessors);
@@ -144,8 +145,8 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     [srtFrames srtIdx] = sort(frameOrder);
     
     fprintf('Building Connected Component Distances... ');
-    HashedCells = cell(1,numFrames);
-    for t=1:numFrames
+    HashedCells = cell(1,CONSTANTS.numFrames);
+    for t=1:CONSTANTS.numFrames
         HashedCells{t} = struct('hullID',{}, 'trackID',{});
     end
     
@@ -166,7 +167,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
     fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
     
-    system(['.\MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    system(['MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
     
     fprintf('Done\n');
     tTrack = toc;

@@ -129,8 +129,8 @@ switch answer
             if ( ~isfield(CONSTANTS,'imageNamePattern') )
                 bQueryImageDir = true;
             elseif ( ~isfield(CONSTANTS,'channelOrder') )
-                [numChans numFrames] = Helper.GetImListInfo(CONSTANTS.rootImageFolder,CONSTANTS.imageNamePattern);
-                bQueryImageDir = (numFrames == 0);
+                [channelList, frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder,CONSTANTS.imageNamePattern);
+                bQueryImageDir = isempty(frameList);
             else
                 bQueryImageDir = isempty(Helper.LoadPrimaryIntensityImage(1));
             end

@@ -35,7 +35,7 @@ function imgray = LoadIntensityImage(filename)
     
     % Handle "color" images by averaging the color channels to get
     % intensity (should all be the same for all channels)
-    if ( ndims(im) == 3 )
-        im = mean(im,3);
+    if ( ndims(imgray) == 3 )
+        imgray = mean(imgray,3);
     end
 end
