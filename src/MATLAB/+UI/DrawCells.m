@@ -83,6 +83,10 @@ set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
 %set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
 axis(curAx,'off');
+
+% Force original zoom level to be the full image before we "zoom in"
+zoom(Figures.cells.handle, 'reset');
+
 if xl(1)~=0 && xl(2)~=1
     xlim(curAx,xl);
     ylim(curAx,yl);
