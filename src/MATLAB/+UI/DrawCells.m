@@ -36,6 +36,8 @@ global CellFamilies CellTracks CellHulls HashedCells Figures CONSTANTS MitosisEd
 timeLabel = ['Time: ' num2str(Figures.time)];
 set(Figures.cells.timeLabel,'String',timeLabel);
 
+[localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
+
 % Missing Cells Counter
 missingCells = UI.CellCountDifference();
 if strcmp(get(Figures.cells.menuHandles.missingCellsMenu, 'Checked'),'on')
@@ -127,7 +129,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
            
         curHullID = HashedCells{Figures.time}(i).hullID;
         curTrackID = HashedCells{Figures.time}(i).trackID;
-        
+
         if ( ~isempty(drawHullFilter) && ~any(curHullID == drawHullFilter ) )
             continue;
         end
@@ -135,11 +137,22 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         if ( ~checkCOMLims(curHullID, xl, yl) )
             continue;
         end
+
+%         if(Figures.cells.showInterior)
+%             drawString = [num2str(curTrackID) ' / ' num2str(curHullID)];
+%         else
+%             drawString = num2str(curTrackID);
+%         end
+        if isKey(localLabels, curTrackID)
+            labelStr = localLabels(curTrackID);
+        else
+            labelStr = num2str(curTrackID);
+        end
         
         if(Figures.cells.showInterior)
-            drawString = [num2str(curTrackID) ' / ' num2str(curHullID)];
+            drawString = [labelStr ' / ' num2str(curHullID)];
         else
-            drawString = num2str(curTrackID);
+            drawString = labelStr;
         end
         
         %draw connection to sibling 

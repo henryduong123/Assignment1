@@ -6,24 +6,32 @@ function ContextChangeParent(familyID,time,trackID)
     global Figures
 
     % This will prompt the user and ask for what Parent should be swapped.
-    newTrackID = inputdlg('Enter the node that needs to be swapped','Parent Swap',1,{num2str(trackID)});
-    if(isempty(newTrackID)),return,end;
-    newTrackID = str2double(newTrackID(1));
+    answer = inputdlg('Enter the node that needs to be swapped','Parent Swap',1,{num2str(trackID)});
+    if(isempty(answer)),return,end;
+    
+    [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(familyID);
+    newTrackIDLocal = answer(1);
+    newTrackID = UI.LocalToTrack(revLocalLabels, newTrackIDLocal);
+
+%    newTrackID = str2double(newTrackID(1));
     % If there isn't a parent ID, will send error. Example: Root Node
-  parentTrackID = CellTracks(trackID).parentTrack;
-  if (isempty(parentTrackID))
-       warndlg('This is the root node and will not be able to switch parents');
+    parentTrackID = CellTracks(trackID).parentTrack;
+    if (isempty(parentTrackID))
+        warndlg('This is the root node and will not be able to switch parents');
         return;
-  end
+    else
+        parentTrackIDLocal = UI.TrackToLocal(localLabels, parentTrackID);
+    end
+    
     % If the track doesn't exist it will send a warning.
-    if ( newTrackID > length(CellTracks) )
-        warn = sprintf('Track %d does not exist, use "Remove from Tree" instead.',newTrackID);
+    if ( isnan(newTrackID) || newTrackID > length(CellTracks) )
+        warn = sprintf('Track %s does not exist, use "Remove from Tree" instead.',newTrackIDLocal);
         warndlg(warn);
         return;
     end
    % if the cell doesn't exist in the current frame it will send a warning.
     if(isempty(CellTracks(newTrackID).hulls))
-        warn = sprintf('Track %d does not exist, cannot switch Parents',newTrackID);
+        warn = sprintf('Track %s does not exist, cannot switch Parents',newTrackIDLocal);
         warndlg(warn);
         return
     end
@@ -42,7 +50,7 @@ function ContextChangeParent(familyID,time,trackID)
     % if the cell does not exist untill later on in the tree it will send a
     % warning message.
     if ( time < CellTracks(newTrackID).startTime )
-        warn = sprintf('Cannot switch Parents from %d to %d, track %d does not exist until frame %d.',parentTrackID, newTrackID,newTrackID, CellTracks(newTrackID).startTime);
+        warn = sprintf('Cannot switch Parents from %s to %s, track %s does not exist until frame %d.',parentTrackIDLocal, newTrackIDLocal,newTrackIDLocal, CellTracks(newTrackID).startTime);
         warndlg(warn);
         return
     end
