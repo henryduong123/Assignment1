@@ -165,6 +165,12 @@ function bNeedsUpdate = FixOldFileVersions()
         Log = rmfield(Log,'figures');
         bNeedsUpdate = true;
     end
+    
+    % Make sure fields in CellFamilies are doubles
+    for i=1:length(CellFamilies)
+        CellFamilies(i).rootTrackID = double(CellFamilies(i).rootTrackID);
+        CellFamilies(i).tracks = double(CellFamilies(i).tracks);
+    end
 end
 
 function outStruct = forceLogicalFields(inStruct, varargin)
