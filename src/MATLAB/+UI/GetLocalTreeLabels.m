@@ -2,10 +2,10 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
     global CellFamilies CellTracks Figures
 
     % This is a map of trackID -> short label
-    localLabels = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
+    localLabels = containers.Map('KeyType', 'double', 'ValueType', 'any');
     
     % This is a map that's the reverse of localLabels, i.e. short label -> trackID
-    revLocalLabels = containers.Map('KeyType', 'char', 'ValueType', 'uint32');
+    revLocalLabels = containers.Map('KeyType', 'char', 'ValueType', 'double');
     
     trackHeights = Families.ComputeTrackHeights(familyID);
     
