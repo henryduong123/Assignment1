@@ -92,6 +92,12 @@ switch answer
         
         Load.AddConstant('version',softwareVersion,1);
         Load.AddConstant('cellType', [], 1);
+        
+        UI.SegPreview();
+        if ( isempty(CONSTANTS.cellType) )
+            return;
+        end
+        
         Load.InitializeConstants();
         
         errOpen = Segmentation.SegAndTrack();
