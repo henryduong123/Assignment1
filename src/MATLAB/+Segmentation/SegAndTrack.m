@@ -84,11 +84,11 @@ function [errStatus, segInfo] = SegAndTrack()
     
     UI.InitializeFigures();
     
-    UI.SaveData(1);
-    
     % Adds the special origin action, to indicate that this is initial
     % segmentation data from which edit actions are built.
     Editor.ReplayableEditAction(@Editor.OriginAction, 1);
+    
+    UI.SaveData(1);
     
     Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
 end

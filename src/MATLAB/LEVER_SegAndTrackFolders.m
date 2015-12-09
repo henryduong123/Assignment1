@@ -113,7 +113,11 @@ for dirIdx=1:length(dirList)
         
         % Initialize cell phenotype structure in all cases.
         CellPhenotypes = struct('descriptions', {{'died' 'ambiguous' 'off screen'}}, 'hullPhenoSet', {zeros(2,0)}, 'colors',{[0 0 0;.549 .28235 .6235;0 1 1]});
-
+        
+        % Adds the special origin action, to indicate that this is initial
+        % segmentation data from which edit actions are built.
+        Editor.ReplayableEditAction(@Editor.OriginAction, 1);
+        
         Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 
         Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
