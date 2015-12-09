@@ -24,11 +24,11 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
-    global CellFamilies CellHulls HashedCells
+function [deleteHullIDs, replaceHullID] = MergeSplitCells(mergeCells, selectedTree)
+    global CellHulls HashedCells
     
-    deleteCells = [];
-    replaceCell = [];
+    deleteHullIDs = [];
+    replaceHullID = [];
     
     if ( isempty(mergeCells) )
         return;
@@ -36,31 +36,27 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
     
     t = CellHulls(mergeCells(1)).time;
     bestEdge = getLockedMergeTrack(t, mergeCells, selectedTree);
-    [mergeObj, deleteCells] = Segmentation.CreateMergedCell(mergeCells);
+    [mergeHull, deleteHullIDs] = createMergeCell(mergeCells);
     
-    if ( isempty(mergeObj) || isempty(deleteCells) )
+    if ( isempty(mergeHull) || isempty(deleteHullIDs) )
         return;
     end
+
+    replaceHullID = min(deleteHullIDs);
+    deleteHullIDs = setdiff(deleteHullIDs,replaceHullID);
+    Hulls.SetCellHullEntries(replaceHullID, mergeHull);
+    Editor.LogEdit('Merge', deleteHullIDs, replaceHullID, true);
     
-    nextMergeCells = getNextMergeCells(t, deleteCells);
-    
-    replaceCell = min(deleteCells);
-    deleteCells = setdiff(deleteCells,replaceCell);
-    
-    mergeObj.userEdited = true;
-    Hulls.SetCellHullEntries(replaceCell, mergeObj);
-    Editor.LogEdit('Merge', deleteCells, replaceCell, true);
-    
-    for i=1:length(deleteCells)
-        Hulls.RemoveHull(deleteCells(i));
+    for i=1:length(deleteHullIDs)
+        Hulls.RemoveHull(deleteHullIDs(i));
     end
     
-    [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughMerge(t, replaceCell);
+    [costMatrix, extendHulls, affectedHulls] = Tracker.TrackThroughMerge(t, replaceHullID);
     if ( isempty(costMatrix) )
         return;
     end
     
-    changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, replaceCell);
+    changedHulls = Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, replaceHullID);
 
     if ( t < length(HashedCells) )
         checkHulls = [HashedCells{t}.hullID];
@@ -71,26 +67,11 @@ function [deleteCells replaceCell] = MergeSplitCells(mergeCells, selectedTree)
         affectedHulls = nextHulls(bAffectedHulls);
         
         if ( ~isempty(bestEdge) )
-            bestEdge(1) = replaceCell;
+            bestEdge(1) = replaceHullID;
             [costMatrix extendHulls affectedHulls] = enforceTrackEdges(bestEdge, costMatrix,extendHulls,affectedHulls);
         end
         
         Tracker.ReassignTracks(costMatrix, extendHulls, affectedHulls, []);
-    end
-end
-
-function nextMergeCells = getNextMergeCells(t, mergeCells)
-    global CellTracks
-    
-    nextMergeCells = [];
-    trackIDs = Hulls.GetTrackID(mergeCells);
-    for i=1:length(trackIDs)
-        hash = (t+1) - CellTracks(trackIDs(i)).startTime + 1;
-        if ( (hash > length(CellTracks(trackIDs(i)).hulls)) || (CellTracks(trackIDs(i)).hulls(hash) == 0) )
-            continue;
-        end
-        
-        nextMergeCells = [nextMergeCells CellTracks(trackIDs(i)).hulls(hash)];
     end
 end
 
@@ -130,6 +111,22 @@ function bestEdge = getLockedMergeTrack(t, mergeCells, selectedTree)
             return;
         end
     end
+end
+
+function [mergeHull, deleteHullIDs] = createMergeCell(mergeIDs)
+    global CONSTANTS CellHulls
+    
+    mergeHull = [];
+    deleteHullIDs = [];
+    
+    if ( length(mergeIDs) < 2 )
+        return;
+    end
+    
+    deleteHullIDs = mergeIDs;
+    newIndexPixels = vertcat(CellHulls(deleteHullIDs).indexPixels);
+
+    mergeHull = Hulls.CreateHull(CONSTANTS.imageSize, newIndexPixels, CellHulls(deleteHullIDs(1)).time, true);
 end
 
 function edge = getTrackEdge(t, trackID)
