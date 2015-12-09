@@ -156,7 +156,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     
     ConnectedDist = [];
     Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
-    Segmentation.RewriteSegData('segmentationData',datasetName);
+    Segmentation.WriteSegData('segmentationData',datasetName);
 
     fprintf(1,'\nDone\n');
     tSeg = toc;
@@ -173,10 +173,10 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     tTrack = toc;
 
     %% Import into LEVer's data sturcture
-    [objTracks gConnect] = Tracker.RereadTrackData('segmentationData', CONSTANTS.datasetName);
+    [objTracks gConnect] = Tracker.ReadTrackData('segmentationData', CONSTANTS.datasetName);
     fprintf('Finalizing Data...');
     try
-        Tracker.RebuildTrackingData(objTracks, gConnect);
+        Tracker.BuildTrackingData(objTracks, gConnect);
     catch excp
         
         cltime = clock();

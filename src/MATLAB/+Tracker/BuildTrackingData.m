@@ -1,4 +1,4 @@
-function RebuildTrackingData(objTracks, gConnect)
+function BuildTrackingData(objTracks, gConnect)
     global CONSTANTS Costs GraphEdits ResegLinks CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
 
     %ensure that the globals are empty

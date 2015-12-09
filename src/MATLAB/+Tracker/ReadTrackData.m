@@ -1,4 +1,4 @@
-function [objTracks gConnect] = RereadTrackData(DatasetDir, DatasetName)
+function [objTracks gConnect] = ReadTrackData(DatasetDir, DatasetName)
 global CellHulls
 
 th=max([CellHulls.time]);
