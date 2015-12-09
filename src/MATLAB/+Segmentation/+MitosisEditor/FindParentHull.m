@@ -55,7 +55,7 @@ function parentHull = addParentHull(midpoint, time, mitosisPoints)
     
     imSet = Helper.LoadIntensityImageSet(time);
 
-    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     segFunc = typeParams.resegRoutines(1).func;
     paramData = typeParams.resegRoutines(1).params;
     

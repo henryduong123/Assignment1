@@ -274,7 +274,7 @@ function hulls = partialSegHulls(chkPoint, time)
     
     imSet = Helper.LoadIntensityImageSet(time);
 
-    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     segFunc = typeParams.resegRoutines(1).func;
     paramData = typeParams.resegRoutines(1).params;
     

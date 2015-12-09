@@ -1,5 +1,4 @@
-function typeParams = GetCellTypeParameters(cellType)
-    typeParams = [];
+function typeParams = GetCellTypeStructure(cellType)
     cellTypes = Load.GetSupportedCellTypes();
     
     typeNames = {cellTypes.name};

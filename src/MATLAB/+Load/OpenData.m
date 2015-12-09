@@ -88,7 +88,7 @@ switch answer
         if (~Helper.ImageFileDialog())
             return;
         end
-        settings = Load.ReadSettings();
+        Load.ReadSettings();
         
         Load.AddConstant('version',softwareVersion,1);
         Load.AddConstant('cellType', [], 1);

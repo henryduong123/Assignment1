@@ -37,7 +37,7 @@ end
 rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
 xyCoords = Helper.SwapXY_RC(rcCoords);
 
-typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
 if ( typeParams.splitParams.useGMM )
     gmoptions = statset('Display','off', 'MaxIter',400);
     

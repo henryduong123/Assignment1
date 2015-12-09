@@ -61,7 +61,7 @@ Load.AddConstant('minTrackScore',               0.5,1);
 Load.AddConstant('maxPropagateFrames',          50,1);
 
 %% Particular Constants
-typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
 Load.AddConstant('timeResolution', typeParams.leverParams.timeResolution); %in min per frame
 Load.AddConstant('maxPixelDistance', typeParams.leverParams.maxPixelDistance);
 Load.AddConstant('maxCenterOfMassDistance', typeParams.leverParams.maxCenterOfMassDistance);

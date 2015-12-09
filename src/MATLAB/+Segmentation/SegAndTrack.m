@@ -43,7 +43,7 @@ function [errStatus, segInfo] = SegAndTrack()
 
     % 
     Load.SaveSettings(settings);
-    Load.AddConstant('matFullFile',[settings.matFilePath settings.matFile],1);
+    Load.AddConstant('matFullFile',fullfile(settings.matFilePath, settings.matFile),1);
     
     numProcessors = getenv('Number_of_processors');
     numProcessors = str2double(numProcessors);
@@ -51,17 +51,7 @@ function [errStatus, segInfo] = SegAndTrack()
         numProcessors = 4;
     end
     
-    % TODO: Rewrite for more extensible segmentation/tracking interface:
-    % Check for <celltype>Seg.exe, if it exists it is assumed to be a
-    % full-movie segmentation which handles threading internally
-    % (see e.g. HematoSeg.exe)
-    
-    errStatus = '';
-    
-    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
-    segInfo = typeParams.segRoutine;
-    
-    segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
+    segArgs = Segmentation.GetCellTypeParams();
     [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
     
     if ( ~isempty(errStatus) )

@@ -22,7 +22,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
     xyCoords = Helper.SwapXY_RC(rcCoords);
     
-    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     if ( typeParams.splitParams.useGMM )
         kIdx = gmmCluster(xyCoords, k, oldMeans);
     else

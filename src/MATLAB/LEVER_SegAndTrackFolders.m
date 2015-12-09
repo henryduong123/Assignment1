@@ -98,7 +98,7 @@ for dirIdx=1:length(dirList)
     Load.InitializeConstants();
 
     if ( ~bTrialRun )
-        segArgs = Helper.GetCellTypeSegParams(CONSTANTS.cellType);
+        segArgs = Segmentation.GetCellTypeParams();
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
         if ( ~isempty(errStatus) )
             fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', CONSTANTS.datasetName);

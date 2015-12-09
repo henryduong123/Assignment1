@@ -2,7 +2,7 @@
 function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, overlapPoints, time)
     global CONSTANTS
     
-    typeParams = Load.GetCellTypeParameters(CONSTANTS.cellType);
+    typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     
     origSegName = char(CONSTANTS.segInfo.func);
     resegRoutines = typeParams.resegRoutines;
