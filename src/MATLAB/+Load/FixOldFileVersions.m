@@ -25,7 +25,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bNeedsUpdate = FixOldFileVersions()
-    global CellHulls CellFamilies HashedCells ConnectedDist GraphEdits ResegLinks Costs CellPhenotypes CellTracks ReplayEditActions Log
+    global CONSTANTS CellHulls CellFamilies HashedCells ConnectedDist GraphEdits ResegLinks Costs CellPhenotypes CellTracks ReplayEditActions Log
 
     bNeedsUpdate = false;
     
@@ -34,6 +34,23 @@ function bNeedsUpdate = FixOldFileVersions()
         for i=1:length(emptyHash)
             HashedCells{emptyHash(i)} = struct('hullID',{}, 'trackID',{});
         end
+    end
+    
+    % As of version 7.13.3, channelOrder doesn't exist and primaryChannel indicates the main phase display/seg channel
+    if ( isfield(CONSTANTS, 'channelOrder') )
+        chanOrder = CONSTANTS.channelOrder;
+        [~,invChanOrder] = sort(chanOrder);
+        
+        Load.ReplaceConstant('channelOrder', 'primaryChannel',chanOrder(1));
+        
+        % Put channel colors and fluorescent indicators in file name order
+        chanColor = CONSTANTS.channelColor(invChanOrder,:);
+        chanFluor = CONSTANTS.channelFluor(invChanOrder,:);
+        
+        Load.AddConstant('channelColor', chanColor, 1);
+        Load.AddConstant('channelFluor', chanFluor, 1);
+        
+        bNeedsUpdate = true;
     end
     
     % As of version 7.11, add tag field for CellHulls

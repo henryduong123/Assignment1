@@ -34,13 +34,13 @@ hulls = [];
 frameTimes = [];
 
 supportedCellTypes = Load.GetSupportedCellTypes();
-[procArgs segArgs] = setSegArgs(supportedCellTypes, varargin);
+[procArgs,segArgs] = setSegArgs(supportedCellTypes, varargin);
 if ( isempty(procArgs) )
     return;
 end
 
-if ( isempty(procArgs.channelOrder) )
-	procArgs.channelOrder = 1:procArgs.numChannels;
+if ( isempty(procArgs.primaryChannel) )
+	procArgs.primaryChannel = 1;
 end
 
 % Use the supported type structure to find segmentation routine
@@ -65,14 +65,14 @@ try
     Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
     Load.AddConstant('numChannels', procArgs.numChannels, 1);
     Load.AddConstant('numFrames', procArgs.numFrames, 1);
-    Load.AddConstant('channelOrder', procArgs.channelOrder, 1);
+    Load.AddConstant('primaryChannel', procArgs.primaryChannel, 1);
     
     tStart = procArgs.procID;
     tEnd = procArgs.numFrames;
     tStep = procArgs.numProcesses;
+    primaryChan = procArgs.primaryChannel;
     
     numImages = floor(tEnd/tStep);
-    numChannels = procArgs.numChannels;
 
     for t = tStart:tStep:tEnd
         fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
@@ -82,7 +82,7 @@ try
             continue;
         end
         
-        frameHulls = segFunc(chanImSet, t, segParams{:});
+        frameHulls = segFunc(chanImSet, primaryChan, t, segParams{:});
         
         for i=1:length(frameHulls)
             if ( ~isfield(frameHulls(i),'tag') || isempty(frameHulls(i).tag) )
@@ -122,7 +122,7 @@ fprintf('\tDone\n');
 end
 
 function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
-    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'channelOrder',{[]}, 'imagePath',{''}, 'imagePattern',{''});
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'primaryChannel',{[]}, 'imagePath',{''}, 'imagePattern',{''});
     
     procArgFields = fieldnames(procArgs);
     procArgTypes = cellfun(@(x)(class(x)), struct2cell(procArgs), 'UniformOutput',0);

@@ -54,11 +54,11 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     end
     
     for procID=1:numProcessors
-        segCmd = makeSegCommand(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs);
+        segCmd = makeSegCommand(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs);
         system(['start ' segCmd ' && exit']);
     end
 %     for procID=1:numProcessors
-%         Segmentor(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.channelOrder,rootFolder,namePattern,segArgs{:});
+%         Segmentor(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs{:});
 %     end
 
     bSegFileExists = false(1,numProcessors);
@@ -190,14 +190,14 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     errStatus = '';
 end
 
-function segCmd = makeSegCommand(procID, numProc, numChannels, numFrames, cellType, channelOrder, rootFolder, imagePattern, segArg)
+function segCmd = makeSegCommand(procID, numProc, numChannels, numFrames, cellType, primaryChannel, rootFolder, imagePattern, segArg)
     segCmd = 'Segmentor';
     segCmd = [segCmd ' "' num2str(procID) '"'];
     segCmd = [segCmd ' "' num2str(numProc) '"'];
     segCmd = [segCmd ' "' num2str(numChannels) '"'];
     segCmd = [segCmd ' "' num2str(numFrames) '"'];
     segCmd = [segCmd ' "' cellType '"'];
-    segCmd = [segCmd ' "' num2str(channelOrder) '"'];
+    segCmd = [segCmd ' "' num2str(primaryChannel) '"'];
     segCmd = [segCmd ' "' rootFolder '"'];
     segCmd = [segCmd ' "' imagePattern '"'];
     

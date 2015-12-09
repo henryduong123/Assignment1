@@ -63,7 +63,7 @@ end
 imMax = max(img(:));
 img = mat2gray(img,[0 imMax]);
 
-chanLabel = sprintf('Channel: %d', CONSTANTS.channelOrder(Figures.chanIdx));
+chanLabel = sprintf('Channel: %d', Figures.chanIdx);
 set(Figures.cells.chanLabel,'String',chanLabel);
 
 curAx = get(Figures.cells.handle, 'CurrentAxes');

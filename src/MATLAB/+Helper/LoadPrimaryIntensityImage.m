@@ -1,6 +1,6 @@
 function im = LoadPrimaryIntensityImage(frame)
     global CONSTANTS
-	primaryChan = CONSTANTS.channelOrder(1);
+	primaryChan = CONSTANTS.primaryChannel;
     
     im = zeros(0,0);
     

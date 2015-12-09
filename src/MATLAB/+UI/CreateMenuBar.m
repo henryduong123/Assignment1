@@ -581,7 +581,7 @@ end
 function nextChannel(src,evnt)
 global Figures CONSTANTS
 Figures.chanIdx = Figures.chanIdx + 1;
-if Figures.chanIdx > numel(CONSTANTS.channelOrder)
+if Figures.chanIdx > CONSTANTS.numChannels
     Figures.chanIdx = 1;
 end
 UI.DrawCells();

@@ -1,12 +1,8 @@
-function hulls = FrameSegmentor_Adult(chanIm, t, imageAlpha)
+function hulls = FrameSegmentor_Adult(chanIm, primaryChan, t, imageAlpha)
     hulls = [];
     levels = struct('haloLevel',{[]}, 'igLevel',{[]});
     
-    if ( length(chanIm) > 1 )
-        fprintf('WARNING: Multichannel segmentation not supported by this algorithm, using channel 1\n');
-    end
-    
-    im = chanIm{1};
+    im = chanIm{primaryChan};
     if ( isempty(im) )
         return;
     end

@@ -1,12 +1,7 @@
-function hulls = FrameSegmentor_Embryonic(chanIm, t, imageAlpha)
+function hulls = FrameSegmentor_Embryonic(chanIm, primaryChan, t, imageAlpha)
     hulls = [];
-    levels = struct('haloLevel',{0}, 'igLevel',{0});
     
-    if ( length(chanIm) > 1 )
-        fprintf('WARNING: Multichannel segmentation not supported by this algorithm, using channel 1\n');
-    end
-    
-    im = chanIm{1};
+    im = chanIm{primaryChan};
     if ( isempty(im) )
         return;
     end

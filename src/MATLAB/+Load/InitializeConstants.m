@@ -71,22 +71,20 @@ Load.AddConstant('dMaxCenterOfMass', typeParams.trackParams.dMaxCenterOfMass);
 Load.AddConstant('dMaxConnectComponentTracker', typeParams.trackParams.dMaxConnectComponentTracker);
 
 % Try to update channel info based on loaded image data.
-channelOrder = typeParams.channelParams.channelOrder;
+primaryChannel = typeParams.channelParams.primaryChannel;
 channelColor = typeParams.channelParams.channelColor;
 channelFluor = typeParams.channelParams.channelFluor;
-numMissingChan = CONSTANTS.numChannels - length(channelOrder);
+
+numMissingChan = CONSTANTS.numChannels - length(channelFluor);
 if ( numMissingChan > 0 )
-    missingChannels = length(channelOrder):length(channelOrder)+numMissingChan;
-    channelOrder = [channelOrder missingChannels];
     channelColor = [channelColor; hsv(numMissingChan+2)];
     channelFluor = [channelFluor false(1,numMissingChan)];
 elseif ( numMissingChan < 0 )
-    channelOrder = channelOrder(1:CONSTANTS.numChannels);
     channelColor = channelColor(1:CONSTANTS.numChannels,:);
     channelFluor = channelFluor(1:CONSTANTS.numChannels);
 end
 
-Load.AddConstant('channelOrder', channelOrder);
+Load.AddConstant('primaryChannel', primaryChannel);
 Load.AddConstant('channelColor', channelColor);
 Load.AddConstant('channelFluor', channelFluor);
 

@@ -35,7 +35,7 @@ Figures.time = 1;
 % Cell count in active clone
 Figures.cellCount = 1;
 % Which channel to display in DrawCells
-Figures.chanIdx = 1;
+Figures.chanIdx = CONSTANTS.primaryChannel;
 
 oldCellsHandle = [];
 oldTreeHandle = [];
@@ -88,7 +88,7 @@ Figures.cells.timeLabel = uicontrol(Figures.cells.handle,...
 Figures.cells.chanLabel = uicontrol(Figures.cells.handle,...
     'Style','text',...
     'Position',[60 0 60 20],...
-    'String',['Channel: ' num2str(CONSTANTS.channelOrder(Figures.chanIdx))]);
+    'String',['Channel: ' num2str(Figures.chanIdx)]);
 
 % Missing Cell counter: number of missing cells in current cell frame
 Figures.cells.cellCountLabel = uicontrol(Figures.cells.handle,...
