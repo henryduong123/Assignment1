@@ -7,9 +7,8 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
     % This is a map that's the reverse of localLabels, i.e. short label -> trackID
     revLocalLabels = containers.Map('KeyType', 'char', 'ValueType', 'double');
     
-    trackHeights = Families.ComputeTrackHeights(familyID);
-    
     rootTrackID = CellFamilies(familyID).rootTrackID;
+    trackHeights = Families.ComputeTrackHeights(rootTrackID);
     
     numTracks = length(CellFamilies(familyID).tracks);
     
