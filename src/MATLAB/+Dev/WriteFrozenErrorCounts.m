@@ -41,7 +41,7 @@ function [datasetName, frozenTrees, hullCount, trackCount, missingCount, userSeg
         return;
     end
 
-    datasetName = CONSTANTS.datasetName;
+    datasetName = Metadata.GetDatasetName();
 
     for i=1:length(frozenTrees)
         [hullIDs missingHulls] = Families.GetAllHulls(frozenTrees(i));

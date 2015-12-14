@@ -38,7 +38,7 @@ famTracks = CellFamilies(familyID).tracks;
 
 settings = Load.ReadSettings();
 
-[outFile,outPath,FilterIndex] = uiputfile('*.csv',['Export Metrics for clone #' num2str(rootTrackID)],fullfile(settings.matFilePath,[CONSTANTS.datasetName '_' num2str(rootTrackID) '_metrics.csv']));
+[outFile,outPath,FilterIndex] = uiputfile('*.csv',['Export Metrics for clone #' num2str(rootTrackID)],fullfile(settings.matFilePath,[Metadata.GetDatasetName() '_' num2str(rootTrackID) '_metrics.csv']));
 if ( FilterIndex == 0 )
     return;
 end

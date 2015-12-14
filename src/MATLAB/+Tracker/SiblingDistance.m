@@ -43,7 +43,7 @@ end
 
 hullPerims = containers.Map('KeyType','uint32', 'ValueType','any');
 
-ccDist = Helper.CalcConnectedDistance(cell1HullID,cell2HullID, CONSTANTS.imageSize, hullPerims, CellHulls);
+ccDist = Helper.CalcConnectedDistance(cell1HullID,cell2HullID, Metadata.GetDimensions('rc'), hullPerims, CellHulls);
 distanceCenterOfMass = norm(CellHulls(cell1HullID).centerOfMass - CellHulls(cell2HullID).centerOfMass);
 
 if(distanceCenterOfMass > CONSTANTS.maxCenterOfMassDistance || ccDist > CONSTANTS.maxPixelDistance)

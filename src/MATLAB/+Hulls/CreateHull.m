@@ -1,4 +1,4 @@
-function newHull = CreateHull(imageSize, indexPixels, time, userEdited, tag)
+function newHull = CreateHull(rcImageDims, indexPixels, time, userEdited, tag)
     global CellHulls
     
     if ( ~exist('time','var') )
@@ -15,7 +15,7 @@ function newHull = CreateHull(imageSize, indexPixels, time, userEdited, tag)
     
     newHull = Helper.MakeEmptyStruct(CellHulls);
     
-    rcCoords = Helper.IndexToCoord(imageSize, indexPixels);
+    rcCoords = Helper.IndexToCoord(rcImageDims, indexPixels);
     xyCoords = Helper.SwapXY_RC(rcCoords);
     
     newHull.indexPixels = indexPixels;

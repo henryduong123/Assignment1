@@ -34,7 +34,8 @@ if ( ~exist('bUserEdit','var') )
 end
 
 % guassian clustering (x,y,...) coordinates of cell interior
-rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
+rcImageDims = Metadata.GetDimensions('rc');
+rcCoords = Helper.IndexToCoord(rcImageDims, hull.indexPixels);
 xyCoords = Helper.SwapXY_RC(rcCoords);
 
 typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
@@ -54,7 +55,7 @@ end
 for i=1:k
     newHullPixels = hull.indexPixels( kIdx==i );
     
-    outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time, bUserEdit);
+    outputHull = Hulls.CreateHull(rcImageDims, newHullPixels, hull.time, bUserEdit);
     newHulls = [newHulls outputHull];
 end
 

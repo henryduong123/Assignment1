@@ -1,17 +1,15 @@
 function chanImSet = LoadIntensityImageSet(frame)
-    global CONSTANTS
-    
-    chanImSet = cell(1,CONSTANTS.numChannels);
+    chanImSet = cell(1, Metadata.GetNumberOfChannels());
     
     bAllMissing = true;
-    for c = 1:CONSTANTS.numChannels
-        imFilename = Helper.GetFullImagePath(c, frame);
-        if ( ~exist(imFilename,'file') )
+    for c = 1:Metadata.GetNumberOfChannels()
+        im = Helper.LoadIntensityImage(frame, c);
+        if ( isempty(im) )
             continue;
         end
         
         bAllMissing = false;
-        chanImSet{c} = Helper.LoadIntensityImage(imFilename);
+        chanImSet{c} = im;
     end
     
     if ( bAllMissing )

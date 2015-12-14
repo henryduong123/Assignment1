@@ -51,7 +51,7 @@ function newHulls = splitMitosisHull(hullID, linePoints, bForcePoints)
     
     mitVec = mitVec / norm(mitVec);
     
-    [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), CellHulls(hullID).indexPixels);
     
     if ( bForcePoints )
         distSq = ((c-linePoints(1,1)).^2 + (r-linePoints(1,2)).^2);
@@ -150,7 +150,7 @@ function hullID = mergeOverlapping(chkHulls, chkPoint, time)
     
     objCOM = zeros(length(validHulls),2);
     for i=1:length(validHulls)
-        [r c] = ind2sub(CONSTANTS.imageSize, validHulls(i).indexPixels);
+        [r c] = ind2sub(Metadata.GetDimensions('rc'), validHulls(i).indexPixels);
         objCOM = mean([r c], 1);
     end
     
@@ -159,7 +159,7 @@ function hullID = mergeOverlapping(chkHulls, chkPoint, time)
     
     newHull = validHulls(minIdx);
     
-    [r c] = ind2sub(CONSTANTS.imageSize, newHull.indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), newHull.indexPixels);
     newHullEntry = createNewHullStruct(c, r, time);
     
     bMergeHulls = arrayfun(@(x)(nnz(ismember(newHullEntry.indexPixels,CellHulls(x).indexPixels)) > 5), frameHulls);
@@ -197,14 +197,14 @@ function hullID = mergeOverlapping(chkHulls, chkPoint, time)
 end
 
 function outHullID = mergeHullValues(hullID, mergeStruct)
-    global CONSTANTS CellHulls
+    global CellHulls
     
     outHullID = hullID;
     
     [dump, idxA, idxB] = union(CellHulls(hullID).indexPixels, mergeStruct.indexPixels);
     CellHulls(hullID).indexPixels = [CellHulls(hullID).indexPixels(idxA); mergeStruct.indexPixels(idxB)];
     
-    [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
     cvIdx = Helper.ConvexHull(c,r);
     if ( isempty(cvIdx) )
@@ -215,12 +215,12 @@ function outHullID = mergeHullValues(hullID, mergeStruct)
 end
 
 function subtractHulls(hullID, subHullID)
-    global CONSTANTS CellHulls
+    global CellHulls
     
     [dump, subIdx] = union(CellHulls(hullID).indexPixels, CellHulls(subHullID).indexPixels);
     CellHulls(hullID).indexPixels = CellHulls(hullID).indexPixels(subIdx);
     
-    [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(hullID).indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), CellHulls(hullID).indexPixels);
     CellHulls(hullID).centerOfMass = mean([r c]);
     cvIdx = Helper.ConvexHull(c,r);
     if ( isempty(cvIdx) )
@@ -239,20 +239,18 @@ function newHullID = addPointHullEntry(chkPoint, time)
 end
 
 function newHullID = addHullEntry(hull, time)
-    global CONSTANTS
-    
-    [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
     newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHull = createNewHullStruct(x,y, time)
-    global CONSTANTS CellHulls
+    global CellHulls
     
     newHull = Helper.MakeEmptyStruct(CellHulls);
 
-    idxPix = sub2ind(CONSTANTS.imageSize, y,x);
+    idxPix = sub2ind(Metadata.GetDimensions('rc'), y,x);
     
     newHull.indexPixels = idxPix;
     newHull.centerOfMass = mean([y x], 1);

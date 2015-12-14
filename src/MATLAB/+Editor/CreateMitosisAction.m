@@ -49,11 +49,11 @@ function historyAction = CreateMitosisAction(trackID, dirFlag, time, linePoints)
 end
 
 function newPoints = clipToImage(linePoints)
-    global CONSTANTS
-    
     newPoints = linePoints;
-    newPoints(:,1) = min(newPoints(:,1), repmat(CONSTANTS.imageSize(2),size(linePoints,1),1));
-    newPoints(:,2) = min(newPoints(:,2), repmat(CONSTANTS.imageSize(1),size(linePoints,1),1));
+    
+    xyImageDims = Metadata.GetDimensions('xy');
+    newPoints(:,1) = min(newPoints(:,1), repmat(xyImageDims(1),size(linePoints,1),1));
+    newPoints(:,2) = min(newPoints(:,2), repmat(xyImageDims(2),size(linePoints,1),1));
     
     newPoints(:,1) = max(newPoints(:,1), repmat(1,size(linePoints,1),1));
     newPoints(:,2) = max(newPoints(:,2), repmat(1,size(linePoints,1),1));

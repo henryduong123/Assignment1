@@ -3,9 +3,9 @@
 % reconstruction of an edit set from the original data.
 
 function OutputDebugErrorFile()
-    global CONSTANTS Log ReplayEditActions
+    global Log ReplayEditActions
     
-    errfile = [CONSTANTS.datasetName '_DBGEDITS_' num2str(length(Log)) '.mat'];
+    errfile = [Metadata.GetDatasetName() '_DBGEDITS_' num2str(length(Log)) '.mat'];
     save(errfile, 'ReplayEditActions');
 end
 

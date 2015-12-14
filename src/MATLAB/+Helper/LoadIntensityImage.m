@@ -1,15 +1,14 @@
-% imgray = LoadIntensityImage(filename)
+% imgray = LoadIntensityImage(frame, chan)
 % Loads image and calculates "intensity" if it is an rgb image,
 % then uses mat2gray to convert to grayscale values on [0,1].
 
-function imgray = LoadIntensityImage(filename)
+function imgray = LoadIntensityImage(frame, chan)
     global CONSTANTS
     bitrates = [8 12 16];
     
-    [im map]=imread(filename);
-    
+    im = MicroscopeData.Reader(Metadata.GetImageInfo(), frame, chan);
     if ( ndims(im) > 3 )
-        error('LEVER tool only supports grayscale images, please select single channel tiff images.');
+        error('LEVER tool only supports grayscale images!');
     end
     
     if ( ~isfield(CONSTANTS,'bitrate') )
@@ -33,9 +32,8 @@ function imgray = LoadIntensityImage(filename)
         imgray = mat2gray(im);
     end
     
-    % Handle "color" images by averaging the color channels to get
-    % intensity (should all be the same for all channels)
+    % Handle "color" or 3D images by max intensity projection of the color channels to get intensity
     if ( ndims(imgray) == 3 )
-        imgray = mean(imgray,3);
+        imgray = max(imgray,[],3);
     end
 end

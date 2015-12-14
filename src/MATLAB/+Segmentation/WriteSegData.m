@@ -1,5 +1,12 @@
 function WriteSegData(DatasetDir, DatasetName)
-global CONSTANTS CellHulls ConnectedDist
+global CellHulls ConnectedDist
+
+% fname=Helper.GetFullImagePath(1);
+% im = Helper.LoadIntensityImage(fname);
+% if isempty(im)
+%     fprintf('error - unable to extract image size - tracking will fail\n');
+% end
+rcImageDims = Metadata.GetDimensions('rc');
 
 th = max([CellHulls.time]);
 hashedHulls = cell(th,1);
@@ -15,7 +22,7 @@ fprintf(fid,'%d %d\n',th,length(CellHulls) );
 for i=1:length(hashedHulls)
     fprintf(fid,'%d\n',length(hashedHulls{i}) );
     for j=1:length(hashedHulls{i})
-        [r c]=ind2sub(CONSTANTS.imageSize,CellHulls(hashedHulls{i}(j)).indexPixels);
+        [r c]=ind2sub(rcImageDims,CellHulls(hashedHulls{i}(j)).indexPixels);
         COM=round(mean([r c],1));
         fprintf(fid,'%d %d %d %d:',COM(2),COM(1),length(r),size(ConnectedDist{hashedHulls{i}(j)},1) );
         for k=1:size(ConnectedDist{hashedHulls{i}(j)},1)

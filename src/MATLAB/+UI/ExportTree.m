@@ -28,7 +28,7 @@ function ExportTree(src, evt)
 
 global CellFamilies HashedCells Figures CONSTANTS CellTracks CellPhenotypes  
 figure
-set(gcf,'name',CONSTANTS.datasetName)
+set(gcf,'name', Metadata.GetDatasetName())
 set(gcf,'numbertitle','off')
 set(gcf,'color','w')
 familyID=Figures.tree.familyID;

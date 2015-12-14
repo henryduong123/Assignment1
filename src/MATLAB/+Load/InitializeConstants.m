@@ -28,21 +28,6 @@ function InitializeConstants()
 %% Set all constants here
 
 global CONSTANTS
-
-[channelList, frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
-
-Load.AddConstant('numFrames', frameList(end),0);
-Load.AddConstant('numChannels', channelList(end),0);
-
-imSet = Helper.LoadIntensityImageSet(1);
-
-imSizes = zeros(length(imSet),2);
-for i=1:length(imSet)
-    imSizes(i,:) = size(imSet{i});
-end
-
-Load.AddConstant('imageSize', max(imSizes,[],1),0);
-
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
     Load.AddConstant('cellType',cellType,1);
@@ -75,13 +60,13 @@ primaryChannel = typeParams.channelParams.primaryChannel;
 channelColor = typeParams.channelParams.channelColor;
 channelFluor = typeParams.channelParams.channelFluor;
 
-numMissingChan = CONSTANTS.numChannels - length(channelFluor);
+numMissingChan = Metadata.GetNumberOfChannels() - length(channelFluor);
 if ( numMissingChan > 0 )
     channelColor = [channelColor; hsv(numMissingChan+2)];
     channelFluor = [channelFluor false(1,numMissingChan)];
 elseif ( numMissingChan < 0 )
-    channelColor = channelColor(1:CONSTANTS.numChannels,:);
-    channelFluor = channelFluor(1:CONSTANTS.numChannels);
+    channelColor = channelColor(1:Metadata.GetNumberOfChannels(),:);
+    channelFluor = channelFluor(1:Metadata.GetNumberOfChannels());
 end
 
 Load.AddConstant('primaryChannel', primaryChannel);
