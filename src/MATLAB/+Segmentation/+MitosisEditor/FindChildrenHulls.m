@@ -287,7 +287,7 @@ function hulls = partialSegHulls(chkPoint, time)
         end
     end
     
-    hulls = Segmentation.PartialImageSegment(imSet, chkPoint, 200, segFunc, segParams);
+    hulls = Segmentation.PartialImageSegment(imSet, chkPoint, 200, CONSTANTS.primaryChannel, segFunc, segParams);
 end
 
 function updateLocalTracking(newHulls, hullTime)

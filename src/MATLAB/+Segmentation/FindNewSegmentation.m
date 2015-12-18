@@ -20,13 +20,13 @@ function hull = FindNewSegmentation(chanImg, centerPt, subSize, bSearchParams, o
         paramList = buildParams(chkParams, bSearchParams, origParams);
         
         if ( isempty(paramList) )
-            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc,{});
+            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, CONSTANTS.primaryChannel, segFunc,{});
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
         end
         
         for j=1:size(paramList)
             paramArgs = num2cell(paramList(j,:));
-            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, segFunc, paramArgs);
+            chkHulls = Segmentation.PartialImageSegment(chanImg, centerPt, subSize, CONSTANTS.primaryChannel, segFunc, paramArgs);
 
             hull = validIntersectHull(chkHulls, centerPt, overlapPoints);
             

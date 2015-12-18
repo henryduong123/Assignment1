@@ -25,7 +25,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, segFunc, segArgs)
+function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, primaryChan, segFunc, segArgs)
     imDims = max(cellfun(@(x)(ndims(x)),chanImg));
     if ( length(subSize) < imDims )
         subSize = repmat(subSize(1), 1,imDims);
@@ -56,7 +56,7 @@ function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, segFunc, segA
         subImSize = max([subImSize; size(chanSubImg{c})],[],1);
     end
     
-    localHulls = segFunc(chanSubImg, 1, segArgs{:});
+    localHulls = segFunc(chanSubImg, primaryChan, 1, segArgs{:});
     
     hulls = fixupFromSubimage(rcCoordMin, imSize, subImSize, localHulls);
 end

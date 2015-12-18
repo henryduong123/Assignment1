@@ -68,7 +68,7 @@ function parentHull = addParentHull(midpoint, time, mitosisPoints)
         end
     end
     
-    hulls = Segmentation.PartialImageSegment(imSet, midpoint, 200, segFunc, segParams);
+    hulls = Segmentation.PartialImageSegment(imSet, midpoint, 200, CONSTANTS.primaryChannel, segFunc, segParams);
     
     pointCounts = zeros(1,length(hulls));
     for i=1:length(hulls)
