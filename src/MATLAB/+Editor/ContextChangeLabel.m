@@ -33,7 +33,7 @@ function ContextChangeLabel(time,trackID)
     answer = inputdlg('Enter New Label','New Label',1,{UI.TrackToLocal(localLabels, trackID)});
     if(isempty(answer)),return,end;
     
-    newTrackIDLocal = answer(1);
+    newTrackIDLocal = answer{1};
     newTrackID = UI.LocalToTrack(revLocalLabels, newTrackIDLocal);
 
     if ( newTrackID > length(CellTracks) )

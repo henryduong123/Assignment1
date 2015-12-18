@@ -147,7 +147,7 @@ function addHull(src, evt, numhulls)
     if ( numhulls < 0 )
         num = inputdlg('Enter Number of Cells Present','Add Hulls',1,{'1'});
         if(isempty(num)),return,end;
-        numhulls = str2double(num);
+        numhulls = str2double(num{1});
     end
     
     Editor.AddHull(numhulls);

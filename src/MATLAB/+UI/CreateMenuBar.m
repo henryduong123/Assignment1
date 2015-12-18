@@ -636,14 +636,14 @@ global Figures HashedCells
 answer = inputdlg('Enter Frame Number:','Jump to Time...',1,{num2str(Figures.time)});
 
 if(isempty(answer)),return,end;
-answer = str2double(answer(1));
+newTime = str2double(answer{1});
 
-if(answer < 1)
+if(newTime < 1)
     Figures.time = 1;
-elseif(answer > length(HashedCells))
+elseif(newTime > length(HashedCells))
     Figures.time = length(HashedCells);
 else
-    Figures.time = answer;
+    Figures.time = newTime;
 end
 UI.UpdateTimeIndicatorLine();
 UI.DrawCells();
@@ -652,15 +652,15 @@ end
 function displayTree(src,evnt)
 global CellTracks
 answer = inputdlg('Enter Tree Containing Cell:','Display Tree',1);
-answer = str2double(answer);
+trackID = str2double(answer{1});
 
-if(isempty(answer)),return,end
+if(isempty(trackID)),return,end
 
-if(0>=answer || isempty(CellTracks(answer).hulls))
-    msgbox([num2str(answer) ' is not a valid cell'],'Not Valid','error');
+if(0>=trackID || isempty(CellTracks(trackID).hulls))
+    msgbox([num2str(trackID) ' is not a valid cell'],'Not Valid','error');
     return
 end
-UI.DrawTree(CellTracks(answer).familyID);
+UI.DrawTree(CellTracks(trackID).familyID);
 UI.DrawCells();
 end
 

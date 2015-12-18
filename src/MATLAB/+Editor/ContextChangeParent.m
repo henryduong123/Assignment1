@@ -10,7 +10,7 @@ function ContextChangeParent(familyID,time,trackID)
     if(isempty(answer)),return,end;
     
     [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(familyID);
-    newTrackIDLocal = answer(1);
+    newTrackIDLocal = answer{1};
     newTrackID = UI.LocalToTrack(revLocalLabels, newTrackIDLocal);
 
 %    newTrackID = str2double(newTrackID(1));

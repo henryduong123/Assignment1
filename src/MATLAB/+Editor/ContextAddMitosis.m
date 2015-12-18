@@ -38,7 +38,7 @@ if(CellTracks(trackID).startTime==time)
     while(~bValid)
         answer = inputdlg({'Enter parent of these daughter cells '},'Parent',1,{''});
         if(isempty(answer)),return,end
-        parentTrackLocal = answer(1);
+        parentTrackLocal = answer{1};
         parentTrack = UI.LocalToTrack(revLocalLabels, parentTrackLocal);
         
         if(isnan(parentTrack) || CellTracks(parentTrack).startTime>=time || isempty(CellTracks(parentTrack).hulls) ||...

@@ -134,7 +134,7 @@ answer = inputdlg({'Enter Time of Mitosis',['Enter new sister cell of ' UI.Track
 
 if(isempty(answer)),return,end
 
-time = str2double(answer(1));
+time = str2double(answer{1});
 %siblingTrack = str2double(answer(2));
 siblingTrack = UI.LocalToTrack(revLocalLabels, answer{2});
 

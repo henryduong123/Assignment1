@@ -42,7 +42,7 @@ if ( isempty(endAns) )
     return;
 end
 
-nframes = str2double(endAns);
+nframes = str2double(endAns{1});
 nframes = max(nframes, 20);
 nframes = min(nframes, length(HashedCells));
 

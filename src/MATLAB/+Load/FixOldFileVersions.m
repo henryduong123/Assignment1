@@ -29,6 +29,11 @@ function bNeedsUpdate = FixOldFileVersions()
 
     bNeedsUpdate = false;
     
+    % File was created with an incorrectly compiled version string (force version 6.2)
+    if ( ~Load.FileVersionGreaterOrEqual('1.0') )
+        CONSTANTS.version = '6.2';
+    end
+    
     emptyHash = find(cellfun(@(x)(isempty(x)), HashedCells));
     if ( ~isempty(emptyHash) )
         for i=1:length(emptyHash)

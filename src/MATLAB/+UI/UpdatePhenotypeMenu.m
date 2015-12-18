@@ -68,7 +68,7 @@ function setPhenotype(src, evnt)
             return
         end
         
-        [bErr clickPheno] = Editor.ReplayableEditAction(@Editor.AddPhenotype, newDescription);
+        [bErr clickPheno] = Editor.ReplayableEditAction(@Editor.AddPhenotype, newDescription{1});
         if ( bErr )
             return;
         end
