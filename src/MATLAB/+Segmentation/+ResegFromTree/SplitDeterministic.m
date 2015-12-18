@@ -9,7 +9,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         return;
     end
     
-    oldMeans = zeros(k, Helper.GetNumberOfDimensions());
+    oldMeans = zeros(k, 2);
     for i=1:length(checkHullIDs)
         oldCoord = Helper.IndexToCoord(CONSTANTS.imageSize, CellHulls(checkHullIDs(i)).indexPixels);
         oldMeans(i,:) = Helper.SwapXY_RC(mean(oldCoord,1));
@@ -37,8 +37,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         newHullPixels = hull.indexPixels( kIdx==i );
         
         outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time);
-        
-        newHulls = [newHulls nh];
+        newHulls = [newHulls outputHull];
     end
 
     % Define an ordering on the hulls selected, COM is unique per component so

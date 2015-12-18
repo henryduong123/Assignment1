@@ -52,7 +52,7 @@ if ( any(isnan(kIdx)) )
 end
 
 for i=1:k
-    
+    newHullPixels = hull.indexPixels( kIdx==i );
     
     outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time, bUserEdit);
     newHulls = [newHulls outputHull];
