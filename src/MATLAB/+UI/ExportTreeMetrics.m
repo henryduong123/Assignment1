@@ -24,19 +24,37 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ExportMetrics(src,evnt)
+function ExportTreeMetrics(src,evnt)
 
-global CellTracks CONSTANTS
+global CellTracks CellFamilies CONSTANTS Figures
 
 trackMetrics = [];
 
-for i=1:length(CellTracks)
-    trackMetrics = [trackMetrics getMetrics(i,CellTracks(i))];
+familyID=Figures.tree.familyID;
+rootTrackID = CellFamilies(familyID).rootTrackID;
+
+trackHeights = Families.ComputeTrackHeights(rootTrackID);
+famTracks = CellFamilies(familyID).tracks;
+
+settings = Load.ReadSettings();
+
+[outFile,outPath,FilterIndex] = uiputfile('*.csv',['Export Metrics for clone #' num2str(rootTrackID)],fullfile(settings.matFilePath,[CONSTANTS.datasetName '_' num2str(rootTrackID) '_metrics.csv']));
+if ( FilterIndex == 0 )
+    return;
 end
 
-data = 'Cell Label,Number of Frames,First Frame,Last Frame,Origin Cell,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area\n';
+trackSortList = zeros(1,length(famTracks));
+for i=1:length(famTracks)
+    trackSortList(i) = trackHeights(famTracks(i));
+    trackMetrics = [trackMetrics getMetrics(famTracks(i),CellTracks(famTracks(i)))];
+end
+
+[sortedHeights,srtIdx] = sort(trackSortList,'descend');
+trackMetrics = trackMetrics(srtIdx);
+
+data = 'Cell Label,Number of Frames,First Frame,Last Frame,Parent,Child 1,Child 2,Phenotype,Dies on Frame,Mean Speed,Standard Deviation Speed,Min Speed,Max Speed,Mean Area,Standard Deviation Area,Min Area,Max Area\n';
 for i=1:length(trackMetrics)
-    data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ',' num2str(trackMetrics(i).firstFrame) ',' num2str(trackMetrics(i).lastFrame) ',' num2str(trackMetrics(i).familyID) ',' ];
+    data = [data num2str(trackMetrics(i).trackID) ',' num2str(trackMetrics(i).timeFrame) ',' num2str(trackMetrics(i).firstFrame) ',' num2str(trackMetrics(i).lastFrame) ',' ];
     if(~isempty(trackMetrics(i).parent))
         data = [data num2str(trackMetrics(i).parent) ','];
     else
@@ -64,15 +82,14 @@ for i=1:length(trackMetrics)
         num2str(trackMetrics(i).minArea) ',' num2str(trackMetrics(i).maxArea) '\n'];
 end
 
-settings = Load.ReadSettings();
-file = fopen([settings.matFilePath CONSTANTS.datasetName '_metrics.csv'],'w');
-if(file==-1)
-    warndlg(['The file ' settings.matFilePath CONSTANTS.datasetName '_metrics.csv might be opened.  Please close and try again.']);
+file = fopen(fullfile(outPath,outFile),'w');
+if( file < 0)
+    warndlg(['The file ' fullfile(outPath,outFile) ' might be opened.  Please close and try again.']);
     return
 end
+
 fprintf(file,data);
 fclose(file);
-msgbox(['Metrics have been saved to: ' settings.matFilePath CONSTANTS.datasetName '_metrics.csv'],'Saved','help');
 end
 
 function trackMetric = getMetrics(trackID,track)
