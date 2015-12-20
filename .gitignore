@@ -58,3 +58,12 @@ src/MATLAB/*.csv
 src/MATLAB/filmstrip/*/*
 src/MATLAB/*.exe
 bin64/*.exe
+*.ipdb
+*.iobj
+*.exp
+*.tlog
+*.idb
+*.opendb
+src/c/Output/TrackerMex/Debug_x64/
+src/c/Output/TrackerMex/Release_x64/
+src/c/trackerMex.mexw64
