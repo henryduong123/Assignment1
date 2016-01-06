@@ -8,15 +8,15 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
     revLocalLabels = containers.Map('KeyType', 'char', 'ValueType', 'double');
     
     rootTrackID = CellFamilies(familyID).rootTrackID;
-    trackHeights = Families.ComputeTrackHeights(rootTrackID);
+    roots = Families.GetFamilyRoots(rootTrackID);
     
-    numTracks = length(CellFamilies(familyID).tracks);
+    trackHeights = Families.ComputeTrackHeights(rootTrackID);
     
     % if 'Show Short Labels' is unchecked, just return the label itself
     bUseLongLabels = strcmp('off',get(Figures.tree.menuHandles.shortLabelsMenu, 'Checked'));
 
     visitIdx = 1;
-    travQueue = rootTrackID;
+    travQueue = roots;
     while ( ~isempty(travQueue) )
         curTrackID = travQueue(1);
         travQueue = travQueue(2:end);
@@ -32,23 +32,20 @@ function [localLabels, revLocalLabels] = GetLocalTreeLabels(familyID)
             travQueue = [travQueue childTracks(travOrder)];
         end
         
-        if ( visitIdx == 1 || bUseLongLabels )
+        if ( bUseLongLabels || ismember(curTrackID, roots) )
             localLabels(curTrackID) = num2str(curTrackID);
             revLocalLabels(num2str(curTrackID)) = curTrackID;
         else
             alphaLabel = AlphaLocal(visitIdx);
             localLabels(curTrackID) = alphaLabel;
             revLocalLabels(alphaLabel) = curTrackID;
+            visitIdx = visitIdx + 1;
         end
-        visitIdx = visitIdx + 1;
     end
 end
 
 % Convert the index to a letter -- A..Z, AA, AB..ZZ, AAA..ZZZ, ...
 function res = AlphaLocal(label)
-    label = label - 1;
-    if label <= 0, return, end;
-    
     res = '';
     while 1
         label = label - 1;
