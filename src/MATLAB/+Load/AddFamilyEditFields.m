@@ -35,10 +35,10 @@ function bNeedsUpdate = AddFamilyEditFields()
         bNeedsUpdate = true;
     end
     
-%     if ( ~isfield(CellFamilies, 'extFamily') )
-%         CellFamilies = addDefaultField(CellFamilies, 'extFamily', []);
-%         bNeedsUpdate = true;
-%     end
+    if ( ~isfield(CellFamilies, 'extFamily') )
+        CellFamilies = addDefaultField(CellFamilies, 'extFamily', []);
+        bNeedsUpdate = true;
+    end
 end
 
 function outStruct = addDefaultField(inStruct, fieldName, defaultVal)
