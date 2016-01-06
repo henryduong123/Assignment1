@@ -45,6 +45,19 @@ uimenu(Figures.tree.contextMenuHandle,...
     'Separator',    'on');
 
 uimenu(Figures.tree.contextMenuHandle,...
+    'Label',        'Add To Extended Family',...
+    'CallBack',     @addToExtendedFamily,...
+    'Separator',    'on');
+
+uimenu(Figures.tree.contextMenuHandle,...
+    'Label',        'Remove From Extended Family',...
+    'CallBack',     @removeFromExtendedFamily);
+
+uimenu(Figures.tree.contextMenuHandle,...
+    'Label',        'Show Extended Family',...
+    'CallBack',     @showExtendedFamily);
+
+uimenu(Figures.tree.contextMenuHandle,...
     'Label',        'Properties',...
     'CallBack',     @properties,...
     'Separator',    'on');
@@ -145,6 +158,32 @@ function changeLabel(src,evnt)
 global CellTracks
 trackID = get(gco,'UserData');
 Editor.ContextChangeLabel(CellTracks(trackID).startTime,trackID);
+end
+
+function addToExtendedFamily(src,evnt)
+    global Figures
+    
+    trackID = get(gco,'UserData');
+    if(isempty(trackID)),return,end
+
+    Editor.ContextAddToExtendedFamily(trackID);
+end
+
+function removeFromExtendedFamily(src,evnt)
+    trackID = get(gco,'UserData');
+    if(isempty(trackID)),return,end
+
+    Editor.ContextRemoveFromExtendedFamily(trackID);
+end
+
+function showExtendedFamily(src,evnt)
+    global CellFamilies CellTracks
+    
+    trackID = get(gco,'UserData');
+    if(isempty(trackID)),return,end
+    
+    familyID = CellTracks(trackID).familyID;
+    msgbox({'Extended family:', num2str(CellFamilies(familyID).extFamily)})
 end
 
 function properties(src,evnt)
