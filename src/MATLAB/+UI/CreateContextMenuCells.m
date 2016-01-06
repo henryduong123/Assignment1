@@ -254,7 +254,7 @@ function addToExtendedFamily(src,evnt)
     [hullID trackID] = UI.GetClosestCell(0);
     if(isempty(trackID)),return,end
 
-    Editor.ContextAddToExtendedFamily(Figures.time, trackID);
+    Editor.ContextAddToExtendedFamily(trackID);
 end
 
 function removeFromExtendedFamily(src,evnt)

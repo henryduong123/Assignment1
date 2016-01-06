@@ -24,7 +24,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ContextAddToExtendedFamily(time,trackID)
+function ContextAddToExtendedFamily(trackID)
     global CellFamilies CellTracks Figures
 
     familyID = CellTracks(trackID).familyID;
