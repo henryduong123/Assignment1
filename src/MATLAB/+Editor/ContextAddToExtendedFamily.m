@@ -30,9 +30,12 @@ function ContextAddToExtendedFamily(trackID)
     familyID = CellTracks(trackID).familyID;
     
     if ~isempty(CellFamilies(familyID).extFamily)
-        warn = sprintf('Track %d is already in an extended family', trackID);
-        warndlg(warn);
-        return;
+        xfam = CellFamilies(familyID).extFamily;
+        if length(xfam) > 1
+            warn = sprintf('Track %d is already in an extended family', trackID);
+            warndlg(warn);
+            return;
+        end
     end
 
     [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
