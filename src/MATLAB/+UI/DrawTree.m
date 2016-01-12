@@ -76,7 +76,8 @@ if(isempty(CellFamilies(familyID).tracks))
 end
 
 if ( ~UI.DrawPool.HasPool(Figures.tree.axesHandle) )
-    numTracks = length(CellFamilies(familyID).tracks);
+    numTracks = FamilyTracks(CellFamilies, familyID);
+
     
     hold(Figures.tree.axesHandle, 'on');
     
@@ -114,9 +115,9 @@ trackHeights = Families.ComputeTrackHeights(rootTrackID);
 
 Figures.tree.trackMap = trackMap;
 
-[sortedTracks bFamHasPheno] = simpleTraverseTree(rootTrackID, 0, trackMap, trackHeights);
+[sortedTracks bFamHasPheno xBox] = extendedTraverseTree(rootTrackID, trackMap, trackHeights);
 
-xBox = trackMap(rootTrackID).xBox + [-0.5 0.5];
+xBox = xBox + [-0.5 0.5];
 
 UI.DrawPool.StartDraw(Figures.tree.axesHandle);
 
@@ -541,4 +542,80 @@ deltaY = y_lim(2) / pos(4);
 
 set(axHandle, 'units', 'normalized');
 
+end
+
+function numTracks = FamilyTracks(CellFamilies, familyID)
+    numTracks = 0;
+    family = CellFamilies(familyID);
+    
+    if isfield(CellFamilies, 'extFamily')
+        if isempty(family.extFamily)
+            numTracks = length(family.tracks);
+        else
+            for i=1:family.extFamily
+                fid = family.extFamily(i);
+                numTracks = numTracks + length(CellFamilies(fid).tracks);
+            end
+        end
+    else
+        numTracks = length(family.tracks);
+    end
+end
+
+function [sortedTracks bFamHasPheno xBox] = extendedTraverseTree(rootTrackID, trackMap, trackHeights)
+    global CellFamilies CellTracks
+    
+    familyID = CellTracks(rootTrackID).familyID;
+    family = CellFamilies(familyID);
+
+    % handle the simple cases first
+    if isfield(CellFamilies, 'extFamily')
+        if isempty(family.extFamily)
+            [sortedTracks bFamHasPheno] = simpleTraverseTree(rootTrackID, 0, trackMap, trackHeights);
+            xBox = trackMap(rootTrackID).xBox;
+            return;
+        end
+    else
+        [sortedTracks bFamHasPheno] = simpleTraverseTree(rootTrackID, 0, trackMap, trackHeights);
+        xBox = trackMap(rootTrackID).xBox;
+        return;
+    end
+    
+    sortedTracks = [];
+    bFamHasPheno = 0;
+    offset = 0;
+    roots = [CellFamilies(family.extFamily).rootTrackID];
+    for i=1:length(roots)
+        [tracks hasPheno] = simpleTraverseTree(roots(i), 0, trackMap, trackHeights);
+        sortedTracks = [sortedTracks tracks];
+        bFamHasPheno = bFamHasPheno | hasPheno;
+        
+        % find the new offset before we change everything
+        root = trackMap(tracks(1));
+        newOffset = offset + root.xBox(2) + 1;
+
+        % slide everything over by offset
+        for j=1:length(tracks)
+            temp = trackMap(tracks(j));
+            temp.xCenter   = temp.xCenter + offset;
+            temp.xSmallBox = temp.xSmallBox + offset;
+            temp.xBox      = temp.xBox + offset;
+            trackMap(tracks(j)) = temp;
+        end
+        
+        offset = newOffset;
+    end
+    
+    xBox = [trackMap(roots(1)).xBox(1) trackMap(roots(end)).xBox(2)];
+end
+
+function fmax = MaxFluorVal(familyID)
+    global CellFamilies CellTracks CellHulls
+
+    famTracks = CellFamilies(familyID).tracks;
+    famHulls = [CellTracks(famTracks).hulls];
+    famHulls = famHulls(famHulls > 0);
+    fvals = [CellHulls(famHulls).fluorVals];
+    fvals = reshape(fvals,4,[]);
+    fmax = max(fvals,[],2);
 end
