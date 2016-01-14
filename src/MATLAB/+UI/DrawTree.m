@@ -559,7 +559,7 @@ function numTracks = FamilyTracks(CellFamilies, familyID)
         if isempty(family.extFamily)
             numTracks = length(family.tracks);
         else
-            for i=1:family.extFamily
+            for i=1:length(family.extFamily)
                 fid = family.extFamily(i);
                 numTracks = numTracks + length(CellFamilies(fid).tracks);
             end
