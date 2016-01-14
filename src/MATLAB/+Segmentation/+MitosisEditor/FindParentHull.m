@@ -61,11 +61,7 @@ function parentHull = addParentHull(midpoint, time, mitosisPoints)
     
     segParams = cell(1,length(paramData));
     for i=1:length(paramData)
-        if ( isempty(paramData(i).range) )
-            segParams{i} = paramData(i).default;
-        else
-            segParams{i} = paramData(i).range(1);
-        end
+        segParams{i} = paramData(i).value(1);
     end
     
     hulls = Segmentation.PartialImageSegment(imSet, midpoint, 200, CONSTANTS.primaryChannel, segFunc, segParams);
