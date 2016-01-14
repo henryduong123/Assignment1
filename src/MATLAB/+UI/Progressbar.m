@@ -235,8 +235,7 @@ if (isempty(progfig) && (isempty(firstIteration)))
         'xtick',            [] );
     progpatch = patch(...
         'XData',            [0 0 0 0],...
-        'YData',            [0 0 1 1],...
-        'EraseMode',        'none' );
+        'YData',            [0 0 1 1]);
     
 % enable this code if you want the bar to change colors when the 
 % user clicks on the progress bar

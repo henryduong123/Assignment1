@@ -82,8 +82,7 @@ im = imagesc(img, 'Parent',curAx, [0 1]);
 set(im,'uicontextmenu',Figures.cells.contextMenuHandle);
 set(im, 'ButtonDownFcn',( @(src,evt) (UI.FigureCellDown(src,evt, -1))));
 
-%set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
-set(curAx,'Position',[.01 .01 .98 .98],'uicontextmenu',Figures.cells.contextMenuHandle);
+set(curAx,'Position',[.01 .01 .98 .98], 'uicontextmenu',Figures.cells.contextMenuHandle, 'SortMethod','childorder');
 axis(curAx,'off');
 
 % Force original zoom level to be the full image before we "zoom in"
