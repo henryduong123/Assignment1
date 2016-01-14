@@ -112,16 +112,23 @@ function bFinished = runReseg(hToolbar)
 end
 
 function bValid = verifySelectedTree()
-    global ResegState Figures
-    bValid = false;
+    global ResegState Figures CellTracks CellFamilies
     
-    if ( ResegState.primaryTree ~= Figures.tree.familyID )
-        msgbox('The selected lineage is not the lineage being resegmented!','Incorrect Tree', 'warning');
-
+    bValid = true;
+    if ( isempty(ResegState) )
         return;
     end
     
-    bValid = true;
+    preserveRoots = Families.GetFamilyRoots(CellFamilies(ResegState.primaryTree).rootTrackID);
+    validPreserveFam = [CellTracks(preserveRoots).familyID];
+    
+    if ( any(validPreserveFam == Figures.tree.familyID) )
+        return;
+    end
+    
+    msgbox('The selected lineage is not one of the lineages being resegmented!','Incorrect Tree', 'warn');
+    
+    bValid = false;
 end
 
 function cleanupReseg(hToolbar)

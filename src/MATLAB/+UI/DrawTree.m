@@ -59,19 +59,11 @@ if ( ~isfield(Figures.tree,'axesHandle') || ~Helper.ValidUIHandle(Figures.tree.a
         'Box',      'off',...
         'DrawMode', 'fast');
 end
-
-% Used to indicate that the current viewing tree is NOT the current reseg tree.
-badResegColor = [1 0.8 0.8];
-if ( ~isempty(ResegState) && (ResegState.primaryTree ~= Figures.tree.familyID) )
-    set(Figures.tree.axesHandle, 'Color',badResegColor);
-    
-    xl = xlim(Figures.tree.axesHandle);
-    yl = ylim(Figures.tree.axesHandle);
-    text(xl(1),yl(1),'Selected tree is not being resegmented!', 'HorizontalAlignment','Left', 'VerticalAlignment','Top', 'Parent',Figures.tree.axesHandle);
 end
 
 % Leave current tree up if invalid tree selected
 if(isempty(CellFamilies(familyID).tracks))
+    indicateInvalidResegTree();
     return;
 end
 
@@ -184,14 +176,7 @@ else
     set(Figures.cells.menuHandles.lockMenu, 'Enable','on');
 end
 
-% Used to indicate that the current viewing tree is NOT the current reseg tree.
-if ( ~isempty(ResegState) && (ResegState.primaryTree ~= Figures.tree.familyID) )
-    set(Figures.tree.axesHandle, 'Color',badResegColor);
-    
-    xl = xlim(Figures.tree.axesHandle);
-    yl = ylim(Figures.tree.axesHandle);
-    text(xl(1),yl(1),' Selected tree is not being resegmented!', 'HorizontalAlignment','Left', 'VerticalAlignment','Top', 'Parent',Figures.tree.axesHandle);
-end
+indicateInvalidResegTree();
 
 zoom(Figures.tree.handle, 'reset');
 
@@ -270,6 +255,28 @@ end
 %let the user know that the drawing is done
 set(Figures.tree.handle,'Pointer','arrow');
 set(Figures.cells.handle,'Pointer','arrow');
+end
+
+function indicateInvalidResegTree()
+    global ResegState Figures CellTracks CellFamilies
+    if ( isempty(ResegState) )
+        return;
+    end
+    
+    badResegColor = [1 0.8 0.8];
+    preserveRoots = Families.GetFamilyRoots(CellFamilies(ResegState.primaryTree).rootTrackID);
+    validPreserveFam = [CellTracks(preserveRoots).familyID];
+    
+    if ( any(validPreserveFam == Figures.tree.familyID) )
+        return;
+    end
+    
+    % Used to indicate that the current viewing tree is NOT the current reseg tree.
+    set(Figures.tree.axesHandle, 'Color',badResegColor);
+
+    xl = xlim(Figures.tree.axesHandle);
+    yl = ylim(Figures.tree.axesHandle);
+    text(xl(1),yl(1),'Selected tree is not being resegmented!', 'HorizontalAlignment','Left', 'VerticalAlignment','Top', 'Parent',Figures.tree.axesHandle);
 end
 
 function drawResegInfo(trackID, xVal)
