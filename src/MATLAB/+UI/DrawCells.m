@@ -124,6 +124,7 @@ end
         
 %draw labels if turned on
 Figures.cells.labelHandles = [];
+bShowOffTreeLabels = strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on');
 if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
     for i=1:length(HashedCells{Figures.time})
            
@@ -222,10 +223,9 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         
         %draw label
         if( bDrawLabels )%don't draw labels if dragging a mitosis
-            if (Figures.tree.familyID == CellTracks(curTrackID).familyID ||...
-                    strcmp(get(Figures.cells.menuHandles.treeLabelsOn, 'Checked'),'on'))
-                
-                
+            roots = Families.GetFamilyRoots(curTrackID);
+            bOnFamily = any(Figures.tree.familyID == [CellTracks(roots).familyID]);
+            if ( bShowOffTreeLabels || bOnFamily )
                 magPoints = ((CellHulls(curHullID).points(:,1)) +((CellHulls(curHullID).points(:,2))));
                 
                 % attach label to point with highest Manhattan distance
