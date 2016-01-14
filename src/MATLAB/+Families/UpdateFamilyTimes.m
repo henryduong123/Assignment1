@@ -15,6 +15,7 @@ if (isempty(tracks))
     CellFamilies(familyID).bLocked = false;
 	CellFamilies(familyID).bCompleted = false;
     CellFamilies(familyID).bFrozen = false;
+    CellFamilies(familyID).extFamily = [];
     return;
 end
 

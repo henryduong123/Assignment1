@@ -43,7 +43,8 @@ if(isempty(CellFamilies))
         'bCompleted',    {false},...
         'correctedTime', {0},...
         'editInfo', struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0}),...
-        'bFrozen',       {false});
+        'bFrozen',       {false},...
+        'extFamily',     {[]});
     
     curFamilyID = 1;
 else
@@ -61,6 +62,7 @@ else
     CellFamilies(curFamilyID).correctedTime = 0;
     CellFamilies(curFamilyID).editInfo = struct('editedBy',{''}, 'startDate',{[]}, 'endDate',{[]}, 'manualTime',{0}, 'autoTime',{0});
     CellFamilies(curFamilyID).bFrozen = false;
+    CellFamilies(curFamilyID).extFamily = [];
 end
 
 end

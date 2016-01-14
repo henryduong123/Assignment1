@@ -13,6 +13,7 @@ function familyID = CreateEmptyFamily()
     end
     CellFamilies(familyID).bLocked = false;
     CellFamilies(familyID).bFrozen = false;
+    CellFamilies(familyID).extFamily = [];
     CellFamilies(familyID).bCompleted = false;
     CellFamilies(familyID).correctedTime = 0;
 end
