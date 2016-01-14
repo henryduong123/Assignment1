@@ -584,7 +584,8 @@ function [sortedTracks bFamHasPheno xBox] = extendedTraverseTree(rootTrackID, tr
     sortedTracks = [];
     bFamHasPheno = 0;
     offset = 0;
-    roots = [CellFamilies(family.extFamily).rootTrackID];
+    roots = Families.GetFamilyRoots(rootTrackID);
+    
     for i=1:length(roots)
         [tracks hasPheno] = simpleTraverseTree(roots(i), 0, trackMap, trackHeights);
         sortedTracks = [sortedTracks tracks];
