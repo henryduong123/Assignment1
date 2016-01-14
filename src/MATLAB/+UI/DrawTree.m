@@ -67,6 +67,11 @@ if(isempty(CellFamilies(familyID).tracks))
     return;
 end
 
+% Only update cell error estimate when tree is redrawn
+[nSegmentationEdits, nTrackEdits, nMissingHulls, nHulls] = UI.GetErrorCounts();
+errorRate = (nSegmentationEdits+nTrackEdits+nMissingHulls)/nHulls/2;
+set(Figures.tree.cellEditsLabel,'String',sprintf('Seg: %d Track: %d Missing: %d Hulls: %d Rate: %.2f%%', nSegmentationEdits, nTrackEdits, nMissingHulls, nHulls, errorRate*100));
+
 if ( ~UI.DrawPool.HasPool(Figures.tree.axesHandle) )
     numTracks = FamilyTracks(CellFamilies, familyID);
 
