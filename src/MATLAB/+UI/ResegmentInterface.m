@@ -7,7 +7,10 @@ function ResegmentInterface()
     
     defValue = {''};
     if ( Figures.tree.familyID > 0)
-        defValue = {num2str(CellFamilies(Figures.tree.familyID).rootTrackID)};
+        rootTrackID = CellFamilies(Figures.tree.familyID).rootTrackID;
+        rootList = Families.GetFamilyRoots(rootTrackID);
+        
+        defValue = {num2str(rootList,' %d')};
     end
     
     cellStr = inputdlg('Enter root cell IDs','Resegment Cells', 1, defValue);
