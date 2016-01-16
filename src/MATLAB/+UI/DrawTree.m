@@ -59,7 +59,6 @@ if ( ~isfield(Figures.tree,'axesHandle') || ~Helper.ValidUIHandle(Figures.tree.a
         'Box',      'off',...
         'DrawMode', 'fast');
 end
-end
 
 % Leave current tree up if invalid tree selected
 if(isempty(CellFamilies(familyID).tracks))
