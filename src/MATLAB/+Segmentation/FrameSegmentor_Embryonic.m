@@ -1,3 +1,27 @@
+% FrameSegmentor_Embryonic - Algorithm for identifying embryonic neural progenitor cells imaged using phase contrast microscopy.
+% 
+% hulls = FrameSegmentor_Embryonic(chanIm, primaryChan, t, imageAlpha)
+% INPUTS:
+%   chanIm - A cell array each chanIm{i} contains the image intensity date 
+%   for the i-th channel at frame t. Some cells may be empty if they were 
+%   unavailable or not imaged at frame t.
+% 
+%   primaryChan - A number between 1 and CONSTANTS.numChannels indicating
+%   the primary channel for the segmentation. Specific algorithms may use
+%   information from other available channels as well.
+% 
+%   t - The frame number of the image data being passed into the
+%   segmentation algorithm.
+% 
+%   imageAlpha - A multiplier on the threshold used to detect the phase constrast "halo" surrounding cells.
+%   Increasing the imageAlpha multiplier will usually result in fewer cell segmentation results.
+% 
+% OUTPUTS:
+%   hulls - The hulls output is a structure array with one entry per segmentation result.
+%   For more information on the output format see Segmentation.FrameSegmentor.
+% 
+% See also Segmentation.FrameSegmentor.
+% 
 function hulls = FrameSegmentor_Embryonic(chanIm, primaryChan, t, imageAlpha)
     hulls = [];
     

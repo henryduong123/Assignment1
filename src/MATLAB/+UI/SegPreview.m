@@ -346,6 +346,7 @@ function createParamControls(hDlg, selectIdx)
     numParams = length(dialogInfo.segInfo(selectIdx).params);
     segFunc = dialogInfo.segInfo(selectIdx).func;
     
+    %% Load function help information
     funcName = char(segFunc);
     funcHelp = help(funcName);
     if ( isempty(funcHelp) )
@@ -362,16 +363,26 @@ function createParamControls(hDlg, selectIdx)
     hCellBox = dialogInfo.hKeep(1);
     hChanBox = dialogInfo.hKeep(2);
     
+    %% Put a segmentation summary from function help into the combo-box tooltip.
+    tokMatch = regexp(funcHelp,'^\s*FrameSegmentor_*\w*\s*-\s*(.+?)^\s*$', 'once','tokens','lineanchors');
+    if ( isempty(tokMatch) )
+        helpLines = strsplit(funcHelp,'\n');
+        funcSummary = strtrim(helpLines{1});
+    else
+        funcSummary = tokMatch{1};
+    end
+    
     curControlPos = [controlLeft, dialogHeight-controlPad];
-    curControlPos = layoutLabelControls(hCellBox, curControlPos, 'Cell Type: ', funcHelp);
+    curControlPos = layoutLabelControls(hCellBox, curControlPos, 'Cell Type: ', funcSummary);
     curControlPos = layoutLabelControls(hChanBox, curControlPos, 'Channel: ', '');
     
+    %% Try to find parameter help in function documentation to put in label/textbox tooltips
     hParams = zeros(1,numParams);
     for i=1:numParams
         paramName = dialogInfo.segInfo(selectIdx).params(i).name;
         
         paramHelp = '';
-        tokMatch = regexp(funcHelp,['^\s*(' paramName '.+)$'], 'once','tokens');
+        tokMatch = regexp(funcHelp,['^\s*(' paramName '.+?)^\s*$'], 'once','tokens','lineanchors');
         if ( ~isempty(tokMatch) )
             paramHelp = tokMatch{1};
         end
