@@ -1,6 +1,19 @@
+% GetSupportedCellTypes - This function is excuted on LEVER load to
+% register information about all supported cell segmentation algorithms.
+%
+% SupportedTypes = GetSupportedCellTypes()
+% OUTPUTS:
+%   SupportedTypes - Structure array of all LEVER supported cell
+%   segmentation algorithms.
+%
+% New FrameSegmentor algorithms should be added to the SupportedTypes list here.
+%
+% See also Segmentation.FrameSegmentor
+% 
 function SupportedTypes = GetSupportedCellTypes()
     SupportedTypes = [];
     
+    %% Adult neural progenitor cell segmentation algorithm
     SupportedTypes = addCellType(SupportedTypes, 'Adult',...
                         'segRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Adult, setParamValue('imageAlpha', 1.5)),...
                         'resegRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Adult, setParamRange('imageAlpha', 1.0,0.5,5)),...
@@ -9,6 +22,7 @@ function SupportedTypes = GetSupportedCellTypes()
                         'leverParams',struct('timeResolution',{5}, 'maxPixelDistance',{40}, 'maxCenterOfMassDistance',{40}, 'dMaxConnectComponent',{40}),...
                         'channelParams',struct('primaryChannel',{1}, 'channelColor',{[1 1 1]}, 'channelFluor',{[false]}));
     
+    %% Embryonic neural progenitor cell segmentation algorithm
     SupportedTypes = addCellType(SupportedTypes, 'Embryonic',...
                         'segRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Embryonic, setParamValue('imageAlpha', 1.5)),...
                         'resegRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Embryonic, setParamRange('imageAlpha', 1.0,0.5,5)),...
@@ -20,6 +34,7 @@ function SupportedTypes = GetSupportedCellTypes()
     % TODO: Move channel params and some lever params into metadata structure and parse directly from microscope data.
 end
 
+%% Create a new supported segmentation type and add it to the SupportedTypes list
 function cellTypes = addCellType(cellTypes, typeName, varargin)
     supportedFields = {'segRoutine', 'resegRoutine','splitParams','trackParams','leverParams','channelParams'};
     
@@ -65,16 +80,18 @@ function cellTypes = addCellType(cellTypes, typeName, varargin)
     cellTypes = [cellTypes; newCellType];
 end
 
+%% Supported type defaults
 function defaultTypeStruct = getDefaultCellType()
     defaultTypeStruct = struct('name',{'Default'},...
-        'segRoutine',{setAlgorithm(@Segmentation.FrameSegmentor, setParamValue('imageAlpha', 1.5))},...
-        'resegRoutines',{setAlgorithm(@Segmentation.FrameSegmentor, setParamRange('imageAlpha', 1.0,0.5,5))},...
+        'segRoutine',{setAlgorithm(@Segmentation.FrameSegmentor)},...
+        'resegRoutines',{setAlgorithm(@Segmentation.FrameSegmentor)},...
         'splitParams',struct('useGMM',true),...
         'trackParams',{struct('dMaxCenterOfMass',{80}, 'dMaxConnectComponentTracker',{40})},...
         'leverParams',{struct('timeResolution',{5}, 'maxPixelDistance',{80}, 'maxCenterOfMassDistance',{80}, 'dMaxConnectComponent',{40})},...
         'channelParams',{struct('primaryChannel',{1}, 'channelColor',{[1 1 1]}, 'channelFluor',{[false]})});
 end
 
+%% Create an structure containing information about a segmentation algorithm.
 function algorithmStruct = setAlgorithm(funcPtr, varargin)
     emptyParam = struct('name',{}, 'value',{});
     algorithmStruct = struct('func',{funcPtr}, 'params',{emptyParam});
@@ -88,14 +105,18 @@ function algorithmStruct = setAlgorithm(funcPtr, varargin)
     end
 end
 
+%% Create an algorithm parameter structure with a single default value
 function paramStruct = setParamValue(paramName, value)
     paramStruct = struct('name',{paramName}, 'value',{value});
 end
 
+%% Create an algorithm parameter structure with a default search range
+% Note: Ranges are only supported during resegmentation or manual segmentation adds
 function paramStruct = setParamRange(paramName, startValue, endValue, numSteps)
     paramStruct = struct('name',{paramName}, 'value',{linspace(startValue,endValue,numSteps)});
 end
 
+%% Validate that setParamValue/Range was used
 function bValidParam = checkParamStruct(inStruct)
     bValidParam = false;
     if ( ~isstruct(inStruct) )
