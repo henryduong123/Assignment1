@@ -222,6 +222,7 @@ function runSeg(src,event)
     SupportedTypes = Load.GetSupportedCellTypes();
     cellType = SupportedTypes(selectSeg).name;
     Load.AddConstant('cellType',cellType,1);
+    Load.AddConstant('primaryChannel', dialogInfo.selectChan,1);
     
     Load.AddConstant('segInfo', dialogInfo.segInfo(selectSeg),1);
     
@@ -287,6 +288,9 @@ function selectedChannel(src,event)
     selectedChan = str2double(chanStr{selectedIdx});
     
     dialogInfo = get(hSegPropDlg, 'UserData');
+    dialogInfo.selectChan = selectedChan;
+    set(hSegPropDlg, 'UserData',dialogInfo);
+    
     hPreviewFig = dialogInfo.hPreviewFig;
     
     previewInfo = get(hPreviewFig, 'UserData');
