@@ -200,13 +200,18 @@ function previewSeg(src,event)
         segHulls = segFunc(imSet, frameInfo.chan, frameInfo.time, segArgs{:});
     end
     
+    validHulls = [];
+    for i=1:length(segHulls)
+        validHulls = [validHulls Hulls.CreateHull(CONSTANTS.imageSize, segHulls(i).indexPixels, frameInfo.time)];
+    end
+    
     set(hPreviewFig, 'Pointer','arrow');
     set(hSegPropDlg, 'Pointer','arrow');
     
     bShowInterior = frameInfo.showInterior;
     
     drawPreviewImage(hPreviewFig);
-    drawSegHulls(hPreviewFig, segHulls, bShowInterior);
+    drawSegHulls(hPreviewFig, validHulls, bShowInterior);
 end
 
 function runSeg(src,event)

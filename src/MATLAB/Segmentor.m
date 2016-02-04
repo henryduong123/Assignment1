@@ -85,6 +85,7 @@ try
         frameHulls = segFunc(chanImSet, primaryChan, t, segParams{:});
         
         for i=1:length(frameHulls)
+            frameHulls(i).time = t;
             if ( ~isfield(frameHulls(i),'tag') || isempty(frameHulls(i).tag) )
                 frameHulls(i).tag = char(segFunc);
             else
@@ -93,7 +94,6 @@ try
         end
         
         hulls = [hulls frameHulls];
-        frameTimes = [frameTimes t];
     end
     
 catch excp

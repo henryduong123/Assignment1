@@ -13,7 +13,10 @@ function newHull = CreateHull(imageSize, indexPixels, time, userEdited, tag)
         tag = '';
     end
     
-    newHull = Helper.MakeEmptyStruct(CellHulls);
+    newHull = [];
+    if ( ~isempty(CellHulls) )
+        newHull = Helper.MakeEmptyStruct(CellHulls);
+    end
     
     rcCoords = Helper.IndexToCoord(imageSize, indexPixels);
     xyCoords = Helper.SwapXY_RC(rcCoords);
