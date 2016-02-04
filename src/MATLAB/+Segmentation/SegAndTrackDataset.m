@@ -20,6 +20,9 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     Load.AddConstant('numChannels', channelList(end),1);
     
     numProcessors = min(numProcessors, CONSTANTS.numFrames);
+    bytesPerIm = prod(CONSTANTS.imageSize) * CONSTANTS.numChannels * 8;
+    m = memory;
+    maxWorkers = min(numProcessors,floor(m.MaxPossibleArrayBytes / bytesPerIm));
     
     if ( CONSTANTS.numFrames < 1 )
         return;
@@ -52,17 +55,49 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     if ( ~exist('.\segmentationData','dir'))
         mkdir('segmentationData');
     end
+    numChannels = CONSTANTS.numChannels;
+    numFrames = CONSTANTS.numFrames;
+    primaryChannel = CONSTANTS.primaryChannel;
+    cellType = CONSTANTS.cellType;
     
-    for procID=1:numProcessors
-        segCmd = makeSegCommand(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs);
-        system(['start ' segCmd ' && exit']);
-    end
-%     for procID=1:numProcessors
-%         Segmentor(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs{:});
+    %% compliled version
+%     for procID=1:maxWorkers
+%         segCmd = makeSegCommand(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs);
+%         system(['start ' segCmd ' && exit']);
 %     end
+    
+    %% single threaded version
+% for procId=1:maxWorkers
+%     Segmentor(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
+% end
 
-    bSegFileExists = false(1,numProcessors);
-    for procID=1:numProcessors
+    %% spmd version
+    poolObj = gcp('nocreate');
+    if (~isempty(poolObj))
+        oldWorkers = poolObj.NumWorkers;
+        if (oldWorkers~=maxWorkers)
+            delete(poolObj);
+            parpool(maxWorkers);
+        end
+    else
+        oldWorkers = 0;
+        parpool(maxWorkers);
+    end
+
+    spmd
+        Segmentor(labindex,numlabs,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
+    end
+    
+    if (oldWorkers~=0 && oldWorkers~=maxWorkers)
+        delete(gcp);
+        if (oldWorkers>0)
+            parpool(oldWorkers);
+        end
+    end
+
+    %% collate output
+    bSegFileExists = false(1,maxWorkers);
+    for procID=1:maxWorkers
         errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
         fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
         semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
