@@ -3,10 +3,10 @@ function segArgs = GetCellTypeParams()
     
     segArgs = {};
     
-    segParams = {CONSTANTS.segInfo.params};
+    segParams = CONSTANTS.segInfo.params;
     if ( isempty(segParams) )
         return;
     end
     
-    segArgs = cellfun(@(x)(x.value(1)), segParams, 'UniformOutput',0);
+    segArgs = arrayfun(@(x)(x.value(1)), segParams, 'UniformOutput',0);
 end
