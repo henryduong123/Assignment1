@@ -10,7 +10,7 @@ function SegPreview()
     hTimeLabel = uicontrol(hPreviewFig,'Style','text', 'Position',[1 0 60 20],'String', ['Time: ' num2str(1)]);
     set(hPreviewFig, 'CurrentAxes',hAx);
     
-    set(hPreviewFig, 'UserData',struct('time',{1}, 'chan',{1}, 'showInterior',{false} , 'hLabel',{hTimeLabel}), 'Toolbar','figure');
+    set(hPreviewFig, 'UserData',struct('time',{1}, 'chan',{1}, 'showInterior',{false}, 'cacheHulls',{[]}, 'hLabel',{hTimeLabel}), 'Toolbar','figure');
     set(hPreviewFig, 'WindowScrollWheelFcn',@windowScrollWheel, 'KeyPressFcn',@windowKeyPress, 'CloseRequestFcn','');
     
     hSegPropDlg = initSegPropDialog(hPreviewFig);
@@ -117,12 +117,18 @@ function drawPreviewImage(hFig)
     imagesc(im, 'Parent',hAx, [0 1]);
     colormap(hAx, gray(256));
     
+    zoom(hAx, 'reset');
+    
     xlim(hAx, xl);
     ylim(hAx, yl);
     
     axis(hAx,'off');
     
     hold(hAx, 'all');
+    
+    if ( ~isempty(frameInfo.cacheHulls) && (frameInfo.cacheHulls(1).time == frameInfo.time) )
+        drawSegHulls(hFig, frameInfo.cacheHulls, frameInfo.showInterior);
+    end
     
     drawnow();
 end
@@ -133,11 +139,14 @@ function drawSegHulls(hFig,segHulls, bShowInterior)
     hAx = get(hFig, 'CurrentAxes');
     hold(hAx, 'on');
     
-    allIndexPixels = vertcat(segHulls.indexPixels);
-    
+    cmap = hsv(31);
     if ( bShowInterior )
-        rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, allIndexPixels);
-        plot(hAx, rcCoords(:,2),rcCoords(:,1), '.r');
+        for i=1:length(segHulls)
+            colorIdx = mod(i-1,31)+1;
+            
+            rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, segHulls(i).indexPixels);
+            plot(hAx, rcCoords(:,2),rcCoords(:,1), '.', 'Color',cmap(colorIdx,:));
+        end
     end
     
     for i=1:length(segHulls)
@@ -205,13 +214,16 @@ function previewSeg(src,event)
         validHulls = [validHulls Hulls.CreateHull(CONSTANTS.imageSize, segHulls(i).indexPixels, frameInfo.time)];
     end
     
+    frameInfo.cacheHulls = validHulls;
+    
     set(hPreviewFig, 'Pointer','arrow');
     set(hSegPropDlg, 'Pointer','arrow');
     
     bShowInterior = frameInfo.showInterior;
     
+    set(hPreviewFig, 'UserData',frameInfo);
+    
     drawPreviewImage(hPreviewFig);
-    drawSegHulls(hPreviewFig, validHulls, bShowInterior);
 end
 
 function runSeg(src,event)
@@ -316,6 +328,14 @@ function selectedCellType(src,event)
     dialogInfo = get(hSegPropDlg, 'UserData');
     dialogInfo.selectSeg = selectedIdx;
     set(hSegPropDlg, 'UserData',dialogInfo);
+    
+    %Clear cached hull data on algorithm selection change.
+    hPreviewFig = dialogInfo.hPreviewFig;
+    frameInfo = get(hPreviewFig, 'UserData');
+    frameInfo.cacheHulls = [];
+    set(hPreviewFig, 'UserData',frameInfo);
+    
+    drawPreviewImage(hPreviewFig);
 end
 
 function setParamValues(hDlg, selectIdx)
