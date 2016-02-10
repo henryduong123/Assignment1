@@ -50,15 +50,15 @@ funcPath = which(funcName);
 if ( ~isempty(funcPath) )
     segFunc = supportedCellTypes(typeIdx).segRoutine.func;
 else
-    fprintf(['WARNING: Could not find ' funcName '() using default Segmentation.FrameSegmentor() routine\n']);
+    deployPrint(['WARNING: Could not find ' funcName '() using default Segmentation.FrameSegmentor() routine\n']);
     segFunc = @Segmentation.FrameSegmentor;
 end
 
 segParams = struct2cell(segArgs);
 
 try 
-    fprintf(1,'%s\n',procArgs.imagePath);
-    fprintf(1,'%s\n',procArgs.imagePattern);
+    deployPrint(1,'%s\n',procArgs.imagePath);
+    deployPrint(1,'%s\n',procArgs.imagePattern);
     
     Load.AddConstant('rootImageFolder', procArgs.imagePath, 1);
     Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
@@ -74,7 +74,7 @@ try
     numImages = floor(tEnd/tStep);
 
     for t = tStart:tStep:tEnd
-        fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
+        deployPrint('%d%%...', round(100 * floor(t/tStep) / numImages));
         
         chanImSet = Helper.LoadIntensityImageSet(t);
         if ( isempty(chanImSet) )
@@ -124,7 +124,15 @@ save(fileName,'hulls');
 fSempahore = fopen(fullfile('segmentationData',['done_' num2str(tStart) '.txt']), 'w');
 fclose(fSempahore);
 
-fprintf('\tDone\n');
+deployPrint('\tDone\n');
+end
+
+function deployPrint(varargin)
+    if ( ~isdeployed() )
+        return;
+    end
+    
+    fprintf(varargin{:});
 end
 
 function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
