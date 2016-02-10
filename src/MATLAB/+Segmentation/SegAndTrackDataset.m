@@ -60,41 +60,45 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     primaryChannel = CONSTANTS.primaryChannel;
     cellType = CONSTANTS.cellType;
     
-    %% compliled version
-%     for procID=1:maxWorkers
-%         segCmd = makeSegCommand(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs);
-%         system(['start ' segCmd ' && exit']);
-%     end
-    
-    %% single threaded version
-% for procId=1:maxWorkers
-%     Segmentor(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
-% end
-
-    %% spmd version
-    poolObj = gcp('nocreate');
-    if (~isempty(poolObj))
-        oldWorkers = poolObj.NumWorkers;
-        if (oldWorkers~=maxWorkers)
-            delete(poolObj);
-            parpool(maxWorkers);
+    if ( isdeployed() )
+        %% compliled version
+        % Must use separately compiled segmentor algorithm in compiled LEVer
+        % because parallel processing toolkit is unsupported
+        for procID=1:maxWorkers
+            segCmd = makeSegCommand(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs);
+            system(['start ' segCmd ' && exit']);
         end
     else
-        oldWorkers = 0;
-        parpool(maxWorkers);
-    end
+        %% single threaded version
+%         for procID=1:maxWorkers
+%             Segmentor(procID,maxWorkers,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
+%         end
 
-    spmd
-        Segmentor(labindex,numlabs,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
-    end
-    
-    if (oldWorkers~=0 && oldWorkers~=maxWorkers)
-        delete(gcp);
-        if (oldWorkers>0)
-            parpool(oldWorkers);
+        %% spmd version
+        poolObj = gcp('nocreate');
+        if (~isempty(poolObj))
+            oldWorkers = poolObj.NumWorkers;
+            if (oldWorkers~=maxWorkers)
+                delete(poolObj);
+                parpool(maxWorkers);
+            end
+        else
+            oldWorkers = 0;
+            parpool(maxWorkers);
+        end
+
+        spmd
+            Segmentor(labindex,numlabs,numChannels,numFrames,cellType,primaryChannel,rootFolder,namePattern,segArgs{:});
+        end
+
+        if (oldWorkers~=0 && oldWorkers~=maxWorkers)
+            delete(gcp);
+            if (oldWorkers>0)
+                parpool(oldWorkers);
+            end
         end
     end
-
+    
     %% collate output
     bSegFileExists = false(1,maxWorkers);
     for procID=1:maxWorkers
@@ -139,7 +143,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
 
     try
         cellSegments = [];
-        frameOrder = [];
         for procID=1:numProcessors
             fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
@@ -148,7 +151,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
             load(fileName);
             
             cellSegments = [cellSegments hulls];
-            frameOrder = [frameOrder frameTimes];
         end
     catch excp
         
@@ -176,8 +178,6 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
         CellHulls(i).centerOfMass = mean([r c], 1);
     end
-
-    [srtFrames srtIdx] = sort(frameOrder);
     
     fprintf('Building Connected Component Distances... ');
     HashedCells = cell(1,CONSTANTS.numFrames);

@@ -26,7 +26,8 @@ function newStruct = MakeInitStruct(templateStruct, initStruct)
             end
         else
             if ( isfield(initStruct,outFields(i)) )
-                [newStruct.(outFields{i})] = deal(forceLogical(initStruct.(outFields{i})));
+                logicalData = arrayfun(@(x)(forceLogical(x.(outFields{i}))), initStruct, 'UniformOutput',false);
+                [newStruct.(outFields{i})] = deal(logicalData{:});
             else
                 [newStruct.(outFields{i})] = deal(false);
             end

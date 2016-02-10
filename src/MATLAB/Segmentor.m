@@ -28,10 +28,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hulls frameTimes] = Segmentor(varargin)
+function hulls = Segmentor(varargin)
 
 hulls = [];
-frameTimes = [];
 
 supportedCellTypes = Load.GetSupportedCellTypes();
 [procArgs,segArgs] = setSegArgs(supportedCellTypes, varargin);
@@ -83,17 +82,24 @@ try
         end
         
         frameHulls = segFunc(chanImSet, primaryChan, t, segParams{:});
-        
-        for i=1:length(frameHulls)
-            frameHulls(i).time = t;
-            if ( ~isfield(frameHulls(i),'tag') || isempty(frameHulls(i).tag) )
-                frameHulls(i).tag = char(segFunc);
-            else
-                frameHulls(i).tag = [char(segFunc) ':' frameHulls(i).tag];
-            end
+        if ( isempty(frameHulls) )
+            continue;
         end
         
-        hulls = [hulls frameHulls];
+        imSize = size(chanImSet{primaryChan});
+        
+        validHulls = [];
+        for i=1:length(frameHulls)
+            tag = char(segFunc);
+            if ( isfield(frameHulls(i),'tag') && isempty(frameHulls(i).tag) )
+                tag = [char(segFunc) ':' frameHulls(i).tag];
+            end
+            
+            newHull = Hulls.CreateHull(imSize, frameHulls(i).indexPixels, t, false, tag);
+            validHulls = [validHulls newHull];
+        end
+        
+        hulls = [hulls validHulls];
     end
     
 catch excp
@@ -112,7 +118,7 @@ catch excp
 end
 
 fileName = fullfile('segmentationData',['objs_' num2str(tStart) '.mat']);
-save(fileName,'hulls','frameTimes');
+save(fileName,'hulls');
 
 % Write this file to indicate that the segmentaiton data is actually fully saved
 fSempahore = fopen(fullfile('segmentationData',['done_' num2str(tStart) '.txt']), 'w');
