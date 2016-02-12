@@ -48,6 +48,9 @@ function hulls = FrameSegmentor_MDK(chanIm, primaryChan, t, imageAlpha)
         if length(r)<50
             continue
         end
+        if length(r)>5000
+            continue;
+        end
         chIdx = Helper.ConvexHull(c,r);
         if ( isempty(chIdx) )
             continue;
