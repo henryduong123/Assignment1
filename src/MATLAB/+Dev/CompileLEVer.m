@@ -140,9 +140,9 @@ function CompileLEVer(forceVersion)
 end
 
 function [vsStruct comparch] = setupCompileTools()
-    vsStruct.vstoolroot = getenv('VS100COMNTOOLS');
+    vsStruct.vstoolroot = getenv('VS140COMNTOOLS');
     if ( isempty(vsStruct.vstoolroot) )
-        error('Cannot compile MTC and mexMAT without Visual Studio 2010');
+        error('Cannot compile MEX files without Visual Studio 2015');
     end
     
     setenv('MATLAB_DIR', matlabroot());
@@ -152,12 +152,8 @@ function [vsStruct comparch] = setupCompileTools()
         vsStruct.buildbits = '64';
         vsStruct.buildenv = fullfile(vsStruct.vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat');
         vsStruct.buildplatform = 'x64';
-    elseif ( strcmpi(comparch,'win32') )
-        vsStruct.buildbits = '32';
-        vsStruct.buildenv = fullfile(vsStruct.vstoolroot,'..','..','vc','bin','vcvars32.bat');
-        vsStruct.buildplatform = 'win32';
     else
-        error('Only windows 32/64-bit builds are currently supported');
+        error('Only windows 64-bit builds are currently supported');
     end
     
     system(['"' vsStruct.buildenv '"' ]);
