@@ -23,6 +23,7 @@
 
 #include "tracker.h"
 
+#include <algorithm>
 	
 int gnumPts;
 

@@ -1,6 +1,8 @@
 #include "mexDijkstra.h"
 #include "CSparseWrapper.h"
 
+#include <algorithm>
+
 const double CSparseWrapper::noEdge = std::numeric_limits<double>::infinity();
 
 CSparseWrapper::CSparseWrapper(const mxArray* sparseArray)

@@ -23,6 +23,8 @@
 
 #include "tracker.h"
 
+#include <algorithm>
+
 int GetGlobalIdx(int t, int idx)
 {
 	return rgDetectLengthSum[t] + idx;

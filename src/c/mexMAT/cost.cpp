@@ -23,6 +23,7 @@
 
 #include "mexMAT.h"
 
+#include <algorithm>
 #include <math.h>
 
 #undef max

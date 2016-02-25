@@ -23,9 +23,10 @@
 
 #include "tracker.h"
 
-
 #undef max
 #undef min
+
+#include <algorithm>
 
 // Convenience defines
 #define SQR(x) ((x)*(x))

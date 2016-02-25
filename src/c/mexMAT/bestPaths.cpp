@@ -23,6 +23,8 @@
 
 #include "mexMAT.h"
 
+#include <algorithm>
+
 std::vector<CSourcePath> gTrackHistory;
 
 // Find all trackIDs from source hullIDs

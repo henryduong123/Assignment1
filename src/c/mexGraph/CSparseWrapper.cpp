@@ -1,6 +1,8 @@
 #include "mexGraph.h"
 #include "CSparseWrapper.h"
 
+#include <algorithm>
+
 const double CSparseGraph::noEdge = std::numeric_limits<double>::infinity();
 
 CSparseGraph::CSparseGraph(mwSize numHulls)
