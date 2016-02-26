@@ -13,6 +13,9 @@ bin/*.prj
 bin/*.txt
 segmentationData/
 
+# Ignore segmentation help function used in compiled LEVER versions.
+CompiledSegHelp.m
+
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio

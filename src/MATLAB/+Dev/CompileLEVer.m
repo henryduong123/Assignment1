@@ -48,12 +48,17 @@ function CompileLEVer(forceVersion)
         end
     end
 
+    %% Build version information
     if ( ~exist('forceVersion', 'var') )
         Dev.MakeVersion();
     else
         Dev.MakeVersion(0, forceVersion);
     end
+    
+    %% Build FrameSegmentor help information into an function for use in compiled LEVER
+    Dev.MakeSegHelp();
 
+    %% Setup visual studio for MEX compilation
     [vsStruct comparch] = setupCompileTools();
     
     bindir = '..\..\bin';
@@ -65,6 +70,7 @@ function CompileLEVer(forceVersion)
         mkdir(bindir);
     end
     
+    %% Compile all MEX files
     outputFiles = {};
     
     newOutput = compileMEX('mexMAT', vsStruct);
@@ -86,6 +92,7 @@ function CompileLEVer(forceVersion)
     newOutput = compileEXE('MTC', vsStruct, bindir);
     outputFiles = [outputFiles; {newOutput}];
 
+    %% Build a list of external and toolbox dependencies
     [toolboxStruct externalStruct] = Dev.GetExternalDependencies();
     if ( ~isempty(externalStruct.deps) )
         fprintf('ERROR: Some local functions have external dependencies\n');
@@ -109,6 +116,8 @@ function CompileLEVer(forceVersion)
             return;
         end
     end
+    
+    %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
     % temporarily remove any startup scripts that would normally be run by matlabrc
     enableStartupScripts(false);
