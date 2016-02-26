@@ -218,10 +218,10 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
     end
     
     toolboxAddCommand = '';
-    if ( ~isempty(toolboxList) )
-        toolboxElems = cellfun(@(x)([' -p "' x '"']), toolboxList, 'UniformOutput',0);
-        toolboxAddCommand = ['-N' toolboxElems{:}];
-    end
+%     if ( ~isempty(toolboxList) )
+%         toolboxElems = cellfun(@(x)([' -p "' x '"']), toolboxList, 'UniformOutput',0);
+%         toolboxAddCommand = ['-N' toolboxElems{:}];
+%     end
     
     fprintf('\nMATLAB Compiling: %s...\n', outputFile);
     result = system(['mcc -v -R -startmsg -m ' projectName '.m ' toolboxAddCommand extraCommand]);
