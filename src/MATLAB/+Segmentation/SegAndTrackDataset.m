@@ -101,21 +101,24 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     
     %% collate output
     bSegFileExists = false(1,maxWorkers);
-    for procID=1:maxWorkers
-        errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
-        fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
-        semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
-        semDesc = dir(semFile);
-        fileDescriptor = dir(fileName);
-        efd = dir(errFile);
-        while((isempty(fileDescriptor) || isempty(semDesc)) && isempty(efd))
-            pause(3)
-            fileDescriptor = dir(fileName);
-            efd = dir(errFile);
-            semDesc = dir(semFile);
+    bSemFileExists = false(1,maxWorkers);
+    bErrFileExists = false(1,maxWorkers);
+    
+    bProcFinish = false(1,maxWorkers);
+    while ( ~all(bProcFinish) )
+        pause(3);
+        
+        for procID=1:maxWorkers
+            errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
+            segFile = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+            semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
+            
+            bErrFileExists(procID) = ~isempty(dir(errFile));
+            bSegFileExists(procID) = ~isempty(dir(segFile));
+            bSemFileExists(procID) = ~isempty(dir(semFile));
         end
         
-        bSegFileExists(procID) = ~isempty(fileDescriptor);
+        bProcFinish = bErrFileExists | (bSegFileExists & bSemFileExists);
     end
     
     if ( ~all(bSegFileExists) )
@@ -144,11 +147,11 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     try
         cellSegments = [];
         for procID=1:numProcessors
-            fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+            segFile = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
-            tstLoad = whos('-file', fileName);
+            tstLoad = whos('-file', segFile);
             
-            load(fileName);
+            load(segFile);
             
             cellSegments = [cellSegments hulls];
         end
