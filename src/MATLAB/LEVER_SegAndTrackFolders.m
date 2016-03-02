@@ -17,9 +17,6 @@ if (isdeployed())
     Load.SetWorkingDir();
 end
 
-cellType = Load.QueryCellType();
-Load.AddConstant('cellType',cellType,1);
-
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if ( ~directory_name ),return,end
 
@@ -37,8 +34,59 @@ if ( strcmpi(outputDir(1:2),'-T') )
     bTrialRun = 1;
 end
 
-processedDatasets = {};
+%% Get a list of valid subdirectories
+dirList = dir(directory_name);
 
+bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dirList);
+bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
+dirList = dirList(bValidDir);
+
+validDirs = {};
+for dirIdx=1:length(dirList)
+    if ( ~(dirList(dirIdx).isdir) )
+        continue
+    end
+    
+    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
+    if ( isempty(fileList) )
+        continue
+    end
+    
+    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
+    if ( isempty(validStartFilename) )
+        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
+        continue;
+    end
+    
+    datasetName = Helper.ParseImageName(validStartFilename);
+    if ( isempty(datasetName) )
+        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
+        continue;
+    end
+    
+    validDirs = [validDirs; dirList(dirIdx).name];
+end
+
+%% Use previewer on first valid directory to get cell type and segmentation parameters
+Load.AddConstant('version',softwareVersion,1);
+Load.AddConstant('cellType', [], 1);
+
+validStartFilename = getValidStartFileName(fullfile(directory_name, validDirs{1}));
+[datasetName,namePattern] = Helper.ParseImageName(validStartFilename);
+
+Load.AddConstant('rootImageFolder', fullfile(directory_name, validDirs{1}),1);
+Load.AddConstant('datasetName', datasetName,1);
+Load.AddConstant('imageNamePattern', namePattern,1);
+Load.AddConstant('matFullFile', fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']),1);
+
+UI.SegPreview();
+if ( isempty(CONSTANTS.cellType) )
+    return;
+end
+
+cellType = CONSTANTS.cellType;
+
+%% Use total number of processors or max from command-line
 numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors < 4)
@@ -52,52 +100,33 @@ if ( exist('maxProcessors','var') )
     numProcessors = min(maxProcessors, numProcessors);
 end
 
-dirList = dir(directory_name);
-
-bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dirList);
-bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
-dirList = dirList(bValidDir);
-
-for dirIdx=1:length(dirList)
-    if ( ~(dirList(dirIdx).isdir) )
-        continue
-    end
-    
-    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
-    if ( isempty(validStartFilename) )
-        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
-        continue;
-    end
-    
-    [datasetName namePattern] = Helper.ParseImageName(validStartFilename);
-    if ( isempty(datasetName) )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
-        continue;
-    end
+%% Run segmentation for all valid directories
+processedDatasets = {};
+for dirIdx=1:length(validDirs)
+    validStartFilename = getValidStartFileName(fullfile(directory_name, validDirs{dirIdx}));
+    [datasetName,namePattern] = Helper.ParseImageName(validStartFilename);
  
-    CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
-    CONSTANTS.datasetName = datasetName;
-    CONSTANTS.imageNamePattern = namePattern;
-    CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
+    Load.AddConstant('cellType', cellType,1);
+    
+    Load.AddConstant('rootImageFolder', fullfile(directory_name, validDirs{dirIdx}),1);
+    Load.AddConstant('datasetName', datasetName,1);
+    Load.AddConstant('imageNamePattern', namePattern,1);
+    Load.AddConstant('matFullFile', fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']),1);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
         fprintf('%s - LEVer data already exists.  Skipping\n', CONSTANTS.datasetName);
         continue
     end
-    
-    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
-    if ( isempty(fileList) )
-        continue
-    end
 
     Load.AddConstant('version',softwareVersion,1);
     
+    %% Segment and track folder
     fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
-    
     tic
-    Load.InitializeConstants();
 
     if ( ~bTrialRun )
+        Load.InitializeConstants();
+        
         segArgs = Segmentation.GetCellTypeParams();
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
         if ( ~isempty(errStatus) )
@@ -119,7 +148,6 @@ for dirIdx=1:length(dirList)
         Editor.ReplayableEditAction(@Editor.OriginAction, 1);
         
         Helper.SaveLEVerState([CONSTANTS.matFullFile]);
-
         Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
     end
     
