@@ -10,6 +10,13 @@ function ReplaceConstant(curField, newField,newValue)
     
     newFieldIdx = find(strcmp(newField,constFields));
     if ( ~isempty(newFieldIdx) )
+        warning(['CONSTANTS.' newField ' already exists, removing ''' curField '']);
+        CONSTANTS = rmfield(CONSTANTS, curField);
+        return;
+    end
+    
+    newFieldIdx = find(strcmp(newField,constFields));
+    if ( ~isempty(newFieldIdx) )
         constFields = constFields(setdiff(1:length(constFields),newFieldIdx));
     end
     
