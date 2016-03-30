@@ -28,7 +28,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         return;
     end
 
-    fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
+    fprintf('Segmenting (using %s processors)...\n',num2str(maxWorkers));
 
     if(~isempty(dir('.\segmentationData')))        
         removeOldFiles('segmentationData', 'err_*.log');
@@ -146,7 +146,7 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
 
     try
         cellSegments = [];
-        for procID=1:numProcessors
+        for procID=1:maxWorkers
             segFile = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
             tstLoad = whos('-file', segFile);
