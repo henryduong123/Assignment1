@@ -91,7 +91,7 @@ try
         validHulls = [];
         for i=1:length(frameHulls)
             tag = char(segFunc);
-            if ( isfield(frameHulls(i),'tag') && isempty(frameHulls(i).tag) )
+            if ( isfield(frameHulls(i),'tag') && ~isempty(frameHulls(i).tag) )
                 tag = [char(segFunc) ':' frameHulls(i).tag];
             end
             

@@ -211,7 +211,7 @@ function previewSeg(src,event)
     
     validHulls = [];
     for i=1:length(segHulls)
-        validHulls = [validHulls Hulls.CreateHull(CONSTANTS.imageSize, segHulls(i).indexPixels, frameInfo.time)];
+        validHulls = [validHulls Hulls.CreateHull(CONSTANTS.imageSize, segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
     end
     
     frameInfo.cacheHulls = validHulls;
