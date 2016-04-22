@@ -63,34 +63,28 @@ function windowScrollWheel(src, event)
 end
 
 function time = setTime(time)
-    global CONSTANTS
-    
     if ( time < 1 )
         time = 1;
     end
     
-    if ( time > CONSTANTS.numFrames )
-        time = CONSTANTS.numFrames;
+    if ( time > Metadata.GetNumberOfFrames() )
+        time = Metadata.GetNumberOfFrames();
     end
 end
 
 function newTime = incrementFrame(time, delta)
-    global CONSTANTS
-    
     newTime = time + delta;
     
     if ( newTime < 1 )
         newTime = 1;
     end
     
-    if ( newTime > CONSTANTS.numFrames )
-        newTime = newTime - CONSTANTS.numFrames;
+    if ( newTime > Metadata.GetNumberOfFrames() )
+        newTime = newTime - Metadata.GetNumberOfFrames();
     end
 end
 
 function drawPreviewImage(hFig)
-    global CONSTANTS
-    
     hAx = get(hFig, 'CurrentAxes');
     frameInfo = get(hFig, 'UserData');
     
@@ -100,17 +94,19 @@ function drawPreviewImage(hFig)
     im = imSet{frameInfo.chan};
     
     if ( isempty(im) )
-        im = 0.5*ones(CONSTANTS.imageSize);
+        im = 0.5*ones(Metadata.GetDimensions());
     end
     
     imMax = max(im(:));
     im = mat2gray(im,[0 imMax]);
     
+    imDims = Metadata.GetDimensions();
+    
     xl=xlim(hAx);
     yl=ylim(hAx);
     if ( all(xl == [0 1]) )
-        xl = [1 CONSTANTS.imageSize(2)];
-        yl = [1 CONSTANTS.imageSize(1)];
+        xl = [1 imDims(1)];
+        yl = [1 imDims(2)];
     end
 
     hold(hAx, 'off');
@@ -134,8 +130,6 @@ function drawPreviewImage(hFig)
 end
 
 function drawSegHulls(hFig,segHulls, bShowInterior)
-    global CONSTANTS
-    
     hAx = get(hFig, 'CurrentAxes');
     hold(hAx, 'on');
     
@@ -144,7 +138,7 @@ function drawSegHulls(hFig,segHulls, bShowInterior)
         for i=1:length(segHulls)
             colorIdx = mod(i-1,31)+1;
             
-            rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, segHulls(i).indexPixels);
+            rcCoords = Helper.IndexToCoord(Metadata.GetDimensions(), segHulls(i).indexPixels);
             plot(hAx, rcCoords(:,2),rcCoords(:,1), '.', 'Color',cmap(colorIdx,:));
         end
     end
@@ -184,8 +178,6 @@ function [segFunc,segArgs] = getSegInfo(dialogInfo)
 end
 
 function previewSeg(src,event)
-    global CONSTANTS
-    
     hPreviewSeg = src;
     hSegPropDlg = get(hPreviewSeg,'Parent');
     
@@ -211,7 +203,7 @@ function previewSeg(src,event)
     
     validHulls = [];
     for i=1:length(segHulls)
-        validHulls = [validHulls Hulls.CreateHull(CONSTANTS.imageSize, segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
+        validHulls = [validHulls Hulls.CreateHull(Metadata.GetDimensions(), segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
     end
     
     frameInfo.cacheHulls = validHulls;
@@ -272,15 +264,13 @@ function closeFigures(src,event)
 end
 
 function hSegPropDlg = initSegPropDialog(hFig)
-    global CONSTANTS
-    
     hSegPropDlg = dialog('Name','Select Segmentation Properties', 'Visible','on', 'WindowStyle','normal', 'CloseRequestFcn',@closeFigures);
 %     WinOnTop(hSegPropDlg,true);
     
     SupportedTypes = Load.GetSupportedCellTypes();
     
     typeNames = {SupportedTypes.name};
-    chanStr = arrayfun(@(x)(num2str(x)), 1:CONSTANTS.numChannels, 'UniformOutput',0);
+    chanStr = arrayfun(@(x)(num2str(x)), 1:Metadata.GetNumberOfChannels(), 'UniformOutput',0);
     
     hCellBox = uicontrol(hSegPropDlg, 'Style','popupmenu', 'String',typeNames, 'Callback',@selectedCellType, 'Position',[20 20 100 20]);
     hChanBox = uicontrol(hSegPropDlg, 'Style','popupmenu', 'String',chanStr, 'Callback',@selectedChannel, 'Position',[20 20 100 20]);
