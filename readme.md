@@ -1,7 +1,7 @@
 # **LEVER**
 ### The Lineage Editing and Validation tool
 
-LEVER is a MATLAB tool for cell segmentation, tracking and lineaging. By default LEVER tries to identify neural stem cells in phase contrast images. However, the segmentation and tracking algorithms can be extended to identify other cell types using different image modalities. Additional information on extending LEVER can be found in the bioimage/LEVER [wiki](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/home).
+LEVER is a MATLAB tool for cell segmentation, tracking and lineaging. By default LEVER tries to identify neural stem cells in phase contrast images. However, the segmentation and tracking algorithms can be extended to identify other cell types using different image modalities. Additional information on extending LEVER can be found in the LEVER [wiki](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/home).
 
 #### Related Publications
 LEVER has been applied to the analysis of thousands of neural progentior cells (NPC) across hundreds of clones. The NPC analysis results along with a discussion of our LEVER algorithms and CloneView web visualization tool was published in Stem Cell Reports.
@@ -25,7 +25,7 @@ LEVER was developed at Drexel University's Bioimaging lab under the direction of
 
 ## Get The Source Code
 
-##### Clone using Git version control system
+##### Clone using [Git](https://git-scm.com) version control system
 1. Open https://git-bioimage.coe.drexel.edu/opensource/lever
 2. Use the url at the top of the page to clone the git repository
 
@@ -37,15 +37,16 @@ LEVER was developed at Drexel University's Bioimaging lab under the direction of
 ## Running LEVER
 **An installer containing the compiled version of LEVER is available at** http://bioimage.coe.drexel.edu.
 
-The installer is recommended for users that do not have access to MATLAB or do not need to develop new segmentation algorithms for use with LEVER.
+The installer is recommended for users that do not have access to MATLAB or do not need to develop new segmentation algorithms for use with LEVER. After installation LEVER can be run from the start menu.
 
 ### Running from source
 
 1. Acquire the LEVER source through one of the above methods
-2. Run MATLAB (2012b) and set the current directory to the Path-to-LEVER/src/matlab
-3. Choose 'Segment & Track' to segment new data or 'Existing' to open previously created LEVER data
-4. If segmenting for the first time select an image that adheres to the required file name scheme (see below)
-5. Select the segmentation type that corresponds to the cell type and microscope configuration
+2. Run MATLAB (2015b) and set the current directory to the Path-to-LEVER/src/matlab
+3. Type 'LEVer' on the MATLAB command line to start the program
+4. Choose 'Segment & Track' to segment new data or 'Existing' to open previously created LEVER data
+5. If segmenting for the first time select an image that adheres to the required file name scheme (see below)
+6. Select the segmentation type that corresponds to the cell type and microscope configuration
 
 #### Image Naming Requirements
 LEVER requires that images for cell segmentation and display adhere to the following format:
