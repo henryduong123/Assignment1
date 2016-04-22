@@ -748,7 +748,7 @@ function urlStr = urlifyString(inStr)
 end
 
 function createBugReport(src,evnt)
-    verString = Helper.GetVersion('fullstring');
+    verString = Dev.GetVersion('fullstring');
     
 %     issueLabels = 'bug';
 %     issueTitle = '<ISSUE TITLE>';

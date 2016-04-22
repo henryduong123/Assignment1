@@ -25,37 +25,15 @@
 
 function CompileLEVer(forceVersion)
     totalTime = tic();
-
-    % Try to set up git for the build, give a warning about checking the
-    % fallback file if we can't find git.
-    bFoundGit = Dev.SetupGit();
-    if ( ~bFoundGit )
-        questionStr = sprintf('%s\n%s','Cannot find git you should verify the fallback file version info before building.','Are you sure you wish to continue with the build?');
-        result = questdlg(questionStr,'Build Warning','Yes','No','No');
-        if ( strcmpi(result,'No') )
-            return;
-        end
-    end
-
-    % Give a messagebox warning if there are uncommitted changes.
-    % Note: even committed changes may not have been pushed to server.
-    [status,result] = system('git status --porcelain');
-    if ( status == 0 && (length(result) > 1) )
-        questionStr = sprintf('%s\n%s','There are uncommitted changes in your working directory','Are you sure you wish to continue with the build?');
-        result = questdlg(questionStr,'Build Warning','Yes','No','No');
-        if ( strcmpi(result,'No') )
-            return;
-        end
-    end
-
-    %% Build version information
-    if ( ~exist('forceVersion', 'var') )
-        Dev.MakeVersion();
-    else
-        Dev.MakeVersion(0, forceVersion);
+    
+    if ( ~exist('forceVersion','var') )
+        forceVersion = '';
     end
     
-    %% Build FrameSegmentor help information into an function for use in compiled LEVER
+    %% General compiler setup: Deals with version updates and pulls external dependencies
+    initStruct = Dev.InitCompiler('LEVER',forceVersion);
+    
+    %% Build FrameSegmentor help information into a function for use in compiled LEVER
     Dev.MakeSegHelp();
 
     %% Setup visual studio for MEX compilation
@@ -91,48 +69,18 @@ function CompileLEVer(forceVersion)
     
     newOutput = compileEXE('MTC', vsStruct, bindir);
     outputFiles = [outputFiles; {newOutput}];
-
-    %% Build a list of external and toolbox dependencies
-    [toolboxStruct externalStruct] = Dev.GetExternalDependencies();
-    if ( ~isempty(externalStruct.deps) )
-        fprintf('ERROR: Some local functions have external dependencies\n');
-        for i=1:length(externalStruct.deps)
-            fprintf('[%d]  %s\n', i, externalStruct.deps{i});
-            for j=1:length(externalStruct.funcs{i})
-                if ( ~isempty(externalStruct.callers{i}{j}) )
-                    for k=1:length(externalStruct.callers{i}{j})
-                        localName = Dev.GetLocalName(externalStruct.callers{i}{j}{k});
-                        fprintf('    %s calls: %s\n', localName, externalStruct.funcs{i}{j});
-                    end
-                end
-            end
-            fprintf('------\n');
-        end
-        
-%         error('External dependencies cannot be packaged in a MATLAB executable');
-        questionStr = sprintf('%s\n%s','Possible external dependencies were found in project, you should verify all these functions are local before continuing the build.','Are you sure you wish to continue?');
-        result = questdlg(questionStr,'External Dependency Warning','Continue','Cancel','Cancel');
-        if ( strcmpi(result,'Cancel') )
-            return;
-        end
-    end
     
     %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
-    % temporarily remove any startup scripts that would normally be run by matlabrc
-    enableStartupScripts(false);
-    
     addImgs = {'+UI\backFrame.png'; '+UI\forwardFrame.png'; '+UI\pause.png';'+UI\play.png';'+UI\stop.png'};
-    newOutput = compileMATLAB('LEVer', bindir, addImgs, toolboxStruct.deps);
+    newOutput = compileMATLAB('LEVer', bindir, addImgs, initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, toolboxStruct.deps);
+    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('Segmentor', bindir, {}, toolboxStruct.deps);
+    newOutput = compileMATLAB('Segmentor', bindir, {}, initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
-    
-    enableStartupScripts(true);
     
     fprintf('\n');
     
@@ -142,8 +90,8 @@ function CompileLEVer(forceVersion)
     bIsEXE = cellfun(@(x)(~isempty(x)), strfind(lower(outputFiles), '.exe'));
     exeOutputs = outputFiles(bIsEXE);
     
-    verSuffix = Helper.GetVersion('file');
-    zip(fullfile(bindir,['LEVer' verSuffix '.zip']), [exeOutputs; {'*.bat'}], bindir);
+%     verSuffix = Dev.GetVersion('file');
+%     zip(fullfile(bindir,['LEVer' verSuffix '.zip']), [exeOutputs; {'*.bat'}], bindir);
     
     toc(totalTime)
 end
@@ -213,8 +161,8 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
     end
     extrasList = vertcat({'LEVER_logo.tif';
                           '+Segmentation\FrameSegmentor_*.m';
-                          '+Helper\GetVersion.m';
-                          '+Helper\VersionInfo.m'}, extrasList);
+                          '+Dev\GetVersion.m';
+                          '+Dev\VersionInfo.m'}, extrasList);
     
 	extraCommand = '';
     if ( ~isempty(extrasList) )
@@ -227,10 +175,10 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
     end
     
     toolboxAddCommand = '';
-%     if ( ~isempty(toolboxList) )
-%         toolboxElems = cellfun(@(x)([' -p "' x '"']), toolboxList, 'UniformOutput',0);
-%         toolboxAddCommand = ['-N' toolboxElems{:}];
-%     end
+    if ( ~isempty(toolboxList) )
+        toolboxElems = cellfun(@(x)([' -p "' x '"']), toolboxList, 'UniformOutput',0);
+        toolboxAddCommand = ['-N' toolboxElems{:}];
+    end
     
     fprintf('\nMATLAB Compiling: %s...\n', outputFile);
     result = system(['mcc -v -R -startmsg -m ' projectName '.m ' toolboxAddCommand extraCommand]);
@@ -242,45 +190,3 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
     
     fprintf('Done (%f sec)\n', toc(compileTime));
 end
-
-function enableStartupScripts(bEnable)
-    searchPrefix = '';
-    renamePrefix = 'disabled_';
-    if ( bEnable )
-        searchPrefix = 'disabled_';
-        renamePrefix = '';
-    end
-    
-    searchName = [searchPrefix 'startup.m'];
-    newName = [renamePrefix 'startup.m'];
-    
-    startupScripts = findFilesInPath(searchName, userpath);
-    for i=1:length(startupScripts)
-        scriptPath = fileparts(startupScripts{i});
-        movefile(startupScripts{i}, fullfile(scriptPath,newName));
-    end
-end
-
-function fullNames = findFilesInPath(filename, searchPaths)
-    fullNames = {};
-    
-    chkPaths = [];
-    while ( ~isempty(searchPaths) )
-        [newPath remainder] = strtok(searchPaths, pathsep);
-        if ( isempty(newPath) )
-            searchPaths = remainder;
-            continue;
-        end
-        
-        chkPaths = [chkPaths; {newPath}];
-        searchPaths = remainder;
-    end
-    
-    for i=1:length(chkPaths)
-        chkFullPath = fullfile(chkPaths{i}, filename);
-        if ( exist(chkFullPath, 'file') )
-            fullNames = [fullNames; {chkFullPath}];
-        end
-    end
-end
-

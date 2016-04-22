@@ -31,9 +31,9 @@
 function opened = OpenData()
 global Figures Colors CONSTANTS
 
-softwareVersion = Helper.GetVersion();
+softwareVersion = Dev.GetVersion();
 if(isempty(Figures))
-    fprintf('LEVer ver %s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
+    fprintf('%s\n***DO NOT DISTRIBUTE***\n\n', softwareVersion);
 end
 
 if(exist('ColorScheme.mat','file'))

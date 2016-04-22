@@ -11,7 +11,7 @@ global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
 
-softwareVersion = Helper.GetVersion();
+softwareVersion = Dev.GetVersion();
 
 if (isdeployed())
     Load.SetWorkingDir();
