@@ -131,6 +131,11 @@ function bNeedsUpdate = FixOldFileVersions()
         bNeedsUpdate = true;
     end
     
+    % Properly include image metadata, remove old superfluous fields
+    if ( Load.FixMetadata() )
+        bNeedsUpdate = true;
+    end
+    
 %     % Adds the special origin action, to indicate that this is initial
 %     % segmentation data from which edit actions are built.
 %     if ( isempty(ReplayEditActions) || bNeedsUpdate )

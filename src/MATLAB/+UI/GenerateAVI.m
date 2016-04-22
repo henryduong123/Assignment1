@@ -28,7 +28,7 @@ function GenerateAVI(src, evt)
 global Figures CONSTANTS HashedCells
 
 defaultPath = fileparts(CONSTANTS.matFullFile);
-defaultFile = [CONSTANTS.datasetName '.mp4'];
+defaultFile = [Metadata.GetDatasetName() '.mp4'];
 
 [movieFile, moviePath] = uiputfile('*.mp4', 'Save Movie', fullfile(defaultPath, defaultFile));
 if ( movieFile == 0 )

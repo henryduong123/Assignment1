@@ -160,16 +160,17 @@ function setMenus()
     end
 
     if (isfield(Figures.cells,'menuHandles') && isfield(Figures.cells.menuHandles,'saveMenu'))
+        datasetName = Metadata.GetDatasetName();
         if ( Editor.StackedHistory.IsSaved() )
             set(Figures.cells.menuHandles.saveMenu,'Enable','off');
             set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
-            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
+            set(Figures.cells.handle,'Name',[datasetName ' Image Data']);
+            set(Figures.tree.handle,'Name',[datasetName ' Lineage Data']);
         else
             set(Figures.cells.menuHandles.saveMenu,'Enable','on');
             set(Figures.tree.menuHandles.saveMenu,'Enable','on');
-            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
-            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
+            set(Figures.cells.handle,'Name',[datasetName ' Image Data *']);
+            set(Figures.tree.handle,'Name',[datasetName ' Lineage Data *']);
         end
     end
 end %setMenu

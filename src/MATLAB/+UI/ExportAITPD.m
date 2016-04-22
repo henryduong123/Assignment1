@@ -52,7 +52,7 @@ trackData = [];
 
 if(CellFamilies(track.familyID).endTime-CellFamilies(track.familyID).startTime < 0.50*length(HashedCells)),return,end
 
-trackData.datasetName = CONSTANTS.datasetName;
+trackData.datasetName = Metadata.GetDatasetName();
 trackData.cellLabel = label;
 trackData.parent = track.parentTrack;
 trackData.sibling = track.siblingTrack;
@@ -85,7 +85,7 @@ for i=1:length(track.hulls)
     
     trackData.times(length(trackData.times)+1,1) = track.startTime +i -1;
     
-    [x y] = ind2sub(CONSTANTS.imageSize,CellHulls(track.hulls(i)).indexPixels);
+    [x y] = ind2sub(Metadata.GetDimensions('rc'),CellHulls(track.hulls(i)).indexPixels);
     x = x(:) - min(x) +2;
     y = y(:) - min(y) +2;
     im = zeros(max(x)+2,max(y)+2);
@@ -112,7 +112,7 @@ success = 0;
 
 settings = Load.ReadSettings();
 [file,filePath,filterIndex] = uiputfile([settings.matFilePath '*.txt'],'Save data',...
-        [CONSTANTS.datasetName '_AITPD.txt']);
+        [Metadata.GetDatasetName() '_AITPD.txt']);
 if(filterIndex<1),return,end
 
 fout=fopen([filePath file],'w');

@@ -35,13 +35,13 @@ time = clock;%[year month day hour minute seconds]
 settings = Load.ReadSettings();
 if ( ~isempty(settings.matFilePath) )
     logPath = settings.matFilePath;
-    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+    logFile = fullfile(logPath, [Metadata.GetDatasetName() '_log.csv']);
 elseif ( isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile) )
     logPath = fileparts(CONSTANTS.matFullFile);
-    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+    logFile = fullfile(logPath, [Metadata.GetDatasetName() '_log.csv']);
 else
     logPath = '.\';
-    logFile = fullfile(logPath, [CONSTANTS.datasetName '_log.csv']);
+    logFile = fullfile(logPath, [Metadata.GetDatasetName() '_log.csv']);
 end
 
 [x usr] = system('whoami');
@@ -106,7 +106,7 @@ while(file<2)
     answer = questdlg('Please close the log.','Log Opened','Use new log name','Try Again','Try Again');
     switch answer
         case 'Use new log name'
-            file = fopen(fullfile(logPath,[CONSTANTS.datasetName '_log2.csv']),'a');
+            file = fopen(fullfile(logPath,[Metadata.GetDatasetName() '_log2.csv']),'a');
         case 'Try Again'
             file = fopen(logFile,'a');
     end

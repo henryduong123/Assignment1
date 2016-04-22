@@ -35,7 +35,7 @@ function [errStatus, segInfo] = SegAndTrack()
     settings = Load.ReadSettings();
 
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName '_LEVer.mat']);
+        [Metadata.GetDatasetName() '_LEVer.mat']);
 
     if(~FilterIndex)
         return;
@@ -52,10 +52,10 @@ function [errStatus, segInfo] = SegAndTrack()
     end
     
     segArgs = Segmentation.GetCellTypeParams();
-    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
+    [errStatus,tSeg,tTrack] = Segmentation.SegAndTrackDataset(numProcessors, segArgs);
     
     if ( ~isempty(errStatus) )
-        errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
+        errFilename = [Metadata.GetDatasetName() '_segtrack_err.log'];
         
         msgbox(['An error occured during segmentation and tracking. For further details see log file: ' errFilename],'SegAndTrack Error','warn');
         

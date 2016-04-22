@@ -9,24 +9,25 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
         return;
     end
     
-    oldMeans = zeros(k, 2);
+    rcImageDims = Metadata.GetDimensions('rc');
+    xyOldMeans = zeros(k, rcImageDims);
     for i=1:length(checkHullIDs)
-        oldCoord = Helper.IndexToCoord(CONSTANTS.imageSize, CellHulls(checkHullIDs(i)).indexPixels);
-        oldMeans(i,:) = Helper.SwapXY_RC(mean(oldCoord,1));
+        rcOldCoord = Helper.IndexToCoord(rcImageDims, CellHulls(checkHullIDs(i)).indexPixels);
+        xyOldMeans(i,:) = Helper.SwapXY_RC(mean(rcOldCoord,1));
     end
     
     if ( length(hull.indexPixels) < 2 )
         return;
     end
     
-    rcCoords = Helper.IndexToCoord(CONSTANTS.imageSize, hull.indexPixels);
+    rcCoords = Helper.IndexToCoord(rcImageDims, hull.indexPixels);
     xyCoords = Helper.SwapXY_RC(rcCoords);
     
     typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     if ( typeParams.splitParams.useGMM )
-        kIdx = gmmCluster(xyCoords, k, oldMeans);
+        kIdx = gmmCluster(xyCoords, k, xyOldMeans);
     else
-        kIdx = kmeans(xyCoords, k, 'start',oldMeans, 'EmptyAction','drop');
+        kIdx = kmeans(xyCoords, k, 'start',xyOldMeans, 'EmptyAction','drop');
     end
     
     if ( any(isnan(kIdx)) )
@@ -36,7 +37,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     for i=1:k
         newHullPixels = hull.indexPixels( kIdx==i );
         
-        outputHull = Hulls.CreateHull(CONSTANTS.imageSize, newHullPixels, hull.time);
+        outputHull = Hulls.CreateHull(rcImageDims, newHullPixels, hull.time);
         newHulls = [newHulls outputHull];
     end
 

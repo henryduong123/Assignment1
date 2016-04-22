@@ -20,8 +20,9 @@ function ccDist = CalcHullConnectedDistances(hullID, nextHullIDs, hullPerims, hu
         return;
     end
     
+    rcImageDims = Metadata.GetDimensions('rc');
     for i=1:length(checkHullIDs)
-        chkDist = Helper.CalcConnectedDistance(hullID,checkHullIDs(i), CONSTANTS.imageSize, hullPerims, hulls);
+        chkDist = Helper.CalcConnectedDistance(hullID,checkHullIDs(i), rcImageDims, hullPerims, hulls);
         ccDist(chkHullIdx(i)) = chkDist;
     end
 end

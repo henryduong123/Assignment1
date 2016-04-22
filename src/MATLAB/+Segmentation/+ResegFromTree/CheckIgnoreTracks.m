@@ -41,7 +41,7 @@ function [bIgnoreEdges, bLongEdges] = CheckIgnoreTracks(t, trackIDs, viewLims)
 end
 
 function bInLims = checkHullCOMLims(hullID, xyViewLims)
-    global CONSTANTS CellHulls
+    global CellHulls
     
     if ( isempty(hullID) || hullID == 0 )
         bInLims = false;
@@ -51,10 +51,10 @@ function bInLims = checkHullCOMLims(hullID, xyViewLims)
     lenDims = xyViewLims(:,2) - xyViewLims(:,1);
     padScale = 0.05;
     
-    imSize = Helper.SwapXY_RC(CONSTANTS.imageSize);
+    xyImageDims = Metadata.GetDimensions('xy');
     
     bNotEdgeMin = (xyViewLims(:,1) >= 1+5);
-    bNotEdgeMax = (xyViewLims(:,2) <= (imSize-5).');
+    bNotEdgeMax = (xyViewLims(:,2) <= (xyImageDims-5).');
     
     padInMin = bNotEdgeMin.*padScale.*lenDims;
     padInMax = bNotEdgeMax.*padScale.*lenDims;

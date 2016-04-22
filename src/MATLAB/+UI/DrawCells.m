@@ -55,9 +55,9 @@ else
 end
 
 %read in image
-img = Helper.LoadChannelIntensityImage(Figures.time,Figures.chanIdx);
+img = Helper.LoadIntensityImage(Figures.time,Figures.chanIdx);
 if ( isempty(img) )
-    img = zeros(CONSTANTS.imageSize);
+    img = zeros(Metadata.GetDimensions('rc'));
 end
 
 imMax = max(img(:));
@@ -177,7 +177,7 @@ if(strcmp(get(Figures.cells.menuHandles.labelsMenu, 'Checked'),'on'))
         colorStruct = UI.GetCellDrawProps(curTrackID, curHullID, drawString);
         
         if(Figures.cells.showInterior)
-            [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(curHullID).indexPixels);
+            [r c] = ind2sub(Metadata.GetDimensions('rc'), CellHulls(curHullID).indexPixels);
             plot(curAx, c, r, '.', 'Color',colorStruct.edge);
         end
         

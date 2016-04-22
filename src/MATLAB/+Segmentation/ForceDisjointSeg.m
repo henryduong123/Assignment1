@@ -3,7 +3,7 @@
 %the current method still allows considerable hull overlap in some cases.
 
 function newHull = ForceDisjointSeg(hull, time, centerPt)
-    global CONSTANTS CellHulls HashedCells
+    global CellHulls HashedCells
     
     newHull = [];
     
@@ -17,7 +17,7 @@ function newHull = ForceDisjointSeg(hull, time, centerPt)
         return;
     end
     
-    bwimg = zeros(CONSTANTS.imageSize);
+    bwimg = zeros(Metadata.GetDimensions('rc'));
     bwimg(pix(bPickPix)) = 1;
     
     CC = bwconncomp(bwimg,8);

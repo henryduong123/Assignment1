@@ -454,7 +454,7 @@ function loadStainData(src,evt)
         chkDir = fileparts(CONSTANTS.matFullFile);
     end
     
-    [stainFile stainPath filterIdx] = uigetfile(fullfile(chkDir,'*_StainInfo.mat'), 'Open Staining Data',fullfile(chkDir, [CONSTANTS.datasetName '_StainInfo.mat']));
+    [stainFile stainPath filterIdx] = uigetfile(fullfile(chkDir,'*_StainInfo.mat'), 'Open Staining Data',fullfile(chkDir, [Metadata.GetDatasetName() '_StainInfo.mat']));
     if ( filterIdx == 0 )
         return;
     end
@@ -581,7 +581,7 @@ end
 function nextChannel(src,evnt)
 global Figures CONSTANTS
 Figures.chanIdx = Figures.chanIdx + 1;
-if Figures.chanIdx > CONSTANTS.numChannels
+if Figures.chanIdx > Metadata.GetNumberOfChannels()
     Figures.chanIdx = 1;
 end
 UI.DrawCells();

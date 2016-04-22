@@ -57,17 +57,18 @@ end
 segParams = struct2cell(segArgs);
 
 try 
-    deployPrint(1,'%s\n',procArgs.imagePath);
-    deployPrint(1,'%s\n',procArgs.imagePattern);
+    deployPrint(1,'%s\n',procArgs.metadataFile);
     
-    Load.AddConstant('rootImageFolder', procArgs.imagePath, 1);
-    Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
-    Load.AddConstant('numChannels', procArgs.numChannels, 1);
-    Load.AddConstant('numFrames', procArgs.numFrames, 1);
+    imageData = MicroscopeData.ReadMetadata(procArgs.metadataFile,false);
+    if ( isempty(imageData) )
+        error(['Unable to read image metadata file: ' procArgs.metadataFile]);
+    end
+    
     Load.AddConstant('primaryChannel', procArgs.primaryChannel, 1);
+    Metadata.SetMetadata(imageData);
     
     tStart = procArgs.procID;
-    tEnd = procArgs.numFrames;
+    tEnd = Metadata.GetNumberOfFrames();
     tStep = procArgs.numProcesses;
     primaryChan = procArgs.primaryChannel;
     
@@ -135,10 +136,11 @@ function deployPrint(varargin)
     fprintf(varargin{:});
 end
 
-function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
-    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'primaryChannel',{[]}, 'imagePath',{''}, 'imagePattern',{''});
+function [procArgs, segArgs] = setSegArgs(supportedCellTypes, argCell)
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'primaryChannel',{1}, 'metadataFile',{''}, 'cellType',{''});
     
     procArgFields = fieldnames(procArgs);
+    procArgFields = reshape(procArgFields,1,length(procArgFields));
     procArgTypes = cellfun(@(x)(class(x)), struct2cell(procArgs), 'UniformOutput',0);
     
     segArgs = [];

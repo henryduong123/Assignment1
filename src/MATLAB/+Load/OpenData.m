@@ -128,26 +128,29 @@ switch answer
             end
             
             Load.SaveSettings(settings);
-            
             Load.AddConstant('matFullFile', [settings.matFilePath settings.matFile], 1);
             
-            bQueryImageDir = false;
-            if ( ~isfield(CONSTANTS,'imageNamePattern') )
-                bQueryImageDir = true;
-            elseif ( ~isfield(CONSTANTS,'primaryChannel') )
-                [channelList, frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder,CONSTANTS.imageNamePattern);
-                bQueryImageDir = isempty(frameList);
-            else
-                bQueryImageDir = isempty(Helper.LoadPrimaryIntensityImage(1));
+            % Update imageData.DatasetName early enough to check for
+            % image/data match.
+            if ( isfield(CONSTANTS,'datasetName') )
+                oldName = CONSTANTS.datasetName;
+                if ( oldName(end) == '_' )
+                    oldName = oldName(1:end-1);
+                end
+                
+                Load.AddConstant('imageData.DatasetName',oldName,true);
             end
             
-            if ( bQueryImageDir )
-                if (~Helper.ImageFileDialog())
+            imageData = MicroscopeData.ReadMetadata(fullfile(CONSTANTS.rootImageFolder, [Metadata.GetDatasetName() '.json']), false);
+            if ( isempty(imageData) )
+                if ( exist(CONSTANTS.rootImageFolder,'dir') )
+                    error('No metadata found in image directory, currently unsupported!');
+                elseif (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return
                 end
             end
-                
+            
             if(exist('objHulls','var'))
                 errordlg('Data too old to run with this version of LEVer');
                 CONSTANTS = oldCONSTANTS;
@@ -168,17 +171,20 @@ switch answer
             ovwAns = questdlg('Old file format detected! Update required. Would you like to save the updated file to a new location?', ... 
                                 'Verision Update', ... 
                                 'Save As...','Overwrite','Overwrite'); 
-                                
+            
+            bValidAns = false;
             % Handle response 
             switch ovwAns 
                 case 'Save As...' 
-                    if ( ~UI.SaveDataAs(true) )
-                        warning(['File format must updated. Overwriting file: ' CONSTANTS.matFullFile]);
-                        Helper.SaveLEVerState(CONSTANTS.matFullFile);
-                    end
+                    bValidAns = UI.SaveDataAs(true);
                 case 'Overwrite'
+                    bValidAns = true;
                     Helper.SaveLEVerState(CONSTANTS.matFullFile);
-            end 
+            end
+            
+            if ( ~bValidAns )
+                warning('Proceeding without updating file, be sure to save before exiting LEVer!');
+            end
         end
         
          UI.InitializeFigures();

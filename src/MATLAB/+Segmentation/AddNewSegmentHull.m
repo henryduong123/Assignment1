@@ -24,34 +24,27 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newTrackID = AddNewSegmentHull(clickPt, time)
-    global CONSTANTS CellHulls
+function newTrackID = AddNewSegmentHull(xyClickPt, time)
+    global CellHulls
     
     chanImSet = Helper.LoadIntensityImageSet(time);
- 
-    if strcmp(CONSTANTS.cellType, 'Hemato')
-        subSize = 100;
-    else
-        subSize = 200;
-    end
-    
-    
-    chkHull = Segmentation.FindNewSegmentation(chanImSet, clickPt, subSize, true, [], time);
+    chkHull = Segmentation.FindNewSegmentation(chanImSet, xyClickPt, 200, true, [], time);
 
     newHull = Helper.MakeEmptyStruct(CellHulls);
     newHull.userEdited = true;
     
     if ( ~isempty(chkHull) )
-        chkHull = Segmentation.ForceDisjointSeg(chkHull, time, clickPt);
+        chkHull = Segmentation.ForceDisjointSeg(chkHull, time, xyClickPt);
     end
     
     % TODO: Update manual click hulls for 3D
+    rcImageDims = Metadata.GetDimensions('rc');
     if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
-        clickIndex = Helper.CoordToIndex(CONSTANTS.imageSize, round(Helper.SwapXY_RC(clickPt)));
-        newHull = Hulls.CreateHull(CONSTANTS.imageSize, clickIndex, time, true, 'Manual');
+        clickIndex = Helper.CoordToIndex(rcImageDims, round(Helper.SwapXY_RC(xyClickPt)));
+        newHull = Hulls.CreateHull(rcImageDims, Helper.SwapXY_RC(xyClickPt), time, true, 'Manual');
     else
-        newHull = Hulls.CreateHull(CONSTANTS.imageSize, chkHull.indexPixels, time, true, chkHull.tag);
+        newHull = Hulls.CreateHull(rcImageDims, chkHull.indexPixels, time, true, chkHull.tag);
     end
     
     newHullID = Hulls.SetCellHullEntries(0, newHull);

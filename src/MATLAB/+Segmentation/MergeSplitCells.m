@@ -126,7 +126,7 @@ function [mergeHull, deleteHullIDs] = createMergeCell(mergeIDs)
     deleteHullIDs = mergeIDs;
     newIndexPixels = vertcat(CellHulls(deleteHullIDs).indexPixels);
 
-    mergeHull = Hulls.CreateHull(CONSTANTS.imageSize, newIndexPixels, CellHulls(deleteHullIDs(1)).time, true);
+    mergeHull = Hulls.CreateHull(Metadata.GetDimensions('rc'), newIndexPixels, CellHulls(deleteHullIDs(1)).time, true);
 end
 
 function edge = getTrackEdge(t, trackID)

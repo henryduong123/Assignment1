@@ -6,10 +6,7 @@
 % rootTracks - List of root tree tracks to resegment
 
 function tLast = ResegFromTree(rootTracks, tStart, tEnd)
-    global HashedCells CellTracks CellHulls Costs
-    
-    global Figures CONSTANTS
-    outMovieDir = fullfile('B:\Users\mwinter\Documents\Figures\Reseg',CONSTANTS.datasetName);
+    global HashedCells CellTracks CellHulls Costs Figures
     
     if ( ~exist('tStart','var') )
         tStart = 2;
