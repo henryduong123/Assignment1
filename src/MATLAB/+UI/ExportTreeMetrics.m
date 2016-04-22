@@ -28,8 +28,6 @@ function ExportTreeMetrics(src,evnt)
 
 global CellTracks CellFamilies CONSTANTS Figures
 
-trackMetrics = [];
-
 familyID=Figures.tree.familyID;
 rootTrackID = CellFamilies(familyID).rootTrackID;
 
@@ -43,10 +41,17 @@ if ( FilterIndex == 0 )
     return;
 end
 
-trackSortList = zeros(1,length(famTracks));
+trackSortList = [];
+trackMetrics = [];
 for i=1:length(famTracks)
-    trackSortList(i) = trackHeights(famTracks(i));
-    trackMetrics = [trackMetrics getMetrics(famTracks(i),CellTracks(famTracks(i)))];
+    trackEntry = getMetrics(famTracks(i),CellTracks(famTracks(i)));
+    
+    if ( isempty(trackEntry) )
+        continue;
+    end
+    
+    trackSortList = [trackSortList trackHeights(famTracks(i))];
+    trackMetrics = [trackMetrics trackEntry];
 end
 
 [sortedHeights,srtIdx] = sort(trackSortList,'descend');
