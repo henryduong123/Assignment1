@@ -41,8 +41,8 @@ function newTrackID = AddNewSegmentHull(xyClickPt, time)
     rcImageDims = Metadata.GetDimensions('rc');
     if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
-        clickIndex = Helper.CoordToIndex(rcImageDims, round(Helper.SwapXY_RC(xyClickPt)));
-        newHull = Hulls.CreateHull(rcImageDims, Helper.SwapXY_RC(xyClickPt), time, true, 'Manual');
+        clickIndex = Utils.CoordToInd(rcImageDims, round(Utils.SwapXY_RC(xyClickPt)));
+        newHull = Hulls.CreateHull(rcImageDims, Utils.SwapXY_RC(xyClickPt), time, true, 'Manual');
     else
         newHull = Hulls.CreateHull(rcImageDims, chkHull.indexPixels, time, true, chkHull.tag);
     end

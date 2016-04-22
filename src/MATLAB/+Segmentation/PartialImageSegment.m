@@ -36,8 +36,8 @@ function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, primaryChan, 
         imSize = max([imSize; size(chanImg{c})],[],1);
     end
     
-    rcCoordMin = floor(Helper.SwapXY_RC(xyCenterPt) - subSize/2);
-    rcCoordMax = ceil(Helper.SwapXY_RC(xyCenterPt) + subSize/2);
+    rcCoordMin = floor(Utils.SwapXY_RC(xyCenterPt) - subSize/2);
+    rcCoordMax = ceil(Utils.SwapXY_RC(xyCenterPt) + subSize/2);
     
     rcCoordMin(rcCoordMin < 1) = 1;
     rcCoordMax(rcCoordMax > imSize) = imSize(rcCoordMax > imSize);
@@ -71,6 +71,6 @@ function newHulls = fixupFromSubimage(rcCoordMin, origSize, subSize, hulls)
 end
 
 function globIdx = makeGlobalPix(locIdx, globSz, locSz, rcOffset)
-    globCoords = Helper.IndexToCoord(locSz, locIdx) + repmat(rcOffset, size(locIdx,1),1);
-    globIdx = Helper.CoordToIndex(globSz, globCoords);
+    globCoords = Utils.IndToCoord(locSz, locIdx) + repmat(rcOffset, size(locIdx,1),1);
+    globIdx = Utils.CoordToInd(globSz, globCoords);
 end

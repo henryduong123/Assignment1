@@ -18,8 +18,8 @@ function newHull = CreateHull(rcImageDims, indexPixels, time, userEdited, tag)
         newHull = Helper.MakeEmptyStruct(CellHulls);
     end
     
-    rcCoords = Helper.IndexToCoord(rcImageDims, indexPixels);
-    xyCoords = Helper.SwapXY_RC(rcCoords);
+    rcCoords = Utils.IndToCoord(rcImageDims, indexPixels);
+    xyCoords = Utils.SwapXY_RC(rcCoords);
     
     newHull.indexPixels = indexPixels;
     newHull.centerOfMass = mean(rcCoords,1);

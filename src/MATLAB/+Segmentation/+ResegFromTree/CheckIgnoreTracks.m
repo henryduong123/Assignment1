@@ -59,7 +59,7 @@ function bInLims = checkHullCOMLims(hullID, xyViewLims)
     padInMin = bNotEdgeMin.*padScale.*lenDims;
     padInMax = bNotEdgeMax.*padScale.*lenDims;
     
-    hullCOM = Helper.SwapXY_RC(CellHulls(hullID).centerOfMass).';
+    hullCOM = Utils.SwapXY_RC(CellHulls(hullID).centerOfMass).';
     
     bInDim = ((hullCOM > xyViewLims(:,1)+padInMin) & (hullCOM < xyViewLims(:,2)-padInMax));
     

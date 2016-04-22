@@ -35,8 +35,8 @@ end
 
 % guassian clustering (x,y,...) coordinates of cell interior
 rcImageDims = Metadata.GetDimensions('rc');
-rcCoords = Helper.IndexToCoord(rcImageDims, hull.indexPixels);
-xyCoords = Helper.SwapXY_RC(rcCoords);
+rcCoords = Utils.IndToCoord(rcImageDims, hull.indexPixels);
+xyCoords = Utils.SwapXY_RC(rcCoords);
 
 typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
 if ( typeParams.splitParams.useGMM )

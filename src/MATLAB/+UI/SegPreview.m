@@ -138,7 +138,7 @@ function drawSegHulls(hFig,segHulls, bShowInterior)
         for i=1:length(segHulls)
             colorIdx = mod(i-1,31)+1;
             
-            rcCoords = Helper.IndexToCoord(Metadata.GetDimensions(), segHulls(i).indexPixels);
+            rcCoords = Utils.IndToCoord(Metadata.GetDimensions(), segHulls(i).indexPixels);
             plot(hAx, rcCoords(:,2),rcCoords(:,1), '.', 'Color',cmap(colorIdx,:));
         end
     end

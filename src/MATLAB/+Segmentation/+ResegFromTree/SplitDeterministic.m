@@ -12,16 +12,16 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     rcImageDims = Metadata.GetDimensions('rc');
     xyOldMeans = zeros(k, rcImageDims);
     for i=1:length(checkHullIDs)
-        rcOldCoord = Helper.IndexToCoord(rcImageDims, CellHulls(checkHullIDs(i)).indexPixels);
-        xyOldMeans(i,:) = Helper.SwapXY_RC(mean(rcOldCoord,1));
+        rcOldCoord = Utils.IndToCoord(rcImageDims, CellHulls(checkHullIDs(i)).indexPixels);
+        xyOldMeans(i,:) = Utils.SwapXY_RC(mean(rcOldCoord,1));
     end
     
     if ( length(hull.indexPixels) < 2 )
         return;
     end
     
-    rcCoords = Helper.IndexToCoord(rcImageDims, hull.indexPixels);
-    xyCoords = Helper.SwapXY_RC(rcCoords);
+    rcCoords = Utils.IndToCoord(rcImageDims, hull.indexPixels);
+    xyCoords = Utils.SwapXY_RC(rcCoords);
     
     typeParams = Load.GetCellTypeStructure(CONSTANTS.cellType);
     if ( typeParams.splitParams.useGMM )
