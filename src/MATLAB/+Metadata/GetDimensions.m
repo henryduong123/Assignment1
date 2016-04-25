@@ -6,13 +6,18 @@ function dims = GetDimensions(dimOrder)
     end
     
     dims = [];
-    selectedDims = [1 2 3];
-    if ( strcmpi(dimOrder,'rc') )
-        selectedDims = [2 1 3];
-    end
-    
     if ( ~isfield(CONSTANTS,'imageData') )
         return;
+    end
+    
+    numDims = 3;
+    if ( CONSTANTS.imageData.Dimensions(3) == 1 )
+        numDims = 2;
+    end
+    
+    selectedDims = 1:numDims;
+    if ( strcmpi(dimOrder,'rc') )
+        selectedDims = Utils.SwapXY_RC(selectedDims);
     end
     
     dims = CONSTANTS.imageData.Dimensions(selectedDims);
