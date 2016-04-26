@@ -1,5 +1,5 @@
-function BuildTrackingData(objTracks, gConnect)
-    global CONSTANTS Costs GraphEdits ResegLinks CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
+function BuildTrackingData(hullTracks, gConnect)
+    global Costs GraphEdits ResegLinks CellHulls CellFamilies CellTracks HashedCells CellPhenotypes
 
     %ensure that the globals are empty
     Costs = gConnect;
@@ -13,18 +13,15 @@ function BuildTrackingData(objTracks, gConnect)
     CellPhenotypes = struct('descriptions', {{'died'}}, 'hullPhenoSet', {zeros(2,0)});
     
     hullList = [];
-    for i=length(objTracks):-1:1
-        UI.Progressbar((length(objTracks)-i) / (length(objTracks)));
+    for i=length(hullTracks):-1:1
+        UI.Progressbar((length(hullTracks)-i) / (length(hullTracks)));
         
         if ( any(ismember(hullList,i)) )
             continue;
         end
         
-        if ( objTracks(i).inID ~= 0 )
-            continue;
-        end
-        
-        hullList = addToTrack(i,hullList,objTracks);
+        allTrackHulls = find(hullTracks == hullTracks(i));
+        hullList = [hullList addToTrack(allTrackHulls)];
     end
     
     if ( length(hullList) ~= length(CellHulls) )
@@ -43,36 +40,19 @@ function BuildTrackingData(objTracks, gConnect)
         Dev.PrintIntegrityErrors(errors);
     end
 
-
     %create the family trees
     Families.ProcessNewborns();
 end
 
-function hullList = addToTrack(hullID, hullList, objTracks)
-    global CellHulls
-    
-    if ( any(ismember(hullList,hullID)) || objTracks(hullID).inID ~= 0 )
+function hullList = addToTrack(allTrackHulls)  
+    if ( isempty(allTrackHulls) )
         return
     end
 
-    Families.NewCellFamily(hullID);
-    hullList = [hullList hullID];
-
-    nextHull = hullID;
-    while ( objTracks(nextHull).outID ~= 0 )
-        nextHull = objTracks(nextHull).outID;
-        
-        if ( any(ismember(hullList,nextHull)) )
-            break;
-        end
-        
-        if ( any(ismember(hullList,objTracks(nextHull).inID)) )
-            Tracks.AddHullToTrack(nextHull,[],objTracks(nextHull).inID);
-        else
-            %this runs if there was an error in objTracks data structure
-            Families.NewCellFamily(hull);
-        end
-        
-        hullList = [hullList nextHull];
+    Families.NewCellFamily(allTrackHulls(1));
+    for i=2:length(allTrackHulls)
+        Tracks.AddHullToTrack(allTrackHulls(i),[],allTrackHulls(i-1));
     end
+    
+    hullList = allTrackHulls;
 end

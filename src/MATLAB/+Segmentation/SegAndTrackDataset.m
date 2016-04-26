@@ -160,16 +160,10 @@ function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
 
     % Sort segmentations and fluorescent data so that they are time ordered
     segtimes = [cellSegments.time];
-    [srtSegs srtIdx] = sort(segtimes);
+    [~,srtIdx] = sort(segtimes);
     CellHulls = Helper.MakeInitStruct(Helper.GetCellHullTemplate(), cellSegments(srtIdx));
     
-    % Make sure center of mass is available
-    for i=1:length(CellHulls)
-        [r c] = ind2sub(Metadata.GetDimensions('rc'), CellHulls(i).indexPixels);
-        CellHulls(i).centerOfMass = mean([r c], 1);
-    end
-    
-    fprintf('Building Connected Component Distances... ');
+    %% Build hashed cell list
     HashedCells = cell(1,Metadata.GetNumberOfFrames());
     for t=1:Metadata.GetNumberOfFrames()
         HashedCells{t} = struct('hullID',{}, 'trackID',{});
@@ -179,9 +173,10 @@ function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
         HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
     end
     
+    %% Create connected component distances for tracker
+    fprintf('Building Connected Component Distances... ');
     ConnectedDist = [];
     Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
-    Segmentation.WriteSegData('segmentationData',Metadata.GetDatasetName());
 
     fprintf(1,'\nDone\n');
     tSeg = toc;
@@ -189,19 +184,16 @@ function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
     %% Tracking
     tic
     fprintf(1,'Tracking...');
-    fnameIn=['.\segmentationData\SegObjs_' Metadata.GetDatasetName() '.txt'];
-    fnameOut=['.\segmentationData\Tracked_' Metadata.GetDatasetName() '.txt'];
     
-    system(['MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    [hullTracks,gConnect] = trackerMex(CellHulls, ConnectedDist, Metadata.GetNumberOfFrames(), CONSTANTS.dMaxCenterOfMass, CONSTANTS.dMaxConnectComponentTracker);
     
     fprintf('Done\n');
     tTrack = toc;
 
     %% Import into LEVer's data sturcture
-    [objTracks gConnect] = Tracker.ReadTrackData('segmentationData', Metadata.GetDatasetName());
     fprintf('Finalizing Data...');
     try
-        Tracker.BuildTrackingData(objTracks, gConnect);
+        Tracker.BuildTrackingData(hullTracks, gConnect);
     catch excp
         
         cltime = clock();

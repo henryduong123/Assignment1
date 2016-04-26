@@ -47,20 +47,8 @@ for dirIdx=1:length(dirList)
         continue
     end
     
-    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
-    if ( isempty(fileList) )
-        continue
-    end
-    
-    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
-    if ( isempty(validStartFilename) )
-        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
-        continue;
-    end
-    
-    datasetName = Helper.ParseImageName(validStartFilename);
-    if ( isempty(datasetName) )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
+    imageData = MicroscopeData.ReadMetadata([fullfile(directory_name,dirList(dirIdx).name) '\'],false);
+    if ( isempty(imageData) )
         continue;
     end
     
@@ -71,13 +59,11 @@ end
 Load.AddConstant('version',softwareVersion,1);
 Load.AddConstant('cellType', [], 1);
 
-validStartFilename = getValidStartFileName(fullfile(directory_name, validDirs{1}));
-[datasetName,namePattern] = Helper.ParseImageName(validStartFilename);
+[imageData,imagePath] = MicroscopeData.ReadMetadata([fullfile(directory_name, validDirs{1}) '\']);
+Metadata.SetMetadata(imageData);
 
-Load.AddConstant('rootImageFolder', fullfile(directory_name, validDirs{1}),1);
-Load.AddConstant('datasetName', datasetName,1);
-Load.AddConstant('imageNamePattern', namePattern,1);
-Load.AddConstant('matFullFile', fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']),1);
+Load.AddConstant('rootImageFolder', imagePath, 1);
+Load.AddConstant('matFullFile', fullfile(outputDir, Metadata.GetDatasetName()),1);
 
 UI.SegPreview();
 if ( isempty(CONSTANTS.cellType) )
@@ -103,25 +89,21 @@ end
 %% Run segmentation for all valid directories
 processedDatasets = {};
 for dirIdx=1:length(validDirs)
-    validStartFilename = getValidStartFileName(fullfile(directory_name, validDirs{dirIdx}));
-    [datasetName,namePattern] = Helper.ParseImageName(validStartFilename);
- 
-    Load.AddConstant('cellType', cellType,1);
-    
-    Load.AddConstant('rootImageFolder', fullfile(directory_name, validDirs{dirIdx}),1);
-    Load.AddConstant('datasetName', datasetName,1);
-    Load.AddConstant('imageNamePattern', namePattern,1);
-    Load.AddConstant('matFullFile', fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']),1);
+    [imageData,imagePath] = MicroscopeData.ReadMetadata([fullfile(directory_name, validDirs{dirIdx}) '\']);
+    Metadata.SetMetadata(imageData);
+
+    Load.AddConstant('rootImageFolder', imagePath, 1);
+    Load.AddConstant('matFullFile', fullfile(outputDir, [Metadata.GetDatasetName() '_LEVer.mat']),1);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
-        fprintf('%s - LEVer data already exists.  Skipping\n', CONSTANTS.datasetName);
+        fprintf('%s - LEVer data already exists.  Skipping\n', Metadata.GetDatasetName());
         continue
     end
 
     Load.AddConstant('version',softwareVersion,1);
     
     %% Segment and track folder
-    fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
+    fprintf('Segment & track file : %s\n', Metadata.GetDatasetName());
     tic
 
     if ( ~bTrialRun )
@@ -130,9 +112,9 @@ for dirIdx=1:length(validDirs)
         segArgs = Segmentation.GetCellTypeParams();
         [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(numProcessors, segArgs);
         if ( ~isempty(errStatus) )
-            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', CONSTANTS.datasetName);
+            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', Metadata.GetDatasetName());
             
-            errFilename = fullfile(outputDir, [CONSTANTS.datasetName '_segtrack_err.log']);
+            errFilename = fullfile(outputDir, [Metadata.GetDatasetName() '_segtrack_err.log']);
             fid = fopen(errFilename, 'wt');
             fprintf(fid, '%s', errStatus);
             fclose(fid);
@@ -151,31 +133,8 @@ for dirIdx=1:length(validDirs)
         Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
     end
     
-    processedDatasets = [processedDatasets; {CONSTANTS.datasetName}];
+    processedDatasets = [processedDatasets; {Metadata.GetDatasetName()}];
 end %dd
 
 clear global;
-end
-
-% This function tries to quickly find one or more files that qualify as an
-% initial image frame for parsing dataset names, etc. Returns the first
-% file name found
-function filename = getValidStartFileName(chkPath)
-    filename = '';
-    
-    flist = [];
-    chkDigits = 7:-1:2;
-    for i=1:length(chkDigits)
-        digitStr = ['%0' num2str(chkDigits(i)) 'd'];
-        flist = dir(fullfile(chkPath,['*_t' num2str(1,digitStr) '*.tif']));
-        if ( ~isempty(flist) )
-            break;
-        end
-    end
-    
-    if ( isempty(flist) )
-        return;
-    end
-    
-    filename = flist(1).name;
 end

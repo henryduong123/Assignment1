@@ -87,7 +87,7 @@ try
             continue;
         end
         
-        imSize = size(chanImSet{primaryChan});
+        rcImageDims = Metadata.GetDimensions('rc');
         
         validHulls = [];
         for i=1:length(frameHulls)
@@ -96,7 +96,7 @@ try
                 tag = [char(segFunc) ':' frameHulls(i).tag];
             end
             
-            newHull = Hulls.CreateHull(imSize, frameHulls(i).indexPixels, t, false, tag);
+            newHull = Hulls.CreateHull(rcImageDims, frameHulls(i).indexPixels, t, false, tag);
             validHulls = [validHulls newHull];
         end
         
