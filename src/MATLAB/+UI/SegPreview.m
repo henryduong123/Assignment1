@@ -4,11 +4,9 @@
 function SegPreview()
 	hPreviewFig = figure();
     
-    Load.SetImageInfo();
-    
     hAx = axes('Parent',hPreviewFig, 'Position',[0.01 0.01 0.98 0.98], 'XTick',[],'YTick',[]);
     hTimeLabel = uicontrol(hPreviewFig,'Style','text', 'Position',[1 0 60 20],'String', ['Time: ' num2str(1)]);
-    set(hPreviewFig, 'CurrentAxes',hAx);
+    set(hPreviewFig, 'CurrentAxes',hAx, 'NumberTitle','off', 'Name',[Metadata.GetDatasetName() ' Preview']);
     
     set(hPreviewFig, 'UserData',struct('time',{1}, 'chan',{1}, 'showInterior',{false}, 'cacheHulls',{[]}, 'hLabel',{hTimeLabel}), 'Toolbar','figure');
     set(hPreviewFig, 'WindowScrollWheelFcn',@windowScrollWheel, 'KeyPressFcn',@windowKeyPress, 'CloseRequestFcn','');
@@ -138,7 +136,7 @@ function drawSegHulls(hFig,segHulls, bShowInterior)
         for i=1:length(segHulls)
             colorIdx = mod(i-1,31)+1;
             
-            rcCoords = Utils.IndToCoord(Metadata.GetDimensions(), segHulls(i).indexPixels);
+            rcCoords = Utils.IndToCoord(Metadata.GetDimensions('rc'), segHulls(i).indexPixels);
             plot(hAx, rcCoords(:,2),rcCoords(:,1), '.', 'Color',cmap(colorIdx,:));
         end
     end
@@ -203,7 +201,7 @@ function previewSeg(src,event)
     
     validHulls = [];
     for i=1:length(segHulls)
-        validHulls = [validHulls Hulls.CreateHull(Metadata.GetDimensions(), segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
+        validHulls = [validHulls Hulls.CreateHull(Metadata.GetDimensions('rc'), segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
     end
     
     frameInfo.cacheHulls = validHulls;

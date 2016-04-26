@@ -30,7 +30,7 @@ function newHull = CreateHull(rcImageDims, indexPixels, time, userEdited, tag)
         return;
     end
 
-    newHull.points = xyCoords(chIdx,:);
+    newHull.points = xyCoords(chIdx,1:2);
     
     newHull.time = time;
     newHull.userEdited = (userEdited > 0);
