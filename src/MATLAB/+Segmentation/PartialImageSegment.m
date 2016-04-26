@@ -62,11 +62,12 @@ function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, primaryChan, 
 end
 
 function newHulls = fixupFromSubimage(rcCoordMin, origSize, subSize, hulls)
-    newHulls = hulls;
+    newHulls = [];
     
     rcOffset = rcCoordMin - 1;
     for i=1:length(hulls)
-        newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
+        idxPix = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
+        newHulls = [newHulls Hulls.CreateHull(origSize, idxPix)];
     end
 end
 

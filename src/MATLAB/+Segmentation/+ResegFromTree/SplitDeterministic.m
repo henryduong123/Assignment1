@@ -10,7 +10,7 @@ function newHulls = SplitDeterministic(hull, k, checkHullIDs)
     end
     
     rcImageDims = Metadata.GetDimensions('rc');
-    xyOldMeans = zeros(k, rcImageDims);
+    xyOldMeans = zeros(k, length(rcImageDims));
     for i=1:length(checkHullIDs)
         rcOldCoord = Utils.IndToCoord(rcImageDims, CellHulls(checkHullIDs(i)).indexPixels);
         xyOldMeans(i,:) = Utils.SwapXY_RC(mean(rcOldCoord,1));
