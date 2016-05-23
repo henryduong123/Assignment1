@@ -149,6 +149,8 @@ switch answer
                     CONSTANTS = oldCONSTANTS;
                     return
                 end
+            else
+                Metadata.SetMetadata(imageData);
             end
             
             if(exist('objHulls','var'))
