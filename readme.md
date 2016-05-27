@@ -12,23 +12,24 @@ The version of LEVER available here includes segmentation algorithms for adult a
 Additional information on  LEVER can be found in the LEVER [wiki](https://git-bioimage.coe.drexel.edu/opensource/lever/wikis/home). This includes sections on using LEVER, and on extending the program with custom segmentation algorithms. 
 
 #### Referencing LEVER
-LEVER may be cited using:
 
-* M. Winter, M. Liu, D. Monteleone, J. Melunis, U. Hershberg, S. K. Goderie, S. Temple, and A. R. Cohen, _Computational Image Analysis Reveals Intrinsic Multigenerational Differences Between Anterior and Posterior Cerebral Cortex Neural Progenitor Cells_, Stem Cell Reports, 2015. http://dx.doi.org/10.1016/j.stemcr.2015.08.002 [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/26344906).
+Please cite LEVER using either or both of:
 
-*  Winter et al., _Vertebrate neural stem cell segmentation, tracking and lineaging with validation and editing_, Nat Protocols, vol. 6, pp. 1942-1952, 2011. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/22094730).
+* M. Winter, M. Liu, D. Monteleone, J. Melunis, U. Hershberg, S. K. Goderie, S. Temple, and A. R. Cohen, _Computational Image Analysis Reveals Intrinsic Multigenerational Differences Between Anterior and Posterior Cerebral Cortex Neural Progenitor Cells_, Stem Cell Reports, 2015. http://dx.doi.org/10.1016/j.stemcr.2015.08.002, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/26344906)).
 
- Additional LEVER publications include
+*  Winter et al., _Vertebrate neural stem cell segmentation, tracking and lineaging with validation and editing_, Nat Protocols, vol. 6, pp. 1942-1952, 2011, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/22094730)).
 
-* Mankowski, W. C., Winter, M. R., Wait, E., et al., _Segmentation of occluded hematopoietic stem cells from tracking_, Conf Proc IEEE Eng Med Biol Soc, vol. 2014, pp. 5510-3, 2014.[pubmed](http://www.ncbi.nlm.nih.gov/pubmed/25571242).
+ Additional LEVER publications include:
 
-* Wait, E., Winter, M., Bjornsson, C., et al., _Visualization and correction of automated segmentation, tracking and lineaging from 5-D stem cell image sequences_, BMC Bioinformatics, vol. 15, 2014. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/25281197).
+* Mankowski, W. C., Winter, M. R., Wait, E., et al., _Segmentation of occluded hematopoietic stem cells from tracking_, Conf Proc IEEE Eng Med Biol Soc, vol. 2014, pp. 5510-3, 2014, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/25571242)).
+
+* Wait, E., Winter, M., Bjornsson, C., et al., _Visualization and correction of automated segmentation, tracking and lineaging from 5-D stem cell image sequences_, BMC Bioinformatics, vol. 15, 2014, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/25281197)).
 
  LEVER uses an integrated tracking algorithm called Multitemporal Association Tracking (MAT). The algorithm, applied to tracking axonal organelle transport was originally published in the International Journal of Computational Biology and Drug Design. This is the best reference on MAT. A comparison of MAT and other particle tracking algorithms was subsequently published in Nature Methods. The same MAT algorithm, consisting of just a few hundred lines of C code has been applied to dozens of applications in cell and organelle tracking.
 
-* Winter et al., _Axonal transport analysis using Multitemporal Association Tracking_, International Journal of Computational Biology and Drug Design, vol. 5, pp. 35-48, 2012. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/22436297).
+* Winter et al., _Axonal transport analysis using Multitemporal Association Tracking_, International Journal of Computational Biology and Drug Design, vol. 5, pp. 35-48, 2012, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/22436297)).
 
-* Chenouard et al., _Objective comparison of particle tracking methods_, Nat Methods, Jan 19 2014, [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24441936).
+* Chenouard et al., _Objective comparison of particle tracking methods_, Nat Methods, Jan 19 2014, ([pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24441936)).
 
 ## Get The Source Code
 
