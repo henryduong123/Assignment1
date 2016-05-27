@@ -11,12 +11,12 @@ M. Winter, M. Liu, D. Monteleone, J. Melunis, U. Hershberg, S. K. Goderie, S. Te
 ---
 The original LEVER software protocol with usage instructions for analyzing proliferating cells was published in Nature Protocols.
 
-Winter et al., _Vertebrate neural stem cell segmentation, tracking and lineaging with validation and editing_, Nat Protocols, vol. 6, pp. 1942-1952, 2011.
+Winter et al., _Vertebrate neural stem cell segmentation, tracking and lineaging with validation and editing_, Nature Protocols, vol. 6, pp. 1942-1952, 2011.
 
 ---
-LEVER uses an integratedtracking algorithm termed Multitemporal Association Tracking (MAT). The algorithm, applied to microtubule transport tracking was originally published in the International Journal of Computational Biology and Drug Design. A comparison of MAT and other particle tracking algorithms was subsequently published in Nature Methods.
+LEVER uses an integrated tracking algorithm termed Multitemporal Association Tracking (MAT). The algorithm, applied to microtubule transport tracking was originally published in the International Journal of Computational Biology and Drug Design. A comparison of MAT and other particle tracking algorithms was subsequently published in Nature Methods.
 
-Chenouard et al., _Objective comparison of particle tracking methods_, Nat Methods, Jan 19 2014.
+Chenouard et al., _Objective comparison of particle tracking methods_, Nature Methods, Jan 19 2014.
 
 Winter et al., _Axonal transport analysis using Multitemporal Association Tracking_, International Journal of Computational Biology and Drug Design, vol. 5, pp. 35-48, 2012.
 
