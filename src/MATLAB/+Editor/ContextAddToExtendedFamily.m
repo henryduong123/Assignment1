@@ -39,7 +39,7 @@ function ContextAddToExtendedFamily(trackID)
     end
 
     [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
-    answer = inputdlg('Enter cell label of family to join','Join Family',1,{UI.TrackToLocal(localLabels, trackID)});
+    answer = inputdlg('Enter cell label of family to join','Join Family',1,{num2str(CellFamilies(Figures.tree.familyID).tracks(1))});
     if(isempty(answer)),return,end;
     
     newTrackIDLocal = answer{1};
