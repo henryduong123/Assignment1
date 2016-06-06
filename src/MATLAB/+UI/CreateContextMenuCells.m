@@ -85,18 +85,29 @@ uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Remove From Tree',...
     'CallBack',     @removeFromTree);
 
-uimenu(Figures.cells.contextMenuHandle,...
-    'Label',        'Add To Extended Family',...
-    'CallBack',     @addToExtendedFamily,...
+multiTreeMenu = uimenu(Figures.cells.contextMenuHandle,...
+    'Label',        'Multi Tree',...
     'Separator',    'on');
 
-uimenu(Figures.cells.contextMenuHandle,...
+uimenu(multiTreeMenu,...
+    'Label',        'Add To Extended Family',...
+    'CallBack',     @addToExtendedFamily)
+
+uimenu(multiTreeMenu,...
     'Label',        'Remove From Extended Family',...
     'CallBack',     @removeFromExtendedFamily);
 
-uimenu(Figures.cells.contextMenuHandle,...
+uimenu(multiTreeMenu,...
     'Label',        'Show Extended Family',...
     'CallBack',     @showExtendedFamily);
+
+uimenu(multiTreeMenu,...
+    'Label',        'Add All To Extended Family',...
+    'CallBack',     @addAllToExtendedFamily);
+
+uimenu(multiTreeMenu,...
+    'Label',        'Remove All From Extended Family',...
+    'CallBack',     @removeAllFromExtendedFamily);
 
 uimenu(Figures.cells.contextMenuHandle,...
     'Label',        'Properties',...
@@ -251,10 +262,13 @@ end
 function addToExtendedFamily(src,evnt)
     global Figures
     
-    [hullID trackID] = UI.GetClosestCell(0);
-    if(isempty(trackID)),return,end
+    hullIDs = Figures.cells.selectedHulls;
+    if isempty(hullIDs)
+        [hullIDs ~] = UI.GetClosestCell(0);
+    end
+    if(isempty(hullIDs)),return,end
 
-    Editor.ContextAddToExtendedFamily(trackID);
+    Editor.ContextAddToExtendedFamily(hullIDs);
 end
 
 function removeFromExtendedFamily(src,evnt)
@@ -272,6 +286,18 @@ function showExtendedFamily(src,evnt)
     
     familyID = CellTracks(trackID).familyID;
     msgbox({'Extended family:', num2str(CellFamilies(familyID).extFamily)})
+end
+
+function addAllToExtendedFamily(src,evnt)
+    global Figures
+    
+    Editor.ContextAddAllToExtendedFamily(Figures.time);
+end
+
+function removeAllFromExtendedFamily(src,evnt)
+    global Figures
+
+    Editor.ContextRemoveAllFromExtendedFamily();
 end
 
 function properties(src,evnt)

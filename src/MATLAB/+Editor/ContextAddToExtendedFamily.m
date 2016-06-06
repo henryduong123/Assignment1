@@ -24,17 +24,21 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ContextAddToExtendedFamily(trackID)
+function ContextAddToExtendedFamily(hullIDs)
     global CellFamilies CellTracks Figures
 
-    familyID = CellTracks(trackID).familyID;
-    
-    if ~isempty(CellFamilies(familyID).extFamily)
-        xfam = CellFamilies(familyID).extFamily;
-        if length(xfam) > 1
-            warn = sprintf('Track %d is already in an extended family', trackID);
-            warndlg(warn);
-            return;
+    trackIDs = Hulls.GetTrackID(hullIDs);
+    familyIDs = [CellTracks(trackIDs).familyID];
+
+    for i=1:length(familyIDs)
+        familyID = familyIDs(i);
+        if ~isempty(CellFamilies(familyID).extFamily)
+            xfam = CellFamilies(familyID).extFamily;
+            if length(xfam) > 1
+                warn = sprintf('Track %d is already in an extended family', trackID);
+                warndlg(warn);
+                return;
+            end
         end
     end
 
@@ -57,14 +61,14 @@ function ContextAddToExtendedFamily(trackID)
         return
     end
     
-    if ( newTrackID == trackID )
-        warn = sprintf('Track %s is the current track.', newTrackIDLocal);
+    if ( ismember(newTrackID, trackIDs) )
+        warn = sprintf('Track %s is one of the selected track(s).', newTrackIDLocal);
         warndlg(warn);
         return;
     end
 
     newFamilyID = CellTracks(newTrackID).familyID;
-    newExtFamily = union(CellFamilies(newFamilyID).extFamily, [familyID newFamilyID]);
+    newExtFamily = union(CellFamilies(newFamilyID).extFamily, [familyIDs newFamilyID]);
     [CellFamilies(newExtFamily).extFamily] = deal(newExtFamily);
     
     UI.DrawTree(Figures.tree.familyID);
