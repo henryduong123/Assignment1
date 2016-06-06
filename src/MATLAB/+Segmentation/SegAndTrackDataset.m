@@ -202,9 +202,6 @@ function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
         
         return;
     end
-    
-    %% Add all the families in the first frame to the same extended family
-    Families.MultiTreeAllTracks(1);
     fprintf('Done\n');
     
     errStatus = '';
