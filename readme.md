@@ -7,4 +7,4 @@ segmenting, tracking and lineaging. LEVER also includes a novel validation
 interface that makes any errors in the automated results easy to identify and quick
 to correct.
 
-The full LEVER readme can be found at \\bioimage.coe.drexel.edu\LEVER.
+The full LEVER readme can be found at [\\bioimage.coe.drexel.edu\LEVER] (\\bioimage.coe.drexel.edu\LEVER).
