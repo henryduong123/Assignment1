@@ -97,11 +97,18 @@ function newEdges = FindFrameReseg(t, curEdges, bIgnoreEdges)
         bAddedHull(i) = 1;
     end
     
+    % Bump up the cost of splitting a hull
+    [bestInCost,bestInIdx] = min(costMatrix,[],1);
+    idx = sub2ind(size(costMatrix), bestInIdx,(1:size(costMatrix,2)));
+    
+    splitCosts = 2*costMatrix;
+    splitCosts(idx) = bestInCost;
+    
     % Find hulls we may need to split
     desiredCellCount = zeros(length(nextHulls),1);
     desirers = cell(length(nextHulls),1);
     for i=1:length(checkHulls)
-        [desiredCosts desiredIdx] = sort(costMatrix(i,:));
+        [desiredCosts,desiredIdx] = sort(splitCosts(i,:));
         if ( isinf(desiredCosts(1)) )
             continue;
         end
