@@ -22,16 +22,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function goHeader(folder,bC)
+function goHeader(folder,bC,excludeFiles)
 if nargin<2
     bC=0;
 end
+if nargin<3
+    excludeFile={};
+end
 if bC
     flist = dir(fullfile(folder, '*.cpp'));
+    flist = [flist;dir(fullfile(folder, '*.c'))];
     flist = [flist;dir(fullfile(folder, '*.h'))];
     % note - this is the old token for the c code. this will need to change
     % to ******* as per the new licenseheader.c
-    strToken='//////////';
+%     strToken='//////////';
+    strToken='**********';
     txtPreamble = license.getFileText('.\+license\LicenseHeader.c');
 else
     flist = dir(fullfile(folder, '*.m'));
@@ -39,7 +44,9 @@ else
     txtPreamble = license.getFileText('.\+license\LicenseHeader.m');
 end
 for ff=1:length(flist)
-    
+    if any(strcmp(excludeFiles,flist(ff).name))
+        continue
+    end
     txt = license.getFileText(fullfile(folder,flist(ff).name));
     
     

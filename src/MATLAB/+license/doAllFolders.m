@@ -35,10 +35,11 @@ end
 license.goHeader('.\');
 
 % c files
+excludeFiles={'sha1.h','sha1.c'};
 dlist=dir('..\c');
 for dd=1:length(dlist)
     if ~dlist(dd).isdir || length(dlist(dd).name)<4
         continue
     end
-    license.goHeader(['.\' dlist(dd).name '\'],1);
+    license.goHeader(['..\c\' dlist(dd).name '\'],1,excludeFiles);
 end    
