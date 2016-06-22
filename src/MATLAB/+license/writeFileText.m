@@ -23,9 +23,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+function writeFileText(filename,txt)
 fid = fopen(filename,'wt');
 for i=1:length(txt)
     fprintf(fid,'%s',txt{i});
 end
-fclose(fid)
+fclose(fid);

@@ -23,7 +23,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+function txt=getFileText(filename)
 
 fid = fopen(filename,'rt');
 i=1;
