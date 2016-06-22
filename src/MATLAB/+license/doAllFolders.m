@@ -1,8 +1,6 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011-2016 Andrew Cohen, Eric Wait, Mark Winter, Walt
-%     Mankowski
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
 %     http://n2t.net/ark:/87918/d9rp4t for details
@@ -35,3 +33,12 @@ for dd=1:length(dlist)
     
 end
 license.goHeader('.\');
+
+% c files
+dlist=dir('..\c');
+for dd=1:length(dlist)
+    if ~dlist(dd).isdir || length(dlist(dd).name)<4
+        continue
+    end
+    license.goHeader(['.\' dlist(dd).name '\'],1);
+end    
