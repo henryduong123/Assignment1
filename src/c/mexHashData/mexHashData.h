@@ -19,6 +19,8 @@
 *     <http://www.gnu.org/licenses/>.
 *
 ***********************************************************************/
+#include "mex.h"
+
 extern "C"
 {
  #include "sha1.h"

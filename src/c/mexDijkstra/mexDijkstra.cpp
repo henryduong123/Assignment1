@@ -19,7 +19,9 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#include "mexDijkstra.h"
+***********************************************************************/
+
+#include "mexDijkstra.h"
 #include "CSparseWrapper.h"
 
 #include <vector>

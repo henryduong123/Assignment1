@@ -18,8 +18,7 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/
-#include "tracker.h"
+***********************************************************************/#include "tracker.h"
 #include "Utility.h"
 #include "Hull.h"
 

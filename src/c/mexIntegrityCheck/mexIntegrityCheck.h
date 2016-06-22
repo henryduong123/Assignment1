@@ -18,7 +18,8 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#include "mex.h"
+***********************************************************************/
+#include "mex.h"
 
 #ifdef MEXMAT_EXPORTS
  #define MEXMAT_LIB __declspec(dllexport)

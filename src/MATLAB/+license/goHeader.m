@@ -35,8 +35,8 @@ if bC
     flist = [flist;dir(fullfile(folder, '*.h'))];
     % note - this is the old token for the c code. this will need to change
     % to ******* as per the new licenseheader.c
-%     strToken='//////////';
-    strToken='**********';
+%      strToken='//////////';
+   strToken='**********';
     txtPreamble = license.getFileText('.\+license\LicenseHeader.c');
 else
     flist = dir(fullfile(folder, '*.m'));

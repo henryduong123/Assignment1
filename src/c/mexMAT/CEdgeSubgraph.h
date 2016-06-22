@@ -18,7 +18,8 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#ifndef _CEDGESUBGRAPH_H_
+***********************************************************************/
+#ifndef _CEDGESUBGRAPH_H_
 #define _CEDGESUBGRAPH_H_ 1
 
 class CEdgeSubgraph

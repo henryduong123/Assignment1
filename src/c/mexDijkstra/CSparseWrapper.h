@@ -20,7 +20,9 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#ifndef CSPARSEWRAPPER_H
+***********************************************************************/
+
+#ifndef CSPARSEWRAPPER_H
 #define CSPARSEWRAPPER_H 1
 
 #include <limits>

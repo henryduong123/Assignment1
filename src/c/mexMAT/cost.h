@@ -19,6 +19,7 @@
 *     <http://www.gnu.org/licenses/>.
 *
 ***********************************************************************/
+
 // Get cost based on a frame and index list.  The srcFrameIdx is used if there, it is the index into
 // path vector of the source point(start of new path).  srcFrameIdx is trivially 0 if there is
 // no history being used.

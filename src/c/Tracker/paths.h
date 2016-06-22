@@ -18,8 +18,7 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/
-#ifndef PATHS_H
+***********************************************************************/#ifndef PATHS_H
 #define PATHS_H
 
 #include "Utility.h"

@@ -19,6 +19,8 @@
 *     <http://www.gnu.org/licenses/>.
 *
 ***********************************************************************/
+#include "mexHashData.h"
+
 #include <string.h>
 
 #include <string>

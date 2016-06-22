@@ -18,8 +18,7 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/
-#ifndef HULL_H
+***********************************************************************/#ifndef HULL_H
 #define HULL_H
 
 #include "Utility.h"

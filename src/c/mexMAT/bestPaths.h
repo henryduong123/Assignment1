@@ -19,6 +19,7 @@
 *     <http://www.gnu.org/licenses/>.
 *
 ***********************************************************************/
+
 // Double limits convenience definition
 typedef std::numeric_limits<double> DoubleLims;
 
