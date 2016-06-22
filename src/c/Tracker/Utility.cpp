@@ -18,7 +18,8 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#include "Utility.h"
+***********************************************************************/
+#include "Utility.h"
 
 Vec<float> gColors[NCOLORS] = {
 	Vec<float>(1,0,0),

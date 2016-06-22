@@ -18,7 +18,8 @@
 *     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 *     <http://www.gnu.org/licenses/>.
 *
-***********************************************************************/#include "mex.h"
+***********************************************************************/
+#include "mex.h"
 
 #include "tracker.h"
 #include "Hull.h"
