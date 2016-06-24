@@ -141,10 +141,19 @@ switch answer
                 Load.AddConstant('imageData.DatasetName',oldName,true);
             end
             
-            imageData = MicroscopeData.ReadMetadata(fullfile(CONSTANTS.rootImageFolder, [Metadata.GetDatasetName() '.json']), false);
+            imageData = MicroscopeData.ReadMetadataFile(fullfile(CONSTANTS.rootImageFolder, [Metadata.GetDatasetName() '.json']));
             if ( isempty(imageData) )
-                if ( exist(CONSTANTS.rootImageFolder,'dir') )
-                    error('No metadata found in image directory, currently unsupported!');
+                tifList = dir(fullfile(CONSTANTS.rootImageFolder,'*.tif'));
+                if ( exist(CONSTANTS.rootImageFolder,'dir') && ~isempty(tifList) )
+                    % Try to export or rename old lever image data
+                    metadataPath = Load.ImageExportDialog(CONSTANTS.rootImageFolder,tifList(1).name);
+                    if ( isempty(metadataPath) )
+                        CONSTANTS = oldCONSTANTS;
+                        return;
+                    end
+                    
+                    imageData = MicroscopeData.ReadMetadataFile(metadataPath);
+                    Metadata.SetMetadata(imageData);
                 elseif (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return

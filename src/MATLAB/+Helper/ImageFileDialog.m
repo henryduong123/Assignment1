@@ -4,7 +4,7 @@ settings = Load.ReadSettings();
 bOpened = 0;
 
 while ( ~bOpened )
-    metadataPath = Load.ImageExportDialog(settings.imagePath,'Test');
+    metadataPath = Load.ImageLoadDialog(settings.imagePath,['Open Dataset Metadata or Image (' Metadata.GetDatasetName() '): ']);
     if ( isempty(metadataPath) )
         return;
     end

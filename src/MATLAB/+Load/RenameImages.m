@@ -40,6 +40,10 @@ function jsonPath = RenameImages(exportDir,inRoot, renameStruct, bCreateDatasetD
         paramCell = num2cell(paramVals(i,:)+paramOffset);
         outName = sprintf(renameStruct.outPattern,paramCell{:});
         
+        if ( strcmp(outName,validNames{i}) )
+            continue;
+        end
+        
         fileOp(fullfile(inRoot,validNames{i}),fullfile(exportDir,outName));
     end
     
