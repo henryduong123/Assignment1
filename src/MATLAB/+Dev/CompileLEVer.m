@@ -67,8 +67,8 @@ function CompileLEVer(forceVersion)
     outputFiles = [outputFiles; {newOutput}];
     
     
-    newOutput = compileEXE('MTC', vsStruct, bindir);
-    outputFiles = [outputFiles; {newOutput}];
+%     newOutput = compileEXE('MTC', vsStruct, bindir);
+%     outputFiles = [outputFiles; {newOutput}];
     
     %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
