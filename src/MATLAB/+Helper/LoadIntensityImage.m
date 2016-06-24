@@ -6,7 +6,7 @@ function imgray = LoadIntensityImage(frame, chan)
     global CONSTANTS
     bitrates = [8 12 16];
     
-    im = MicroscopeData.Reader(Metadata.GetImageInfo(), frame, chan,[],[],[],true,false);
+    im = MicroscopeData.Reader('imageData',Metadata.GetImageInfo(), 'chanList',chan, 'timeRange',[frame frame], 'prompt',false);
     if ( ndims(im) > 3 )
         error('LEVER tool only supports grayscale images!');
     end
