@@ -4,7 +4,12 @@ settings = Load.ReadSettings();
 bOpened = 0;
 
 while ( ~bOpened )
-    [imageData, settings.imagePath] = MicroscopeData.ReadMetadata(settings.imagePath, true);
+    metadataPath = Load.ImageExportDialog(settings.imagePath,'Test');
+    if ( isempty(metadataPath) )
+        return;
+    end
+    
+    [imageData, settings.imagePath] = MicroscopeData.ReadMetadataFile(metadataPath);
     if ( isempty(imageData) )
         return;
     end
