@@ -11,6 +11,17 @@ global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
 
+if ( ~exist('outputDir','var') )
+    outputDir = '';
+end
+
+% Trial run command
+bTrialRun = false;
+if ( strncmpi(outputDir,'-T',2) )
+    outputDir = outputDir(3:end);
+    bTrialRun = true;
+end
+
 softwareVersion = Dev.GetVersion();
 
 if (isdeployed())
@@ -20,57 +31,43 @@ end
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if ( ~directory_name ),return,end
 
-if ( ~exist('outputDir','var') )
-    outputDir = directory_name;
-end
-
-% Trial run command
-bTrialRun = 0;
-if ( strcmpi(outputDir(1:2),'-T') )
-    outputDir = outputDir(3:end);
-    if ( isempty(outputDir) )
-        outputDir = directory_name;
-    end
-    bTrialRun = 1;
-end
-
-%% Get a list of valid subdirectories
-dirList = dir(directory_name);
-
-bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dirList);
-bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
-dirList = dirList(bValidDir);
-
-validDirs = {};
-for dirIdx=1:length(dirList)
-    if ( ~(dirList(dirIdx).isdir) )
-        continue
-    end
-    
-    imageData = MicroscopeData.ReadMetadata([fullfile(directory_name,dirList(dirIdx).name) '\'],false);
-    if ( isempty(imageData) )
-        continue;
-    end
-    
-    validDirs = [validDirs; dirList(dirIdx).name];
-end
-
-%% Use previewer on first valid directory to get cell type and segmentation parameters
-Load.AddConstant('version',softwareVersion,1);
+% Get initial cell segmentation parameters
 Load.AddConstant('cellType', [], 1);
 
-[imageData,imagePath] = MicroscopeData.ReadMetadata([fullfile(directory_name, validDirs{1}) '\']);
-Metadata.SetMetadata(imageData);
+hDlg = UI.SegPropDialog();
+uiwait(hDlg);
 
-Load.AddConstant('rootImageFolder', imagePath, 1);
-Load.AddConstant('matFullFile', fullfile(outputDir, Metadata.GetDatasetName()),1);
-
-UI.SegPreview();
 if ( isempty(CONSTANTS.cellType) )
     return;
 end
 
-cellType = CONSTANTS.cellType;
+%% Run export of subdirectories if necessary.
+exportRoot = Load.FolderExport(directory_name);
+if ( isempty(exportRoot) )
+    return;
+end
+
+if ( isempty(outputDir) )
+    outputDir = exportRoot;
+end
+
+%% Find valid images in exported folder.
+[chkPaths,invalidFile] = Load.CheckFolderExport(exportRoot);
+validJSON = chkPaths(~invalidFile);
+
+if ( isempty(validJSON) )
+    warning(['No valid data found at: ' exportRoot]);
+    return;
+end
+
+%% Use previewer on first valid directory to get cell type and segmentation parameters
+Load.AddConstant('version',softwareVersion,1);
+
+[imageData,imagePath] = MicroscopeData.ReadMetadataFile(fullfile(exportRoot,validJSON{1}));
+Metadata.SetMetadata(imageData);
+
+Load.AddConstant('rootImageFolder', imagePath, 1);
+Load.AddConstant('matFullFile', fullfile(outputDir, Metadata.GetDatasetName()),1);
 
 %% Use total number of processors or max from command-line
 numProcessors = getenv('Number_of_processors');
@@ -88,12 +85,15 @@ end
 
 %% Run segmentation for all valid directories
 processedDatasets = {};
-for dirIdx=1:length(validDirs)
-    [imageData,imagePath] = MicroscopeData.ReadMetadata([fullfile(directory_name, validDirs{dirIdx}) '\']);
+for dirIdx=1:length(validJSON)
+    subDir = fileparts(validJSON{dirIdx});
+    dataDir = fileparts(subDir);
+    
+    [imageData,imagePath] = MicroscopeData.ReadMetadataFile(fullfile(exportRoot,validJSON{dirIdx}));
     Metadata.SetMetadata(imageData);
 
     Load.AddConstant('rootImageFolder', imagePath, 1);
-    Load.AddConstant('matFullFile', fullfile(outputDir, [Metadata.GetDatasetName() '_LEVer.mat']),1);
+    Load.AddConstant('matFullFile', fullfile(outputDir,dataDir, [Metadata.GetDatasetName() '_LEVer.mat']),1);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
         fprintf('%s - LEVer data already exists.  Skipping\n', Metadata.GetDatasetName());
