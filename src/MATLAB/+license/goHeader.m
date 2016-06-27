@@ -41,14 +41,14 @@ if bC
 else
     flist = dir(fullfile(folder, '*.m'));
     strToken='%%%%%%%%%%';
-    txtPreamble = license.getFileText('.\+license\LicenseHeader.m');
 end
 for ff=1:length(flist)
     if any(strcmp(excludeFiles,flist(ff).name))
         continue
     end
     txt = license.getFileText(fullfile(folder,flist(ff).name));
-    
+    txtPreamble = license.getFileText('.\+license\LicenseHeader.m');
+
     
     idxPreamble = find(cellfun(@(x) ~isempty(strfind(x,strToken)),txt),2);
     if length(idxPreamble)~=2
