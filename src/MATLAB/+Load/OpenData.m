@@ -154,6 +154,9 @@ switch answer
                     
                     imageData = MicroscopeData.ReadMetadataFile(metadataPath);
                     Metadata.SetMetadata(imageData);
+                    
+                    imageFolder = fileparts(metadataPath);
+                    Load.AddConstant('rootImageFolder', imageFolder, 1);
                 elseif (~Helper.ImageFileDialog())
                     CONSTANTS = oldCONSTANTS;
                     return
