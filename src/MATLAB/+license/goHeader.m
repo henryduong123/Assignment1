@@ -27,7 +27,7 @@ if nargin<2
     bC=0;
 end
 if nargin<3
-    excludeFile={};
+    excludeFiles={};
 end
 if bC
     flist = dir(fullfile(folder, '*.cpp'));
