@@ -54,6 +54,9 @@ function CompileLEVer(forceVersion)
     newOutput = compileMEX('mexMAT', vsStruct);
     outputFiles = [outputFiles; {newOutput}];
     
+    newOutput = compileMEX('Tracker', vsStruct);
+    outputFiles = [outputFiles; {newOutput}];
+    
     newOutput = compileMEX('mexDijkstra', vsStruct);
     outputFiles = [outputFiles; {newOutput}];
     
@@ -65,10 +68,6 @@ function CompileLEVer(forceVersion)
     
     newOutput = compileMEX('mexHashData', vsStruct);
     outputFiles = [outputFiles; {newOutput}];
-    
-    
-%     newOutput = compileEXE('MTC', vsStruct, bindir);
-%     outputFiles = [outputFiles; {newOutput}];
     
     %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
