@@ -35,21 +35,22 @@ if bC
     flist = [flist;dir(fullfile(folder, '*.h'))];
     % note - this is the old token for the c code. this will need to change
     % to ******* as per the new licenseheader.c
-%      strToken='//////////';
-   strToken='**********';
-    txtPreamble = license.getFileText('.\+license\LicenseHeader.c');
+    %      strToken='//////////';
+    strToken='**********';
+    % get matlab headers out of c files...
+%     strToken='%%%%%%%%%%';
+    fnamePreamble='.\+license\LicenseHeader.c';
 else
     flist = dir(fullfile(folder, '*.m'));
     strToken='%%%%%%%%%%';
+    fnamePreamble='.\+license\LicenseHeader.m';
 end
 for ff=1:length(flist)
     if any(strcmp(excludeFiles,flist(ff).name))
         continue
     end
     txt = license.getFileText(fullfile(folder,flist(ff).name));
-    txtPreamble = license.getFileText('.\+license\LicenseHeader.m');
-
-    
+    txtPreamble = license.getFileText(fnamePreamble);
     idxPreamble = find(cellfun(@(x) ~isempty(strfind(x,strToken)),txt),2);
     if length(idxPreamble)~=2
         fprintf(1,'found file with no license: %s\n',flist(ff).name);
