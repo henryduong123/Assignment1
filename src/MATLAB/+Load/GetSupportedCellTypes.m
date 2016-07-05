@@ -10,10 +10,36 @@
 %
 % See also Segmentation.FrameSegmentor
 % 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011-2016 Andrew Cohen
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     http://n2t.net/ark:/87918/d9rp4t for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function SupportedTypes = GetSupportedCellTypes()
     SupportedTypes = [];
     
     %% Adult neural progenitor cell segmentation algorithm
+    % the embryonic cell type has default settings for all parameters. override
+    % in custom segmentation as needed only.
     SupportedTypes = addCellType(SupportedTypes, 'Adult',...
                         'segRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Adult, setParamValue('imageAlpha', 1.5)),...
                         'resegRoutine',setAlgorithm(@Segmentation.FrameSegmentor_Adult, setParamRange('imageAlpha', 1.0,0.5,5)),...
@@ -30,7 +56,11 @@ function SupportedTypes = GetSupportedCellTypes()
                         'trackParams',struct('dMaxCenterOfMass',{80}, 'dMaxConnectComponentTracker',{40}),...
                         'leverParams',struct('timeResolution',{5}, 'maxPixelDistance',{80}, 'maxCenterOfMassDistance',{80}, 'dMaxConnectComponent',{40}),...
                         'channelParams',struct('primaryChannel',{1}, 'channelColor',{[1 1 1]}, 'channelFluor',{[false]}));
-    
+    %% Three level segmentation
+    SupportedTypes = addCellType(SupportedTypes, 'MultiThreshDark',...
+                        'segRoutine',setAlgorithm(@Segmentation.FrameSegmentor_MDK, setParamValue('imageAlpha', 1)),...
+                        'resegRoutine',setAlgorithm(@Segmentation.FrameSegmentor_MDK, setParamRange('imageAlpha', 1.0,.95,5)),...
+                        'splitParams',struct('useGMM',true));
     % TODO: Move channel params and some lever params into metadata structure and parse directly from microscope data.
 end
 

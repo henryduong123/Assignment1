@@ -5,10 +5,10 @@
 % EW - rewrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ function [errStatus, segInfo] = SegAndTrack()
     settings = Load.ReadSettings();
 
     [settings.matFile,settings.matFilePath,FilterIndex] = uiputfile('.mat','Save edits',...
-        [CONSTANTS.datasetName '_LEVer.mat']);
+        [Metadata.GetDatasetName() '_LEVer.mat']);
 
     if(~FilterIndex)
         return;
@@ -52,10 +52,10 @@ function [errStatus, segInfo] = SegAndTrack()
     end
     
     segArgs = Segmentation.GetCellTypeParams();
-    [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
+    [errStatus,tSeg,tTrack] = Segmentation.SegAndTrackDataset(numProcessors, segArgs);
     
     if ( ~isempty(errStatus) )
-        errFilename = [CONSTANTS.datasetName '_segtrack_err.log'];
+        errFilename = [Metadata.GetDatasetName() '_segtrack_err.log'];
         
         msgbox(['An error occured during segmentation and tracking. For further details see log file: ' errFilename],'SegAndTrack Error','warn');
         

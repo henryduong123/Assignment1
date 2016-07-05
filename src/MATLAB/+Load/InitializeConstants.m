@@ -3,10 +3,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -28,9 +28,6 @@ function InitializeConstants()
 %% Set all constants here
 
 global CONSTANTS
-
-Load.SetImageInfo();
-
 if (~isfield(CONSTANTS,'cellType') || isempty(CONSTANTS.cellType))
     cellType = Load.QueryCellType();
     Load.AddConstant('cellType',cellType,1);
@@ -63,13 +60,13 @@ primaryChannel = typeParams.channelParams.primaryChannel;
 channelColor = typeParams.channelParams.channelColor;
 channelFluor = typeParams.channelParams.channelFluor;
 
-numMissingChan = CONSTANTS.numChannels - length(channelFluor);
+numMissingChan = Metadata.GetNumberOfChannels() - length(channelFluor);
 if ( numMissingChan > 0 )
     channelColor = [channelColor; hsv(numMissingChan+2)];
     channelFluor = [channelFluor false(1,numMissingChan)];
 elseif ( numMissingChan < 0 )
-    channelColor = channelColor(1:CONSTANTS.numChannels,:);
-    channelFluor = channelFluor(1:CONSTANTS.numChannels);
+    channelColor = channelColor(1:Metadata.GetNumberOfChannels(),:);
+    channelFluor = channelFluor(1:Metadata.GetNumberOfChannels());
 end
 
 Load.AddConstant('primaryChannel', primaryChannel);

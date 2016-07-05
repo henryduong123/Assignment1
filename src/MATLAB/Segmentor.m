@@ -7,10 +7,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -28,10 +28,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [hulls frameTimes] = Segmentor(varargin)
+function hulls = Segmentor(varargin)
 
 hulls = [];
-frameTimes = [];
 
 supportedCellTypes = Load.GetSupportedCellTypes();
 [procArgs,segArgs] = setSegArgs(supportedCellTypes, varargin);
@@ -51,31 +50,32 @@ funcPath = which(funcName);
 if ( ~isempty(funcPath) )
     segFunc = supportedCellTypes(typeIdx).segRoutine.func;
 else
-    fprintf(['WARNING: Could not find ' funcName '() using default Segmentation.FrameSegmentor() routine\n']);
+    deployPrint(['WARNING: Could not find ' funcName '() using default Segmentation.FrameSegmentor() routine\n']);
     segFunc = @Segmentation.FrameSegmentor;
 end
 
 segParams = struct2cell(segArgs);
 
 try 
-    fprintf(1,'%s\n',procArgs.imagePath);
-    fprintf(1,'%s\n',procArgs.imagePattern);
+    deployPrint(1,'%s\n',procArgs.metadataFile);
     
-    Load.AddConstant('rootImageFolder', procArgs.imagePath, 1);
-    Load.AddConstant('imageNamePattern', procArgs.imagePattern, 1);
-    Load.AddConstant('numChannels', procArgs.numChannels, 1);
-    Load.AddConstant('numFrames', procArgs.numFrames, 1);
+    imageData = MicroscopeData.ReadMetadata(procArgs.metadataFile,false);
+    if ( isempty(imageData) )
+        error(['Unable to read image metadata file: ' procArgs.metadataFile]);
+    end
+    
     Load.AddConstant('primaryChannel', procArgs.primaryChannel, 1);
+    Metadata.SetMetadata(imageData);
     
     tStart = procArgs.procID;
-    tEnd = procArgs.numFrames;
+    tEnd = Metadata.GetNumberOfFrames();
     tStep = procArgs.numProcesses;
     primaryChan = procArgs.primaryChannel;
     
     numImages = floor(tEnd/tStep);
 
     for t = tStart:tStep:tEnd
-        fprintf('%d%%...', round(100 * floor(t/tStep) / numImages));
+        deployPrint('%d%%...', round(100 * floor(t/tStep) / numImages));
         
         chanImSet = Helper.LoadIntensityImageSet(t);
         if ( isempty(chanImSet) )
@@ -83,17 +83,24 @@ try
         end
         
         frameHulls = segFunc(chanImSet, primaryChan, t, segParams{:});
-        
-        for i=1:length(frameHulls)
-            frameHulls(i).time = t;
-            if ( ~isfield(frameHulls(i),'tag') || isempty(frameHulls(i).tag) )
-                frameHulls(i).tag = char(segFunc);
-            else
-                frameHulls(i).tag = [char(segFunc) ':' frameHulls(i).tag];
-            end
+        if ( isempty(frameHulls) )
+            continue;
         end
         
-        hulls = [hulls frameHulls];
+        rcImageDims = Metadata.GetDimensions('rc');
+        
+        validHulls = [];
+        for i=1:length(frameHulls)
+            tag = char(segFunc);
+            if ( isfield(frameHulls(i),'tag') && ~isempty(frameHulls(i).tag) )
+                tag = [char(segFunc) ':' frameHulls(i).tag];
+            end
+            
+            newHull = Hulls.CreateHull(rcImageDims, frameHulls(i).indexPixels, t, false, tag);
+            validHulls = [validHulls newHull];
+        end
+        
+        hulls = [hulls validHulls];
     end
     
 catch excp
@@ -112,19 +119,28 @@ catch excp
 end
 
 fileName = fullfile('segmentationData',['objs_' num2str(tStart) '.mat']);
-save(fileName,'hulls','frameTimes');
+save(fileName,'hulls');
 
 % Write this file to indicate that the segmentaiton data is actually fully saved
 fSempahore = fopen(fullfile('segmentationData',['done_' num2str(tStart) '.txt']), 'w');
 fclose(fSempahore);
 
-fprintf('\tDone\n');
+deployPrint('\tDone\n');
 end
 
-function [procArgs segArgs] = setSegArgs(supportedCellTypes, argCell)
-    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'numChannels',{0}, 'numFrames',{0}, 'cellType',{''}, 'primaryChannel',{[]}, 'imagePath',{''}, 'imagePattern',{''});
+function deployPrint(varargin)
+    if ( ~isdeployed() )
+        return;
+    end
+    
+    fprintf(varargin{:});
+end
+
+function [procArgs, segArgs] = setSegArgs(supportedCellTypes, argCell)
+    procArgs = struct('procID',{1}, 'numProcesses',{1}, 'primaryChannel',{1}, 'metadataFile',{''}, 'cellType',{''});
     
     procArgFields = fieldnames(procArgs);
+    procArgFields = reshape(procArgFields,1,length(procArgFields));
     procArgTypes = cellfun(@(x)(class(x)), struct2cell(procArgs), 'UniformOutput',0);
     
     segArgs = [];

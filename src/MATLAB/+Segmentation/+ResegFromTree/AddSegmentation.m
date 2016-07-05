@@ -11,8 +11,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
     
     chanImSet = Helper.LoadIntensityImageSet(time);
     
-    guessPoint = Helper.SwapXY_RC(CellHulls(prevHull).centerOfMass);
-    
+    guessPoint = Utils.SwapXY_RC(CellHulls(prevHull).centerOfMass);
     chkHull = Segmentation.FindNewSegmentation(chanImSet, guessPoint, 200, bAggressive, CellHulls(prevHull).indexPixels, time);
     if ( isempty(chkHull) )
         return;
@@ -27,7 +26,7 @@ function [addedHull costMatrix nextHulls] = AddSegmentation(prevHull, costMatrix
         return;
     end
     
-    newHull = Hulls.CreateHull(CONSTANTS.imageSize, chkPix, time, false, chkHull.tag);
+    newHull = Hulls.CreateHull(Metadata.GetDimensions('rc'), chkPix, time, false, chkHull.tag);
     
     % Use temporary hull to verify cost (not on a track yet)
     chkIdx = find(checkHulls == prevHull);

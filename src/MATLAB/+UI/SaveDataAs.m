@@ -38,11 +38,11 @@ settings = Load.ReadSettings();
 time = clock;
 fprintf('Choose a folder to save current data...\n');
 
-newName = [CONSTANTS.datasetName '_LEVer.mat'];
+newName = [Metadata.GetDatasetName() '_LEVer.mat'];
 
 bEditName = (~bOverWrite && ~strcmp(settings.matFilePath,'.\'));
 if ( bEditName )
-    newName = [CONSTANTS.datasetName ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat'];
+    newName = [Metadata.GetDatasetName() ' edits ' num2str(time(1)) '-' num2str(time(2),'%02d') '-' num2str(time(3),'%02d') '_LEVer.mat'];
 end
 
 if(strcmp(settings.matFilePath,'.\'))

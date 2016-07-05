@@ -15,23 +15,23 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
-%
+%     http://n2t.net/ark:/87918/d9rp4t for details
+% 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-%
+% 
 %     LEVer is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-%
+% 
 %     You should have received a copy of the GNU General Public License
-%     along with LEVer in file "gnu gpl v3.txt".  If not, see
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
 %     <http://www.gnu.org/licenses/>.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,16 +160,17 @@ function setMenus()
     end
 
     if (isfield(Figures.cells,'menuHandles') && isfield(Figures.cells.menuHandles,'saveMenu'))
+        datasetName = Metadata.GetDatasetName();
         if ( Editor.StackedHistory.IsSaved() )
             set(Figures.cells.menuHandles.saveMenu,'Enable','off');
             set(Figures.tree.menuHandles.saveMenu,'Enable','off');
-            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
-            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data']);
+            set(Figures.cells.handle,'Name',[datasetName ' Image Data']);
+            set(Figures.tree.handle,'Name',[datasetName ' Lineage Data']);
         else
             set(Figures.cells.menuHandles.saveMenu,'Enable','on');
             set(Figures.tree.menuHandles.saveMenu,'Enable','on');
-            set(Figures.cells.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
-            set(Figures.tree.handle,'Name',[CONSTANTS.datasetName ' Image Data *']);
+            set(Figures.cells.handle,'Name',[datasetName ' Image Data *']);
+            set(Figures.tree.handle,'Name',[datasetName ' Lineage Data *']);
         end
     end
 end %setMenu

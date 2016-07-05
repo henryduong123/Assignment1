@@ -34,8 +34,9 @@ function parentHull = FindParentHull(childHulls, linePoints, time, forceParents)
     
     pointCounts = zeros(1,length(chkHulls));
     
+    rcImageDims = Metadata.GetDimensions('rc');
     for i=1:length(chkHulls)
-        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(chkHulls(i)).indexPixels);
+        [r c] = ind2sub(rcImageDims, CellHulls(chkHulls(i)).indexPixels);
         bContainsPoints = inpolygon(c,r, mitosisPoints(:,1), mitosisPoints(:,2));
         pointCounts(i) = nnz(bContainsPoints);
     end
@@ -66,9 +67,10 @@ function parentHull = addParentHull(midpoint, time, mitosisPoints)
     
     hulls = Segmentation.PartialImageSegment(imSet, midpoint, 200, CONSTANTS.primaryChannel, segFunc, segParams);
     
+    rcImageDims = Metadata.GetDimensions('rc');
     pointCounts = zeros(1,length(hulls));
     for i=1:length(hulls)
-        [r c] = ind2sub(CONSTANTS.imageSize, hulls(i).indexPixels);
+        [r c] = ind2sub(rcImageDims, hulls(i).indexPixels);
         bContainsPoints = inpolygon(c,r, mitosisPoints(:,1), mitosisPoints(:,2));
         pointCounts(i) = nnz(bContainsPoints);
     end
@@ -88,28 +90,25 @@ function newHullID = addPointHullEntry(chkPoint, time)
     x = round(chkPoint(1));
     y = round(chkPoint(2));
     
-    filename = Helper.GetFullImagePath(time);
-    img = Helper.LoadIntensityImage(filename);
+    img = Helper.LoadIntensityImage(time,CONSTANTS.primaryChannel);
     
     newHull = createNewHullStruct(x, y, time);
     newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHullID = addHullEntry(hull, time)
-    global CONSTANTS
-    
-    [r c] = ind2sub(CONSTANTS.imageSize, hull.indexPixels);
+    [r c] = ind2sub(Metadata.GetDimensions('rc'), hull.indexPixels);
     
     newHull = createNewHullStruct(c, r, time);
     newHullID = Hulls.SetCellHullEntries(0, newHull);
 end
 
 function newHull = createNewHullStruct(x,y, time)
-    global CONSTANTS CellHulls
+    global CellHulls
     
     newHull = Helper.MakeEmptyStruct(CellHulls);
 
-    idxPix = sub2ind(CONSTANTS.imageSize, y,x);
+    idxPix = sub2ind(Metadata.GetDimensions('rc'), y,x);
     
     newHull.indexPixels = idxPix;
     newHull.centerOfMass = mean([y x], 1);

@@ -30,9 +30,10 @@ function gitPath = findGitPath()
     gitPath = '';
     
     comparch = computer('arch');
-    progFilesPath = 'C:\Program Files (x86)';
+    progFilesPath64 = 'C:\Program Files';
     if ( strcmpi(comparch,'win64') )
         progFilesPath = getenv('ProgramFiles(x86)');
+        progFilesPath64 = getenv('ProgramFiles');
     elseif ( strcmpi(comparch,'win32') )
         progFilesPath = getenv('ProgramFiles');
     else
@@ -40,7 +41,9 @@ function gitPath = findGitPath()
     end
     
     tryPaths = {fullfile(progFilesPath, 'Git');
+                fullfile(progFilesPath64, 'Git');
                 fullfile(progFilesPath, 'msysgit');
+                fullfile(progFilesPath64, 'msysgit');
                 'C:\Git';
                 'C:\msysgit'};
 	

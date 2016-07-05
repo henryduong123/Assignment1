@@ -4,10 +4,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, primaryChan, 
         imSize = max([imSize; size(chanImg{c})],[],1);
     end
     
-    rcCoordMin = floor(Helper.SwapXY_RC(xyCenterPt) - subSize/2);
-    rcCoordMax = ceil(Helper.SwapXY_RC(xyCenterPt) + subSize/2);
+    rcCoordMin = floor(Utils.SwapXY_RC(xyCenterPt) - subSize/2);
+    rcCoordMax = ceil(Utils.SwapXY_RC(xyCenterPt) + subSize/2);
     
     rcCoordMin(rcCoordMin < 1) = 1;
     rcCoordMax(rcCoordMax > imSize) = imSize(rcCoordMax > imSize);
@@ -62,15 +62,16 @@ function hulls = PartialImageSegment(chanImg, xyCenterPt, subSize, primaryChan, 
 end
 
 function newHulls = fixupFromSubimage(rcCoordMin, origSize, subSize, hulls)
-    newHulls = hulls;
+    newHulls = [];
     
     rcOffset = rcCoordMin - 1;
     for i=1:length(hulls)
-        newHulls(i).indexPixels = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
+        idxPix = makeGlobalPix(hulls(i).indexPixels, origSize, subSize, rcOffset);
+        newHulls = [newHulls Hulls.CreateHull(origSize, idxPix)];
     end
 end
 
 function globIdx = makeGlobalPix(locIdx, globSz, locSz, rcOffset)
-    globCoords = Helper.IndexToCoord(locSz, locIdx) + repmat(rcOffset, size(locIdx,1),1);
-    globIdx = Helper.CoordToIndex(globSz, globCoords);
+    globCoords = Utils.IndToCoord(locSz, locIdx) + repmat(rcOffset, size(locIdx,1),1);
+    globIdx = Utils.CoordToInd(globSz, globCoords);
 end

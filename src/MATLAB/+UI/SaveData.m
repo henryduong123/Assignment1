@@ -38,9 +38,9 @@ if isfield(CONSTANTS,'matFullFile') && ~isempty(CONSTANTS.matFullFile)
     Helper.SaveLEVerState([CONSTANTS.matFullFile]);
 else
     if(orginal)
-        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer.mat']);
+        Helper.SaveLEVerState(fullfile(settings.matFilePath, [Metadata.GetDatasetName() '_LEVer.mat']));
     else
-        Helper.SaveLEVerState([settings.matFilePath CONSTANTS.datasetName '_LEVer_edits.mat']);
+        Helper.SaveLEVerState(fullfile(settings.matFilePath, [Metadata.GetDatasetName() '_LEVer_edits.mat']));
     end
 end
 

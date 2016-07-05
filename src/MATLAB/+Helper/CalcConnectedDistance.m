@@ -1,10 +1,10 @@
-% dist = CalcConnectedDistance(startHull,nextHull, imageSize, perimMap, cellHulls)
+% dist = CalcConnectedDistance(startHull,nextHull, rcImageDims, perimMap, cellHulls)
 % Calculate the connected-component distance from startHull to nextHull.
 % 
 % startHull,nextHull - must be valid indices into the cellHulls structure.
 %
-% imageSize - indicates the dimensions of the image or volume the hulls
-% were segmented from (for use in converting cellHulls.indexPixels.
+% rcImageDims - indicates the dimensions (row,column,height) of the image or volume
+% the hulls were segmented from (for use in converting cellHulls.indexPixels.
 % 
 % perimMap = containers.Map('KeyType', 'uint32', 'ValueType', 'any'), must
 % be a map handle passed by the calling routine. This shares perimeter
@@ -14,7 +14,31 @@
 % 
 % See Tracker.BuildConnectedDistance() for calling examples.
 
-function dist = CalcConnectedDistance(startHull,nextHull, imageSize, perimMap, cellHulls)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011-2016 Andrew Cohen
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     http://n2t.net/ark:/87918/d9rp4t for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+function dist = CalcConnectedDistance(startHull,nextHull, rcImageDims, perimMap, cellHulls)
     isect = intersect(cellHulls(startHull).indexPixels, cellHulls(nextHull).indexPixels);
     if ( ~isempty(isect) )
         isectDist = 1 - (length(isect) / min(length(cellHulls(startHull).indexPixels), length(cellHulls(nextHull).indexPixels)));
@@ -22,20 +46,20 @@ function dist = CalcConnectedDistance(startHull,nextHull, imageSize, perimMap, c
         return;
     end
     
-    addPerim(startHull, imageSize,perimMap,cellHulls);
-    addPerim(nextHull, imageSize,perimMap,cellHulls);
+    addPerim(startHull, rcImageDims,perimMap,cellHulls);
+    addPerim(nextHull, rcImageDims,perimMap,cellHulls);
     D = pdist2(perimMap(startHull), perimMap(nextHull));
     
     dist = min(D(:));
 end
 
-function addPerim(hullID, imageSize, perimMap, cellHulls)
+function addPerim(hullID, rcImageDims, perimMap, cellHulls)
     if ( isKey(perimMap, hullID) )
         return
     end;
     
-    pxCell = cell(1,length(imageSize));
-    [pxCell{:}] = ind2sub(imageSize, cellHulls(hullID).indexPixels);
+    pxCell = cell(1,length(rcImageDims));
+    [pxCell{:}] = ind2sub(rcImageDims, cellHulls(hullID).indexPixels);
     
     pixelCoords = cell2mat(pxCell);
     minCoord = min(pixelCoords,[],1);
@@ -49,10 +73,10 @@ function addPerim(hullID, imageSize, perimMap, cellHulls)
     end
     
     bwIm = false(locMax);
-    locCell = mat2cell(locCoord, size(locCoord,1), ones(1,length(imageSize)));
+    locCell = mat2cell(locCoord, size(locCoord,1), ones(1,length(rcImageDims)));
     locInd = sub2ind(locMax, locCell{:});
     
-    perimCell = cell(1,length(imageSize));
+    perimCell = cell(1,length(rcImageDims));
     bwIm(locInd) = true;
     perimIm = bwperim(bwIm);
     

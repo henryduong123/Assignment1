@@ -3,10 +3,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -126,7 +126,7 @@ function [mergeHull, deleteHullIDs] = createMergeCell(mergeIDs)
     deleteHullIDs = mergeIDs;
     newIndexPixels = vertcat(CellHulls(deleteHullIDs).indexPixels);
 
-    mergeHull = Hulls.CreateHull(CONSTANTS.imageSize, newIndexPixels, CellHulls(deleteHullIDs(1)).time, true);
+    mergeHull = Hulls.CreateHull(Metadata.GetDimensions('rc'), newIndexPixels, CellHulls(deleteHullIDs(1)).time, true);
 end
 
 function edge = getTrackEdge(t, trackID)

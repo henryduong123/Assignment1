@@ -13,6 +13,9 @@ bin/*.prj
 bin/*.txt
 segmentationData/
 
+# Ignore segmentation help function used in compiled LEVER versions.
+CompiledSegHelp.m
+
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
@@ -58,3 +61,12 @@ src/MATLAB/*.csv
 src/MATLAB/filmstrip/*/*
 src/MATLAB/*.exe
 bin64/*.exe
+*.ipdb
+*.iobj
+*.exp
+*.tlog
+*.idb
+*.opendb
+src/c/Output/TrackerMex/Debug_x64/
+src/c/Output/TrackerMex/Release_x64/
+src/c/trackerMex.mexw64

@@ -1,44 +1,91 @@
  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     This file is part of LEVer.exe
-%     (C) 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     http://n2t.net/ark:/87918/d9rp4t for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mcc -m LEVER_SegAndTrackFolders.m
 function LEVER_SegAndTrackFolders(outputDir, maxProcessors)
 global CONSTANTS CellPhenotypes
 
 CONSTANTS=[];
 
-softwareVersion = Helper.GetVersion();
+if ( ~exist('outputDir','var') )
+    outputDir = '';
+end
+
+% Trial run command
+bTrialRun = false;
+if ( strncmpi(outputDir,'-T',2) )
+    outputDir = outputDir(3:end);
+    bTrialRun = true;
+end
+
+softwareVersion = Dev.GetVersion();
 
 if (isdeployed())
     Load.SetWorkingDir();
 end
 
-cellType = Load.QueryCellType();
-Load.AddConstant('cellType',cellType,1);
-
 directory_name = uigetdir('','Select Root Folder for Seg and Track');
 if ( ~directory_name ),return,end
 
-if ( ~exist('outputDir','var') )
-    outputDir = directory_name;
+% Get initial cell segmentation parameters
+Load.AddConstant('cellType', [], 1);
+
+hDlg = UI.SegPropDialog();
+uiwait(hDlg);
+
+if ( isempty(CONSTANTS.cellType) )
+    return;
 end
 
-% Trial run command
-bTrialRun = 0;
-if ( strcmpi(outputDir(1:2),'-T') )
-    outputDir = outputDir(3:end);
-    if ( isempty(outputDir) )
-        outputDir = directory_name;
-    end
-    bTrialRun = 1;
+%% Run export of subdirectories if necessary.
+exportRoot = Load.FolderExport(directory_name);
+if ( isempty(exportRoot) )
+    return;
 end
 
-processedDatasets = {};
+if ( isempty(outputDir) )
+    outputDir = exportRoot;
+end
 
+%% Find valid images in exported folder.
+[chkPaths,invalidFile] = Load.CheckFolderExport(exportRoot);
+validJSON = chkPaths(~invalidFile);
+
+if ( isempty(validJSON) )
+    warning(['No valid data found at: ' exportRoot]);
+    return;
+end
+
+%% Use previewer on first valid directory to get cell type and segmentation parameters
+Load.AddConstant('version',softwareVersion,1);
+
+[imageData,imagePath] = MicroscopeData.ReadMetadataFile(fullfile(exportRoot,validJSON{1}));
+Metadata.SetMetadata(imageData);
+
+Load.AddConstant('rootImageFolder', imagePath, 1);
+Load.AddConstant('matFullFile', fullfile(outputDir, Metadata.GetDatasetName()),1);
+
+%% Use total number of processors or max from command-line
 numProcessors = getenv('Number_of_processors');
 numProcessors = str2double(numProcessors);
 if(isempty(numProcessors) || isnan(numProcessors) || numProcessors < 4)
@@ -52,58 +99,38 @@ if ( exist('maxProcessors','var') )
     numProcessors = min(maxProcessors, numProcessors);
 end
 
-dirList = dir(directory_name);
-
-bInvalidName = arrayfun(@(x)(strncmpi(x.name,'.',1) || strncmpi(x.name,'..',2)), dirList);
-bValidDir = ~bInvalidName & (vertcat(dirList.isdir) > 0);
-dirList = dirList(bValidDir);
-
-for dirIdx=1:length(dirList)
-    if ( ~(dirList(dirIdx).isdir) )
-        continue
-    end
+%% Run segmentation for all valid directories
+processedDatasets = {};
+for dirIdx=1:length(validJSON)
+    subDir = fileparts(validJSON{dirIdx});
+    dataDir = fileparts(subDir);
     
-    validStartFilename = getValidStartFileName(fullfile(directory_name, dirList(dirIdx).name));
-    if ( isempty(validStartFilename) )
-        fprintf('\n**** Image list does not begin with frame 1 for %s.  Skipping\n\n', directory_name);
-        continue;
-    end
-    
-    [datasetName namePattern] = Helper.ParseImageName(validStartFilename);
-    if ( isempty(datasetName) )
-        fprintf('\n**** Image names not formatted correctly for %s.  Skipping\n\n', directory_name);
-        continue;
-    end
- 
-    CONSTANTS.rootImageFolder = fullfile(directory_name, dirList(dirIdx).name);
-    CONSTANTS.datasetName = datasetName;
-    CONSTANTS.imageNamePattern = namePattern;
-    CONSTANTS.matFullFile = fullfile(outputDir, [CONSTANTS.datasetName '_LEVer.mat']);
+    [imageData,imagePath] = MicroscopeData.ReadMetadataFile(fullfile(exportRoot,validJSON{dirIdx}));
+    Metadata.SetMetadata(imageData);
+
+    Load.AddConstant('rootImageFolder', imagePath, 1);
+    Load.AddConstant('matFullFile', fullfile(outputDir,dataDir, [Metadata.GetDatasetName() '_LEVer.mat']),1);
     
     if ( exist(CONSTANTS.matFullFile,'file') )
-        fprintf('%s - LEVer data already exists.  Skipping\n', CONSTANTS.datasetName);
-        continue
-    end
-    
-    fileList = dir(fullfile(directory_name, dirList(dirIdx).name, '*.tif'));
-    if ( isempty(fileList) )
+        fprintf('%s - LEVer data already exists.  Skipping\n', Metadata.GetDatasetName());
         continue
     end
 
     Load.AddConstant('version',softwareVersion,1);
     
-    fprintf('Segment & track file : %s\n', CONSTANTS.datasetName);
-    
+    %% Segment and track folder
+    fprintf('Segment & track file : %s\n', Metadata.GetDatasetName());
     tic
-    Load.InitializeConstants();
 
     if ( ~bTrialRun )
+        Load.InitializeConstants();
+        
         segArgs = Segmentation.GetCellTypeParams();
-        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(CONSTANTS.rootImageFolder, CONSTANTS.datasetName, CONSTANTS.imageNamePattern, numProcessors, segArgs);
+        [errStatus tSeg tTrack] = Segmentation.SegAndTrackDataset(numProcessors, segArgs);
         if ( ~isempty(errStatus) )
-            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', CONSTANTS.datasetName);
+            fprintf('\n\n*** Segmentation/Tracking failed for %s\n\n', Metadata.GetDatasetName());
             
-            errFilename = fullfile(outputDir, [CONSTANTS.datasetName '_segtrack_err.log']);
+            errFilename = fullfile(outputDir, [Metadata.GetDatasetName() '_segtrack_err.log']);
             fid = fopen(errFilename, 'wt');
             fprintf(fid, '%s', errStatus);
             fclose(fid);
@@ -119,35 +146,11 @@ for dirIdx=1:length(dirList)
         Editor.ReplayableEditAction(@Editor.OriginAction, 1);
         
         Helper.SaveLEVerState([CONSTANTS.matFullFile]);
-
         Error.LogAction('Segmentation time - Tracking time',tSeg,tTrack);
     end
     
-    processedDatasets = [processedDatasets; {CONSTANTS.datasetName}];
+    processedDatasets = [processedDatasets; {Metadata.GetDatasetName()}];
 end %dd
 
 clear global;
-end
-
-% This function tries to quickly find one or more files that qualify as an
-% initial image frame for parsing dataset names, etc. Returns the first
-% file name found
-function filename = getValidStartFileName(chkPath)
-    filename = '';
-    
-    flist = [];
-    chkDigits = 7:-1:2;
-    for i=1:length(chkDigits)
-        digitStr = ['%0' num2str(chkDigits(i)) 'd'];
-        flist = dir(fullfile(chkPath,['*_t' num2str(1,digitStr) '*.tif']));
-        if ( ~isempty(flist) )
-            break;
-        end
-    end
-    
-    if ( isempty(flist) )
-        return;
-    end
-    
-    filename = flist(1).name;
 end

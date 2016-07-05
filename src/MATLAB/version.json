@@ -1,0 +1,12 @@
+{
+  "name" : "LEVER",
+  "majorVersion" : 7,
+  "minorVersion" : 14,
+  "branchName" : "master",
+  "buildNumber" : "2016.07.05.18",
+  "buildMachine" : "bioimage28",
+  "commitHash" : [
+                   "lever.git : f3caa208f9dfe30ce840b56fd5274a62f15a43b1",
+                   "utilities.git : 6537681200925800e61251113576f525237b0af7"
+                 ]
+}

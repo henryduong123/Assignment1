@@ -1,4 +1,28 @@
-function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, namePattern, numProcessors, segArgs)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Copyright 2011-2016 Andrew Cohen
+%
+%     This file is part of LEVer - the tool for stem cell lineaging. See
+%     http://n2t.net/ark:/87918/d9rp4t for details
+% 
+%     LEVer is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     LEVer is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with LEVer in file "gnu gpl v3.txt".  If not, see 
+%     <http://www.gnu.org/licenses/>.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
     global CONSTANTS CellHulls HashedCells ConnectedDist
     
     errStatus = sprintf('Unknown Error\n');
@@ -8,24 +32,23 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     %% Segmentation
     tic
     
-    % Remove trailing \ or / from rootFolder
-    if ( (rootFolder(end) == '\') || (rootFolder(end) == '/') )
-        rootFolder = rootFolder(1:end-1);
-    end
-    
-    % Set CONSTANTS.imageSize as soon as possible
-    [channelList,frameList] = Helper.GetImListInfo(CONSTANTS.rootImageFolder, CONSTANTS.imageNamePattern);
-    
-    Load.AddConstant('numFrames', frameList(end),1);
-    Load.AddConstant('numChannels', channelList(end),1);
-    
-    numProcessors = min(numProcessors, CONSTANTS.numFrames);
-    
-    if ( CONSTANTS.numFrames < 1 )
+    if ( Metadata.GetNumberOfFrames() < 1 )
         return;
     end
+    
+    numProcessors = min(numProcessors, Metadata.GetNumberOfFrames());
 
-    fprintf('Segmenting (using %s processors)...\n',num2str(numProcessors));
+    numProcessors = min(numProcessors, Metadata.GetNumberOfFrames());
+    bytesPerIm = prod(Metadata.GetDimensions()) * Metadata.GetNumberOfChannels() * 8;
+    m = memory;
+    maxWorkers = min(numProcessors,floor(m.MaxPossibleArrayBytes / bytesPerIm));
+
+    % Remove trailing \ or / from rootFolder
+    if ( (CONSTANTS.rootImageFolder(end) == '\') || (CONSTANTS.rootImageFolder(end) == '/') )
+        CONSTANTS.rootImageFolder = CONSTANTS.rootImageFolder(1:end-1);
+    end
+
+    fprintf('Segmenting (using %s processors)...\n',num2str(maxWorkers));
 
     if(~isempty(dir('.\segmentationData')))        
         removeOldFiles('segmentationData', 'err_*.log');
@@ -33,18 +56,9 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         removeOldFiles('segmentationData', 'done_*.txt');
     end
     
-    imSet = Helper.LoadIntensityImageSet(1);
-
-    imSizes = zeros(length(imSet),2);
-    for i=1:length(imSet)
-        imSizes(i,:) = size(imSet{i});
-    end
-
-    Load.AddConstant('imageSize', max(imSizes,[],1),1);
-    
-    if ( ndims(CONSTANTS.imageSize) < 2 || ndims(CONSTANTS.imageSize) >= 3 )
+    if ( isempty(Metadata.GetDimensions()) )
         cltime = clock();
-        errStatus = sprintf('%02d:%02d:%02.1f - Images are empty or have incorrect dimensions [%s]\n',cltime(4),cltime(5),cltime(6), num2str(CONSTANTS.imageSize));
+        errStatus = sprintf('%02d:%02d:%02.1f - Images dimensions are empty\n',cltime(4),cltime(5),cltime(6));
         
         return;
     end
@@ -53,30 +67,69 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         mkdir('segmentationData');
     end
     
-    for procID=1:numProcessors
-        segCmd = makeSegCommand(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs);
-        system(['start ' segCmd ' && exit']);
-    end
-%     for procID=1:numProcessors
-%         Segmentor(procID,numProcessors,CONSTANTS.numChannels,CONSTANTS.numFrames,CONSTANTS.cellType,CONSTANTS.primaryChannel,rootFolder,namePattern,segArgs{:});
-%     end
+    metadataFile = fullfile(CONSTANTS.rootImageFolder, [Metadata.GetDatasetName() '.json']);
+    primaryChannel = CONSTANTS.primaryChannel;
+    cellType = CONSTANTS.cellType;
+    
+    if ( isdeployed() )
+        %% compliled version
+        % Must use separately compiled segmentor algorithm in compiled LEVer
+        % because parallel processing toolkit is unsupported
+        for procID=1:maxWorkers
+            segCmd = makeSegCommand(procID,maxWorkers,primaryChannel,metadataFile,cellType,segArgs);
+            system(['start ' segCmd ' && exit']);
+        end
+    else
+        %% single threaded version
+%         for procID=1:maxWorkers
+%             Segmentor(procID,maxWorkers,primaryChannel,metadataFile,cellType,segArgs{:});
+%         end
 
-    bSegFileExists = false(1,numProcessors);
-    for procID=1:numProcessors
-        errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
-        fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
-        semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
-        semDesc = dir(semFile);
-        fileDescriptor = dir(fileName);
-        efd = dir(errFile);
-        while((isempty(fileDescriptor) || isempty(semDesc)) && isempty(efd))
-            pause(3)
-            fileDescriptor = dir(fileName);
-            efd = dir(errFile);
-            semDesc = dir(semFile);
+        %% spmd version
+        poolObj = gcp('nocreate');
+        if (~isempty(poolObj))
+            oldWorkers = poolObj.NumWorkers;
+            if (oldWorkers~=maxWorkers)
+                delete(poolObj);
+                parpool(maxWorkers);
+            end
+        else
+            oldWorkers = 0;
+            parpool(maxWorkers);
+        end
+
+        spmd
+            Segmentor(labindex,numlabs,primaryChannel,metadataFile,cellType,segArgs{:});
+        end
+
+        if (oldWorkers~=0 && oldWorkers~=maxWorkers)
+            delete(gcp);
+            if (oldWorkers>0)
+                parpool(oldWorkers);
+            end
+        end
+    end
+    
+    %% collate output
+    bSegFileExists = false(1,maxWorkers);
+    bSemFileExists = false(1,maxWorkers);
+    bErrFileExists = false(1,maxWorkers);
+    
+    bProcFinish = false(1,maxWorkers);
+    while ( ~all(bProcFinish) )
+        pause(3);
+        
+        for procID=1:maxWorkers
+            errFile = ['.\segmentationData\err_' num2str(procID) '.log'];
+            segFile = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+            semFile = ['.\segmentationData\done_' num2str(procID) '.txt'];
+            
+            bErrFileExists(procID) = ~isempty(dir(errFile));
+            bSegFileExists(procID) = ~isempty(dir(segFile));
+            bSemFileExists(procID) = ~isempty(dir(semFile));
         end
         
-        bSegFileExists(procID) = ~isempty(fileDescriptor);
+        bProcFinish = bErrFileExists | (bSegFileExists & bSemFileExists);
     end
     
     if ( ~all(bSegFileExists) )
@@ -104,16 +157,14 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
 
     try
         cellSegments = [];
-        frameOrder = [];
-        for procID=1:numProcessors
-            fileName = ['.\segmentationData\objs_' num2str(procID) '.mat'];
+        for procID=1:maxWorkers
+            segFile = ['.\segmentationData\objs_' num2str(procID) '.mat'];
             
-            tstLoad = whos('-file', fileName);
+            tstLoad = whos('-file', segFile);
             
-            load(fileName);
+            load(segFile);
             
             cellSegments = [cellSegments hulls];
-            frameOrder = [frameOrder frameTimes];
         end
     catch excp
         
@@ -133,20 +184,12 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
 
     % Sort segmentations and fluorescent data so that they are time ordered
     segtimes = [cellSegments.time];
-    [srtSegs srtIdx] = sort(segtimes);
+    [~,srtIdx] = sort(segtimes);
     CellHulls = Helper.MakeInitStruct(Helper.GetCellHullTemplate(), cellSegments(srtIdx));
     
-    % Make sure center of mass is available
-    for i=1:length(CellHulls)
-        [r c] = ind2sub(CONSTANTS.imageSize, CellHulls(i).indexPixels);
-        CellHulls(i).centerOfMass = mean([r c], 1);
-    end
-
-    [srtFrames srtIdx] = sort(frameOrder);
-    
-    fprintf('Building Connected Component Distances... ');
-    HashedCells = cell(1,CONSTANTS.numFrames);
-    for t=1:CONSTANTS.numFrames
+    %% Build hashed cell list
+    HashedCells = cell(1,Metadata.GetNumberOfFrames());
+    for t=1:Metadata.GetNumberOfFrames()
         HashedCells{t} = struct('hullID',{}, 'trackID',{});
     end
     
@@ -154,9 +197,10 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
         HashedCells{CellHulls(i).time} = [HashedCells{CellHulls(i).time} struct('hullID',{i}, 'trackID',{0})];
     end
     
+    %% Create connected component distances for tracker
+    fprintf('Building Connected Component Distances... ');
     ConnectedDist = [];
     Tracker.BuildConnectedDistance(1:length(CellHulls), 0, 1);
-    Segmentation.WriteSegData('segmentationData',datasetName);
 
     fprintf(1,'\nDone\n');
     tSeg = toc;
@@ -164,19 +208,16 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     %% Tracking
     tic
     fprintf(1,'Tracking...');
-    fnameIn=['.\segmentationData\SegObjs_' datasetName '.txt'];
-    fnameOut=['.\segmentationData\Tracked_' datasetName '.txt'];
     
-    system(['MTC.exe ' num2str(CONSTANTS.dMaxCenterOfMass) ' ' num2str(CONSTANTS.dMaxConnectComponentTracker) ' "' fnameIn '" "' fnameOut '" > out.txt']);
+    [hullTracks,gConnect] = trackerMex(CellHulls, ConnectedDist, Metadata.GetNumberOfFrames(), CONSTANTS.dMaxCenterOfMass, CONSTANTS.dMaxConnectComponentTracker);
     
     fprintf('Done\n');
     tTrack = toc;
 
     %% Import into LEVer's data sturcture
-    [objTracks gConnect] = Tracker.ReadTrackData('segmentationData', CONSTANTS.datasetName);
     fprintf('Finalizing Data...');
     try
-        Tracker.BuildTrackingData(objTracks, gConnect);
+        Tracker.BuildTrackingData(hullTracks, gConnect);
     catch excp
         
         cltime = clock();
@@ -190,16 +231,13 @@ function [errStatus tSeg tTrack] = SegAndTrackDataset(rootFolder, datasetName, n
     errStatus = '';
 end
 
-function segCmd = makeSegCommand(procID, numProc, numChannels, numFrames, cellType, primaryChannel, rootFolder, imagePattern, segArg)
+function segCmd = makeSegCommand(procID, numProc, primaryChannel, metadataFile, cellType, segArg)
     segCmd = 'Segmentor';
     segCmd = [segCmd ' "' num2str(procID) '"'];
     segCmd = [segCmd ' "' num2str(numProc) '"'];
-    segCmd = [segCmd ' "' num2str(numChannels) '"'];
-    segCmd = [segCmd ' "' num2str(numFrames) '"'];
-    segCmd = [segCmd ' "' cellType '"'];
     segCmd = [segCmd ' "' num2str(primaryChannel) '"'];
-    segCmd = [segCmd ' "' rootFolder '"'];
-    segCmd = [segCmd ' "' imagePattern '"'];
+    segCmd = [segCmd ' "' metadataFile '"'];
+    segCmd = [segCmd ' "' cellType '"'];
     
     for i=1:length(segArg)
         segCmd = [segCmd ' "' num2str(segArg{i}) '"'];

@@ -3,10 +3,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -24,34 +24,27 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function newTrackID = AddNewSegmentHull(clickPt, time)
-    global CONSTANTS CellHulls
+function newTrackID = AddNewSegmentHull(xyClickPt, time)
+    global CellHulls
     
     chanImSet = Helper.LoadIntensityImageSet(time);
- 
-    if strcmp(CONSTANTS.cellType, 'Hemato')
-        subSize = 100;
-    else
-        subSize = 200;
-    end
-    
-    
-    chkHull = Segmentation.FindNewSegmentation(chanImSet, clickPt, subSize, true, [], time);
+    chkHull = Segmentation.FindNewSegmentation(chanImSet, xyClickPt, 200, true, [], time);
 
     newHull = Helper.MakeEmptyStruct(CellHulls);
     newHull.userEdited = true;
     
     if ( ~isempty(chkHull) )
-        chkHull = Segmentation.ForceDisjointSeg(chkHull, time, clickPt);
+        chkHull = Segmentation.ForceDisjointSeg(chkHull, time, xyClickPt);
     end
     
     % TODO: Update manual click hulls for 3D
+    rcImageDims = Metadata.GetDimensions('rc');
     if ( isempty(chkHull) )
         % Add a point hull since we couldn't find a segmentation containing the click
-        clickIndex = Helper.CoordToIndex(CONSTANTS.imageSize, round(Helper.SwapXY_RC(clickPt)));
-        newHull = Hulls.CreateHull(CONSTANTS.imageSize, clickIndex, time, true, 'Manual');
+        clickIndex = Utils.CoordToInd(rcImageDims, round(Utils.SwapXY_RC(xyClickPt)));
+        newHull = Hulls.CreateHull(rcImageDims, clickIndex, time, true, 'Manual');
     else
-        newHull = Hulls.CreateHull(CONSTANTS.imageSize, chkHull.indexPixels, time, true, chkHull.tag);
+        newHull = Hulls.CreateHull(rcImageDims, chkHull.indexPixels, time, true, chkHull.tag);
     end
     
     newHullID = Hulls.SetCellHullEntries(0, newHull);

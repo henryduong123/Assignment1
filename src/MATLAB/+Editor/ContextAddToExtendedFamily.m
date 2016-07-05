@@ -3,10 +3,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011 Andrew Cohen, Eric Wait and Mark Winter
+%     Copyright 2011-2016 Andrew Cohen
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
-%     https://pantherfile.uwm.edu/cohena/www/LEVer.html for details
+%     http://n2t.net/ark:/87918/d9rp4t for details
 % 
 %     LEVer is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -24,22 +24,26 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function ContextAddToExtendedFamily(trackID)
+function ContextAddToExtendedFamily(hullIDs)
     global CellFamilies CellTracks Figures
 
-    familyID = CellTracks(trackID).familyID;
-    
-    if ~isempty(CellFamilies(familyID).extFamily)
-        xfam = CellFamilies(familyID).extFamily;
-        if length(xfam) > 1
-            warn = sprintf('Track %d is already in an extended family', trackID);
-            warndlg(warn);
-            return;
+    trackIDs = Hulls.GetTrackID(hullIDs);
+    familyIDs = [CellTracks(trackIDs).familyID];
+
+    for i=1:length(familyIDs)
+        familyID = familyIDs(i);
+        if ~isempty(CellFamilies(familyID).extFamily)
+            xfam = CellFamilies(familyID).extFamily;
+            if length(xfam) > 1
+                warn = sprintf('Track %d is already in an extended family', trackID);
+                warndlg(warn);
+                return;
+            end
         end
     end
 
     [localLabels, revLocalLabels] = UI.GetLocalTreeLabels(Figures.tree.familyID);
-    answer = inputdlg('Enter cell label of family to join','Join Family',1,{UI.TrackToLocal(localLabels, trackID)});
+    answer = inputdlg('Enter cell label of family to join','Join Family',1,{num2str(CellFamilies(Figures.tree.familyID).tracks(1))});
     if(isempty(answer)),return,end;
     
     newTrackIDLocal = answer{1};
@@ -57,14 +61,14 @@ function ContextAddToExtendedFamily(trackID)
         return
     end
     
-    if ( newTrackID == trackID )
-        warn = sprintf('Track %s is the current track.', newTrackIDLocal);
+    if ( ismember(newTrackID, trackIDs) )
+        warn = sprintf('Track %s is one of the selected track(s).', newTrackIDLocal);
         warndlg(warn);
         return;
     end
 
     newFamilyID = CellTracks(newTrackID).familyID;
-    newExtFamily = union(CellFamilies(newFamilyID).extFamily, [familyID newFamilyID]);
+    newExtFamily = union(CellFamilies(newFamilyID).extFamily, [familyIDs newFamilyID]);
     [CellFamilies(newExtFamily).extFamily] = deal(newExtFamily);
     
     UI.DrawTree(Figures.tree.familyID);
