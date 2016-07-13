@@ -54,6 +54,10 @@ function FigureCellDown(src,evnt, labelID)
         else
             Editor.AddHull(2);
         end
+    elseif (strcmp(selectionType,'alt'))
+        if ( Figures.cells.downHullID > 0 )
+            UI.AddCellSelection(Figures.cells.downHullID);
+        end
     end
 end
 

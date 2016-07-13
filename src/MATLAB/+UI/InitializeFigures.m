@@ -50,7 +50,7 @@ Figures.tree.handle = figure();
 Figures.cells.selectedHulls = [];
 Figures.controlDown = false; %control key is currently down? for selecting cells and fine adjustment
 
-Figures.downHullID = -1;
+Figures.cells.downHullID = -1;
 Figures.downClickPoint = [0 0];
 
 whitebg(Figures.cells.handle,'k');

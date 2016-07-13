@@ -35,7 +35,8 @@ function ContextAddToExtendedFamily(hullIDs)
         if ~isempty(CellFamilies(familyID).extFamily)
             xfam = CellFamilies(familyID).extFamily;
             if length(xfam) > 1
-                warn = sprintf('Track %d is already in an extended family', trackID);
+                rootTrackID = CellFamilies(familyID).rootTrackID;
+                warn = sprintf('Track %d is already in an extended family', rootTrackID);
                 warndlg(warn);
                 return;
             end
@@ -48,6 +49,10 @@ function ContextAddToExtendedFamily(hullIDs)
     
     newTrackIDLocal = answer{1};
     newTrackID = UI.LocalToTrack(revLocalLabels, newTrackIDLocal);
+    
+    newFamilyID = CellTracks(newTrackID).familyID;
+    bInExtFamily = ismember(trackIDs,CellFamilies(newFamilyID).tracks);
+    trackIDs = trackIDs(~bInExtFamily);
 
     if ( isnan(newTrackID) || newTrackID > length(CellTracks) )
         warn = sprintf('Track %s does not exist.',newTrackIDLocal);
@@ -67,7 +72,6 @@ function ContextAddToExtendedFamily(hullIDs)
         return;
     end
 
-    newFamilyID = CellTracks(newTrackID).familyID;
     newExtFamily = union(CellFamilies(newFamilyID).extFamily, [familyIDs newFamilyID]);
     [CellFamilies(newExtFamily).extFamily] = deal(newExtFamily);
     
