@@ -170,7 +170,7 @@ function previewSeg(src,event)
     
     validHulls = [];
     for i=1:length(segHulls)
-        validHulls = [validHulls Hulls.CreateHull(Metadata.GetDimensions('rc'), segHulls(i).indexPixels, frameInfo.time, false, segHulls(i).tag)];
+        validHulls = [validHulls Hulls.CreateHull(Metadata.GetDimensions('rc'), segHulls(i).indexPixels, frameInfo.time, false)];
     end
     
     frameInfo.cacheHulls = validHulls;
