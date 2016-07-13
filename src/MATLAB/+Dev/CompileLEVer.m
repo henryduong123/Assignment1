@@ -32,12 +32,16 @@ function CompileLEVer(forceVersion)
     
     %% General compiler setup: Deals with version updates and pulls external dependencies
     initStruct = Dev.InitCompiler('LEVER',forceVersion);
+    if ( isempty(initStruct) )
+        % User exited the build due to error or uncommited dependencies.
+        return;
+    end
     
     %% Build FrameSegmentor help information into a function for use in compiled LEVER
     Dev.MakeSegHelp();
 
     %% Setup visual studio for MEX compilation
-    [vsStruct comparch] = setupCompileTools();
+    [vsStruct,comparch] = setupCompileTools();
     
     bindir = '..\..\bin';
     if ( strcmpi(comparch,'win64') )
@@ -71,14 +75,16 @@ function CompileLEVer(forceVersion)
     
     %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
+    javaDeps = initStruct.javaList;
+    
     addImgs = {'+UI\backFrame.png'; '+UI\forwardFrame.png'; '+UI\pause.png';'+UI\play.png';'+UI\stop.png'};
-    newOutput = compileMATLAB('LEVer', bindir, addImgs, initStruct.toolboxList);
+    newOutput = compileMATLAB('LEVer', bindir, [javaDeps;addImgs], initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, {}, initStruct.toolboxList);
+    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, javaDeps, initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('Segmentor', bindir, {}, initStruct.toolboxList);
+    newOutput = compileMATLAB('Segmentor', bindir, javaDeps, initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
     fprintf('\n');
@@ -95,7 +101,7 @@ function CompileLEVer(forceVersion)
     toc(totalTime)
 end
 
-function [vsStruct comparch] = setupCompileTools()
+function [vsStruct,comparch] = setupCompileTools()
     vsStruct.vstoolroot = getenv('VS140COMNTOOLS');
     if ( isempty(vsStruct.vstoolroot) )
         error('Cannot compile MEX files without Visual Studio 2015');
