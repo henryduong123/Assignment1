@@ -3,10 +3,10 @@
   "majorVersion" : 7,
   "minorVersion" : 14,
   "branchName" : "master",
-  "buildNumber" : "2016.07.05.18",
+  "buildNumber" : "2016.07.13.19",
   "buildMachine" : "bioimage28",
   "commitHash" : [
-                   "lever.git : f3caa208f9dfe30ce840b56fd5274a62f15a43b1",
-                   "utilities.git : 6537681200925800e61251113576f525237b0af7"
+                   "lever.git : 927f1b2f5e7c61457c5a923cdf82875a876659f9",
+                   "utilities.git : 0112a311096593ddeb888a58c8f0c6e3982340bb"
                  ]
 }
