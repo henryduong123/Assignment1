@@ -6,7 +6,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Copyright 2011-2016 Andrew Cohen
+%     Copyright 2016 Drexel University
 %
 %     This file is part of LEVer - the tool for stem cell lineaging. See
 %     http://n2t.net/ark:/87918/d9rp4t for details
