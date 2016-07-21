@@ -104,8 +104,8 @@ void loadDists(const mxArray* ccDists)
 
 		for (int j = 0; j < m ; j++)
 		{
-			int nextHull = (int)(distPairs[j*2]);
-			double dist = distPairs[j*2+1];
+			int nextHull = MatToC((int)(distPairs[j]));
+			double dist = distPairs[j+m];
 
 			ccDistMap[i].insert(std::pair<int, double>(nextHull,dist));
 		}
