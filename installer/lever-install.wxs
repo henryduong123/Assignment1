@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" 
+           Name="LEVER" 
+           Language="1033" 
+           Version="7.14.1" 
+           Manufacturer="http://bioimage.coe.drexel.edu" 
+           UpgradeCode="49684da6-6259-4985-8be4-c8551290437f">
+    
+		<Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine" 
+             Manufacturer="http://bioimage.coe.drexel.edu"
+             Description="LEVER"
+             Comments="(c) 2016 http://bioimage.coe.drexel.edu"/>
+
+		<MediaTemplate EmbedCab="yes" />
+
+    <Condition Message=
+               "This installer requires Windows 7 or higher.">
+      <![CDATA[
+               Installed OR
+               VersionNT >= 601
+               ]]>
+    </Condition>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="LEVER_ProgramDir"
+                   Name="LEVER">
+          <Directory Id="Subdir" Name="Sample Data" />
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="LEVER_ShortcutsDir"
+                   Name="LEVER" />
+      </Directory>
+    </Directory>
+  
+    <DirectoryRef Id="LEVER_ProgramDir">
+
+      <Component Id="CMP_LEVER"
+                 Guid="C5344940-7AE8-4D9A-865A-24933BA22672">
+        <File Source="../bin64/LEVer.exe" KeyPath="yes" />
+        <File Source="../bin64/LEVER_SegAndTrackFolders.exe" />
+        <File Source="../bin64/Segmentor.exe" />
+        <File Source="../bin64/debugLEVer.bat" />
+        <File Source="../bin64/gnu gpl v3.txt" />
+      </Component>
+
+    </DirectoryRef>
+    
+    
+    <Icon Id="leverIcon.ico" SourceFile="resources/LEVER_logo.ico"/>
+    <Icon Id="uninstallIcon.ico" SourceFile="resources/LEVER_uninstall.ico"/>
+    <DirectoryRef Id="LEVER_ShortcutsDir">
+      <Component Id="CMP_LEVERShortcuts"
+                 Guid="7D6042C6-6719-45EA-BD04-116EC1AE4F17">
+        <Shortcut Id="LEVER_Shortcut"
+                  Name="LEVER"
+                  Description="LEVER lineage editing and validation tool"
+                  Target="[LEVER_ProgramDir]LEVer.exe"
+                  Icon="leverIcon.ico"/>
+        <Shortcut Id="LEVER_SegAndTrackFolders_Shortcut"
+                  Name="LEVER_SegAndTrackFolders"
+                  Description="LEVER Batch segmentation and tracking tool"
+                  Target="[LEVER_ProgramDir]LEVER_SegAndTrackFolders.exe"
+                  Icon="leverIcon.ico"/>
+        <Shortcut Id="Uninstall_Shortcut"
+                  Name="Uninstall LEVER"
+                  Description="Uninstall LEVER Software and all of its componets"
+                  Target="[System64Folder]msiexec.exe"
+                  Arguments="/x [ProductCode]"
+                  Icon="uninstallIcon.ico"/>
+        <RemoveFolder Id="Remove_LEVER_ShortcutsDir"
+                      On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\Bioimage\LEVER"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature"
+             Title="Main Product"
+             Level="1">
+      <ComponentRef Id="CMP_LEVER" />
+      <ComponentRef Id="CMP_LEVERShortcuts" />
+    </Feature>
+		
+  </Product>
+</Wix>
