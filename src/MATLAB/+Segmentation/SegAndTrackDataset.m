@@ -35,8 +35,6 @@ function [errStatus,tSeg,tTrack] = SegAndTrackDataset(numProcessors, segArgs)
     if ( Metadata.GetNumberOfFrames() < 1 )
         return;
     end
-    
-    numProcessors = min(numProcessors, Metadata.GetNumberOfFrames());
 
     numProcessors = min(numProcessors, Metadata.GetNumberOfFrames());
     bytesPerIm = prod(Metadata.GetDimensions()) * Metadata.GetNumberOfChannels() * 8;
