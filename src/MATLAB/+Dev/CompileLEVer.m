@@ -41,7 +41,8 @@ function CompileLEVer(forceVersion)
     Dev.MakeSegHelp();
 
     %% Setup visual studio for MEX compilation
-    [vsStruct,comparch] = setupCompileTools();
+    setenv('MATLAB_DIR', matlabroot());
+    [compStruct,comparch] = Dev.SetupCPPCompiler('vs2015');
     
     bindir = '..\..\bin';
     if ( strcmpi(comparch,'win64') )
@@ -55,36 +56,37 @@ function CompileLEVer(forceVersion)
     %% Compile all MEX files
     outputFiles = {};
     
-    newOutput = compileMEX('mexMAT', vsStruct);
+    newOutput = compileMEX('mexMAT', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('Tracker', vsStruct);
+    newOutput = compileMEX('Tracker', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('mexDijkstra', vsStruct);
+    newOutput = compileMEX('mexDijkstra', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('mexGraph', vsStruct);
+    newOutput = compileMEX('mexGraph', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('mexIntegrityCheck', vsStruct);
+    newOutput = compileMEX('mexIntegrityCheck', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMEX('mexHashData', vsStruct);
+    newOutput = compileMEX('mexHashData', compStruct);
     outputFiles = [outputFiles; {newOutput}];
     
     %% Compile LEVER, Segmentor, and batch LEVER_SegAndTrackFolders.
     
     javaDeps = initStruct.javaList;
-    
+    addFiles = {'LEVER_logo.tif'; '+Segmentation\FrameSegmentor_*.m'; '+Dev\GetVersion.m'; '+Dev\VersionInfo.m'};
     addImgs = {'+UI\backFrame.png'; '+UI\forwardFrame.png'; '+UI\pause.png';'+UI\play.png';'+UI\stop.png'};
-    newOutput = compileMATLAB('LEVer', bindir, [javaDeps;addImgs], initStruct.toolboxList);
+    
+    newOutput = compileMATLAB('LEVer', bindir, [addFiles;javaDeps;addImgs], initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, javaDeps, initStruct.toolboxList);
+    newOutput = compileMATLAB('LEVER_SegAndTrackFolders', bindir, [addFiles;javaDeps], initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
-    newOutput = compileMATLAB('Segmentor', bindir, javaDeps, initStruct.toolboxList);
+    newOutput = compileMATLAB('Segmentor', bindir, [addFiles;javaDeps], initStruct.toolboxList);
     outputFiles = [outputFiles; {newOutput}];
     
     fprintf('\n');
@@ -101,57 +103,36 @@ function CompileLEVer(forceVersion)
     toc(totalTime)
 end
 
-function [vsStruct,comparch] = setupCompileTools()
-    vsStruct.vstoolroot = getenv('VS140COMNTOOLS');
-    if ( isempty(vsStruct.vstoolroot) )
-        error('Cannot compile MEX files without Visual Studio 2015');
-    end
-    
-    setenv('MATLAB_DIR', matlabroot());
-
-    comparch = computer('arch');
-    if ( strcmpi(comparch,'win64') )
-        vsStruct.buildbits = '64';
-        vsStruct.buildenv = fullfile(vsStruct.vstoolroot,'..','..','vc','bin','amd64','vcvars64.bat');
-        vsStruct.buildplatform = 'x64';
-    else
-        error('Only windows 64-bit builds are currently supported');
-    end
-    
-    system(['"' vsStruct.buildenv '"' ]);
-    clear mex;
-end
-
-function outputFile = compileMEX(projectName, vsStruct)
+function outputFile = compileMEX(projectName, compStruct)
     compileTime = tic();
-    outputFile = [projectName '.mexw' vsStruct.buildbits];
+    outputFile = [projectName '.mexw' compStruct.buildbits];
     fprintf('\nVisual Studio Compiling: %s...\n', outputFile);
     
     projectRoot = fullfile('..','c',projectName);
     
-    result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
+    result = system(['"' fullfile(compStruct.toolroot,'..','IDE','devenv.com') '"' ' /build "Release|' compStruct.buildplatform '" "' projectRoot '.sln"']);
     if ( result ~= 0 )
         error([projectName ': MEX compile failed.']);
     end
     
-    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.dll']) ' ' fullfile('.', [projectName '.mexw' vsStruct.buildbits])]);
+    system(['copy ' fullfile(projectRoot, ['Release_' compStruct.buildplatform], [projectName '.dll']) ' ' fullfile('.', [projectName '.mexw' compStruct.buildbits])]);
     fprintf('Done (%f sec)\n\n', toc(compileTime));
 end
 
-function outputFile = compileEXE(projectName, vsStruct, bindir)
+function outputFile = compileEXE(projectName, compStruct, bindir)
     compileTime = tic();
     outputFile = [projectName '.exe'];
     fprintf('\nVisual Studio Compiling: %s...\n', outputFile);
     
     projectRoot = fullfile('..','c',projectName);
     
-    result = system(['"' fullfile(vsStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' vsStruct.buildplatform '" "' projectRoot '.sln"']);
+    result = system(['"' fullfile(compStruct.vstoolroot,'..','IDE','devenv.com') '"' ' /build "Release|' compStruct.buildplatform '" "' projectRoot '.sln"']);
     if ( result ~= 0 )
         error([projectName ': EXE compile failed.']);
     end
     
-    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.exe']) ' ' fullfile('.', [projectName '.exe'])]);
-    system(['copy ' fullfile(projectRoot, ['Release_' vsStruct.buildplatform], [projectName '.exe']) ' ' fullfile(bindir,'.')]);
+    system(['copy ' fullfile(projectRoot, ['Release_' compStruct.buildplatform], [projectName '.exe']) ' ' fullfile('.', [projectName '.exe'])]);
+    system(['copy ' fullfile(projectRoot, ['Release_' compStruct.buildplatform], [projectName '.exe']) ' ' fullfile(bindir,'.')]);
     
     fprintf('Done (%f sec)\n\n', toc(compileTime));
 end
@@ -164,10 +145,6 @@ function outputFile = compileMATLAB(projectName, bindir, extrasList, toolboxList
     if ( ~exist('extrasList','var') )
         extrasList = {};
     end
-    extrasList = vertcat({'LEVER_logo.tif';
-                          '+Segmentation\FrameSegmentor_*.m';
-                          '+Dev\GetVersion.m';
-                          '+Dev\VersionInfo.m'}, extrasList);
     
 	extraCommand = '';
     if ( ~isempty(extrasList) )

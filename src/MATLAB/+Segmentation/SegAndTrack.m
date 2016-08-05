@@ -26,8 +26,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [errStatus, segInfo] = SegAndTrack()
-    global CONSTANTS CellPhenotypes
+function errStatus = SegAndTrack()
+    global CellPhenotypes
 
     % Modified 
     errStatus = 'Cancel';

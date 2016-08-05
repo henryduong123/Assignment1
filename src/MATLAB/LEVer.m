@@ -24,9 +24,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function LEVer(varargin)
+
+UI.SetLook();
+
 if (isdeployed())
     Load.SetWorkingDir();
 end
+
 if ( nargin > 0 )
     if ( strcmpi(varargin{1}, '-v') )
         UI.about;
@@ -35,8 +39,8 @@ if ( nargin > 0 )
         Helper.SetDebug(~isdeployed());
     end
 end
+
 if( Load.OpenData() )
     Editor.ReplayableEditAction(@Editor.InitHistory);
 end
-
 end
