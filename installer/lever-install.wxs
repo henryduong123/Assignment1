@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" 
-           Name="LEVER" 
-           Language="1033" 
-           Version="7.14.1" 
-           Manufacturer="http://bioimage.coe.drexel.edu" 
+	<Product Id="*"
+           Name="LEVER"
+           Language="1033"
+           Version="$(env.LEVER_VER)"
+           Manufacturer="http://bioimage.coe.drexel.edu"
            UpgradeCode="49684da6-6259-4985-8be4-c8551290437f">
-    
-		<Package InstallerVersion="200" 
-             Compressed="yes" 
-             InstallScope="perMachine" 
+
+		<Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
              Manufacturer="http://bioimage.coe.drexel.edu"
              Description="LEVER"
              Comments="(c) 2016 http://bioimage.coe.drexel.edu"/>
@@ -37,7 +37,7 @@
                    Name="LEVER" />
       </Directory>
     </Directory>
-  
+
     <DirectoryRef Id="LEVER_ProgramDir">
 
       <Component Id="CMP_LEVER"
@@ -50,8 +50,8 @@
       </Component>
 
     </DirectoryRef>
-    
-    
+
+
     <Icon Id="leverIcon.ico" SourceFile="resources/LEVER_logo.ico"/>
     <Icon Id="uninstallIcon.ico" SourceFile="resources/LEVER_uninstall.ico"/>
     <DirectoryRef Id="LEVER_ShortcutsDir">
@@ -90,6 +90,6 @@
       <ComponentRef Id="CMP_LEVER" />
       <ComponentRef Id="CMP_LEVERShortcuts" />
     </Feature>
-		
+
   </Product>
 </Wix>
