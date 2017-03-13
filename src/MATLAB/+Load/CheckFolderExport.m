@@ -22,14 +22,15 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [subPaths,needsExport,renamable] = CheckFolderExport(rootDir)
-    [subPaths,needsExport,renamable] = recursiveCheckExport(rootDir,'');
+function [subPaths,needsExport,renamable,ambiguous] = CheckFolderExport(rootDir)
+    [subPaths,needsExport,renamable,ambiguous] = recursiveCheckExport(rootDir,'');
 end
 
-function [subPaths,needsExport,renamable] = recursiveCheckExport(rootDir,subDir)
+function [subPaths,needsExport,renamable,ambiguous] = recursiveCheckExport(rootDir,subDir)
     subPaths = {};
     needsExport = false(0);
     renamable = false(0);
+    ambiguous = false(0);
     
     dirList = dir(fullfile(rootDir,subDir));
     
@@ -59,6 +60,7 @@ function [subPaths,needsExport,renamable] = recursiveCheckExport(rootDir,subDir)
         subPaths = cellfun(@(x)(fullfile(subDir,x)),jsonNames(bValid),'UniformOutput',false);
         needsExport = false(nnz(bValid),1);
         renamable = false(nnz(bValid),1);
+        ambiguous = false(nnz(bValid),1);
     end
     
     %% Handle folders of TIFs that don't require export or are renamable stacks
@@ -68,11 +70,18 @@ function [subPaths,needsExport,renamable] = recursiveCheckExport(rootDir,subDir)
     tifNames = filenames(bTIF);
     if ( ~isempty(tifNames) )
         % If these appear to be renameable tifs don't bother with subdirectories
-        [bNeedsExport,bWriteable,renameStruct] = Load.CheckExportImages(fullfile(rootDir,subDir),tifNames{1});
+        [bNeedsExport,bSequence,bInPlace,renameStruct] = Load.CheckExportImages(fullfile(rootDir,subDir),tifNames{1});
+        if ( bSequence && isempty(renameStruct) )
+            subPaths = {fullfile(subDir,tifNames{1})};
+            needsExport = bNeedsExport;
+            ambiguous = true;
+            return;
+        end
+        
         if ( ~isempty(renameStruct) )
             subPaths = {fullfile(subDir,tifNames{1})};
             needsExport = bNeedsExport;
-            renamable = bWriteable;
+            renamable = bInPlace;
             
             return;
         end
@@ -86,15 +95,17 @@ function [subPaths,needsExport,renamable] = recursiveCheckExport(rootDir,subDir)
         subPaths = [subPaths; cellfun(@(x)(fullfile(subDir,x)),exportNames,'UniformOutput',false)];
         needsExport = [needsExport; true(length(exportNames),1)];
         renamable = [renamable; false(length(exportNames),1)];
+        ambiguous = [ambiguous; false(length(exportNames),1)];
     end
     
     %% Deal with further subdirectories
     for i=1:length(pathList)
         nextSubDir = fullfile(subDir,pathList(i).name);
-        [newPaths,chkExport,chkRename] = recursiveCheckExport(rootDir,nextSubDir);
+        [newPaths,chkExport,chkRename,chkAmbiguous] = recursiveCheckExport(rootDir,nextSubDir);
         
         subPaths = [subPaths; newPaths];
         needsExport = [needsExport; chkExport];
         renamable = [renamable; chkRename];
+        ambiguous = [ambiguous; chkAmbiguous];
     end
 end
