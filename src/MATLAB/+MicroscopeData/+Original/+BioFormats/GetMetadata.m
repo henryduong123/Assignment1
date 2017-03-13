@@ -17,7 +17,7 @@ if (bfReader.getSeriesCount()>1)
     onlyOneSeries = false;
 end
 
-for series=0:bfReader.getSeriesCount()-1;
+for series=0:bfReader.getSeriesCount()-1
     bfReader.setSeries(series);
 
     imageData = [];
@@ -109,6 +109,8 @@ for series=0:bfReader.getSeriesCount()-1;
             size(imageData.TimeStampDelta,3)~=imageData.NumberOfFrames)
         imageData = rmfield(imageData,'TimeStampDelta');
     end
+    
+    imageData.imageDir = fileparts(char(bfReader.getCurrentFile));
 
     seriesMetadata{series+1} = imageData;
 
@@ -116,6 +118,10 @@ for series=0:bfReader.getSeriesCount()-1;
 end
 
 prgs.ClearProgress();
+
+if (length(seriesMetadata)==1)
+    seriesMetadata = seriesMetadata{1};
+end
 
 if (nargout>1)
     varargout{1} = omeMetadata;

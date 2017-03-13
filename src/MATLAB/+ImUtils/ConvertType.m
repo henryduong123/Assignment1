@@ -13,10 +13,36 @@ if (~exist('normalize','var') || isempty(normalize))
     normalize = 0;
 end
 
+w = whos('imageIn');
+if (strcmpi(w.class,typ) && ~normalize)
+    imageOut = imageIn;
+    return
+end
+
 if (~strcmpi(typ,'logical'))
     imageOut = zeros(size(imageIn),typ);
 else
     imageOut = false(size(imageIn));
+end
+
+% deal with images that come in as 16 bit but are really a lesser bit depth
+if (strcmpi(w.class,'uint16'))
+    imMax = max(imageIn(:));
+    maxTypes = [2^8-1,2^10-1,2^12-1];
+    isBigger = maxTypes < double(imMax);
+    if (isBigger(3))
+        % truly a 16 bit image
+        % do nothing
+    elseif (isBigger(2))
+        % is really a 12 bit image
+        imageIn = single(imageIn)./single(maxTypes(3));
+    elseif (isBigger(1))
+        % is really a 10 bit image
+        imageIn = single(imageIn)./single(maxTypes(2));
+    else
+        % is really a 8 bit image
+        imageIn = single(imageIn)./single(maxTypes(1));
+    end
 end
 
 if (normalize)
@@ -39,7 +65,7 @@ if (normalize)
                 case 'int16'
                     imageOut(:,:,:,c,t) = im2int16(imTemp);
                 case 'uint32'
-                    imageOut(:,:,:,c,t) = im2uint32(imTemp);
+                    imageOut(:,:,:,c,t) = uint32(imTemp*(2^32-1));
                 case 'int32'
                     imageOut(:,:,:,c,t) = im2int32(imTemp);
                 case 'single'
@@ -54,7 +80,6 @@ if (normalize)
         end
     end
 else
-    w = whos('imageIn');
     switch w.class
         case 'single'
             imageIn = convertToMaxOfOne(imageIn,w.class);

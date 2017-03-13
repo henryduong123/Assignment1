@@ -25,13 +25,24 @@
 function exportRoot = FolderExport(rootDir)
     exportRoot = rootDir;
     
-    [subPaths,needsExport,renamable] = Load.CheckFolderExport(rootDir);
+    [subPaths,needsExport,renamable,ambiguous] = Load.CheckFolderExport(rootDir);
     if ( isempty(subPaths) )
         return;
     end
     
     bExport = any(needsExport);
     if ( ~bExport )
+        return;
+    end
+    
+    if ( any(ambiguous) )
+        exportRoot = '';
+        msgbox({'The directories appear to contain image sequences.',...
+                'Image sequences must conform to LEVER name guidelines.',...
+                'Please use IrfanView or another tool to rename the images.',...
+                '',...
+                'Image name format: <DatasetName>_c%02d_t%04d_z%04d.tif'},...
+                'Export Error', 'Warn');
         return;
     end
     

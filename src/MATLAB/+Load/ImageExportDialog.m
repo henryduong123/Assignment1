@@ -23,7 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function jsonPath = ImageExportDialog(rootDir,filename)
-    [bNeedsExport,bWriteable,renameStruct] = Load.CheckExportImages(rootDir,filename);
+    jsonPath = '';
+
+    [bNeedsExport,bSequence,bInPlace,renameStruct] = Load.CheckExportImages(rootDir,filename);
     if ( ~bNeedsExport )
         [~,chkName] = fileparts(filename);
         jsonList = dir(fullfile(rootDir,[chkName '*.json']));
@@ -31,7 +33,17 @@ function jsonPath = ImageExportDialog(rootDir,filename)
         return;
     end
     
-    exportDir = Load.ExportLocationDialog(rootDir, bWriteable);
+    if ( bSequence && isempty(renameStruct) )
+        msgbox({'The selected image appears to be part of an image sequence.',...
+                'Image sequences must conform to LEVER name guidelines.',...
+                'Please use IrfanView or another tool to rename the sequence.',...
+                '',...
+                'Image name format: <DatasetName>_c%02d_t%04d_z%04d.tif'},...
+                'Export Error', 'Warn');
+        return;
+    end
+    
+    exportDir = Load.ExportLocationDialog(rootDir, bInPlace);
     if ( isempty(exportDir) )
         return;
     end

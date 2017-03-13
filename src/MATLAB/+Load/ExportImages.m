@@ -23,7 +23,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function jsonPath = ExportImages(exportDir, inRoot,inFilename)
-    [~,imD] = MicroscopeData.Original.Convert2Tiffs(inRoot,inFilename, exportDir, true, false);
+    [~,imD] = MicroscopeData.Original.ConvertData(inRoot,inFilename, exportDir, false, true, false);
     if ( length(imD) > 1 )
         [~,imName] = fileparts(inFilename);
         exportDir = fullfile(exportDir,imName);

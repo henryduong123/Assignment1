@@ -27,23 +27,32 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function [bNeedsExport,bWriteable,renameStruct] = CheckExportImages(rootDir,fileName)
+function [bNeedsExport,bTifSequence,bInPlace,renameStruct] = CheckExportImages(rootDir,filename)
     bNeedsExport = false;
-    bWriteable = false;
+    bTifSequence = false;
+    bInPlace = false;
     renameStruct = [];
     
-    [~,chkName,chkExt] = fileparts(fileName);
+    [~,chkName,chkExt] = fileparts(filename);
     if ( any(strcmpi(chkExt,{'.tif','.tiff'})) )
         jsonList = dir(fullfile(rootDir,[chkName '*.json']));
         if ( ~isempty(jsonList) )
             return;
         end
         
-        renameStruct = Load.BuildRenameStruct(fileName);
+        bTifSequence = checkSequence(rootDir, filename);
+        renameStruct = Load.BuildRenameStruct(filename);
     end
     
-    bWriteable = ~isempty(renameStruct) && checkWriteable(rootDir);
+    bInPlace = ~isempty(renameStruct) && checkWriteable(rootDir);
     bNeedsExport = true;
+end
+
+function bSequence = checkSequence(rootDir, filename)
+    fileBlob = regexprep(filename, '\d+', '*');
+    fileList = dir(fullfile(rootDir,fileBlob));
+    
+    bSequence = (length(fileList) > 1);
 end
 
 function bCanWrite = checkWriteable(rootDir)

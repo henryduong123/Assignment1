@@ -37,7 +37,7 @@ function renameStruct = BuildRenameStruct(imageName)
     [startMatch,tokMatch] = regexpi(fileName, paramPattern, 'start','tokens');
 
     % If there are multiple matches to the parameter type, take only the one that's furthest in the name.
-    bFoundParams = cellfun(@(x)(~isempty(x)),startMatch);
+    bFoundParams = cellfun(@(x)(~isempty(x)), startMatch);
     validStarts = cellfun(@(x)(x(end)), startMatch(bFoundParams));
     validParams = cellfun(@(x)(x{end}{1}), tokMatch(bFoundParams), 'UniformOutput',false);
     
