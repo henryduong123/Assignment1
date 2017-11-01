@@ -1,6 +1,15 @@
 # **LEVER**
 ### The Lineage Editing and Validation tool
 
+*Please note that there is a completely new version of lever currently in development.
+This project, knows as 'lever.js' unifies the 2-D and 3-D LEVER algorithms in a 
+new software architecture that is better, faster, stronger, etc.*
+
+The software will be released publically within the next 6-12 months. In the interim,
+please contact Andy Cohen (https://bioimage.coe.drexel.edu) if you're interested 
+in learning more about the new version.
+
+
 LEVER (lineage editing and validation) is a set of software tools for analyzing 
 time-lapse microscopy images of proliferating cells. LEVER includes algorithms for 
 segmenting, tracking and lineaging. LEVER also includes a novel validation 
